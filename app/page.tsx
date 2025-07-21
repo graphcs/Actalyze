@@ -13,7 +13,17 @@ export default function Home() {
       
       {/* Desktop Background */}
       <div 
-        className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat hidden md:block"
+        className="absolute inset-0 w-full h-full bg-no-repeat hidden lg:block"
+        style={{
+          backgroundImage: "url('/green-banner-desktop.png')",
+          backgroundSize: 'contain',
+          backgroundPosition: 'center top',
+        }}
+      />
+      
+      {/* Medium screens background - full width */}
+      <div 
+        className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat hidden md:block lg:hidden"
         style={{
           backgroundImage: "url('/green-banner-desktop.png')",
           backgroundSize: 'cover',
@@ -26,66 +36,76 @@ export default function Home() {
         className="absolute inset-0 w-full h-full"
         style={{
           background: `linear-gradient(
-            225deg,
-            rgba(168, 203, 161, 0.3) 0%,
-            rgba(168, 203, 161, 0.15) 25%,
+            260deg,
+            rgba(168, 203, 161, 0.85) 0%,
+            rgba(168, 203, 161, 0.65) 25%,
             rgba(249, 244, 239, 0.4) 60%,
-            rgba(249, 244, 239, 0.7) 100%
-          )`
+            rgba(249, 244, 239, 0.6) 100%
+          )`,
+          mixBlendMode: 'multiply'
         }}
       />
       
       {/* Content */}
-      <div className="relative z-10 min-h-screen flex flex-col">
-        {/* Header */}
-        <header className="pt-6 px-6 md:pt-12 md:pl-16">
-          <h1 className="brand-title text-xl lg:text-5xl font-bold text-dark-green">
-            GutRoot
-          </h1>
-        </header>
-
-        {/* Main Content */}
-        <main className="flex-1 flex items-center">
-          <div className="w-full">
-            {/* Mobile Layout */}
-            <div className="md:hidden flex flex-col items-center justify-center px-6 text-center">
-              <div className="max-w-sm">
-                <h2 className="text-3xl font-bold text-dark-gray leading-tight mb-8">
-                  Gut Health,
-                  <br />
-                  Personalized
-                  <br />
-                  from the
-                  <br />
-                  Root Up.
-                </h2>
-                
-                <a href="/auth" className="btn-primary text-base px-8 py-3 font-medium shadow-lg hover:shadow-xl transition-all duration-300 w-full max-w-xs inline-block text-center">
-                  Start Your Gut Check
-                </a>
-              </div>
-            </div>
-
-            {/* Desktop Layout */}
-            <div className="hidden md:flex items-center">
-              <div className="max-w-4xl mx-auto px-16">
-                <div className="max-w-xl">
-                  <h2 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-dark-gray leading-tight mb-8">
-                    Gut Health,
-                    <br />
-                    Personalized
-                    <br />
-                    from the Root Up.
-                  </h2>
-                  
-                  <a href="/auth" className="btn-primary text-lg px-8 py-4 font-medium shadow-lg hover:shadow-xl transition-all duration-300 inline-block">
-                    Start Your Gut Check
-                  </a>
-                </div>
-              </div>
+      <div className="relative z-10 min-h-screen">
+        {/* Mobile Layout */}
+        <div className="md:hidden h-[80%] flex flex-col px-8">
+          {/* Brand Title */}
+          <div className="pt-6 mb-32">
+            <h1 className="brand-title text-3xl font-black text-dark-green">
+              GutRoot
+            </h1>
+          </div>
+          
+          {/* Headline - Aligned with Brand Title */}
+          <div className="mb-48">
+            <div className="max-w-sm">
+              <h2 className="text-5xl font-semibold text-dark-gray leading-tight text-left">
+                Gut Health,
+                <br />
+                Personalized
+                <br />
+                from the
+                <br />
+                Root Up.
+              </h2>
             </div>
           </div>
-        </main>
+          
+          {/* CTA Button - Centered */}
+          <div className="pb-8 flex justify-center">
+            <a href="/auth" className="btn-primary text-xl px-8 py-3 font-medium shadow-lg hover:shadow-xl transition-all duration-300 max-w-xs w-full text-center">
+              Start Your Gut Check
+            </a>
+          </div>
+        </div>
+
+        {/* Desktop Layout */}
+        <div className="hidden md:block min-h-screen">
+          {/* Content Container - Left Side */}
+          <div className="absolute left-16 top-0 h-full flex flex-col justify-between py-16 max-w-2xl">
+            {/* Top Section - Brand Title and Headline */}
+            <div>
+              <h1 className="brand-title text-5xl font-black text-dark-green mb-12">
+                GutRoot
+              </h1>
+              <h2 className="text-5xl lg:text-6xl xl:text-7xl font-bold text-dark-gray leading-tight text-left">
+                Gut Health,
+                <br />
+                Personalized
+                <br />
+                from the Root Up.
+              </h2>
+            </div>
+            
+            {/* Bottom Section - CTA Button */}
+            <div>
+              <a href="/auth" className="btn-primary text-lg px-8 py-4 font-medium shadow-lg hover:shadow-xl transition-all duration-300 inline-block">
+                Start Your Gut Check
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

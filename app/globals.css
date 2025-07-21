@@ -296,7 +296,7 @@ body {
 /* Brand Title Class - Young Serif Font */
 .brand-title {
   font-family: 'Young Serif', var(--font-serif);
-  font-weight: 400;
+  font-weight: 900;
   letter-spacing: -0.02em;
 }
 
@@ -312,6 +312,37 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 
 input[type="password"]::-webkit-caps-lock-indicator {
   display: none !important;
+}
+
+/* Custom Checkbox Styling */
+input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 1.1rem;
+  height: 1.1rem;
+  border: 2px solid var(--color-dark-gray);
+  background-color: transparent;
+  border-radius: 3px;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+input[type="checkbox"]:checked {
+  background-color: transparent;
+  border-color: var(--color-dark-gray);
+}
+
+input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--color-dark-gray);
+  font-size: 12px;
+  font-weight: bold;
 }
 
 /* Custom Scrollbar */

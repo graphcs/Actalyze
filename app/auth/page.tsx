@@ -141,8 +141,22 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-cream-light flex items-center justify-center px-4">
-      <div className="w-full max-w-sm">
+    <div className="min-h-screen bg-cream-light flex items-center justify-center px-4 relative overflow-hidden">
+      {/* Orange Gradient Overlay - Bottom Left */}
+      <div 
+        className="absolute inset-0 w-full h-full pointer-events-none"
+        style={{
+          background: `linear-gradient(
+            45deg,
+            rgba(245, 166, 35, 0.4) 0%,
+            rgba(245, 166, 35, 0.25) 25%,
+            rgba(255, 244, 230, 0.15) 50%,
+            rgba(255, 244, 230, 0.05) 70%,
+            transparent 85%
+          )`
+        }}
+      />
+      <div className="w-full max-w-sm relative z-10">
         {/* Header */}
         <div className="text-start mb-8">
           <Link href="/">
@@ -347,7 +361,7 @@ export default function AuthPage() {
               <input
                 type="checkbox"
                 id="agreeTerms"
-                className="mr-2 w-4 h-4 text-orange-primary border-pale-gray rounded focus:ring-orange-primary"
+                className="mr-2"
                 checked={signupData.agreeTerms}
                 onChange={(e) => {
                   setSignupData({ ...signupData, agreeTerms: e.target.checked })
