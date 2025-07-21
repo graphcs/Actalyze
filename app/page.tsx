@@ -3,7 +3,7 @@ export default function Home() {
     <div className="min-h-screen relative overflow-hidden bg-cream-50">
       {/* Mobile Background */}
       <div 
-        className="absolute inset-0 w-full h-[80%] bg-cover bg-center bg-no-repeat md:hidden"
+        className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat md:hidden"
         style={{
           backgroundImage: "url('/green-banner-mobile.png')",
           backgroundSize: 'cover',
@@ -82,14 +82,18 @@ export default function Home() {
 
         {/* Desktop Layout */}
         <div className="hidden md:block min-h-screen">
-          {/* Content Container - Left Side */}
-          <div className="absolute left-16 top-0 h-full flex flex-col justify-between py-16 max-w-2xl">
-            {/* Top Section - Brand Title and Headline */}
-            <div>
-              <h1 className="brand-title text-5xl font-black text-dark-green mb-12">
+          {/* Content Container - Responsive Left Side */}
+          <div className="absolute left-8 md:left-20 lg:left-54 xl:left-150 top-0 h-full flex flex-col py-4 max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl">
+            {/* Brand Title */}
+            <div className="pt-4 md:pt-6 lg:pt-8 xl:pt-10 md:mb-42 xl:mb-45">
+              <h1 className="brand-title md:text-5xl font-black text-dark-green">
                 GutRoot
               </h1>
-              <h2 className="text-5xl lg:text-6xl xl:text-7xl font-bold text-dark-gray leading-tight text-left">
+            </div>
+            
+            {/* Headline */}
+            <div className="md:mb-52 lg:mb-48 xl:mb-45">
+              <h2 className="md:text-5xl lg:text-6xl xl:text-7xl font-semibold text-dark-gray leading-tight text-left">
                 Gut Health,
                 <br />
                 Personalized
@@ -98,9 +102,9 @@ export default function Home() {
               </h2>
             </div>
             
-            {/* Bottom Section - CTA Button */}
-            <div>
-              <a href="/auth" className="btn-primary text-lg px-8 py-4 font-medium shadow-lg hover:shadow-xl transition-all duration-300 inline-block">
+            {/* CTA Button */}
+            <div className="flex justify-center">
+              <a href="/auth" className="btn-primary lg:text-3xl px-6 md:px-8 lg:px-10 xl:px-12 py-3 md:py-4 lg:py-5 xl:py-6 font-bold shadow-lg hover:shadow-xl transition-all duration-300 inline-block">
                 Start Your Gut Check
               </a>
             </div>
