@@ -1,26 +1,333 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Young+Serif:wght@400&display=swap');
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Primary Brand Colors */
+  --color-sage-50: #f8faf9;
+  --color-sage-100: #f0f4f1;
+  --color-sage-200: #dce6df;
+  --color-sage-300: #c2d2c7;
+  --color-sage-400: #a3bfaa;
+  --color-sage-500: #7fa189;
+  --color-sage-600: #6b8a74;
+  --color-sage-700: #5a7362;
+  --color-sage-800: #4a5f52;
+  --color-sage-900: #3f5045;
+
+  /* Warm Beige/Cream Tones */
+  --color-cream-50: #fefcfa;
+  --color-cream-100: #fdf9f3;
+  --color-cream-200: #faf4ea;
+  --color-cream-300: #f5edd8;
+  --color-cream-400: #ede0c1;
+  --color-cream-500: #e3d0a1;
+  --color-cream-600: #d4bc7e;
+  --color-cream-700: #c4a660;
+  --color-cream-800: #a68a4f;
+  --color-cream-900: #8a7242;
+
+  /* Orange/Amber Accent Colors */
+  --color-amber-50: #fffbeb;
+  --color-amber-100: #fef3c7;
+  --color-amber-200: #fde68a;
+  --color-amber-300: #fcd34d;
+  --color-amber-400: #fbbf24;
+  --color-amber-500: #f59e0b;
+  --color-amber-600: #d97706;
+  --color-amber-700: #b45309;
+  --color-amber-800: #92400e;
+  --color-amber-900: #78350f;
+
+  /* Neutral Colors */
+  --color-gray-50: #fafaf9;
+  --color-gray-100: #f5f5f4;
+  --color-gray-200: #e7e5e4;
+  --color-gray-300: #d6d3d1;
+  --color-gray-400: #a8a29e;
+  --color-gray-500: #78716c;
+  --color-gray-600: #57534e;
+  --color-gray-700: #44403c;
+  --color-gray-800: #292524;
+  --color-gray-900: #1c1917;
+
+  /* Semantic Colors */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
+
+  /* Green Tones */
+  --color-dark-green: #0D4C47;
+  --color-light-green: #A8CBA1;
+
+  /* Cream/Beige Tones */
+  --color-cream-primary: #F9F4EF;
+  --color-cream-light: #FFF4E6;
+  --color-cream-warm: #F8ECC7;
+  --color-cream-soft: #F9F0DD;
+  --color-yellow-cream: #F7E4A0;
+
+  /* Orange Tones */
+  --color-orange-primary: #F5A623;
+  --color-orange-light: #FFC76C;
+  --color-orange-pale: #FFE8C0;
+
+  /* Gray Scale */
+  --color-dark-gray: #2B2B2B;
+  --color-medium-gray: #666666;
+  --color-light-gray: #A1A1A1;
+  --color-pale-gray: #CACACA;
+  --color-pure-white: #FFFFFF;
+
+  /* Background and Foreground */
+  --background: #fefcfa;
+  --foreground: #1c1917;
+  --muted: #f5edd8;
+  --muted-foreground: #78716c;
+  --border: #e7e5e4;
+  --input: #fefcfa;
+  --ring: #7fa189;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Colors */
+  --color-sage-50: rgb(from var(--color-sage-50) r g b);
+  --color-sage-100: rgb(from var(--color-sage-100) r g b);
+  --color-sage-200: rgb(from var(--color-sage-200) r g b);
+  --color-sage-300: rgb(from var(--color-sage-300) r g b);
+  --color-sage-400: rgb(from var(--color-sage-400) r g b);
+  --color-sage-500: rgb(from var(--color-sage-500) r g b);
+  --color-sage-600: rgb(from var(--color-sage-600) r g b);
+  --color-sage-700: rgb(from var(--color-sage-700) r g b);
+  --color-sage-800: rgb(from var(--color-sage-800) r g b);
+  --color-sage-900: rgb(from var(--color-sage-900) r g b);
+
+  --color-cream-50: rgb(from var(--color-cream-50) r g b);
+  --color-cream-100: rgb(from var(--color-cream-100) r g b);
+  --color-cream-200: rgb(from var(--color-cream-200) r g b);
+  --color-cream-300: rgb(from var(--color-cream-300) r g b);
+  --color-cream-400: rgb(from var(--color-cream-400) r g b);
+  --color-cream-500: rgb(from var(--color-cream-500) r g b);
+  --color-cream-600: rgb(from var(--color-cream-600) r g b);
+  --color-cream-700: rgb(from var(--color-cream-700) r g b);
+  --color-cream-800: rgb(from var(--color-cream-800) r g b);
+  --color-cream-900: rgb(from var(--color-cream-900) r g b);
+
+  --color-amber-50: rgb(from var(--color-amber-50) r g b);
+  --color-amber-100: rgb(from var(--color-amber-100) r g b);
+  --color-amber-200: rgb(from var(--color-amber-200) r g b);
+  --color-amber-300: rgb(from var(--color-amber-300) r g b);
+  --color-amber-400: rgb(from var(--color-amber-400) r g b);
+  --color-amber-500: rgb(from var(--color-amber-500) r g b);
+  --color-amber-600: rgb(from var(--color-amber-600) r g b);
+  --color-amber-700: rgb(from var(--color-amber-700) r g b);
+  --color-amber-800: rgb(from var(--color-amber-800) r g b);
+  --color-amber-900: rgb(from var(--color-amber-900) r g b);
+
+  --color-gray-50: rgb(from var(--color-gray-50) r g b);
+  --color-gray-100: rgb(from var(--color-gray-100) r g b);
+  --color-gray-200: rgb(from var(--color-gray-200) r g b);
+  --color-gray-300: rgb(from var(--color-gray-300) r g b);
+  --color-gray-400: rgb(from var(--color-gray-400) r g b);
+  --color-gray-500: rgb(from var(--color-gray-500) r g b);
+  --color-gray-600: rgb(from var(--color-gray-600) r g b);
+  --color-gray-700: rgb(from var(--color-gray-700) r g b);
+  --color-gray-800: rgb(from var(--color-gray-800) r g b);
+  --color-gray-900: rgb(from var(--color-gray-900) r g b);
+
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-transparent: transparent;
+
+  /* Green Tones */
+  --color-dark-green: rgb(from var(--color-dark-green) r g b);
+  --color-light-green: rgb(from var(--color-light-green) r g b);
+
+  /* Cream/Beige Tones */
+  --color-cream-primary: rgb(from var(--color-cream-primary) r g b);
+  --color-cream-light: rgb(from var(--color-cream-light) r g b);
+  --color-cream-warm: rgb(from var(--color-cream-warm) r g b);
+  --color-cream-soft: rgb(from var(--color-cream-soft) r g b);
+  --color-yellow-cream: rgb(from var(--color-yellow-cream) r g b);
+
+  /* Orange Tones */
+  --color-orange-primary: rgb(from var(--color-orange-primary) r g b);
+  --color-orange-light: rgb(from var(--color-orange-light) r g b);
+  --color-orange-pale: rgb(from var(--color-orange-pale) r g b);
+
+  /* Gray Scale */
+  --color-dark-gray: rgb(from var(--color-dark-gray) r g b);
+  --color-medium-gray: rgb(from var(--color-medium-gray) r g b);
+  --color-light-gray: rgb(from var(--color-light-gray) r g b);
+  --color-pale-gray: rgb(from var(--color-pale-gray) r g b);
+  --color-pure-white: rgb(from var(--color-pure-white) r g b);
+
+  /* Semantic Colors */
+  --color-success: rgb(from var(--color-success) r g b);
+  --color-warning: rgb(from var(--color-warning) r g b);
+  --color-error: rgb(from var(--color-error) r g b);
+  --color-info: rgb(from var(--color-info) r g b);
+
+  /* Background Colors */
+  --color-background: rgb(from var(--background) r g b);
+  --color-foreground: rgb(from var(--foreground) r g b);
+  --color-muted: rgb(from var(--muted) r g b);
+  --color-muted-foreground: rgb(from var(--muted-foreground) r g b);
+  --color-border: rgb(from var(--border) r g b);
+  --color-input: rgb(from var(--input) r g b);
+  --color-ring: rgb(from var(--ring) r g b);
+
+  /* Primary Brand Color */
+  --color-primary: var(--color-sage-600);
+  --color-primary-foreground: var(--color-white);
+  --color-secondary: var(--color-cream-200);
+  --color-secondary-foreground: var(--color-gray-900);
+  --color-accent: var(--color-amber-500);
+  --color-accent-foreground: var(--color-white);
+
+  /* Typography */
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-serif: 'Young Serif', ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+
+  /* Spacing */
+  --spacing-0: 0px;
+  --spacing-px: 1px;
+  --spacing-0_5: 0.125rem;
+  --spacing-1: 0.25rem;
+  --spacing-1_5: 0.375rem;
+  --spacing-2: 0.5rem;
+  --spacing-2_5: 0.625rem;
+  --spacing-3: 0.75rem;
+  --spacing-3_5: 0.875rem;
+  --spacing-4: 1rem;
+  --spacing-5: 1.25rem;
+  --spacing-6: 1.5rem;
+  --spacing-7: 1.75rem;
+  --spacing-8: 2rem;
+  --spacing-9: 2.25rem;
+  --spacing-10: 2.5rem;
+  --spacing-11: 2.75rem;
+  --spacing-12: 3rem;
+  --spacing-14: 3.5rem;
+  --spacing-16: 4rem;
+  --spacing-20: 5rem;
+  --spacing-24: 6rem;
+  --spacing-28: 7rem;
+  --spacing-32: 8rem;
+  --spacing-36: 9rem;
+  --spacing-40: 10rem;
+  --spacing-44: 11rem;
+  --spacing-48: 12rem;
+  --spacing-52: 13rem;
+  --spacing-56: 14rem;
+  --spacing-60: 15rem;
+  --spacing-64: 16rem;
+  --spacing-72: 18rem;
+  --spacing-80: 20rem;
+  --spacing-96: 24rem;
+
+  /* Border Radius */
+  --radius-none: 0px;
+  --radius-sm: 0.125rem;
+  --radius: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  --shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+  --shadow-none: 0 0 #0000;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Base Styles */
+* {
+  border-color: var(--color-border);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  font-feature-settings: "rlig" 1, "calt" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Component Classes */
+.btn-primary {
+  background-color: var(--color-orange-light);
+  color: var(--color-dark-gray);
+  font-family: 'Inter', var(--font-sans);
+  font-weight: 600;
+  cursor: pointer;
+  @apply py-3 px-6 rounded-full transition-all duration-200 shadow-sm hover:shadow-md;
+}
+
+.btn-secondary {
+  @apply bg-cream-200 hover:bg-cream-300 text-gray-900 font-medium py-3 px-6 rounded-xl transition-colors duration-200;
+}
+
+.card {
+  @apply bg-white rounded-xl shadow-sm border border-gray-200 p-6;
+}
+
+.input {
+  @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent outline-none transition-all duration-200;
+}
+
+.container {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+.no-border {
+  border: none !important;
+}
+
+/* Brand Title Class - Young Serif Font */
+.brand-title {
+  font-family: 'Young Serif', var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+/* Hide browser's default password reveal button */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
+input[type="password"]::-webkit-credentials-auto-fill-button {
+  display: none !important;
+}
+
+input[type="password"]::-webkit-caps-lock-indicator {
+  display: none !important;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-gray-100);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-sage-400);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-sage-500);
 }
