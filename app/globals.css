@@ -84,7 +84,6 @@
   --foreground: #1c1917;
   --muted: #f5edd8;
   --muted-foreground: #78716c;
-  --border: #e7e5e4;
   --input: #fefcfa;
   --ring: #7fa189;
 }
@@ -173,7 +172,6 @@
   --color-foreground: rgb(from var(--foreground) r g b);
   --color-muted: rgb(from var(--muted) r g b);
   --color-muted-foreground: rgb(from var(--muted-foreground) r g b);
-  --color-border: rgb(from var(--border) r g b);
   --color-input: rgb(from var(--input) r g b);
   --color-ring: rgb(from var(--ring) r g b);
 
@@ -247,11 +245,6 @@
   --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
   --shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
   --shadow-none: 0 0 #0000;
-}
-
-/* Base Styles */
-* {
-  border-color: var(--color-border);
 }
 
 body {

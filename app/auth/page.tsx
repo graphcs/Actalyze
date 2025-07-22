@@ -81,7 +81,7 @@ export default function AuthPage() {
       if (error) {
         setErrors({ auth: error.message })
       } else {
-        router.push('/onboarding')
+        router.push('/onboarding/initial-question')
       }
     } catch (error) {
       setErrors({ auth: 'An unexpected error occurred' })
@@ -111,7 +111,7 @@ export default function AuthPage() {
       if (error) {
         setErrors({ auth: error.message })
       } else {
-        router.push('/onboarding')
+        router.push('/onboarding/initial-question')
       }
     } catch (error) {
       setErrors({ auth: 'An unexpected error occurred' })
@@ -126,7 +126,7 @@ export default function AuthPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/onboarding`
+          redirectTo: `${window.location.origin}/onboarding/initial-question`
         }
       })
 
@@ -156,14 +156,23 @@ export default function AuthPage() {
           )`
         }}
       />
-      <div className="w-full max-w-sm relative z-10">
-        {/* Header */}
-        <div className="text-start mb-8">
+
+      {/* Main Container - Centered with full height */}
+      <div className="w-full max-w-lg h-full flex flex-col relative z-10">
+        {/* Brand Title - Top left of container */}
+        <div className="pb-20">
           <Link href="/">
-            <h1 className="brand-title text-4xl font-bold text-dark-green mb-6">
+            <h1 className="brand-title text-4xl font-bold text-dark-green">
               GutRoot
             </h1>
           </Link>
+        </div>
+
+        {/* Form Content - Centered vertically in remaining space */}
+        <div className="flex-1 flex items-center justify-center">
+          <div className="w-full md:px-16">
+        {/* Header */}
+        <div className="text-start mb-8">
           <h2 className="text-3xl font-semibold text-dark-gray mb-6">
             {isLogin ? 'Sign In' : 'Sign up'}
           </h2>
@@ -387,10 +396,10 @@ export default function AuthPage() {
         {/* OAuth Section - Only for Login */}
         {isLogin && (
           <>
-            <div className="flex items-center my-6">
-              <div className="flex-1 border-t border-pale-gray"></div>
-              <span className="px-3 text-sm text-medium-gray">Or</span>
-              <div className="flex-1 border-t border-pale-gray"></div>
+            <div className="flex items-center justify-center my-6">
+              <div className="w-8 border-t-2 border-black"></div>
+              <span className="px-4 text-lg font-medium text-black">Or</span>
+              <div className="w-8 border-t-2 border-black"></div>
             </div>
 
             <div className="space-y-3">
@@ -426,6 +435,8 @@ export default function AuthPage() {
           >
             {isLogin ? "Don't have an account? sign up" : "Already have an account? sign in"}
           </button>
+        </div>
+          </div>
         </div>
       </div>
     </div>
