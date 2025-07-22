@@ -102,7 +102,7 @@ export default function InitialQuestionPage() {
           <button
             onClick={handleContinue}
             disabled={!selectedReason}
-            className={`w-full py-4 px-6 rounded-full hover:cursor-pointer font-semibold transition-all duration-200 bg-orange-primary text-dark hover:opacity-90`}
+            className="w-full py-4 px-6 rounded-full font-semibold transition-all duration-200 bg-orange-primary text-dark cursor-pointer disabled:cursor-not-allowed"
           >
             Continue
           </button>

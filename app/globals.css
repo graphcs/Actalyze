@@ -256,6 +256,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Prevent page scrolling on onboarding pages */
+.onboarding-page {
+  height: 100vh;
+  overflow: hidden;
+}
+
 /* Custom Component Classes */
 .btn-primary {
   background-color: var(--color-orange-light);
@@ -354,4 +360,52 @@ input[type="checkbox"]:checked::after {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-sage-500);
+}
+
+/* Custom Question Scrollbar */
+.question-scroll {
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-bottom: 120px;
+  /* Extra space for continue button on mobile */
+  margin-right: -16px;
+  /* Push scrollbar to right on mobile */
+  padding-right: 20px;
+  /* Compensate for negative margin */
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .question-scroll {
+    margin-right: 0;
+    /* Reset margin on medium screens */
+    padding-right: 0;
+    /* Reset padding on medium screens */
+    padding-bottom: 0;
+    /* No extra space needed since button is now static on medium screens */
+  }
+}
+
+@media (min-width: 1024px) {
+  .question-scroll {
+    margin-right: 0;
+    /* Reset margin on desktop */
+    padding-right: 0;
+    /* Reset padding on desktop */
+    padding-bottom: 0;
+    /* No extra padding needed on desktop */
+  }
+}
+
+.question-scroll::-webkit-scrollbar {
+  width: 12px;
+}
+
+.question-scroll::-webkit-scrollbar-track {
+  background: #FFFFFF;
+  border-radius: 12px;
+}
+
+.question-scroll::-webkit-scrollbar-thumb {
+  background: #F9F0DD;
+  border-radius: 12px;
 }
