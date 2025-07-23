@@ -1,0 +1,424 @@
+import { supabase } from './supabase'
+import { OnboardingFormData } from '@/types/onboarding'
+import {
+    InsertAssessment,
+    InsertQuestionResponse,
+    InsertProgressMetric,
+    InsertSymptomPattern,
+    Assessment,
+    QuestionResponse,
+    ProgressMetric,
+    MetricType,
+    SymptomType
+} from '@/types/database'
+
+// Assessment functions
+export async function createAssessment(data: {
+    initialReason?: string
+    assessmentType?: 'daily_check' | 'full_assessment' | 'follow_up'
+}): Promise<{ assessment: Assessment | null; error: string | null }> {
+    try {
+        console.log('Checking auth state...')
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+        console.log('Auth state:', user, authError)
+        console.log('Session:', await supabase.auth.getSession())
+
+        if (!user) {
+            return { assessment: null, error: 'User not authenticated' }
+        }
+
+        const assessmentData: InsertAssessment = {
+            user_id: user.id,
+            initial_reason: data.initialReason,
+            assessment_type: data.assessmentType || 'full_assessment',
+            status: 'completed'
+        }
+
+        const { data: assessment, error } = await supabase
+            .from('assessments')
+            .insert(assessmentData)
+            .select()
+            .single()
+
+        if (error) {
+            return { assessment: null, error: error.message }
+        }
+
+        return { assessment, error: null }
+    } catch (error) {
+        return { assessment: null, error: (error as Error).message }
+    }
+}
+
+// Question responses functions
+export async function saveQuestionResponses(
+    assessmentId: string,
+    formData: OnboardingFormData
+): Promise<{ success: boolean; error: string | null }> {
+    try {
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (!user) {
+            return { success: false, error: 'User not authenticated' }
+        }
+
+        // Convert form data to individual question responses
+        const responses: InsertQuestionResponse[] = []
+
+        Object.entries(formData).forEach(([questionId, value]) => {
+            if (value !== null && value !== undefined && value !== '') {
+                // Determine question type based on the question ID and value
+                let questionType: string
+                let responseText: string
+
+                if (Array.isArray(value)) {
+                    questionType = 'multi-select'
+                    responseText = value.join(', ')
+                } else if (typeof value === 'number') {
+                    questionType = 'slider'
+                    responseText = value.toString()
+                } else {
+                    // Determine if it's single-select, text-input, text-area, or image-select
+                    // You can enhance this logic based on your question configuration
+                    if (questionId === 'age') {
+                        questionType = 'text-input'
+                    } else if (questionId === 'foodRating') {
+                        questionType = 'text-area'
+                    } else if (questionId === 'stoolType') {
+                        questionType = 'image-select'
+                    } else {
+                        questionType = 'single-select'
+                    }
+                    responseText = value.toString()
+                }
+
+                responses.push({
+                    assessment_id: assessmentId,
+                    user_id: user.id,
+                    question_id: questionId,
+                    question_type: questionType,
+                    response_value: value,
+                    response_text: responseText
+                })
+            }
+        })
+
+        if (responses.length === 0) {
+            return { success: false, error: 'No responses to save' }
+        }
+
+        const { error } = await supabase
+            .from('question_responses')
+            .insert(responses)
+
+        if (error) {
+            return { success: false, error: error.message }
+        }
+
+        return { success: true, error: null }
+    } catch (error) {
+        return { success: false, error: (error as Error).message }
+    }
+}
+
+// Progress metrics functions
+export async function saveProgressMetrics(
+    assessmentId: string,
+    formData: OnboardingFormData
+): Promise<{ success: boolean; error: string | null }> {
+    try {
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (!user) {
+            return { success: false, error: 'User not authenticated' }
+        }
+
+        const metrics: InsertProgressMetric[] = []
+
+        // Extract specific metrics from form data
+        if (formData.bowelFrequency) {
+            metrics.push({
+                user_id: user.id,
+                assessment_id: assessmentId,
+                metric_type: 'bowel_frequency',
+                metric_text: formData.bowelFrequency
+            })
+        }
+
+        if (formData.energyLevel) {
+            metrics.push({
+                user_id: user.id,
+                assessment_id: assessmentId,
+                metric_type: 'energy_level',
+                metric_value: formData.energyLevel
+            })
+        }
+
+        if (formData.moodTracking) {
+            metrics.push({
+                user_id: user.id,
+                assessment_id: assessmentId,
+                metric_type: 'mood_score',
+                metric_text: formData.moodTracking
+            })
+        }
+
+        if (formData.sleepQuality) {
+            metrics.push({
+                user_id: user.id,
+                assessment_id: assessmentId,
+                metric_type: 'sleep_quality',
+                metric_text: formData.sleepQuality
+            })
+        }
+
+        if (formData.hydrationHabits) {
+            metrics.push({
+                user_id: user.id,
+                assessment_id: assessmentId,
+                metric_type: 'hydration_level',
+                metric_text: formData.hydrationHabits
+            })
+        }
+
+        if (metrics.length === 0) {
+            return { success: true, error: null } // No metrics to save, but not an error
+        }
+
+        const { error } = await supabase
+            .from('progress_metrics')
+            .upsert(metrics, {
+                onConflict: 'user_id,metric_type,metric_date',
+                ignoreDuplicates: false
+            })
+
+        if (error) {
+            return { success: false, error: error.message }
+        }
+
+        return { success: true, error: null }
+    } catch (error) {
+        return { success: false, error: (error as Error).message }
+    }
+}
+
+// Symptom patterns functions
+export async function saveSymptomPatterns(
+    assessmentId: string,
+    formData: OnboardingFormData
+): Promise<{ success: boolean; error: string | null }> {
+    try {
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (!user) {
+            return { success: false, error: 'User not authenticated' }
+        }
+
+        const symptoms: InsertSymptomPattern[] = []
+
+        // Extract symptoms from gut concerns
+        if (formData.gutConcerns && formData.gutConcerns.length > 0) {
+            formData.gutConcerns.forEach(concern => {
+                let symptomType: SymptomType
+                let severity = 3 // Default moderate severity
+
+                switch (concern) {
+                    case 'bloating':
+                        symptomType = 'bloating'
+                        break
+                    case 'constipation':
+                        symptomType = 'constipation'
+                        break
+                    case 'diarrhea':
+                        symptomType = 'diarrhea'
+                        break
+                    case 'acid-reflux':
+                        symptomType = 'acid_reflux'
+                        break
+                    case 'gas':
+                        symptomType = 'gas'
+                        break
+                    case 'cramping':
+                        symptomType = 'cramping'
+                        break
+                    case 'brain-fog':
+                        symptomType = 'brain_fog'
+                        break
+                    case 'skin-issues':
+                        symptomType = 'skin_issues'
+                        break
+                    case 'irregular-stool':
+                        symptomType = 'irregular_stool'
+                        break
+                    default:
+                        return // Skip unknown symptoms
+                }
+
+                symptoms.push({
+                    user_id: user.id,
+                    assessment_id: assessmentId,
+                    symptom_type: symptomType,
+                    severity: severity,
+                    frequency: 'daily', // Default frequency
+                    notes: `Reported in assessment: ${concern}`
+                })
+            })
+        }
+
+        if (symptoms.length === 0) {
+            return { success: true, error: null } // No symptoms to save, but not an error
+        }
+
+        const { error } = await supabase
+            .from('symptom_patterns')
+            .insert(symptoms)
+
+        if (error) {
+            return { success: false, error: error.message }
+        }
+
+        return { success: true, error: null }
+    } catch (error) {
+        return { success: false, error: (error as Error).message }
+    }
+}
+
+// Comprehensive save function
+export async function saveCompleteAssessment(
+    formData: OnboardingFormData,
+    initialReason?: string
+): Promise<{ assessmentId: string | null; error: string | null }> {
+    try {
+        // 1. Create assessment
+        const { assessment, error: assessmentError } = await createAssessment({
+            initialReason,
+            assessmentType: 'full_assessment'
+        })
+
+        if (assessmentError || !assessment) {
+            return { assessmentId: null, error: assessmentError || 'Failed to create assessment' }
+        }
+
+        // 2. Save question responses
+        const { error: responsesError } = await saveQuestionResponses(assessment.id, formData)
+        if (responsesError) {
+            console.error('Failed to save question responses:', responsesError)
+            // Continue anyway, don't fail the whole process
+        }
+
+        // 3. Save progress metrics
+        const { error: metricsError } = await saveProgressMetrics(assessment.id, formData)
+        if (metricsError) {
+            console.error('Failed to save progress metrics:', metricsError)
+            // Continue anyway, don't fail the whole process
+        }
+
+        // 4. Save symptom patterns
+        const { error: symptomsError } = await saveSymptomPatterns(assessment.id, formData)
+        if (symptomsError) {
+            console.error('Failed to save symptom patterns:', symptomsError)
+            // Continue anyway, don't fail the whole process
+        }
+
+        return { assessmentId: assessment.id, error: null }
+    } catch (error) {
+        return { assessmentId: null, error: (error as Error).message }
+    }
+}
+
+// User profile functions
+export async function upsertUserProfile(profileData: {
+    firstName?: string
+    lastName?: string
+    email?: string
+}): Promise<{ success: boolean; error: string | null }> {
+    try {
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (!user) {
+            return { success: false, error: 'User not authenticated' }
+        }
+
+        const { error } = await supabase
+            .from('user_profiles')
+            .upsert({
+                id: user.id,
+                first_name: profileData.firstName,
+                last_name: profileData.lastName,
+                email: profileData.email || user.email
+            })
+
+        if (error) {
+            return { success: false, error: error.message }
+        }
+
+        return { success: true, error: null }
+    } catch (error) {
+        return { success: false, error: (error as Error).message }
+    }
+}
+
+// Get user's latest assessment
+export async function getLatestAssessment(): Promise<{ assessment: Assessment | null; error: string | null }> {
+    try {
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (!user) {
+            return { assessment: null, error: 'User not authenticated' }
+        }
+
+        const { data: assessment, error } = await supabase
+            .from('assessments')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('completed_at', { ascending: false })
+            .limit(1)
+            .single()
+
+        if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+            return { assessment: null, error: error.message }
+        }
+
+        return { assessment: assessment || null, error: null }
+    } catch (error) {
+        return { assessment: null, error: (error as Error).message }
+    }
+}
+
+// Get user's progress metrics for a date range
+export async function getProgressMetrics(
+    metricType?: MetricType,
+    daysBack: number = 30
+): Promise<{ metrics: ProgressMetric[]; error: string | null }> {
+    try {
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (!user) {
+            return { metrics: [], error: 'User not authenticated' }
+        }
+
+        const startDate = new Date()
+        startDate.setDate(startDate.getDate() - daysBack)
+
+        let query = supabase
+            .from('progress_metrics')
+            .select('*')
+            .eq('user_id', user.id)
+            .gte('metric_date', startDate.toISOString().split('T')[0])
+            .order('metric_date', { ascending: false })
+
+        if (metricType) {
+            query = query.eq('metric_type', metricType)
+        }
+
+        const { data: metrics, error } = await query
+
+        if (error) {
+            return { metrics: [], error: error.message }
+        }
+
+        return { metrics: metrics || [], error: null }
+    } catch (error) {
+        return { metrics: [], error: (error as Error).message }
+    }
+} 

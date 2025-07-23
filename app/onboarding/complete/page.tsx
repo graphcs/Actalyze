@@ -22,21 +22,44 @@ export default function OnboardingCompletePage() {
     e.preventDefault()
     setIsSubmitting(true)
 
-    // Simulate API call to generate and send report
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    try {
+      // Save assessment to database
+      if (formData) {
+        const { saveCompleteAssessment } = await import('@/lib/database')
+        
+        const initialReason = localStorage.getItem('gutRootInitialReason')
+        const { assessmentId, error } = await saveCompleteAssessment(
+          formData, 
+          initialReason || undefined
+        )
+
+        if (error) {
+          console.error('Failed to save assessment:', error)
+          // Continue with the flow even if database save fails
+        } else {
+          console.log('Assessment saved successfully:', assessmentId)
+        }
+      }
+
+      // TODO: Generate AI report and send email
+      console.log('Form Data:', formData)
+      console.log('Email:', email)
+      
+      // Simulate processing time
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
+    } catch (error) {
+      console.error('Error during submission:', error)
+      // Continue with the flow even if there's an error
+    }
     
-    // Clear form data from localStorage
+    // Clear form data from localStorage after successful database save
     localStorage.removeItem('gutRootOnboardingForm')
     localStorage.removeItem('gutRootOnboardingStep')
     localStorage.removeItem('gutRootInitialReason')
     
-    // TODO: Integrate with AI report generation
-    console.log('Form Data:', formData)
-    console.log('Email:', email)
-    
     // Redirect immediately without changing submitting state
     router.push('/onboarding/upgrade')
-    
   }
 
   const validateEmail = (email: string) => {
