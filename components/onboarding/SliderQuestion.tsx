@@ -27,16 +27,16 @@ export default function SliderQuestion({ question, value, onChange }: SliderQues
       {/* Slider Container */}
       <div className="relative px-4">
         {/* Scale Labels */}
-        <div className="flex justify-between mb-4 text-sm text-medium-gray">
-          <span>Not<br/>energetic</span>
-          <span>Very<br/>energetic</span>
+        <div className="flex justify-between mb-4 text-sm font-medium text-black px-4">
+          <span className="text-start">Not<br/>energetic</span>
+          <span className="text-right">Very<br/>energetic</span>
         </div>
         
         {/* Custom Slider Track */}
-        <div className="relative h-2 bg-cream-300 rounded-full">
+        <div className="relative h-1 bg-orange-light rounded-full">
           {/* Progress Track */}
           <div 
-            className="absolute h-2 bg-orange-primary rounded-full transition-all duration-200"
+            className="absolute h-1 bg-orange-light rounded-full transition-all duration-200"
             style={{ width: `${percentage}%` }}
           />
           
@@ -65,7 +65,7 @@ export default function SliderQuestion({ question, value, onChange }: SliderQues
         </div>
         
         {/* Scale Numbers */}
-        <div className="flex justify-between mt-2 text-lg font-semibold text-dark-gray">
+        <div className="flex justify-between mt-4 text-lg font-semibold text-mdium-gray">
           {Array.from({ length: max - min + 1 }, (_, i) => min + i).map((num) => (
             <span key={num} className={value === num ? 'text-orange-primary' : ''}>
               {num}
@@ -75,8 +75,8 @@ export default function SliderQuestion({ question, value, onChange }: SliderQues
       </div>
       
       {/* Dynamic Label */}
-      <div className="text-center">
-        <div className="text-lg font-medium text-dark-gray">
+      <div className="text-start">
+        <div className="text-xl font-medium text-black">
           {value} = {currentLabel}
         </div>
       </div>
