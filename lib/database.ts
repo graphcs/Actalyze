@@ -435,6 +435,56 @@ export async function getLatestReport(assessmentId?: string): Promise<{ report: 
     }
 }
 
+export async function getReportPDFUrl(reportId: string): Promise<{ pdfUrl: string | null; error: string | null }> {
+    try {
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (!user) {
+            return { pdfUrl: null, error: 'User not authenticated' }
+        }
+
+        const { data: report, error } = await supabase
+            .from('reports')
+            .select('pdf_url')
+            .eq('id', reportId)
+            .eq('user_id', user.id) // Ensure user can only access their own reports
+            .single()
+
+        if (error) {
+            return { pdfUrl: null, error: error.message }
+        }
+
+        return { pdfUrl: report.pdf_url, error: null }
+    } catch (error) {
+        return { pdfUrl: null, error: (error as Error).message }
+    }
+}
+
+export async function getUserReports(limit: number = 10): Promise<{ reports: Report[]; error: string | null }> {
+    try {
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (!user) {
+            return { reports: [], error: 'User not authenticated' }
+        }
+
+        const { data: reports, error } = await supabase
+            .from('reports')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(limit)
+
+        if (error) {
+            return { reports: [], error: error.message }
+        }
+
+        return { reports: reports || [], error: null }
+    } catch (error) {
+        return { reports: [], error: (error as Error).message }
+    }
+}
+
 // User profile functions
 export async function upsertUserProfile(profileData: {
     firstName?: string

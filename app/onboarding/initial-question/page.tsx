@@ -77,11 +77,7 @@ export default function InitialQuestionPage() {
             <button
               key={reason}
               onClick={() => setSelectedReason(reason)}
-              className={`w-full py-4 px-6 rounded-full text-dark font-medium transition-all duration-100 ${
-                selectedReason === reason
-                  ? ''
-                  : 'hover:opacity-80'
-              }`}
+              className={`w-full py-4 px-6 rounded-full text-dark font-medium transition-all duration-100`}
               style={{ 
                 backgroundColor: '#FAE4B2',
                 ...(selectedReason === reason && {

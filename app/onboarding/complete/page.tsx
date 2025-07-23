@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { OnboardingFormData } from '@/types/onboarding'
+import { supabase } from '@/lib/supabase'
 
 export default function OnboardingCompletePage() {
   const [email, setEmail] = useState('')
@@ -84,21 +85,61 @@ export default function OnboardingCompletePage() {
 
       if (reportError) {
         console.error('Failed to save AI report:', reportError)
-        // Continue with flow even if report save fails
-      } else {
-        console.log('AI report saved successfully:', reportId)
+        throw new Error(`Failed to save report: ${reportError}`)
+      }
+
+      if (!reportId) {
+        throw new Error('No report ID returned from database')
+      }
+
+      console.log('AI report saved successfully:', reportId)
+
+      setProcessingStage('Creating your PDF report...')
+      
+      // Generate PDF report
+      try {
+        // Get the current session token
+        const { data: { session } } = await supabase.auth.getSession()
+        
+        if (!session?.access_token) {
+          throw new Error('No authentication session found')
+        }
+
+        const pdfResponse = await fetch('/api/generate-pdf', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            reportData: report,
+            reportId: reportId,
+            assessmentId: assessmentId
+          }),
+        })
+
+        if (!pdfResponse.ok) {
+          const errorData = await pdfResponse.json()
+          console.error('PDF generation failed:', errorData.error)
+          // Continue with flow even if PDF fails
+        } else {
+          const { pdfUrl, fileName } = await pdfResponse.json()
+          console.log('PDF generated successfully:', pdfUrl, fileName)
+        }
+      } catch (pdfError) {
+        console.error('PDF generation error:', pdfError)
+        // Continue with flow even if PDF fails
       }
 
       setProcessingStage('Preparing your results...')
       
       // Simulate final processing time
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      await new Promise(resolve => setTimeout(resolve, 1000))
       
       console.log('Report generated successfully:', report)
       console.log('Email for delivery:', email)
       
-      // TODO: Send email with report
-      // TODO: Generate PDF version
+      // TODO: Send email with report and PDF attachment
       
     } catch (error) {
       console.error('Error during submission:', error)

@@ -255,7 +255,7 @@ export default function OnboardingPage() {
                 <button
                   onClick={handleNext}
                   disabled={currentQuestion.required && !isStepValid()}
-                  className="w-full md:w-[80%] max-w-md py-4 rounded-full font-semibold transition-all duration-200 bg-orange-primary text-dark cursor-pointer disabled:cursor-not-allowed shadow-lg"
+                  className="w-full md:w-[80%] max-w-md py-4 rounded-full font-semibold transition-all duration-200 bg-orange-primary text-dark cursor-pointer disabled:cursor-not-allowed"
                 >
                   {currentStep === totalSteps - 1 ? 'Submit' : 'Continue'}
                 </button>
