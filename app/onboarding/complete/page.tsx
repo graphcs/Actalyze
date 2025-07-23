@@ -34,8 +34,9 @@ export default function OnboardingCompletePage() {
     console.log('Form Data:', formData)
     console.log('Email:', email)
     
-    setIsSubmitting(false)
-    router.push('/dashboard') // Redirect to dashboard or success page
+    // Redirect immediately without changing submitting state
+    router.push('/onboarding/upgrade')
+    
   }
 
   const validateEmail = (email: string) => {
@@ -44,26 +45,20 @@ export default function OnboardingCompletePage() {
   }
 
   return (
-    <div className="min-h-screen bg-cream-light flex items-center justify-center px-4 relative overflow-hidden">
-      {/* Orange Gradient Overlay */}
-      <div 
-        className="absolute inset-0 w-full h-full pointer-events-none"
-        style={{
-          background: `linear-gradient(
-            45deg,
-            rgba(245, 166, 35, 0.4) 0%,
-            rgba(245, 166, 35, 0.25) 25%,
-            rgba(255, 244, 230, 0.15) 50%,
-            rgba(255, 244, 230, 0.05) 70%,
-            transparent 85%
-          )`
-        }}
-      />
-
-      {/* Main Container */}
-      <div className="w-full max-w-lg h-full flex flex-col relative z-10">
+    <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden"
+         style={{
+           background: `
+             radial-gradient(circle at top left, #B0D1A9 0%, transparent 50%),
+             radial-gradient(circle at top right, #D7E3C7 0%, transparent 50%),
+             radial-gradient(circle at bottom left, #D0E1C1 0%, transparent 50%),
+             radial-gradient(circle at bottom right, #D2DCA6 0%, transparent 50%),
+             linear-gradient(135deg, #B0D1A9 0%, #D7E3C7 25%, #D0E1C1 75%, #D2DCA6 100%)
+           `
+         }}>
+      {/* Main Container - Centered */}
+      <div className="w-full max-w-lg h-screen flex flex-col relative z-10">
         {/* Brand Title */}
-        <div className="pb-20">
+        <div className="pt-10">
           <Link href="/">
             <h1 className="brand-title text-4xl font-bold text-dark-green">
               GutRoot
@@ -71,61 +66,75 @@ export default function OnboardingCompletePage() {
           </Link>
         </div>
 
-        {/* Content */}
+        {/* Content - Centered in remaining space */}
         <div className="flex-1 flex items-center justify-center">
-          <div className="w-full md:px-16 text-center">
-            
-            {/* Success Message */}
-            <div className="mb-8">
-              <div className="text-6xl mb-4">🎉</div>
-              <h2 className="text-3xl font-semibold text-dark-gray mb-4">
-                Congratulations!
-              </h2>
-              <p className="text-dark-gray text-lg mb-8">
-                Your personalized gut health assessment is complete. 
-                We're generating your custom report now.
-              </p>
-            </div>
-
-            {/* Email Form */}
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label className="block text-left text-sm font-medium text-dark-gray mb-2">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  placeholder="Enter your email to receive your report"
-                  className="w-full px-4 py-3 bg-white rounded-lg border border-pale-gray focus:ring-2 focus:ring-orange-primary focus:border-transparent outline-none transition-all duration-200"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
+          <div className="w-full max-w-md">
+          
+          {isSubmitting ? (
+            /* Submission Success State */
+            <>
+              {/* Opened Inbox Icon */}
+              <div className="mb-16 text-center">
+                <img 
+                  src="/opened-inbox.png" 
+                  alt="Opened Inbox" 
+                  className="w-[60%] h-[60%] mx-auto"
                 />
               </div>
 
-              <button
-                type="submit"
-                disabled={!validateEmail(email) || isSubmitting}
-                className={`w-full py-4 px-6 rounded-full font-semibold transition-all duration-200 ${
-                  validateEmail(email) && !isSubmitting
-                    ? 'bg-orange-primary text-dark hover:opacity-90 cursor-pointer'
-                    : 'bg-pale-gray text-medium-gray cursor-not-allowed'
-                }`}
-              >
-                {isSubmitting ? 'Generating Report...' : 'Send My Report'}
-              </button>
-            </form>
+              {/* Success Text */}
+              <div className="mb-12">
+                <h2 className="text-xl font-medium text-dark-gray text-start px-6 md:px-12">
+                  Great! You'll also receive<br />
+                  weekly gut health tips...
+                </h2>
+              </div>
+            </>
+          ) : (
+            /* Initial Form State */
+            <>
+              {/* Inbox Icon */}
+              <div className="mb-12 text-center">
+                <img 
+                  src="/inbox.png" 
+                  alt="Inbox" 
+                  className="mx-auto"
+                />
+              </div>
 
-            {/* Additional Info */}
-            <div className="mt-8 text-sm text-medium-gray">
-              <p>Your report will include:</p>
-              <ul className="mt-2 space-y-1">
-                <li>• Personalized gut health analysis</li>
-                <li>• Dietary recommendations</li>
-                <li>• Lifestyle suggestions</li>
-                <li>• Next steps for improvement</li>
-              </ul>
-            </div>
+              {/* Title Text */}
+              <div className="mb-12">
+                <h2 className="text-2xl font-medium text-dark-gray text-start leading-relaxed">
+                  Want to save your results and<br />
+                  get your plan by email?
+                </h2>
+              </div>
+
+              {/* Email Form */}
+              <form onSubmit={handleSubmit} className="w-full space-y-8">
+                <div>
+                  <label className="block text-left text-sm font-medium text-dark-gray mb-2">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    className="w-full px-4 py-4 bg-white rounded-lg no-border focus:ring-2 focus:ring-orange-primary focus:border-transparent outline-none transition-all duration-200 text-dark-gray"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full py-4 px-6 rounded-full font-semibold text-lg transition-all duration-200 bg-orange-light text-black cursor-pointer"
+                >
+                  Submit
+                </button>
+              </form>
+            </>
+          )}
           </div>
         </div>
       </div>

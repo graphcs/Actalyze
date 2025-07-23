@@ -250,12 +250,12 @@ export default function OnboardingPage() {
             </div>
 
             {/* Continue Button */}
-            <div className="fixed bottom-8 left-4 right-4 md:static md:mb-16">
-              <div className="md:flex md:justify-center">
+            <div className="fixed bottom-8 left-4 right-4">
+              <div className="flex justify-center">
                 <button
                   onClick={handleNext}
                   disabled={currentQuestion.required && !isStepValid()}
-                  className="w-full md:w-[80%] py-4 rounded-full font-semibold transition-all duration-200 bg-orange-primary text-dark cursor-pointer disabled:cursor-not-allowed shadow-lg"
+                  className="w-full md:w-[80%] max-w-md py-4 rounded-full font-semibold transition-all duration-200 bg-orange-primary text-dark cursor-pointer disabled:cursor-not-allowed shadow-lg"
                 >
                   {currentStep === totalSteps - 1 ? 'Submit' : 'Continue'}
                 </button>
