@@ -35,7 +35,7 @@ async function generateGutHealthReport(
     const prompt = buildComprehensivePrompt(formData, initialReason, userProfile)
 
     const completion = await openai.chat.completions.create({
-        model: "gpt-4",
+        model: "gpt-4.1",
         messages: [
             {
                 role: "system",
@@ -176,8 +176,19 @@ Make your recommendations evidence-based, practical, and personalized to this in
 `
 }
 
-function parseAIResponse(response: string) {
-    const sections = {
+interface ParsedReport {
+    digestive_score: number
+    diet_recommendations: string
+    supplement_suggestions: string
+    lifestyle_changes: string
+    bowel_trends: string
+    goal_reminders: string
+    symptom_patterns_analysis: string
+    ai_tip_of_week: string
+}
+
+function parseAIResponse(response: string): ParsedReport {
+    const sections: ParsedReport = {
         digestive_score: 0,
         diet_recommendations: '',
         supplement_suggestions: '',
@@ -195,20 +206,23 @@ function parseAIResponse(response: string) {
             sections.digestive_score = parseInt(scoreMatch[1])
         }
 
-        // Extract each section
-        const sectionMatches = {
-            diet_recommendations: response.match(/\*\*DIET_RECOMMENDATIONS:\*\*([\s\S]*?)(?=\*\*[A-Z_]+:|$)/i),
-            supplement_suggestions: response.match(/\*\*SUPPLEMENT_SUGGESTIONS:\*\*([\s\S]*?)(?=\*\*[A-Z_]+:|$)/i),
-            lifestyle_changes: response.match(/\*\*LIFESTYLE_CHANGES:\*\*([\s\S]*?)(?=\*\*[A-Z_]+:|$)/i),
-            bowel_trends: response.match(/\*\*BOWEL_TRENDS:\*\*([\s\S]*?)(?=\*\*[A-Z_]+:|$)/i),
-            goal_reminders: response.match(/\*\*GOAL_REMINDERS:\*\*([\s\S]*?)(?=\*\*[A-Z_]+:|$)/i),
-            symptom_patterns_analysis: response.match(/\*\*SYMPTOM_PATTERNS_ANALYSIS:\*\*([\s\S]*?)(?=\*\*[A-Z_]+:|$)/i),
-            ai_tip_of_week: response.match(/\*\*AI_TIP_OF_WEEK:\*\*([\s\S]*?)(?=\*\*[A-Z_]+:|$)/i)
+        // Extract each section with explicit typing
+        const sectionPatterns: Record<keyof Omit<ParsedReport, 'digestive_score'>, RegExp> = {
+            diet_recommendations: /\*\*DIET_RECOMMENDATIONS:\*\*([\s\S]*?)(?=\*\*[A-Z_]+:|$)/i,
+            supplement_suggestions: /\*\*SUPPLEMENT_SUGGESTIONS:\*\*([\s\S]*?)(?=\*\*[A-Z_]+:|$)/i,
+            lifestyle_changes: /\*\*LIFESTYLE_CHANGES:\*\*([\s\S]*?)(?=\*\*[A-Z_]+:|$)/i,
+            bowel_trends: /\*\*BOWEL_TRENDS:\*\*([\s\S]*?)(?=\*\*[A-Z_]+:|$)/i,
+            goal_reminders: /\*\*GOAL_REMINDERS:\*\*([\s\S]*?)(?=\*\*[A-Z_]+:|$)/i,
+            symptom_patterns_analysis: /\*\*SYMPTOM_PATTERNS_ANALYSIS:\*\*([\s\S]*?)(?=\*\*[A-Z_]+:|$)/i,
+            ai_tip_of_week: /\*\*AI_TIP_OF_WEEK:\*\*([\s\S]*?)(?=\*\*[A-Z_]+:|$)/i
         }
 
-        Object.entries(sectionMatches).forEach(([key, match]) => {
+        // Extract each section
+        Object.entries(sectionPatterns).forEach(([key, pattern]) => {
+            const match = response.match(pattern)
             if (match && match[1]) {
-                sections[key as keyof typeof sections] = match[1].trim()
+                const sectionKey = key as keyof Omit<ParsedReport, 'digestive_score'>
+                sections[sectionKey] = match[1].trim()
             }
         })
 
