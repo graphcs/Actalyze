@@ -3,11 +3,13 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { OnboardingFormData } from '@/types/onboarding'
 
 export default function OnboardingCompletePage() {
   const [email, setEmail] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [formData, setFormData] = useState(null)
+  const [formData, setFormData] = useState<OnboardingFormData | null>(null)
+  const [processingStage, setProcessingStage] = useState('')
   const router = useRouter()
 
   useEffect(() => {
@@ -23,42 +25,95 @@ export default function OnboardingCompletePage() {
     setIsSubmitting(true)
 
     try {
+      setProcessingStage('Saving your assessment...')
+      
       // Save assessment to database
+      let assessmentId = null
       if (formData) {
         const { saveCompleteAssessment } = await import('@/lib/database')
         
         const initialReason = localStorage.getItem('gutRootInitialReason')
-        const { assessmentId, error } = await saveCompleteAssessment(
+        const { assessmentId: savedAssessmentId, error } = await saveCompleteAssessment(
           formData, 
           initialReason || undefined
         )
 
         if (error) {
           console.error('Failed to save assessment:', error)
-          // Continue with the flow even if database save fails
+          throw new Error(`Assessment save failed: ${error}`)
         } else {
-          console.log('Assessment saved successfully:', assessmentId)
+          console.log('Assessment saved successfully:', savedAssessmentId)
+          assessmentId = savedAssessmentId
         }
       }
 
-      // TODO: Generate AI report and send email
-      console.log('Form Data:', formData)
-      console.log('Email:', email)
+      if (!assessmentId) {
+        throw new Error('No assessment ID available for report generation')
+      }
+
+      setProcessingStage('Analyzing your gut health...')
       
-      // Simulate processing time
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Generate AI report
+      const reportResponse = await fetch('/api/generate-report', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          formData,
+          initialReason: localStorage.getItem('gutRootInitialReason'),
+          userProfile: {
+            firstName: 'there', // TODO: Get from user profile in database
+            lastName: undefined
+          }
+        }),
+      })
+
+      if (!reportResponse.ok) {
+        const errorData = await reportResponse.json()
+        throw new Error(`Report generation failed: ${errorData.error}`)
+      }
+
+      const { report } = await reportResponse.json()
+
+      setProcessingStage('Saving your personalized report...')
+      
+      // Save the AI report to database
+      const { saveAIReport } = await import('@/lib/database')
+      const { reportId, error: reportError } = await saveAIReport(assessmentId, report)
+
+      if (reportError) {
+        console.error('Failed to save AI report:', reportError)
+        // Continue with flow even if report save fails
+      } else {
+        console.log('AI report saved successfully:', reportId)
+      }
+
+      setProcessingStage('Preparing your results...')
+      
+      // Simulate final processing time
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      
+      console.log('Report generated successfully:', report)
+      console.log('Email for delivery:', email)
+      
+      // TODO: Send email with report
+      // TODO: Generate PDF version
       
     } catch (error) {
       console.error('Error during submission:', error)
-      // Continue with the flow even if there's an error
+      
+      // Show user a helpful error message but continue with flow
+      setProcessingStage('Completing setup...')
+      await new Promise(resolve => setTimeout(resolve, 1000))
     }
     
-    // Clear form data from localStorage after successful database save
+    // Clear form data from localStorage after processing
     localStorage.removeItem('gutRootOnboardingForm')
     localStorage.removeItem('gutRootOnboardingStep')
     localStorage.removeItem('gutRootInitialReason')
     
-    // Redirect immediately without changing submitting state
+    // Redirect to upgrade page
     router.push('/onboarding/upgrade')
   }
 
@@ -94,23 +149,32 @@ export default function OnboardingCompletePage() {
           <div className="w-full max-w-md">
           
           {isSubmitting ? (
-            /* Submission Success State */
+            /* Submission Processing State */
             <>
               {/* Opened Inbox Icon */}
               <div className="mb-16 text-center">
                 <img 
                   src="/opened-inbox.png" 
-                  alt="Opened Inbox" 
+                  alt="Processing" 
                   className="w-[60%] h-[60%] mx-auto"
                 />
               </div>
 
-              {/* Success Text */}
+              {/* Processing Text */}
               <div className="mb-12">
                 <h2 className="text-xl font-medium text-dark-gray text-start px-6 md:px-12">
                   Great! You'll also receive<br />
                   weekly gut health tips...
                 </h2>
+                
+                {/* Loading indicator */}
+                <div className="mt-6 px-6 md:px-12">
+                  <div className="flex space-x-2">
+                    <div className="w-2 h-2 bg-orange-primary rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-orange-primary rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                    <div className="w-2 h-2 bg-orange-primary rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                  </div>
+                </div>
               </div>
             </>
           ) : (
@@ -146,12 +210,14 @@ export default function OnboardingCompletePage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
+                    disabled={isSubmitting}
                   />
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full py-4 px-6 rounded-full font-semibold text-lg transition-all duration-200 bg-orange-light text-black cursor-pointer"
+                  disabled={isSubmitting || !email || !validateEmail(email)}
+                  className="w-full py-4 px-6 rounded-full font-semibold text-lg transition-all duration-200 bg-orange-light text-black cursor-pointer disabled:cursor-not-allowed"
                 >
                   Submit
                 </button>

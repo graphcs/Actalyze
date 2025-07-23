@@ -289,40 +289,149 @@ export async function saveCompleteAssessment(
     initialReason?: string
 ): Promise<{ assessmentId: string | null; error: string | null }> {
     try {
-        // 1. Create assessment
+        // Create assessment
         const { assessment, error: assessmentError } = await createAssessment({
             initialReason,
             assessmentType: 'full_assessment'
         })
 
         if (assessmentError || !assessment) {
-            return { assessmentId: null, error: assessmentError || 'Failed to create assessment' }
+            return { assessmentId: null, error: assessmentError }
         }
 
-        // 2. Save question responses
-        const { error: responsesError } = await saveQuestionResponses(assessment.id, formData)
-        if (responsesError) {
-            console.error('Failed to save question responses:', responsesError)
-            // Continue anyway, don't fail the whole process
-        }
+        // Save all related data in parallel
+        const [
+            questionResponsesResult,
+            progressMetricsResult,
+            symptomPatternsResult
+        ] = await Promise.all([
+            saveQuestionResponses(assessment.id, formData),
+            saveProgressMetrics(assessment.id, formData),
+            saveSymptomPatterns(assessment.id, formData)
+        ])
 
-        // 3. Save progress metrics
-        const { error: metricsError } = await saveProgressMetrics(assessment.id, formData)
-        if (metricsError) {
-            console.error('Failed to save progress metrics:', metricsError)
-            // Continue anyway, don't fail the whole process
-        }
+        // Check for any errors (but don't fail the whole operation)
+        const errors = [
+            questionResponsesResult.error,
+            progressMetricsResult.error,
+            symptomPatternsResult.error
+        ].filter(Boolean)
 
-        // 4. Save symptom patterns
-        const { error: symptomsError } = await saveSymptomPatterns(assessment.id, formData)
-        if (symptomsError) {
-            console.error('Failed to save symptom patterns:', symptomsError)
-            // Continue anyway, don't fail the whole process
+        if (errors.length > 0) {
+            console.warn('Some data failed to save:', errors)
         }
 
         return { assessmentId: assessment.id, error: null }
     } catch (error) {
         return { assessmentId: null, error: (error as Error).message }
+    }
+}
+
+// AI Report functions
+export async function saveAIReport(
+    assessmentId: string,
+    reportData: {
+        digestive_score: number
+        diet_recommendations: string
+        supplement_suggestions: string
+        lifestyle_changes: string
+        bowel_trends: string
+        goal_reminders: string
+        symptom_patterns_analysis: string
+        ai_tip_of_week: string
+    },
+    aiModelUsed: string = 'gpt-4.1',
+    aiPromptVersion: string = '1.0'
+): Promise<{ reportId: string | null; error: string | null }> {
+    try {
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (!user) {
+            return { reportId: null, error: 'User not authenticated' }
+        }
+
+        const reportRecord = {
+            assessment_id: assessmentId,
+            user_id: user.id,
+            report_type: 'comprehensive',
+            digestive_score: reportData.digestive_score,
+            diet_recommendations: reportData.diet_recommendations,
+            supplement_suggestions: reportData.supplement_suggestions,
+            lifestyle_changes: reportData.lifestyle_changes,
+            bowel_trends: reportData.bowel_trends,
+            goal_reminders: reportData.goal_reminders,
+            symptom_patterns_analysis: reportData.symptom_patterns_analysis,
+            ai_tip_of_week: reportData.ai_tip_of_week,
+            ai_model_used: aiModelUsed,
+            ai_prompt_version: aiPromptVersion,
+            generation_time_ms: null, // Will be set by caller if needed
+            pdf_url: null, // Will be set later when PDF is generated
+            email_sent_at: null // Will be set when email is sent
+        }
+
+        const { data: report, error } = await supabase
+            .from('reports')
+            .insert(reportRecord)
+            .select()
+            .single()
+
+        if (error) {
+            return { reportId: null, error: error.message }
+        }
+
+        return { reportId: report.id, error: null }
+    } catch (error) {
+        return { reportId: null, error: (error as Error).message }
+    }
+}
+
+export async function updateReportEmailStatus(
+    reportId: string,
+    emailSentAt: string
+): Promise<{ success: boolean; error: string | null }> {
+    try {
+        const { error } = await supabase
+            .from('reports')
+            .update({ email_sent_at: emailSentAt })
+            .eq('id', reportId)
+
+        if (error) {
+            return { success: false, error: error.message }
+        }
+
+        return { success: true, error: null }
+    } catch (error) {
+        return { success: false, error: (error as Error).message }
+    }
+}
+
+export async function getLatestReport(assessmentId?: string): Promise<{ report: Report | null; error: string | null }> {
+    try {
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (!user) {
+            return { report: null, error: 'User not authenticated' }
+        }
+
+        let query = supabase
+            .from('reports')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
+
+        if (assessmentId) {
+            query = query.eq('assessment_id', assessmentId)
+        }
+
+        const { data: report, error } = await query.limit(1).single()
+
+        if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
+            return { report: null, error: error.message }
+        }
+
+        return { report: report || null, error: null }
+    } catch (error) {
+        return { report: null, error: (error as Error).message }
     }
 }
 
