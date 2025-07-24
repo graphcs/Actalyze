@@ -459,7 +459,7 @@ export default function AuthPage() {
               disabled={loading}
               className="btn-primary w-full"
             >
-              {loading ? 'Signing Up...' : 'Sign Up'}
+              Sign up
             </button>
           </form>
         )}
