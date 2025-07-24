@@ -60,7 +60,7 @@ export async function sendEmail({
 export async function sendGutHealthReport(
     email: string,
     htmlContent: string,
-    userName: string = 'there'
+    _userName: string = 'there'
 ): Promise<{ success: boolean; error: string | null; messageId?: string }> {
     const subject = `Your Personalized Gut Health Report - GutRoot`
 

@@ -65,7 +65,7 @@ export default function InitialQuestionPage() {
           />
           <div className="absolute inset-0 flex items-center justify-center px-8">
             <p className="text-dark text-xl leading-relaxed text-left font-medium">
-              Hi, I'm your personalized gut health guide. 
+              Hi, I&apos;m your personalized gut health guide. 
               What brings you here today?
             </p>
           </div>

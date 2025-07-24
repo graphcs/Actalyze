@@ -58,7 +58,7 @@ export function generateReportHTML(reportData: ReportData): string {
         day: 'numeric'
     })
 
-    const userName = reportData.userProfile?.firstName || 'there'
+    const _userName = reportData.userProfile?.firstName || 'there'
 
     return `<!DOCTYPE html>
 <html>

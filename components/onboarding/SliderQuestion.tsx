@@ -1,5 +1,5 @@
 import { FormQuestion } from '@/types/onboarding'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 interface SliderQuestionProps {
   question: FormQuestion
@@ -8,7 +8,7 @@ interface SliderQuestionProps {
 }
 
 export default function SliderQuestion({ question, value, onChange }: SliderQuestionProps) {
-  const [isDragging, setIsDragging] = useState(false)
+  const [, ] = useState(false)
   
   if (!question.sliderConfig) return null
   

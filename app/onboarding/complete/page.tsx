@@ -10,7 +10,7 @@ export default function OnboardingCompletePage() {
   const [email, setEmail] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState<OnboardingFormData | null>(null)
-  const [processingStage, setProcessingStage] = useState('')
+  const [, setProcessingStage] = useState('')
   const router = useRouter()
 
   useEffect(() => {
@@ -206,7 +206,7 @@ export default function OnboardingCompletePage() {
               <div className="mb-12">
                 <div className="flex items-center px-6 md:px-12">
                   <h2 className="text-xl font-medium text-dark-gray text-start">
-                    Great! You'll also receive
+                    Great! You&apos;ll also receive
                     weekly gut health tips.
                   </h2>
                   

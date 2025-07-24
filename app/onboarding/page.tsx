@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { 
   OnboardingFormData, 
-  FormQuestion, 
   FORM_QUESTIONS, 
   DEFAULT_FORM_DATA 
 } from '@/types/onboarding'
@@ -53,7 +52,7 @@ export default function OnboardingPage() {
   const totalSteps = FORM_QUESTIONS.length
   const progressPercentage = ((currentStep + 1) / totalSteps) * 100
 
-  const updateFormData = (field: keyof OnboardingFormData, value: any) => {
+  const updateFormData = (field: keyof OnboardingFormData, value: unknown) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -99,7 +98,7 @@ export default function OnboardingPage() {
   }
 
   const renderQuestion = () => {
-    const onChange = (value: any) => updateFormData(currentQuestion.id, value)
+    const onChange = (value: unknown) => updateFormData(currentQuestion.id, value)
 
     switch (currentQuestion.type) {
       case 'single-select':

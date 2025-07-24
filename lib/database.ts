@@ -6,7 +6,6 @@ import {
     InsertProgressMetric,
     InsertSymptomPattern,
     Assessment,
-    QuestionResponse,
     ProgressMetric,
     MetricType,
     SymptomType
@@ -220,7 +219,7 @@ export async function saveSymptomPatterns(
         if (formData.gutConcerns && formData.gutConcerns.length > 0) {
             formData.gutConcerns.forEach(concern => {
                 let symptomType: SymptomType
-                let severity = 3 // Default moderate severity
+                const severity = 3 // Default moderate severity
 
                 switch (concern) {
                     case 'bloating':

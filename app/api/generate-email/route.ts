@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
             .eq('assessment_id', assessmentId)
 
         // Build assessment data for email
-        const formData: Record<string, any> = {}
+        const formData: Record<string, unknown> = {}
         responses?.forEach(response => {
             formData[response.question_id] = response.response_value
         })
