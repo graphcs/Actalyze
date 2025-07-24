@@ -1,137 +1,185 @@
 import React from 'react'
 import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer'
 
-// Register fonts (you can add custom fonts later)
-// Font.register({
-//   family: 'Inter',
-//   src: 'path/to/Inter-Regular.ttf'
-// })
+// Register Inter font family using local files
+Font.register({
+  family: 'Inter',
+  fonts: [
+    { 
+      src: `${process.cwd()}/public/fonts/Inter-Regular.ttf`,
+      fontWeight: 'normal'
+    },
+    { 
+      src: `${process.cwd()}/public/fonts/Inter-Bold.ttf`,
+      fontWeight: 'bold'
+    },
+  ]
+})
 
-// Define styles
+// Define styles matching Figma design
 const styles = StyleSheet.create({
   page: {
     flexDirection: 'column',
-    backgroundColor: '#FFFFFF',
-    padding: 40,
-    fontFamily: 'Helvetica',
+    backgroundColor: '#F8ECC7',
+    padding: 24,
+    fontFamily: 'Inter',
   },
-  header: {
-    marginBottom: 30,
-    borderBottom: '2px solid #0D4C47',
-    paddingBottom: 20,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#0D4C47',
-    marginBottom: 8,
-    fontFamily: 'Helvetica-Bold',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666666',
-    marginBottom: 4,
-  },
-  date: {
-    fontSize: 12,
-    color: '#A1A1A1',
-  },
-  scoreSection: {
-    backgroundColor: '#F9F4EF',
-    padding: 20,
-    borderRadius: 8,
-    marginBottom: 25,
+  // Header Section - Matches Figma design
+  headerSection: {
+    marginBottom: 32,
+    paddingTop: 16,
     alignItems: 'center',
   },
-  scoreTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#0D4C47',
-    marginBottom: 10,
-    fontFamily: 'Helvetica-Bold',
+  digestiveScoreLabel: {
+    fontSize: 14,
+    color: '#2B2B2B',
+    marginBottom: 12,
+    fontFamily: 'Inter',
+    textAlign: 'center',
   },
-  scoreValue: {
-    fontSize: 48,
+  scoreDisplay: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    marginBottom: 8,
+    justifyContent: 'center',
+  },
+  scoreNumber: {
+    fontSize: 64,
     fontWeight: 'bold',
     color: '#F5A623',
-    marginBottom: 5,
-    fontFamily: 'Helvetica-Bold',
+    lineHeight: 1,
+    fontFamily: 'Inter',
+  },
+  scoreMax: {
+    fontSize: 20,
+    color: '#F5A623',
+    marginLeft: 2,
+    marginBottom: 8,
+    fontFamily: 'Inter',
   },
   scoreDescription: {
     fontSize: 14,
     color: '#666666',
+    marginBottom: 20,
+    fontFamily: 'Inter',
     textAlign: 'center',
   },
+  dailyLogButton: {
+    backgroundColor: '#F5A623',
+    borderRadius: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 24,
+    alignSelf: 'flex-start',
+    marginBottom: 16,
+  },
+  dailyLogText: {
+    color: '#2B2B2B',
+    fontSize: 13,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    fontFamily: 'Inter',
+  },
+  dateText: {
+    fontSize: 12,
+    color: '#666666',
+    marginBottom: 32,
+    fontFamily: 'Inter',
+    textAlign: 'center',
+  },
+  // Section styling - with orange line indicators
   section: {
-    marginBottom: 25,
+    marginBottom: 24,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  sectionIndicator: {
+    width: 3,
+    height: 18,
+    backgroundColor: '#F5A623',
+    marginRight: 12,
+    marginTop: 1,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#0D4C47',
-    marginBottom: 12,
-    borderLeft: '4px solid #F5A623',
-    paddingLeft: 12,
-    fontFamily: 'Helvetica-Bold',
+    fontFamily: 'Inter',
+    flex: 1,
   },
   sectionContent: {
-    fontSize: 12,
-    lineHeight: 1.6,
+    fontSize: 11,
     color: '#2B2B2B',
-    marginLeft: 16,
+    lineHeight: 1.6,
+    marginLeft: 15,
+    fontFamily: 'Inter',
+  },
+  // Power tip box - cream background
+  powerTipContainer: {
+    marginLeft: 15,
+    marginTop: 12,
+  },
+  powerTipBox: {
+    backgroundColor: '#FFC76C',
+    borderRadius: 8,
+    padding: 14,
+  },
+  powerTipTitle: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#2B2B2B',
+    marginBottom: 8,
+    fontFamily: 'Inter',
+  },
+  powerTipContent: {
+    fontSize: 11,
+    color: '#2B2B2B',
+    lineHeight: 1.5,
+    fontFamily: 'Inter',
+  },
+  // Bullet points
+  bulletContainer: {
+    marginLeft: 15,
   },
   bulletPoint: {
     flexDirection: 'row',
-    marginBottom: 8,
-    marginLeft: 16,
+    marginBottom: 6,
+    alignItems: 'flex-start',
   },
-  bullet: {
-    fontSize: 12,
-    color: '#F5A623',
-    width: 15,
-    fontWeight: 'bold',
+  bulletDot: {
+    width: 3,
+    height: 3,
+    backgroundColor: '#F5A623',
+    borderRadius: 1.5,
+    marginTop: 4,
+    marginRight: 8,
   },
   bulletText: {
-    fontSize: 12,
-    lineHeight: 1.5,
+    fontSize: 11,
     color: '#2B2B2B',
     flex: 1,
+    lineHeight: 1.5,
+    fontFamily: 'Inter',
   },
-  tipBox: {
-    backgroundColor: '#A8CBA1',
-    padding: 15,
-    borderRadius: 8,
-    marginTop: 25,
+  // Brand header for subsequent pages
+  brandHeader: {
+    marginBottom: 24,
+    paddingBottom: 12,
+    borderBottom: '1px solid #E5E5E5',
   },
-  tipTitle: {
-    fontSize: 14,
+  brandTitle: {
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#0D4C47',
-    marginBottom: 8,
-    fontFamily: 'Helvetica-Bold',
+    fontFamily: 'Inter',
   },
-  tipText: {
-    fontSize: 12,
-    lineHeight: 1.5,
-    color: '#0D4C47',
-  },
-  footer: {
-    position: 'absolute',
-    bottom: 30,
-    left: 40,
-    right: 40,
-    textAlign: 'center',
-    fontSize: 10,
-    color: '#A1A1A1',
-    borderTop: '1px solid #E5E5E5',
-    paddingTop: 15,
-  },
-  pageNumber: {
-    position: 'absolute',
-    fontSize: 10,
-    bottom: 30,
-    right: 40,
-    color: '#A1A1A1',
+  pageTitle: {
+    fontSize: 16,
+    color: '#666666',
+    marginTop: 4,
+    fontFamily: 'Inter',
   },
 })
 
@@ -159,181 +207,117 @@ const formatBulletPoints = (text: string) => {
   // Split text into bullet points based on common patterns
   const lines = text.split(/[\n•\-\*]/).filter(line => line.trim().length > 0)
   
-  return lines.map((line, index) => (
-    <View key={index} style={styles.bulletPoint}>
-      <Text style={styles.bullet}>•</Text>
-      <Text style={styles.bulletText}>{line.trim()}</Text>
+  return (
+    <View style={styles.bulletContainer}>
+      {lines.map((line, index) => (
+        <View key={index} style={styles.bulletPoint}>
+          <View style={styles.bulletDot} />
+          <Text style={styles.bulletText}>{line.trim()}</Text>
+        </View>
+      ))}
     </View>
-  ))
+  )
 }
 
 export const GutHealthReportPDF: React.FC<{ data: ReportData }> = ({ data }) => {
+  // Console log the AI response data
+  console.log('AI Report Data:', data)
+  
   const currentDate = new Date().toLocaleDateString('en-US', {
-    year: 'numeric',
+    year: 'numeric', 
     month: 'long',
     day: 'numeric'
   })
 
-  const userName = data.userProfile?.firstName || 'Valued Member'
-
   const getScoreDescription = (score: number) => {
-    if (score >= 8) return 'Excellent gut health!'
-    if (score >= 6) return 'Good gut health with room for improvement'
-    if (score >= 4) return 'Moderate gut health - focus areas identified'
-    return 'Significant improvement opportunities'
+    if (score >= 8) return 'Overall excellent digestion'
+    if (score >= 6) return 'Overall good digestion'
+    if (score >= 4) return 'Overall moderate digestion'
+    return 'Overall poor digestion'
   }
 
   return (
     <Document>
-      {/* Page 1 - Cover & Score */}
+      {/* Main Report Page - Matching Figma Design */}
       <Page size="A4" style={styles.page}>
-        <View style={styles.header}>
-          <Text style={styles.title}>GutRoot</Text>
-          <Text style={styles.subtitle}>Personalized Gut Health Report</Text>
-          <Text style={styles.subtitle}>for {userName}</Text>
-          <Text style={styles.date}>Generated on {currentDate}</Text>
-        </View>
-
-        <View style={styles.scoreSection}>
-          <Text style={styles.scoreTitle}>Your Digestive Health Score</Text>
-          <Text style={styles.scoreValue}>{data.digestive_score}/10</Text>
+        {/* Header Section */}
+        <View style={styles.headerSection}>
+          {/* Digestive Score */}
+          <Text style={styles.digestiveScoreLabel}>Digestive score</Text>
+          
+          <View style={styles.scoreDisplay}>
+            <Text style={styles.scoreNumber}>{data.digestive_score}</Text>
+            <Text style={styles.scoreMax}>/10</Text>
+          </View>
+          
           <Text style={styles.scoreDescription}>
             {getScoreDescription(data.digestive_score)}
           </Text>
+          
+          <Text style={styles.dateText}>Week of {currentDate}</Text>
         </View>
 
+        {/* Bowel Trends Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>About This Report</Text>
-          <Text style={styles.sectionContent}>
-            This personalized gut health report was generated based on your comprehensive assessment. 
-            Our AI-powered analysis has identified key areas for improvement and provided evidence-based 
-            recommendations tailored specifically to your unique health profile and lifestyle.
-          </Text>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Your Assessment Summary</Text>
-          {data.assessmentData?.age && (
-            <Text style={styles.sectionContent}>Age: {data.assessmentData.age}</Text>
-          )}
-          {data.assessmentData?.gender && (
-            <Text style={styles.sectionContent}>Gender: {data.assessmentData.gender}</Text>
-          )}
-          {data.assessmentData?.initialReason && (
-            <Text style={styles.sectionContent}>Primary Concern: {data.assessmentData.initialReason}</Text>
-          )}
-        </View>
-
-        <View style={styles.tipBox}>
-          <Text style={styles.tipTitle}>🌟 This Week's Power Tip</Text>
-          <Text style={styles.tipText}>{data.ai_tip_of_week}</Text>
-        </View>
-
-        <View style={styles.footer}>
-          <Text>
-            This report is for educational purposes only and should not replace professional medical advice.
-            Please consult with your healthcare provider before making significant changes to your diet or lifestyle.
-          </Text>
-        </View>
-      </Page>
-
-      {/* Page 2 - Dietary Recommendations */}
-      <Page size="A4" style={styles.page}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Dietary Recommendations</Text>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Personalized Nutrition Plan</Text>
-          {formatBulletPoints(data.diet_recommendations)}
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Supplement Suggestions</Text>
-          {formatBulletPoints(data.supplement_suggestions)}
-        </View>
-
-        <Text style={styles.pageNumber} render={({ pageNumber }) => `Page ${pageNumber}`} />
-      </Page>
-
-      {/* Page 3 - Lifestyle & Analysis */}
-      <Page size="A4" style={styles.page}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Lifestyle & Health Analysis</Text>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Recommended Lifestyle Changes</Text>
-          {formatBulletPoints(data.lifestyle_changes)}
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Bowel Health Analysis</Text>
+          <View style={styles.sectionHeader}>
+            <View style={styles.sectionIndicator} />
+            <Text style={styles.sectionTitle}>Bowel trends</Text>
+          </View>
           <Text style={styles.sectionContent}>{data.bowel_trends}</Text>
         </View>
 
+        {/* Goal Reminder Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Symptom Pattern Insights</Text>
+          <View style={styles.sectionHeader}>
+            <View style={styles.sectionIndicator} />
+            <Text style={styles.sectionTitle}>Goal reminder</Text>
+          </View>
+          <Text style={styles.sectionContent}>{data.goal_reminders}</Text>
+          
+          {/* Power Tip Box */}
+          <View style={styles.powerTipContainer}>
+            <View style={styles.powerTipBox}>
+              <Text style={styles.powerTipTitle}>This week's power tip</Text>
+              <Text style={styles.powerTipContent}>{data.ai_tip_of_week}</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Diet Recommendations Section */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <View style={styles.sectionIndicator} />
+            <Text style={styles.sectionTitle}>Diet recommendations</Text>
+          </View>
+          {formatBulletPoints(data.diet_recommendations)}
+        </View>
+
+        {/* Supplement Suggestions Section */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <View style={styles.sectionIndicator} />
+            <Text style={styles.sectionTitle}>Supplement suggestions</Text>
+          </View>
+          {formatBulletPoints(data.supplement_suggestions)}
+        </View>
+
+        {/* Lifestyle Changes Section */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <View style={styles.sectionIndicator} />
+            <Text style={styles.sectionTitle}>Lifestyle changes</Text>
+          </View>
+          {formatBulletPoints(data.lifestyle_changes)}
+        </View>
+
+        {/* Symptom Patterns Analysis Section */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <View style={styles.sectionIndicator} />
+            <Text style={styles.sectionTitle}>Symptom patterns analysis</Text>
+          </View>
           <Text style={styles.sectionContent}>{data.symptom_patterns_analysis}</Text>
         </View>
-
-        <Text style={styles.pageNumber} render={({ pageNumber }) => `Page ${pageNumber}`} />
-      </Page>
-
-      {/* Page 4 - Goals & Next Steps */}
-      <Page size="A4" style={styles.page}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Your Action Plan</Text>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Weekly Goals</Text>
-          {formatBulletPoints(data.goal_reminders)}
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Next Steps</Text>
-          <View style={styles.bulletPoint}>
-            <Text style={styles.bullet}>•</Text>
-            <Text style={styles.bulletText}>
-              Start with one or two recommendations that feel most manageable
-            </Text>
-          </View>
-          <View style={styles.bulletPoint}>
-            <Text style={styles.bullet}>•</Text>
-            <Text style={styles.bulletText}>
-              Track your progress using a food and symptom diary
-            </Text>
-          </View>
-          <View style={styles.bulletPoint}>
-            <Text style={styles.bullet}>•</Text>
-            <Text style={styles.bulletText}>
-              Reassess your gut health in 4-6 weeks to track improvements
-            </Text>
-          </View>
-          <View style={styles.bulletPoint}>
-            <Text style={styles.bullet}>•</Text>
-            <Text style={styles.bulletText}>
-              Consult with a healthcare provider if symptoms persist or worsen
-            </Text>
-          </View>
-        </View>
-
-        <View style={styles.tipBox}>
-          <Text style={styles.tipTitle}>📧 Stay Connected</Text>
-          <Text style={styles.tipText}>
-            Continue your gut health journey with GutRoot! You'll receive weekly tips, 
-            progress check-ins, and new insights to support your digestive wellness.
-          </Text>
-        </View>
-
-        <View style={styles.footer}>
-          <Text>
-            Generated by GutRoot • www.gutroot.com • For questions or support, contact us at support@gutroot.com
-          </Text>
-        </View>
-
-        <Text style={styles.pageNumber} render={({ pageNumber }) => `Page ${pageNumber}`} />
       </Page>
     </Document>
   )
