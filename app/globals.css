@@ -292,9 +292,9 @@ body {
   border: none !important;
 }
 
-/* Brand Title Class - Young Serif Font */
+/* Brand Title Class - Custom Brand Font */
 .brand-title {
-  font-family: 'Young Serif', var(--font-serif);
+  font-family: var(--font-brand), var(--font-serif), serif;
   font-weight: 900;
   letter-spacing: -0.02em;
 }
