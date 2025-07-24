@@ -197,7 +197,7 @@ export default function OnboardingCompletePage() {
                 <img 
                   src="/opened-inbox.png" 
                   alt="Processing" 
-                  className="w-[60%] h-[60%] mx-auto"
+                  className="w-[40%] mx-auto"
                 />
               </div>
 
@@ -226,7 +226,7 @@ export default function OnboardingCompletePage() {
                 <img 
                   src="/inbox.png" 
                   alt="Inbox" 
-                  className="mx-auto"
+                  className="w-[50%] mx-auto"
                 />
               </div>
 
