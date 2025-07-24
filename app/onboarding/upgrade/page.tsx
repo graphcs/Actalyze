@@ -9,8 +9,8 @@ export default function UpgradePage() {
   const handleUpgradeToPremium = () => {
     // TODO: Implement Stripe payment flow
     console.log('Upgrading to Premium...')
-    // For now, redirect to dashboard
-    router.push('/dashboard')
+    // Redirect to profile page for subscription management
+    router.push('/profile')
   }
 
   const handleContinueFree = () => {
