@@ -94,9 +94,9 @@ export default function OnboardingCompletePage() {
 
       console.log('AI report saved successfully:', reportId)
 
-      setProcessingStage('Creating your PDF report...')
+      setProcessingStage('Preparing your email report...')
       
-      // Generate PDF report
+      // Generate and send HTML email report
       try {
         // Get the current session token
         const { data: { session } } = await supabase.auth.getSession()
@@ -105,7 +105,7 @@ export default function OnboardingCompletePage() {
           throw new Error('No authentication session found')
         }
 
-        const pdfResponse = await fetch('/api/generate-pdf', {
+        const emailResponse = await fetch('/api/generate-email', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -114,21 +114,22 @@ export default function OnboardingCompletePage() {
           body: JSON.stringify({
             reportData: report,
             reportId: reportId,
-            assessmentId: assessmentId
+            assessmentId: assessmentId,
+            userEmail: email
           }),
         })
 
-        if (!pdfResponse.ok) {
-          const errorData = await pdfResponse.json()
-          console.error('PDF generation failed:', errorData.error)
-          // Continue with flow even if PDF fails
+        if (!emailResponse.ok) {
+          const errorData = await emailResponse.json()
+          console.error('Email generation failed:', errorData.error)
+          // Continue with flow even if email fails
         } else {
-          const { pdfUrl, fileName } = await pdfResponse.json()
-          console.log('PDF generated successfully:', pdfUrl, fileName)
+          const { emailSent, messageId } = await emailResponse.json()
+          console.log('Email sent successfully:', emailSent, messageId)
         }
-      } catch (pdfError) {
-        console.error('PDF generation error:', pdfError)
-        // Continue with flow even if PDF fails
+      } catch (emailError) {
+        console.error('Email generation error:', emailError)
+        // Continue with flow even if email fails
       }
 
       setProcessingStage('Preparing your results...')
