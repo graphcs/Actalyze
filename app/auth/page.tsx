@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { SignUpData, SignInData } from '@/lib/supabase'
 import Link from 'next/link'
@@ -27,6 +27,66 @@ export default function AuthPage() {
     confirmPassword: '',
     agreeTerms: false
   })
+
+  // Handle OAuth callback and auth state changes
+  useEffect(() => {
+    // Handle OAuth callback when component mounts
+    const handleAuthCallback = async () => {
+      try {
+        // Check for session (handles OAuth tokens from URL)
+        const { data: { session }, error } = await supabase.auth.getSession()
+        
+        if (error) {
+          console.error('Auth session error:', error)
+          setErrors({ auth: error.message })
+          return
+        }
+
+        if (session) {
+          console.log('Session found, redirecting...', session)
+          router.push('/onboarding/initial-question')
+          return
+        }
+      } catch (error) {
+        console.error('Error handling auth callback:', error)
+      }
+    }
+
+    // Set up auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state change:', event, session)
+      
+      if (event === 'SIGNED_IN' && session) {
+        console.log('User signed in, redirecting...')
+        
+        // For OAuth users, create user profile if it doesn't exist
+        if (session.user) {
+          try {
+            const { upsertUserProfile } = await import('@/lib/database')
+            await upsertUserProfile({
+              firstName: session.user.user_metadata?.first_name || session.user.user_metadata?.name?.split(' ')[0],
+              lastName: session.user.user_metadata?.last_name || session.user.user_metadata?.name?.split(' ')[1],
+              email: session.user.email
+            })
+          } catch (error) {
+            console.error('Error creating user profile:', error)
+          }
+        }
+        
+        router.push('/onboarding/initial-question')
+      } else if (event === 'SIGNED_OUT') {
+        console.log('User signed out')
+      }
+    })
+
+    // Handle callback on mount
+    handleAuthCallback()
+
+    // Cleanup subscription
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [router])
 
   // Validation functions
   const validateEmail = (email: string) => {
@@ -80,12 +140,11 @@ export default function AuthPage() {
 
       if (error) {
         setErrors({ auth: error.message })
-      } else {
-        router.push('/onboarding/initial-question')
+        setLoading(false)
       }
+      // Don't redirect here - let the auth state change listener handle it
     } catch (error) {
       setErrors({ auth: 'An unexpected error occurred' })
-    } finally {
       setLoading(false)
     }
   }
@@ -96,7 +155,7 @@ export default function AuthPage() {
 
     setLoading(true)
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email: signupData.email,
         password: signupData.password,
         options: {
@@ -110,12 +169,23 @@ export default function AuthPage() {
 
       if (error) {
         setErrors({ auth: error.message })
-      } else {
-        router.push('/onboarding/initial-question')
+        setLoading(false)
+      } else if (data.user) {
+        // Create user profile in database
+        try {
+          const { upsertUserProfile } = await import('@/lib/database')
+          await upsertUserProfile({
+            firstName: signupData.firstName,
+            lastName: signupData.lastName,
+            email: signupData.email
+          })
+        } catch (profileError) {
+          console.error('Error creating user profile:', profileError)
+        }
+        // Don't redirect here - let the auth state change listener handle it
       }
     } catch (error) {
       setErrors({ auth: 'An unexpected error occurred' })
-    } finally {
       setLoading(false)
     }
   }
@@ -126,16 +196,17 @@ export default function AuthPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/onboarding/initial-question`
+          redirectTo: `${window.location.origin}/auth`
         }
       })
 
       if (error) {
         setErrors({ auth: error.message })
+        setLoading(false)
       }
+      // Don't set loading to false here on success - user will be redirected to OAuth provider
     } catch (error) {
       setErrors({ auth: 'An unexpected error occurred' })
-    } finally {
       setLoading(false)
     }
   }
