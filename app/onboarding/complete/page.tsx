@@ -203,14 +203,14 @@ export default function OnboardingCompletePage() {
 
               {/* Processing Text */}
               <div className="mb-12">
-                <h2 className="text-xl font-medium text-dark-gray text-start px-6 md:px-12">
-                  Great! You'll also receive<br />
-                  weekly gut health tips...
-                </h2>
-                
-                {/* Loading indicator */}
-                <div className="mt-6 px-6 md:px-12">
-                  <div className="flex space-x-2">
+                <div className="flex items-center px-6 md:px-12">
+                  <h2 className="text-xl font-medium text-dark-gray text-start">
+                    Great! You'll also receive
+                    weekly gut health tips.
+                  </h2>
+                  
+                  {/* Loading indicator - inline */}
+                  <div className="ml-3 flex space-x-2">
                     <div className="w-2 h-2 bg-orange-primary rounded-full animate-bounce"></div>
                     <div className="w-2 h-2 bg-orange-primary rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
                     <div className="w-2 h-2 bg-orange-primary rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
@@ -233,7 +233,7 @@ export default function OnboardingCompletePage() {
               {/* Title Text */}
               <div className="mb-12">
                 <h2 className="text-2xl font-medium text-dark-gray text-start leading-relaxed">
-                  Want to save your results and<br />
+                  Want to save your results and
                   get your plan by email?
                 </h2>
               </div>
