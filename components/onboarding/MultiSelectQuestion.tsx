@@ -31,11 +31,7 @@ export default function MultiSelectQuestion({ question, value, onChange }: Multi
           <button
             key={option.value}
             onClick={() => handleToggle(option.value)}
-            className={`w-full md:w-[80%] py-4 px-6 rounded-full text-dark font-medium transition-all duration-200 text-left ${
-              isSelected
-                ? ''
-                : 'hover:opacity-80'
-            }`}
+            className={`w-full md:w-[80%] py-4 px-6 rounded-full text-dark font-medium transition-all duration-200 text-left`}
             style={{ 
               backgroundColor: '#FAE4B2',
               ...(isSelected && {
