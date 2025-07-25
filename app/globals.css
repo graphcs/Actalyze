@@ -313,6 +313,23 @@ input[type="password"]::-webkit-caps-lock-indicator {
   display: none !important;
 }
 
+/* Hide number input spinner arrows */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* Ensure number inputs look consistent */
+input[type="number"] {
+  appearance: textfield;
+}
+
 /* Custom Checkbox Styling */
 input[type="checkbox"] {
   appearance: none;
