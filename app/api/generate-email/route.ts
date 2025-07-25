@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { generateReportHTML } from '@/lib/html-generator'
-import { sendGutHealthReport } from '@/lib/email-service'
+import { sendGutHealthReportWithPDF } from '@/lib/email-service'
+import { generateAndUploadPDF } from '@/lib/pdf-storage'
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
 
         const token = authHeader.substring(7) // Remove 'Bearer ' prefix
 
-        // Create a Supabase client with the user's session token
+        // Create a Supabase client with the service role key
         const supabase = createClient(supabaseUrl, supabaseServiceKey, {
             auth: {
                 autoRefreshToken: false,
@@ -74,8 +74,8 @@ export async function POST(request: NextRequest) {
             formData[response.question_id] = response.response_value
         })
 
-        // Prepare data for HTML generation
-        const emailData = {
+        // Prepare data for PDF generation and email
+        const emailReportData = {
             ...reportData,
             userProfile: {
                 firstName: userProfileResult.data?.first_name,
@@ -88,35 +88,63 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        console.log('Generating HTML email for user:', user.email)
+        console.log('Generating PDF and sending email for user:', user.email)
         console.log('Report Data:', reportData)
 
-        // Generate HTML email content
-        const htmlContent = generateReportHTML(emailData)
+        // Step 1: Generate and upload PDF to Supabase Storage
+        const pdfStartTime = Date.now()
+        const { url: pdfUrl, error: pdfError } = await generateAndUploadPDF(
+            emailReportData,
+            user.id,
+            reportId
+        )
 
-        console.log('HTML generated successfully, length:', htmlContent.length)
+        let generationTime = 0
+        if (pdfError) {
+            console.error('PDF upload failed:', pdfError)
+            // Continue with email even if PDF upload fails
+        } else {
+            generationTime = Date.now() - pdfStartTime
+            console.log(`PDF uploaded successfully in ${generationTime}ms:`, pdfUrl)
 
-        // Send the email
-        const { success, error: emailError, messageId } = await sendGutHealthReport(
+            // Update the report record with PDF URL and generation time
+            const { error: updateError } = await supabase
+                .from('reports')
+                .update({
+                    pdf_url: pdfUrl,
+                    generation_time_ms: generationTime
+                })
+                .eq('id', reportId)
+                .eq('user_id', user.id)
+
+            if (updateError) {
+                console.error('Failed to update report with PDF URL:', updateError)
+                // Continue anyway - PDF was uploaded successfully
+            }
+        }
+
+        // Step 2: Send email with PDF attachment
+        const userName = userProfileResult.data?.first_name || 'there'
+        const { success, error: emailError, messageId } = await sendGutHealthReportWithPDF(
             userEmail,
-            htmlContent,
-            userProfileResult.data?.first_name || 'there'
+            emailReportData,
+            userName
         )
 
         if (!success || emailError) {
-            console.error('Failed to send email:', emailError)
+            console.error('Failed to send email with PDF:', emailError)
             return NextResponse.json(
                 { error: `Email sending failed: ${emailError}` },
                 { status: 500 }
             )
         }
 
-        console.log('Email sent successfully:', messageId)
+        console.log('Email with PDF sent successfully:', messageId)
 
-        // Update the report record with email sent timestamp
+        // Step 3: Update the report record with email sent timestamp
         const { error: updateError } = await supabase
             .from('reports')
-            .update({ 
+            .update({
                 email_sent_at: new Date().toISOString()
             })
             .eq('id', reportId)
@@ -129,7 +157,9 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
             success: true,
             emailSent: true,
-            messageId
+            messageId,
+            pdfUrl: pdfUrl || null,
+            generationTimeMs: generationTime
         })
 
     } catch (error) {

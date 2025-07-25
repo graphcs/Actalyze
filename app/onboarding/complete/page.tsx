@@ -94,9 +94,9 @@ export default function OnboardingCompletePage() {
 
       console.log('AI report saved successfully:', reportId)
 
-      setProcessingStage('Preparing your email report...')
+      setProcessingStage('Generating your PDF report...')
       
-      // Generate and send HTML email report
+      // Generate and send PDF report via email
       try {
         // Get the current session token
         const { data: { session } } = await supabase.auth.getSession()
@@ -105,6 +105,7 @@ export default function OnboardingCompletePage() {
           throw new Error('No authentication session found')
         }
 
+        // Send email with PDF attachment (this generates the PDF internally)
         const emailResponse = await fetch('/api/generate-email', {
           method: 'POST',
           headers: {
@@ -125,7 +126,7 @@ export default function OnboardingCompletePage() {
           // Continue with flow even if email fails
         } else {
           const { emailSent, messageId } = await emailResponse.json()
-          console.log('Email sent successfully:', emailSent, messageId)
+          console.log('Email with PDF sent successfully:', emailSent, messageId)
         }
       } catch (emailError) {
         console.error('Email generation error:', emailError)
@@ -139,8 +140,6 @@ export default function OnboardingCompletePage() {
       
       console.log('Report generated successfully:', report)
       console.log('Email for delivery:', email)
-      
-      // TODO: Send email with report and PDF attachment
       
     } catch (error) {
       console.error('Error during submission:', error)
