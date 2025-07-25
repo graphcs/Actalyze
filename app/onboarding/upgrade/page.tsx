@@ -15,7 +15,7 @@ export default function UpgradePage() {
 
   const handleContinueFree = () => {
     // Continue with free plan
-    router.push('/dashboard')
+    router.push('/report')
   }
 
   return (

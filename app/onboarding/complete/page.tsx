@@ -155,7 +155,7 @@ export default function OnboardingCompletePage() {
     localStorage.removeItem('gutRootOnboardingStep')
     localStorage.removeItem('gutRootInitialReason')
     
-    // Redirect to upgrade page
+    // Redirect to upgrade page (later will go to report page)
     router.push('/onboarding/upgrade')
   }
 
