@@ -6,6 +6,7 @@ import {
     InsertProgressMetric,
     InsertSymptomPattern,
     Assessment,
+    QuestionResponse,
     ProgressMetric,
     MetricType,
     SymptomType
@@ -378,6 +379,20 @@ export async function saveAIReport(
             return { reportId: null, error: error.message }
         }
 
+        // Update the assessment with the digestive score from the AI report
+        const { error: updateError } = await supabase
+            .from('assessments')
+            .update({ digestive_score: reportData.digestive_score })
+            .eq('id', assessmentId)
+            .eq('user_id', user.id) // Ensure user can only update their own assessments
+
+        if (updateError) {
+            console.warn('Failed to update assessment with digestive score:', updateError.message)
+            // Continue anyway - report was saved successfully
+        } else {
+            console.log(`Updated assessment ${assessmentId} with digestive score: ${reportData.digestive_score}`)
+        }
+
         return { reportId: report.id, error: null }
     } catch (error) {
         return { reportId: null, error: (error as Error).message }
@@ -578,5 +593,137 @@ export async function getProgressMetrics(
         return { metrics: metrics || [], error: null }
     } catch (error) {
         return { metrics: [], error: (error as Error).message }
+    }
+}
+
+// Weekly progress functions
+export async function getWeeklyAssessments(days: number = 7): Promise<{ assessments: Assessment[]; error: string | null }> {
+    try {
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (!user) {
+            return { assessments: [], error: 'User not authenticated' }
+        }
+
+        // Calculate date range
+        const endDate = new Date()
+        const startDate = new Date()
+        startDate.setDate(endDate.getDate() - days)
+
+        const { data: assessments, error } = await supabase
+            .from('assessments')
+            .select('*')
+            .eq('user_id', user.id)
+            .eq('status', 'completed')
+            .gte('completed_at', startDate.toISOString())
+            .lte('completed_at', endDate.toISOString())
+            .order('completed_at', { ascending: false })
+
+        if (error) {
+            return { assessments: [], error: error.message }
+        }
+
+        return { assessments: assessments || [], error: null }
+    } catch (error) {
+        return { assessments: [], error: (error as Error).message }
+    }
+}
+
+export async function getWeeklyAssessmentDetails(assessmentIds: string[]): Promise<{
+    assessmentDetails: Array<{
+        assessment: Assessment
+        responses: QuestionResponse[]
+    }>
+    error: string | null
+}> {
+    try {
+        if (assessmentIds.length === 0) {
+            return { assessmentDetails: [], error: null }
+        }
+
+        // Get all assessments
+        const { data: assessments, error: assessmentError } = await supabase
+            .from('assessments')
+            .select('*')
+            .in('id', assessmentIds)
+
+        if (assessmentError) {
+            return { assessmentDetails: [], error: assessmentError.message }
+        }
+
+        // Get all question responses for these assessments
+        const { data: responses, error: responseError } = await supabase
+            .from('question_responses')
+            .select('*')
+            .in('assessment_id', assessmentIds)
+
+        if (responseError) {
+            return { assessmentDetails: [], error: responseError.message }
+        }
+
+        // Group responses by assessment_id
+        const responsesByAssessment = (responses || []).reduce((acc, response) => {
+            if (!acc[response.assessment_id!]) {
+                acc[response.assessment_id!] = []
+            }
+            acc[response.assessment_id!].push(response)
+            return acc
+        }, {} as Record<string, QuestionResponse[]>)
+
+        // Combine assessments with their responses
+        const assessmentDetails = (assessments || []).map(assessment => ({
+            assessment,
+            responses: responsesByAssessment[assessment.id] || []
+        }))
+
+        return { assessmentDetails, error: null }
+    } catch (error) {
+        return { assessmentDetails: [], error: (error as Error).message }
+    }
+}
+
+export async function getLastWeekAssessments(): Promise<{
+    assessmentDetails: Array<{
+        assessment: Assessment
+        responses: QuestionResponse[]
+    }>
+    error: string | null
+}> {
+    try {
+        // Calculate date range for the week before the current week
+        const currentWeekStart = new Date()
+        currentWeekStart.setDate(currentWeekStart.getDate() - 7)
+
+        const lastWeekStart = new Date(currentWeekStart)
+        lastWeekStart.setDate(currentWeekStart.getDate() - 7)
+
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (!user) {
+            return { assessmentDetails: [], error: 'User not authenticated' }
+        }
+
+        const { data: assessments, error } = await supabase
+            .from('assessments')
+            .select('*')
+            .eq('user_id', user.id)
+            .eq('status', 'completed')
+            .gte('completed_at', lastWeekStart.toISOString())
+            .lt('completed_at', currentWeekStart.toISOString())
+            .order('completed_at', { ascending: false })
+
+        if (error) {
+            return { assessmentDetails: [], error: error.message }
+        }
+
+        if (!assessments || assessments.length === 0) {
+            return { assessmentDetails: [], error: null }
+        }
+
+        // Get details for last week's assessments
+        const assessmentIds = assessments.map(a => a.id)
+        return getWeeklyAssessmentDetails(assessmentIds)
+    } catch (error) {
+        return { assessmentDetails: [], error: (error as Error).message }
     }
 } 

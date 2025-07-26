@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { OnboardingFormData } from '@/types/onboarding'
 import { getSessionToken } from '@/lib/auth'
+import { clearWeeklyReportCache } from '@/lib/weekly-report-cache'
 
 export default function OnboardingCompletePage() {
   const [email, setEmail] = useState('')
@@ -154,7 +155,11 @@ export default function OnboardingCompletePage() {
     localStorage.removeItem('gutRootOnboardingStep')
     localStorage.removeItem('gutRootInitialReason')
     
-    // Redirect to upgrade page (later will go to report page)
+    console.log('✅ Assessment and report completed successfully!')
+    
+    // Clear weekly report cache since new assessment data is available
+    clearWeeklyReportCache()
+    
     router.push('/onboarding/upgrade')
   }
 

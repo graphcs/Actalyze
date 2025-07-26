@@ -83,8 +83,8 @@ CREATE TABLE public.reports (
   ai_tip_of_week TEXT,
   
   -- Metadata
-  ai_model_used TEXT DEFAULT 'gpt-4',
-  ai_prompt_version TEXT DEFAULT 'v1.0',
+  ai_model_used TEXT DEFAULT 'gpt-4.1',
+  ai_prompt_version TEXT DEFAULT 'v3.0',
   generation_time_ms INTEGER,
   pdf_url TEXT, -- Supabase storage URL
   email_sent_at TIMESTAMP WITH TIME ZONE,

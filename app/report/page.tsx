@@ -1,69 +1,147 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
+import { getSessionToken } from '@/lib/auth'
+import { getCachedWeeklyReport, setCachedWeeklyReport } from '@/lib/weekly-report-cache'
 
-interface ReportData {
-  id: string
+interface WeeklyReportData {
   digestive_score: number
-  diet_recommendations: string
-  supplement_suggestions: string
-  lifestyle_changes: string
   bowel_trends: string
   goal_reminders: string
   symptom_patterns_analysis: string
   ai_tip_of_week: string
-  created_at: string
+  diet_recommendations?: string
+  supplement_suggestions?: string
+  lifestyle_changes?: string
+}
+
+interface WeeklyData {
+  totalAssessments: number
+  daysWithAssessments: number
+  averageDigestiveScore: number
+  digestiveScoreRange: { min: number; max: number }
 }
 
 export default function ReportPage() {
-  const [reportData, setReportData] = useState<ReportData | null>(null)
+  const [reportData, setReportData] = useState<WeeklyReportData | null>(null)
+  const [weeklyData, setWeeklyData] = useState<WeeklyData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const hasLoadedRef = useRef(false) // Prevent double calls
   const router = useRouter()
 
-  const loadLatestReport = useCallback(async () => {
+  const loadWeeklyReport = useCallback(async () => {
+    // Prevent double calls in React strict mode
+    if (hasLoadedRef.current) return
+    hasLoadedRef.current = true
+
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
+      // Get the current session token
+      const sessionToken = await getSessionToken()
+      
+      if (!sessionToken) {
+        console.error('No authentication session found')
         router.push('/auth')
         return
       }
 
-      // Get the latest report for the user
-      const { data: report, error } = await supabase
-        .from('reports')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single()
+      console.log('Fetching weekly assessment metadata...')
 
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error loading report:', error)
-      } else if (report) {
-        setReportData(report)
+      // First, get assessment metadata for cache validation
+      const metadataResponse = await fetch('/api/weekly-assessment-metadata', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${sessionToken}`,
+        },
+      })
+
+      if (!metadataResponse.ok) {
+        throw new Error('Failed to fetch assessment metadata')
       }
+
+      const { metadata } = await metadataResponse.json()
+      
+      // Redirect if no assessments
+      if (!metadata.hasAssessments) {
+        router.push('/onboarding/initial-question')
+        return
+      }
+
+      // Check cache first
+      const cachedReport = getCachedWeeklyReport(
+        metadata.assessmentCount,
+        metadata.assessmentIds
+      )
+
+      if (cachedReport) {
+        // Use cached data
+        setReportData(cachedReport.report)
+        setWeeklyData(cachedReport.weeklyData)
+        console.log('📋 Loaded from cache:', cachedReport.metadata)
+        return
+      }
+
+      console.log('🔄 Cache miss - generating new weekly report...')
+
+      // Generate new weekly progress report
+      const response = await fetch('/api/generate-weekly-report', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${sessionToken}`,
+        },
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error('Weekly report generation failed:', errorData.error)
+        
+        if (response.status === 200 && errorData.redirect) {
+          router.push(errorData.redirect)
+          return
+        }
+        
+        throw new Error(`Failed to generate weekly report: ${errorData.error}`)
+      }
+
+      const { report, weeklyData: weekly } = await response.json()
+      console.log('✅ Generated new weekly report')
+      
+      const weeklyReport = {
+        ...report,
+        digestive_score: report.digestive_score // Use AI-generated score directly
+      }
+      
+      // Cache the new report
+      setCachedWeeklyReport(
+        weeklyReport,
+        weekly,
+        metadata.assessmentCount,
+        metadata.assessmentIds
+      )
+      
+      setReportData(weeklyReport)
+      setWeeklyData(weekly)
+      
     } catch (error) {
-      console.error('Error loading report:', error)
+      console.error('Error loading weekly report:', error)
+      router.push('/onboarding/initial-question')
     } finally {
       setIsLoading(false)
     }
   }, [router])
 
   useEffect(() => {
-    loadLatestReport()
-  }, [loadLatestReport])
+    loadWeeklyReport()
+  }, [loadWeeklyReport])
 
   const getWeekRange = () => {
     const today = new Date()
     const startOfWeek = new Date(today)
-    startOfWeek.setDate(today.getDate() - today.getDay()) // Get Sunday
+    startOfWeek.setDate(today.getDate() - 6) // Get 7 days ago (including today)
     
-    const endOfWeek = new Date(startOfWeek)
-    endOfWeek.setDate(startOfWeek.getDate() + 6) // Get Saturday
-
     const formatDate = (date: Date) => {
       return date.toLocaleDateString('en-US', { 
         month: 'long', 
@@ -71,7 +149,7 @@ export default function ReportPage() {
       })
     }
 
-    return `Week of ${formatDate(startOfWeek)}–${formatDate(endOfWeek)}, ${today.getFullYear()}`
+    return `Week of ${formatDate(startOfWeek)}–${formatDate(today)}, ${today.getFullYear()}`
   }
 
   const formatBulletPoints = (text: string) => {
@@ -89,22 +167,21 @@ export default function ReportPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-cream-light flex items-center justify-center">
-        <div className="text-center">
-          <div className="flex space-x-2 justify-center">
-            <div className="w-3 h-3 bg-orange-primary rounded-full animate-bounce"></div>
-            <div className="w-3 h-3 bg-orange-primary rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-            <div className="w-3 h-3 bg-orange-primary rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-          </div>
+        <div className="flex space-x-2">
+          <div className="w-3 h-3 bg-orange-primary rounded-full animate-bounce"></div>
+          <div className="w-3 h-3 bg-orange-primary rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+          <div className="w-3 h-3 bg-orange-primary rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
         </div>
       </div>
     )
   }
 
-  if (!reportData) {
+  if (!reportData || !weeklyData) {
     return (
       <div className="min-h-screen bg-cream-light flex items-center justify-center px-4">
         <div className="text-center">
-          <div className="text-xl font-medium text-dark-gray mb-4">No report found</div>
+          <div className="text-xl font-medium text-dark-gray mb-4">No weekly data found</div>
+          <div className="text-medium-gray mb-6">Complete at least one assessment to see your weekly progress</div>
           <Link 
             href="/onboarding/initial-question"
             className="btn-primary"
@@ -114,6 +191,13 @@ export default function ReportPage() {
         </div>
       </div>
     )
+  }
+
+  const getScoreDescription = (score: number) => {
+    if (score >= 8) return "Excellent digestion"
+    if (score >= 6) return "Overall good digestion"
+    if (score >= 4) return "Moderate digestion"
+    return "Needs attention"
   }
 
   return (
@@ -159,7 +243,7 @@ export default function ReportPage() {
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto pb-8">
-          {/* Digestive Score Section */}
+          {/* Weekly Digestive Score Section */}
           <div className="mb-6">
             <h2 className="text-2xl font-semibold text-black mb-4">
               Digestive score
@@ -174,8 +258,8 @@ export default function ReportPage() {
               </span>
             </div>
             
-            <div className="text-2xl text-center font-medium text-gray-500 mb-6">
-              Overall good digestion
+            <div className="text-2xl text-center font-medium text-gray-500 mb-2">
+              {getScoreDescription(reportData.digestive_score)}
             </div>
 
             {/* Daily Log Button */}
@@ -228,56 +312,60 @@ export default function ReportPage() {
             </div>
           </div>
 
-          {/* Diet Recommendations */}
-          <div className="mb-8">
-            <div className="flex items-center mb-3">
-              <div className="w-1 h-6 bg-orange-primary mr-3"></div>
-              <h3 className="text-3xl font-semibold text-dark-green">
-                Diet recommendations
-              </h3>
+          {/* Additional sections if available */}
+          {reportData.diet_recommendations && (
+            <div className="mb-8">
+              <div className="flex items-center mb-3">
+                <div className="w-1 h-6 bg-orange-primary mr-3"></div>
+                <h3 className="text-3xl font-semibold text-dark-green">
+                  Diet recommendations
+                </h3>
+              </div>
+              <div className="text-xl font-medium text-black leading-relaxed">
+                {formatBulletPoints(reportData.diet_recommendations).map((point, index) => (
+                  <div key={index} className="mb-2">
+                    {point}
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="text-xl font-medium text-black leading-relaxed">
-              {formatBulletPoints(reportData.diet_recommendations).map((point, index) => (
-                <div key={index} className="mb-2">
-                  {point}
-                </div>
-              ))}
-            </div>
-          </div>
+          )}
 
-          {/* Supplement Suggestions */}
-          <div className="mb-8">
-            <div className="flex items-center mb-3">
-              <div className="w-1 h-6 bg-orange-primary mr-3"></div>
-              <h3 className="text-3xl font-semibold text-dark-green">
-                Supplement suggestions
-              </h3>
+          {reportData.supplement_suggestions && (
+            <div className="mb-8">
+              <div className="flex items-center mb-3">
+                <div className="w-1 h-6 bg-orange-primary mr-3"></div>
+                <h3 className="text-3xl font-semibold text-dark-green">
+                  Supplement suggestions
+                </h3>
+              </div>
+              <div className="text-xl font-medium text-black leading-relaxed">
+                {formatBulletPoints(reportData.supplement_suggestions).map((point, index) => (
+                  <div key={index} className="mb-2">
+                    {point}
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="text-xl font-medium text-black leading-relaxed">
-              {formatBulletPoints(reportData.supplement_suggestions).map((point, index) => (
-                <div key={index} className="mb-2">
-                  {point}
-                </div>
-              ))}
-            </div>
-          </div>
+          )}
 
-          {/* Lifestyle Changes */}
-          <div className="mb-8">
-            <div className="flex items-center mb-3">
-              <div className="w-1 h-6 bg-orange-primary mr-3"></div>
-              <h3 className="text-3xl font-semibold text-dark-green">
-                Lifestyle changes
-              </h3>
+          {reportData.lifestyle_changes && (
+            <div className="mb-8">
+              <div className="flex items-center mb-3">
+                <div className="w-1 h-6 bg-orange-primary mr-3"></div>
+                <h3 className="text-3xl font-semibold text-dark-green">
+                  Lifestyle changes
+                </h3>
+              </div>
+              <div className="text-xl font-medium text-black leading-relaxed">
+                {formatBulletPoints(reportData.lifestyle_changes).map((point, index) => (
+                  <div key={index} className="mb-2">
+                    {point}
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="text-xl font-medium text-black leading-relaxed">
-              {formatBulletPoints(reportData.lifestyle_changes).map((point, index) => (
-                <div key={index} className="mb-2">
-                  {point}
-                </div>
-              ))}
-            </div>
-          </div>
+          )}
 
           {/* Symptom Patterns Analysis */}
           <div className="mb-8">
