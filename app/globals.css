@@ -383,7 +383,7 @@ input[type="checkbox"]:checked::after {
 .question-scroll {
   max-height: 60vh;
   overflow-y: auto;
-  padding-bottom: 120px;
+  padding-bottom: 150px;
   /* Extra space for continue button on mobile */
   margin-right: -16px;
   /* Push scrollbar to right on mobile */
@@ -397,7 +397,7 @@ input[type="checkbox"]:checked::after {
     /* Reset margin on medium screens */
     padding-right: 0;
     /* Reset padding on medium screens */
-    padding-bottom: 0;
+    padding-bottom: 100px;
     /* No extra space needed since button is now static on medium screens */
   }
 }
@@ -408,7 +408,7 @@ input[type="checkbox"]:checked::after {
     /* Reset margin on desktop */
     padding-right: 0;
     /* Reset padding on desktop */
-    padding-bottom: 0;
+    padding-bottom: 50px;
     /* No extra padding needed on desktop */
   }
 }
