@@ -340,7 +340,7 @@ export async function saveAIReport(
         ai_tip_of_week: string
     },
     aiModelUsed: string = 'gpt-4.1',
-    aiPromptVersion: string = '1.0'
+    aiPromptVersion: string = '3.0'
 ): Promise<{ reportId: string | null; error: string | null }> {
     try {
         const { data: { user } } = await supabase.auth.getUser()

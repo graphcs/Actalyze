@@ -20,12 +20,12 @@ interface ReportData {
 
 export async function generatePDFBuffer(reportData: ReportData): Promise<{ buffer: Buffer | null; error: string | null }> {
     try {
-        // Create PDF document using React.createElement
-        // Using unknown type assertion for @react-pdf/renderer compatibility
-        const pdfDocument = React.createElement(PDFReport, { reportData }) as unknown as React.ReactElement
+        // Create PDF document using React.createElement with proper typing
+        const pdfDocument = React.createElement(PDFReport, { reportData })
 
-        // Generate PDF as stream
-        const pdfStream = await pdf(pdfDocument).toBlob()
+        // Generate PDF as stream with type assertion to fix @react-pdf/renderer type compatibility
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pdfStream = await pdf(pdfDocument as any).toBlob()
 
         // Convert blob to buffer for Node.js
         const arrayBuffer = await pdfStream.arrayBuffer()

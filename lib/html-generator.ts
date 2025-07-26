@@ -18,32 +18,153 @@ interface ReportData {
   }
 }
 
-const formatBulletPoints = (text: string): string => {
+const formatBulletPoints = (text: string, isSupplementSection: boolean = false): string => {
   if (!text) return ''
 
-  // Split by lines and process each one
-  const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0)
+  // Clean the text first
+  const cleanedText = cleanAIResponse(text)
 
-  return lines.map(line => {
-    // Check if line starts with bullet indicators
+  // Skip empty or placeholder sections
+  if (!cleanedText || cleanedText === '-' || cleanedText.trim() === '') return ''
+
+  const lines = cleanedText.split('\n').map(line => line.trim()).filter(line => line.length > 0)
+
+  const bulletPoints: string[] = []
+  let currentIndex = 0
+
+  while (currentIndex < lines.length) {
+    const titleLine = lines[currentIndex]
+
+    // Skip if it's a bullet pattern (old format fallback)
     const bulletPatterns = [/^[-•*]\s*/, /^\d+\.\s*/, /^[a-zA-Z]\.\s*/]
-    const isBullet = bulletPatterns.some(pattern => pattern.test(line))
+    const isBulletPattern = bulletPatterns.some(pattern => pattern.test(titleLine))
 
-    if (isBullet) {
-      // Clean the line and wrap in bullet styling
-      const cleanLine = line.replace(/^[-•*]\s*/, '').replace(/^\d+\.\s*/, '').replace(/^[a-zA-Z]\.\s*/, '')
-      return `<div class="bullet-point">
-        <span class="bullet">•</span>
-        <span class="bullet-text">${cleanLine}</span>
-      </div>`
-    } else {
-      // Regular paragraph
-      return `<div class="bullet-point">
-        <span class="bullet">•</span>
-        <span class="bullet-text">${line}</span>
-      </div>`
+    if (isBulletPattern) {
+      // Handle old format as fallback
+      const cleanLine = titleLine.replace(/^[-•*]\s*/, '').replace(/^\d+\.\s*/, '').replace(/^[a-zA-Z]\.\s*/, '').trim()
+      bulletPoints.push(`
+        <tr>
+          <td style="vertical-align: top; padding: 4px 0; color: #F5A623; font-weight: bold; font-size: 18px; line-height: 1.4;">•</td>
+          <td style="padding: 4px 0 4px 12px; color: #2B2B2B; font-size: 18px; line-height: 1.4; font-weight: 500;">${cleanLine}</td>
+        </tr>
+      `)
+      currentIndex++
+      continue
     }
-  }).join('')
+
+    // New structured format
+    const title = titleLine
+    const descriptionLines: string[] = []
+
+    // Collect description lines until next title or end
+    let nextIndex = currentIndex + 1
+    while (nextIndex < lines.length) {
+      const nextLine = lines[nextIndex]
+
+      // Check if this looks like a new title (not starting with Dose:, Why:, Note:)
+      const isSpecialLine = nextLine.startsWith('Dose:') || nextLine.startsWith('Why:') || nextLine.startsWith('Note:')
+      const isNewTitle = !isSpecialLine && nextLine.length > 0 && !nextLine.startsWith(' ') &&
+        !bulletPatterns.some(pattern => pattern.test(nextLine))
+
+      // For non-supplement sections, any non-indented line is a new title
+      // For supplement sections, only lines that don't start with Dose/Why/Note are new titles
+      if (!isSupplementSection && isNewTitle && descriptionLines.length > 0) {
+        break
+      } else if (isSupplementSection && isNewTitle && !isSpecialLine && descriptionLines.length > 0) {
+        break
+      }
+
+      descriptionLines.push(nextLine)
+      nextIndex++
+    }
+
+    // Render the bullet point with title and description
+    if (isSupplementSection) {
+      let supplementContent = `<div style="font-weight: bold; color: #2B2B2B; font-size: 16px; margin-bottom: 6px;">${title}</div>`
+
+      descriptionLines.forEach(line => {
+        if (line.startsWith('Dose:')) {
+          supplementContent += `<div style="color: #0D4C47; font-size: 14px; font-weight: bold; margin-top: 2px;">${line}</div>`
+        } else if (line.startsWith('Why:')) {
+          supplementContent += `<div style="color: #666666; font-size: 14px; margin-top: 2px;">${line}</div>`
+        } else if (line.startsWith('Note:')) {
+          supplementContent += `<div style="color: #F5A623; font-size: 14px; font-weight: normal; margin-top: 2px;">${line}</div>`
+        } else {
+          supplementContent += `<div style="color: #2B2B2B; font-size: 14px; line-height: 1.4; margin-top: 2px;">${line}</div>`
+        }
+      })
+
+      bulletPoints.push(`
+        <tr>
+          <td style="vertical-align: top; padding: 4px 0; color: #F5A623; font-weight: bold; font-size: 18px; line-height: 1.4;">•</td>
+          <td style="padding: 4px 0 4px 12px;">
+            ${supplementContent}
+          </td>
+        </tr>
+      `)
+    } else {
+      const description = descriptionLines.length > 0 ? descriptionLines.join(' ') : ''
+      bulletPoints.push(`
+        <tr>
+          <td style="vertical-align: top; padding: 4px 0; color: #F5A623; font-weight: bold; font-size: 18px; line-height: 1.4;">•</td>
+          <td style="padding: 4px 0 4px 12px;">
+            <div style="font-weight: bold; color: #2B2B2B; font-size: 16px; margin-bottom: 4px;">${title}</div>
+            ${description ? `<div style="color: #666666; font-size: 14px; line-height: 1.4;">${description}</div>` : ''}
+          </td>
+        </tr>
+      `)
+    }
+
+    currentIndex = nextIndex
+  }
+
+  return bulletPoints.join('')
+}
+
+// Helper function to clean AI response text (same as PDF generator)
+const cleanAIResponse = (text: string): string => {
+  if (!text) return ''
+
+  let cleaned = text
+
+  // Remove ** wrappers from anywhere in the text
+  cleaned = cleaned.replace(/\*\*(.*?)\*\*/g, '$1')
+
+  // Remove section endings like '--' at the end
+  cleaned = cleaned.replace(/--+\s*$/gm, '')
+
+  // Remove section title patterns like "**SECTION_NAME:**"
+  cleaned = cleaned.replace(/\*\*[A-Z_]+:\*\*/g, '')
+
+  // Remove standalone dashes that indicate empty sections
+  cleaned = cleaned.replace(/^-+$/gm, '')
+
+  // Clean up multiple newlines
+  cleaned = cleaned.replace(/\n\s*\n\s*\n/g, '\n\n')
+
+  // Trim whitespace
+  cleaned = cleaned.trim()
+
+  return cleaned
+}
+
+// Helper function to check if a section should be rendered (same as PDF generator)
+const shouldRenderSection = (content: string): boolean => {
+  if (!content) return false
+
+  const cleaned = cleanAIResponse(content)
+
+  // Don't render if empty, just dashes, or placeholder text
+  if (!cleaned ||
+    cleaned === '-' ||
+    cleaned === '--' ||
+    cleaned.trim() === '' ||
+    cleaned.toLowerCase().includes('not applicable') ||
+    cleaned.toLowerCase().includes('n/a')) {
+    return false
+  }
+
+  return true
 }
 
 const getScoreDescription = (score: number): string => {
@@ -272,70 +393,94 @@ export function generateReportHTML(reportData: ReportData): string {
       <div class="score-description">${getScoreDescription(reportData.digestive_score)}</div>
     </div>
 
+    ${shouldRenderSection(reportData.diet_recommendations) ? `
     <div class="section">
       <div class="section-title-container">
         <div class="section-line"></div>
         <h3 class="section-title">Diet Recommendations</h3>
       </div>
       <div class="section-content">
-        ${formatBulletPoints(reportData.diet_recommendations)}
+        <table style="width: 100%; border-collapse: collapse;">
+          ${formatBulletPoints(reportData.diet_recommendations)}
+        </table>
       </div>
     </div>
+    ` : ''}
 
+    ${shouldRenderSection(reportData.supplement_suggestions) ? `
     <div class="section">
       <div class="section-title-container">
         <div class="section-line"></div>
         <h3 class="section-title">Supplement Suggestions</h3>
       </div>
       <div class="section-content">
-        ${formatBulletPoints(reportData.supplement_suggestions)}
+        <table style="width: 100%; border-collapse: collapse;">
+          ${formatBulletPoints(reportData.supplement_suggestions, true)}
+        </table>
       </div>
     </div>
+    ` : ''}
 
+    ${shouldRenderSection(reportData.lifestyle_changes) ? `
     <div class="section">
       <div class="section-title-container">
         <div class="section-line"></div>
         <h3 class="section-title">Lifestyle Changes</h3>
       </div>
       <div class="section-content">
-        ${formatBulletPoints(reportData.lifestyle_changes)}
+        <table style="width: 100%; border-collapse: collapse;">
+          ${formatBulletPoints(reportData.lifestyle_changes)}
+        </table>
       </div>
     </div>
+    ` : ''}
 
+    ${shouldRenderSection(reportData.bowel_trends) ? `
     <div class="section">
       <div class="section-title-container">
         <div class="section-line"></div>
         <h3 class="section-title">Bowel trends</h3>
       </div>
       <div class="section-content">
-        ${formatBulletPoints(reportData.bowel_trends)}
+        <table style="width: 100%; border-collapse: collapse;">
+          ${formatBulletPoints(reportData.bowel_trends)}
+        </table>
       </div>
     </div>
+    ` : ''}
 
+    ${shouldRenderSection(reportData.goal_reminders) ? `
     <div class="section">
       <div class="section-title-container">
         <div class="section-line"></div>
         <h3 class="section-title">Goal reminder</h3>
       </div>
       <div class="section-content">
-        ${formatBulletPoints(reportData.goal_reminders)}
+        <table style="width: 100%; border-collapse: collapse;">
+          ${formatBulletPoints(reportData.goal_reminders)}
+        </table>
       </div>
     </div>
+    ` : ''}
 
+    ${shouldRenderSection(reportData.symptom_patterns_analysis) ? `
     <div class="section">
       <div class="section-title-container">
         <div class="section-line"></div>
         <h3 class="section-title">Symptom patterns</h3>
       </div>
       <div class="section-content">
-        ${formatBulletPoints(reportData.symptom_patterns_analysis)}
+        <table style="width: 100%; border-collapse: collapse;">
+          ${formatBulletPoints(reportData.symptom_patterns_analysis)}
+        </table>
       </div>
     </div>
+    ` : ''}
 
-    ${reportData.ai_tip_of_week ? `
+    ${shouldRenderSection(reportData.ai_tip_of_week) ? `
     <div class="power-tip">
       <div class="power-tip-title">This week's power tip</div>
-      <div class="power-tip-content">${reportData.ai_tip_of_week}</div>
+      <div class="power-tip-content">${cleanAIResponse(reportData.ai_tip_of_week)}</div>
     </div>
     ` : ''}
 

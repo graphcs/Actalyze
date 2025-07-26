@@ -147,30 +147,48 @@ Give one powerful, actionable tip they can implement this week:
 - Focus on the highest-impact change
 
 ## Response Format
-Please structure your response exactly as follows, using these exact headers:
+Please structure your response exactly as follows, using clean section headers without asterisks or special formatting:
 
-**DIGESTIVE_SCORE:** [number]
+DIGESTIVE_SCORE: [number only]
 
-**DIET_RECOMMENDATIONS:**
-[detailed recommendations]
+DIET_RECOMMENDATIONS:
+[Provide 4-5 specific recommendations. Format each as: TITLE on first line, then description on following lines. Example:
+Increase Soluble Fiber Intake
+Aim to gradually add more soluble fiber from foods such as steamed sweet potato, oats, peeled apples, and soft-cooked carrots. These are gentle for the gut and can help improve stool consistency.]
 
-**SUPPLEMENT_SUGGESTIONS:**
-[detailed suggestions]
+SUPPLEMENT_SUGGESTIONS:
+[Provide 3-4 supplement recommendations. Format each as: SUPPLEMENT NAME on first line, then:
+Dose: [specific dosage]
+Why: [explanation of benefits]
+Note: [optional additional information]
 
-**LIFESTYLE_CHANGES:**
-[detailed changes]
+Example:
+Psyllium Husk
+Dose: 1 teaspoon (5g) mixed in 8oz water, taken twice daily
+Why: Provides both soluble and insoluble fiber to improve stool consistency and regularity
+Note: Start with half dose and increase gradually to avoid bloating]
 
-**BOWEL_TRENDS:**
-[analysis and recommendations]
+LIFESTYLE_CHANGES:
+[Provide 4-5 specific lifestyle changes. Format each as: TITLE on first line, then description on following lines]
 
-**GOAL_REMINDERS:**
-[specific weekly goals]
+BOWEL_TRENDS:
+[Provide analysis points. Format each as: TITLE on first line, then description on following lines]
 
-**SYMPTOM_PATTERNS_ANALYSIS:**
-[comprehensive analysis]
+GOAL_REMINDERS:
+[Provide 3-4 specific weekly goals. Format each as: TITLE on first line, then description on following lines]
 
-**AI_TIP_OF_WEEK:**
-[one powerful tip]
+SYMPTOM_PATTERNS_ANALYSIS:
+[Provide insights. Format each as: TITLE on first line, then description on following lines]
+
+AI_TIP_OF_WEEK:
+[Provide one powerful, actionable tip as plain text]
+
+IMPORTANT FORMATTING RULES:
+- Do NOT use asterisks (**) around any text
+- Do NOT end sections with dashes (--) 
+- If a section doesn't apply, write "Not applicable" instead of "-"
+- Write each recommendation as a complete sentence on its own line
+- Do NOT add bullet points (•, -, *) - the system will add them automatically
 
 Make your recommendations evidence-based, practical, and personalized to this individual's specific situation. Consider their cultural background, current lifestyle, and primary concerns throughout your analysis.
 `
@@ -201,20 +219,20 @@ function parseAIResponse(response: string): ParsedReport {
 
     try {
         // Extract digestive score
-        const scoreMatch = response.match(/\*\*DIGESTIVE_SCORE:\*\*\s*(\d+)/i)
+        const scoreMatch = response.match(/DIGESTIVE_SCORE:\s*(\d+)/i)
         if (scoreMatch) {
             sections.digestive_score = parseInt(scoreMatch[1])
         }
 
         // Extract each section with explicit typing
         const sectionPatterns: Record<keyof Omit<ParsedReport, 'digestive_score'>, RegExp> = {
-            diet_recommendations: /\*\*DIET_RECOMMENDATIONS:\*\*([\s\S]*?)(?=\*\*[A-Z_]+:|$)/i,
-            supplement_suggestions: /\*\*SUPPLEMENT_SUGGESTIONS:\*\*([\s\S]*?)(?=\*\*[A-Z_]+:|$)/i,
-            lifestyle_changes: /\*\*LIFESTYLE_CHANGES:\*\*([\s\S]*?)(?=\*\*[A-Z_]+:|$)/i,
-            bowel_trends: /\*\*BOWEL_TRENDS:\*\*([\s\S]*?)(?=\*\*[A-Z_]+:|$)/i,
-            goal_reminders: /\*\*GOAL_REMINDERS:\*\*([\s\S]*?)(?=\*\*[A-Z_]+:|$)/i,
-            symptom_patterns_analysis: /\*\*SYMPTOM_PATTERNS_ANALYSIS:\*\*([\s\S]*?)(?=\*\*[A-Z_]+:|$)/i,
-            ai_tip_of_week: /\*\*AI_TIP_OF_WEEK:\*\*([\s\S]*?)(?=\*\*[A-Z_]+:|$)/i
+            diet_recommendations: /DIET_RECOMMENDATIONS:\s*([\s\S]*?)(?=\s*SUPPLEMENT_SUGGESTIONS:|$)/i,
+            supplement_suggestions: /SUPPLEMENT_SUGGESTIONS:\s*([\s\S]*?)(?=\s*LIFESTYLE_CHANGES:|$)/i,
+            lifestyle_changes: /LIFESTYLE_CHANGES:\s*([\s\S]*?)(?=\s*BOWEL_TRENDS:|$)/i,
+            bowel_trends: /BOWEL_TRENDS:\s*([\s\S]*?)(?=\s*GOAL_REMINDERS:|$)/i,
+            goal_reminders: /GOAL_REMINDERS:\s*([\s\S]*?)(?=\s*SYMPTOM_PATTERNS_ANALYSIS:|$)/i,
+            symptom_patterns_analysis: /SYMPTOM_PATTERNS_ANALYSIS:\s*([\s\S]*?)(?=\s*AI_TIP_OF_WEEK:|$)/i,
+            ai_tip_of_week: /AI_TIP_OF_WEEK:\s*([\s\S]*?)$/i
         }
 
         // Extract each section
