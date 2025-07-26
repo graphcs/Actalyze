@@ -1,4 +1,22 @@
+'use client'
+
+import { useAuth } from '@/lib/auth'
+import { useRouter } from 'next/navigation'
+
 export default function Home() {
+  const { isAuthenticated, loading } = useAuth()
+  const router = useRouter()
+
+  const handleGetStarted = () => {
+    if (isAuthenticated) {
+      // If user is already authenticated, take them to initial question
+      router.push('/onboarding/initial-question')
+    } else {
+      // If not authenticated, take them to auth page
+      router.push('/auth')
+    }
+  }
+
   return (
     <div className="min-h-screen relative overflow-hidden bg-cream-50">
       {/* Mobile Background */}
@@ -74,9 +92,13 @@ export default function Home() {
           
           {/* CTA Button - Centered */}
           <div className="pb-8 flex justify-center">
-            <a href="/auth" className="btn-primary text-xl px-8 py-3 font-medium shadow-lg hover:shadow-xl transition-all duration-300 max-w-xs w-full text-center">
+            <button 
+              onClick={handleGetStarted}
+              disabled={loading}
+              className="btn-primary text-xl px-8 py-3 font-medium max-w-xs w-full text-center"
+            >
               Start Your Gut Check
-            </a>
+            </button>
           </div>
         </div>
 
@@ -104,9 +126,13 @@ export default function Home() {
             
             {/* CTA Button */}
             <div className="flex justify-center">
-              <a href="/auth" className="btn-primary lg:text-3xl px-6 md:px-8 lg:px-10 xl:px-12 py-3 md:py-4 lg:py-5 xl:py-6 font-bold shadow-lg hover:shadow-xl transition-all duration-300 inline-block">
+              <button 
+                onClick={handleGetStarted}
+                disabled={loading}
+                className="btn-primary lg:text-3xl px-6 md:px-8 lg:px-10 xl:px-12 py-3 md:py-4 lg:py-5 xl:py-6 font-bold inline-block"
+              >
                 Start Your Gut Check
-              </a>
+              </button>
             </div>
           </div>
         </div>

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { OnboardingFormData } from '@/types/onboarding'
-import { supabase } from '@/lib/supabase'
+import { getSessionToken } from '@/lib/auth'
 
 export default function OnboardingCompletePage() {
   const [email, setEmail] = useState('')
@@ -99,9 +99,9 @@ export default function OnboardingCompletePage() {
       // Generate and send PDF report via email
       try {
         // Get the current session token
-        const { data: { session } } = await supabase.auth.getSession()
+        const sessionToken = await getSessionToken()
         
-        if (!session?.access_token) {
+        if (!sessionToken) {
           throw new Error('No authentication session found')
         }
 
@@ -110,7 +110,7 @@ export default function OnboardingCompletePage() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session.access_token}`,
+            'Authorization': `Bearer ${sessionToken}`,
           },
           body: JSON.stringify({
             reportData: report,

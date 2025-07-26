@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { brandFont } from "./fonts";
 import "./globals.css";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -23,7 +24,9 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${brandFont.variable} antialiased`}
       >
-        {children}
+        <ProtectedRoute>
+          {children}
+        </ProtectedRoute>
       </body>
     </html>
   );
