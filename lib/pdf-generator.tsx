@@ -1,21 +1,20 @@
 import React from 'react'
 import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer'
 
-// Register fonts with local file paths
+// Register fonts for PDF
 Font.register({
   family: 'Young Serif',
-  src: process.cwd() + '/public/fonts/youngserif.regular.ttf',
+  src: process.env.NEXT_PUBLIC_URL + '/fonts/youngserif.regular.ttf',
 })
-
 Font.register({
   family: 'Inter',
   fonts: [
     {
-      src: process.cwd() + '/public/fonts/Inter-Regular.ttf',
+      src: process.env.NEXT_PUBLIC_URL + '/fonts/Inter-Regular.ttf',
       fontWeight: 'normal',
     },
     {
-      src: process.cwd() + '/public/fonts/Inter-Bold.ttf',
+      src: process.env.NEXT_PUBLIC_URL + '/fonts/Inter-Bold.ttf',
       fontWeight: 'bold',
     },
   ],
