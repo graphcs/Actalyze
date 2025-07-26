@@ -17,40 +17,84 @@ import ImageSelectQuestion from '@/components/onboarding/ImageSelectQuestion'
 import TextInputQuestion from '@/components/onboarding/TextInputQuestion'
 import TextAreaQuestion from '@/components/onboarding/TextAreaQuestion'
 
+// Function to get initial state from localStorage
+const getInitialFormData = (): OnboardingFormData => {
+  if (typeof window === 'undefined') return DEFAULT_FORM_DATA
+  
+  const savedFormData = localStorage.getItem('gutRootOnboardingForm')
+  if (savedFormData) {
+    try {
+      return JSON.parse(savedFormData)
+    } catch (error) {
+      console.error('Error parsing saved form data:', error)
+      return DEFAULT_FORM_DATA
+    }
+  }
+  return DEFAULT_FORM_DATA
+}
+
+const getInitialStep = (): number => {
+  if (typeof window === 'undefined') return 0
+  
+  const savedStep = localStorage.getItem('gutRootOnboardingStep')
+  if (savedStep) {
+    const stepNumber = parseInt(savedStep)
+    // Ensure step is valid
+    if (stepNumber >= 0 && stepNumber < FORM_QUESTIONS.length) {
+      return stepNumber
+    }
+  }
+  return 0
+}
+
+const getInitialReason = (): string => {
+  if (typeof window === 'undefined') return ''
+  
+  return localStorage.getItem('gutRootInitialReason') || ''
+}
+
 export default function OnboardingPage() {
-  const [currentStep, setCurrentStep] = useState(0)
-  const [formData, setFormData] = useState<OnboardingFormData>(DEFAULT_FORM_DATA)
-  const [initialReason, setInitialReason] = useState<string>('')
+  const [currentStep, setCurrentStep] = useState(() => getInitialStep())
+  const [formData, setFormData] = useState<OnboardingFormData>(() => getInitialFormData())
+  const [initialReason, setInitialReason] = useState<string>(() => getInitialReason())
+  const [isLoaded, setIsLoaded] = useState(false)
   const router = useRouter()
 
-  // Load saved form data and initial reason on mount
+  // Ensure component is properly loaded with saved state
   useEffect(() => {
-    const savedFormData = localStorage.getItem('gutRootOnboardingForm')
-    const savedStep = localStorage.getItem('gutRootOnboardingStep')
-    const reason = localStorage.getItem('gutRootInitialReason')
-    
-    if (savedFormData) {
-      setFormData(JSON.parse(savedFormData))
-    }
-    
-    if (savedStep) {
-      setCurrentStep(parseInt(savedStep))
-    }
-    
-    if (reason) {
-      setInitialReason(reason)
-    }
-  }, [])
+    console.log('Onboarding component loaded with:', {
+      currentStep,
+      hasFormData: Object.keys(formData).length > 0,
+      initialReason,
+      savedStepInStorage: localStorage.getItem('gutRootOnboardingStep')
+    })
+    setIsLoaded(true)
+  }, [currentStep, formData, initialReason])
 
   // Save form data to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem('gutRootOnboardingForm', JSON.stringify(formData))
-    localStorage.setItem('gutRootOnboardingStep', currentStep.toString())
-  }, [formData, currentStep])
+    if (isLoaded) {
+      localStorage.setItem('gutRootOnboardingForm', JSON.stringify(formData))
+      localStorage.setItem('gutRootOnboardingStep', currentStep.toString())
+    }
+  }, [formData, currentStep, isLoaded])
 
   const currentQuestion = FORM_QUESTIONS[currentStep]
   const totalSteps = FORM_QUESTIONS.length
   const progressPercentage = ((currentStep + 1) / totalSteps) * 100
+
+  // Don't render until state is properly loaded
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-cream-light flex items-center justify-center">
+        <div className="flex space-x-2">
+          <div className="w-3 h-3 bg-orange-primary rounded-full animate-bounce"></div>
+          <div className="w-3 h-3 bg-orange-primary rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+          <div className="w-3 h-3 bg-orange-primary rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+        </div>
+      </div>
+    )
+  }
 
   const updateFormData = (field: keyof OnboardingFormData, value: unknown) => {
     setFormData(prev => ({
