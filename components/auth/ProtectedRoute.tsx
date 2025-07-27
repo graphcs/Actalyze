@@ -17,8 +17,8 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     // Don't redirect while loading
     if (loading) return
 
-    // Allow /auth and / routes to pass through
-    if (pathname === '/auth' || pathname === '/') return
+    // Allow /auth, /, and /not-found routes to pass through
+    if (pathname === '/auth' || pathname === '/' || pathname === '/not-found') return
 
     // Redirect to auth if not authenticated
     if (!isAuthenticated) {
@@ -43,8 +43,8 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     )
   }
 
-  // Allow /auth and / routes even if not authenticated
-  if (pathname === '/auth' || pathname === '/') {
+  // Allow /auth, /, and /not-found routes even if not authenticated
+  if (pathname === '/auth' || pathname === '/' || pathname === '/not-found') {
     return <>{children}</>
   }
 

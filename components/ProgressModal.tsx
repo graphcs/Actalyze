@@ -74,21 +74,21 @@ export default function ProgressModal({
           <div className="space-y-4">
             <button
               onClick={onResume}
-              className="w-full h-12 px-6 bg-orange-light text-dark-gray font-semibold rounded-full hover:bg-orange-primary transition-all duration-200 shadow-sm hover:shadow-md"
+              className="w-full h-12 px-6 bg-orange-light text-dark-gray font-semibold rounded-full cursor-pointer"
             >
               Resume Assessment
             </button>
             
             <button
               onClick={onStartOver}
-              className="w-full h-12 px-6 bg-orange-light text-dark-gray font-semibold rounded-full hover:bg-orange-primary transition-all duration-200 shadow-sm hover:shadow-md"
+              className="w-full h-12 px-6 bg-orange-light text-dark-gray font-semibold rounded-full cursor-pointer"
             >
               Start Over
             </button>
             
             <button
               onClick={onClose}
-              className="w-full h-12 px-6 bg-orange-light text-dark-gray font-semibold rounded-full hover:bg-orange-primary transition-all duration-200 shadow-sm hover:shadow-md"
+              className="w-full h-12 px-6 bg-orange-light text-dark-gray font-semibold rounded-full cursor-pointer"
             >
               Cancel
             </button>
