@@ -12,6 +12,11 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "GutRoot - Gut Health, Personalized from the Root Up",
   description: "Your personalized AI-powered gut health guide for better digestion and overall wellness.",
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({
