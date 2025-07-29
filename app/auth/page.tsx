@@ -5,6 +5,8 @@ import { supabase } from '@/lib/supabase'
 import type { SignUpData, SignInData } from '@/lib/supabase'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { checkOnboardingProgress, clearOnboardingProgress, type OnboardingProgress } from '@/lib/onboarding-progress'
+import ProgressModal from '@/components/ProgressModal'
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true)
@@ -28,6 +30,10 @@ export default function AuthPage() {
     agreeTerms: false
   })
 
+  // Progress modal state
+  const [showProgressModal, setShowProgressModal] = useState(false)
+  const [existingProgress, setExistingProgress] = useState<OnboardingProgress>({ hasProgress: false })
+
   // Handle OAuth callback and auth state changes
   useEffect(() => {
     // Handle OAuth callback when component mounts
@@ -43,8 +49,19 @@ export default function AuthPage() {
         }
 
         if (session) {
-          console.log('Session found, redirecting...', session)
-          router.push('/onboarding/initial-question')
+          console.log('Session found, checking for existing progress...', session)
+          
+          // Check for existing onboarding progress
+          const progress = checkOnboardingProgress()
+          
+          if (progress.hasProgress) {
+            // Show modal to let user choose
+            setExistingProgress(progress)
+            setShowProgressModal(true)
+          } else {
+            // No existing progress, start fresh
+            router.push('/onboarding/initial-question')
+          }
           return
         }
       } catch (error) {
@@ -73,7 +90,17 @@ export default function AuthPage() {
           }
         }
         
-        router.push('/onboarding/initial-question')
+        // Check for existing onboarding progress
+        const progress = checkOnboardingProgress()
+        
+        if (progress.hasProgress) {
+          // Show modal to let user choose
+          setExistingProgress(progress)
+          setShowProgressModal(true)
+        } else {
+          // No existing progress, start fresh
+          router.push('/onboarding/initial-question')
+        }
       } else if (event === 'SIGNED_OUT') {
         console.log('User signed out')
       }
@@ -209,6 +236,37 @@ export default function AuthPage() {
       setErrors({ auth: 'An unexpected error occurred' })
       setLoading(false)
     }
+  }
+
+  // Progress modal handlers
+  const handleResumeProgress = () => {
+    setShowProgressModal(false)
+    
+    // Determine where to resume based on progress
+    if (existingProgress.currentStep && existingProgress.currentStep > 0) {
+      // Resume at the saved step in main onboarding
+      router.push('/onboarding')
+    } else if (existingProgress.initialReason) {
+      // Has initial reason but no step progress, go to main onboarding
+      router.push('/onboarding')
+    } else {
+      // Fallback to initial question
+      router.push('/onboarding/initial-question')
+    }
+  }
+
+  const handleStartOver = () => {
+    setShowProgressModal(false)
+    
+    // Clear existing progress
+    clearOnboardingProgress()
+    
+    // Start fresh from initial question
+    router.push('/onboarding/initial-question')
+  }
+
+  const handleCloseModal = () => {
+    setShowProgressModal(false)
   }
 
   return (
@@ -510,6 +568,15 @@ export default function AuthPage() {
           </div>
         </div>
       </div>
+
+      {/* Progress Modal */}
+      <ProgressModal
+        isOpen={showProgressModal}
+        progress={existingProgress}
+        onResume={handleResumeProgress}
+        onStartOver={handleStartOver}
+        onClose={handleCloseModal}
+      />
     </div>
   )
 } 
