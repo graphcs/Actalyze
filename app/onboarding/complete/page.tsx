@@ -7,24 +7,101 @@ import { OnboardingFormData } from '@/types/onboarding'
 import { getSessionToken } from '@/lib/auth'
 import { clearWeeklyReportCache } from '@/lib/weekly-report-cache'
 import { supabase } from '@/lib/supabase'
+import { validateAssessmentCompletion, clearInvalidAssessmentData, getAssessmentDataSafely } from '@/lib/assessment-validation'
+import { checkOnboardingProgress, OnboardingProgress } from '@/lib/onboarding-progress'
+import ProgressModal from '@/components/ProgressModal'
 
 export default function OnboardingCompletePage() {
   const [email, setEmail] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState<OnboardingFormData | null>(null)
   const [, setProcessingStage] = useState('')
+  const [isValidating, setIsValidating] = useState(true)
+  const [hasValidAccess, setHasValidAccess] = useState(false)
+  const [showProgressModal, setShowProgressModal] = useState(false)
+  const [progressData, setProgressData] = useState<OnboardingProgress | null>(null)
   const router = useRouter()
 
   useEffect(() => {
-    // Retrieve the completed form data
-    const savedFormData = localStorage.getItem('gutRootOnboardingForm')
-    if (savedFormData) {
-      setFormData(JSON.parse(savedFormData))
-    }
+    validatePageAccess()
   }, [])
+
+  const validatePageAccess = () => {
+    setIsValidating(true)
+    
+    try {
+      // Step 1: Validate assessment completion
+      const validation = validateAssessmentCompletion()
+      
+      console.log('🔍 Assessment validation result:', validation)
+      
+      if (validation.isComplete) {
+        // Assessment is complete - allow access
+        const completedFormData = getAssessmentDataSafely()
+        if (completedFormData) {
+          setFormData(completedFormData)
+          setHasValidAccess(true)
+          console.log('✅ Assessment complete - access granted')
+        } else {
+          console.log('❌ Assessment data corrupted - redirecting')
+          handleInvalidAccess()
+        }
+      } else if (validation.hasData && validation.completionPercentage > 0) {
+        // Partial progress exists - show resume modal
+        const progress = checkOnboardingProgress()
+        if (progress.hasProgress) {
+          setProgressData(progress)
+          setShowProgressModal(true)
+          console.log('🔄 Partial progress detected - showing resume modal')
+        } else {
+          console.log('❌ Invalid progress data - redirecting')
+          handleInvalidAccess()
+        }
+      } else {
+        // No valid progress - redirect to start
+        console.log('❌ No assessment progress - redirecting to start')
+        handleInvalidAccess()
+      }
+      
+    } catch (error) {
+      console.error('Error validating page access:', error)
+      handleInvalidAccess()
+    } finally {
+      setIsValidating(false)
+    }
+  }
+
+  const handleInvalidAccess = () => {
+    clearInvalidAssessmentData()
+    router.replace('/onboarding/initial-question')
+  }
+
+  const handleResumeProgress = () => {
+    setShowProgressModal(false)
+    router.push('/onboarding')
+  }
+
+  const handleStartOver = () => {
+    clearInvalidAssessmentData()
+    setShowProgressModal(false)
+    router.push('/onboarding/initial-question')
+  }
+
+  const handleCloseModal = () => {
+    setShowProgressModal(false)
+    handleInvalidAccess()
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Additional validation before submission
+    if (!hasValidAccess || !formData) {
+      console.error('❌ Invalid access or missing form data')
+      handleInvalidAccess()
+      return
+    }
+    
     setIsSubmitting(true)
 
     try {
@@ -180,33 +257,81 @@ export default function OnboardingCompletePage() {
     return emailRegex.test(email)
   }
 
-  return (
-    <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden"
-         style={{
-           background: `
-             radial-gradient(circle at top left, #B0D1A9 0%, transparent 50%),
-             radial-gradient(circle at top right, #D7E3C7 0%, transparent 50%),
-             radial-gradient(circle at bottom left, #D0E1C1 0%, transparent 50%),
-             radial-gradient(circle at bottom right, #D2DCA6 0%, transparent 50%),
-             linear-gradient(135deg, #B0D1A9 0%, #D7E3C7 25%, #D0E1C1 75%, #D2DCA6 100%)
-           `
-         }}>
-      {/* Main Container - Centered */}
-      <div className="w-full max-w-lg h-screen flex flex-col relative z-10">
-        {/* Brand Title */}
-        <div className="pt-10">
-          <Link href="/">
-            <h1 className="brand-title text-4xl font-bold text-dark-green">
-              GutRoot
-            </h1>
-          </Link>
-        </div>
-
-        {/* Content - Centered in remaining space */}
-        <div className="flex-1 flex items-center justify-center">
-          <div className="w-full max-w-md">
+  // Show loading state while validating access
+  if (isValidating) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden"
+           style={{
+             background: `
+               radial-gradient(circle at top left, #B0D1A9 0%, transparent 50%),
+               radial-gradient(circle at top right, #D7E3C7 0%, transparent 50%),
+               radial-gradient(circle at bottom left, #D0E1C1 0%, transparent 50%),
+               radial-gradient(circle at bottom right, #D2DCA6 0%, transparent 50%),
+               linear-gradient(135deg, #B0D1A9 0%, #D7E3C7 25%, #D0E1C1 75%, #D2DCA6 100%)
+             `
+           }}>
+        <div className="w-full max-w-lg h-screen flex flex-col relative z-10">
+          <div className="pt-10">
+            <Link href="/">
+              <h1 className="brand-title text-4xl font-bold text-dark-green">
+                GutRoot
+              </h1>
+            </Link>
+          </div>
           
-          {isSubmitting ? (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <div className="inline-flex items-center space-x-2">
+                <div className="w-4 h-4 bg-orange-primary rounded-full animate-bounce"></div>
+                <div className="w-4 h-4 bg-orange-primary rounded-full animate-bounce" style={{animationDelay: '0.15s'}}></div>
+                <div className="w-4 h-4 bg-orange-primary rounded-full animate-bounce" style={{animationDelay: '0.3s'}}></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+  return (
+    <>
+      {/* Progress Modal */}
+      {showProgressModal && progressData && !hasValidAccess && (
+        <ProgressModal
+          isOpen={showProgressModal}
+          progress={progressData}
+          onResume={handleResumeProgress}
+          onStartOver={handleStartOver}
+          onClose={handleCloseModal}
+        />
+      )}
+
+      {/* Main Page Content */}
+      <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden"
+           style={{
+             background: `
+               radial-gradient(circle at top left, #B0D1A9 0%, transparent 50%),
+               radial-gradient(circle at top right, #D7E3C7 0%, transparent 50%),
+               radial-gradient(circle at bottom left, #D0E1C1 0%, transparent 50%),
+               radial-gradient(circle at bottom right, #D2DCA6 0%, transparent 50%),
+               linear-gradient(135deg, #B0D1A9 0%, #D7E3C7 25%, #D0E1C1 75%, #D2DCA6 100%)
+             `
+           }}>
+        {/* Main Container - Centered */}
+        <div className="w-full max-w-lg h-screen flex flex-col relative z-10">
+          {/* Brand Title */}
+          <div className="pt-10">
+            <Link href="/">
+              <h1 className="brand-title text-4xl font-bold text-dark-green">
+                GutRoot
+              </h1>
+            </Link>
+          </div>
+
+          {/* Content - Centered in remaining space */}
+          <div className="flex-1 flex items-center justify-center">
+            <div className="w-full max-w-md">
+            
+            {isSubmitting ? (
             /* Submission Processing State */
             <>
               {/* Opened Inbox Icon */}
@@ -280,9 +405,10 @@ export default function OnboardingCompletePage() {
               </form>
             </>
           )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   )
 } 
