@@ -136,8 +136,6 @@ export default function OnboardingCompletePage() {
 
       setProcessingStage('Preparing your results...')
       
-      // Simulate final processing time
-      await new Promise(resolve => setTimeout(resolve, 1000))
       
       console.log('Report generated successfully:', report)
       console.log('Email for delivery:', email)
@@ -147,7 +145,6 @@ export default function OnboardingCompletePage() {
       
       // Show user a helpful error message but continue with flow
       setProcessingStage('Completing setup...')
-      await new Promise(resolve => setTimeout(resolve, 1000))
     }
     
     // Clear form data from localStorage after processing
@@ -208,18 +205,16 @@ export default function OnboardingCompletePage() {
 
               {/* Processing Text */}
               <div className="mb-12">
-                <div className="flex items-center px-6 md:px-12">
+                <div className="px-6 md:px-12">
                   <h2 className="text-xl font-medium text-dark-gray text-start">
-                    Great! You&apos;ll also receive
-                    weekly gut health tips.
+                    Great! You&apos;ll also receive weekly gut health tips
+                    {/* Loading indicator - inline after "tips" */}
+                    <span className="ml-2 inline-flex items-center space-x-1">
+                      <div className="w-3 h-3 bg-orange-primary rounded-full animate-bounce"></div>
+                      <div className="w-3 h-3 bg-orange-primary rounded-full animate-bounce" style={{animationDelay: '0.15s'}}></div>
+                      <div className="w-3 h-3 bg-orange-primary rounded-full animate-bounce" style={{animationDelay: '0.3s'}}></div>
+                    </span>
                   </h2>
-                  
-                  {/* Loading indicator - inline */}
-                  <div className="ml-3 flex space-x-2">
-                    <div className="w-2 h-2 bg-orange-primary rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-orange-primary rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                    <div className="w-2 h-2 bg-orange-primary rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-                  </div>
                 </div>
               </div>
             </>
