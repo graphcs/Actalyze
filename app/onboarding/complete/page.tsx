@@ -29,6 +29,18 @@ export default function OnboardingCompletePage() {
     try {
       setProcessingStage('Saving your assessment...')
       
+      // Get user profile data
+      const { getUserProfile } = await import('@/lib/database')
+      const { profile, error: profileError } = await getUserProfile()
+      
+      if (profileError) {
+        console.error('Failed to get user profile:', profileError)
+      }
+      
+      // Extract user name for personalization (fallback to 'there' if not available)
+      const firstName = profile?.first_name || 'there'
+      const lastName = profile?.last_name || undefined
+
       // Save assessment to database
       let assessmentId = null
       if (formData) {
@@ -65,8 +77,8 @@ export default function OnboardingCompletePage() {
           formData,
           initialReason: localStorage.getItem('gutRootInitialReason'),
           userProfile: {
-            firstName: 'there', // TODO: Get from user profile in database
-            lastName: undefined
+            firstName: firstName,
+            lastName: lastName
           }
         }),
       })

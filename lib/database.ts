@@ -9,7 +9,9 @@ import {
     QuestionResponse,
     ProgressMetric,
     MetricType,
-    SymptomType
+    SymptomType,
+    UserProfile,
+    Report
 } from '@/types/database'
 
 // Assessment functions
@@ -500,6 +502,34 @@ export async function getUserReports(limit: number = 10): Promise<{ reports: Rep
 }
 
 // User profile functions
+export async function getUserProfile(): Promise<{ profile: UserProfile | null; error: string | null }> {
+    try {
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (!user) {
+            return { profile: null, error: 'User not authenticated' }
+        }
+
+        const { data, error } = await supabase
+            .from('user_profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single()
+
+        if (error) {
+            // If profile doesn't exist, return null (not an error)
+            if (error.code === 'PGRST116') {
+                return { profile: null, error: null }
+            }
+            return { profile: null, error: error.message }
+        }
+
+        return { profile: data, error: null }
+    } catch (error) {
+        return { profile: null, error: (error as Error).message }
+    }
+}
+
 export async function upsertUserProfile(profileData: {
     firstName?: string
     lastName?: string
