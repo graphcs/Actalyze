@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { OnboardingFormData } from '@/types/onboarding'
 import { getSessionToken } from '@/lib/auth'
 import { clearWeeklyReportCache } from '@/lib/weekly-report-cache'
+import { supabase } from '@/lib/supabase'
 
 export default function OnboardingCompletePage() {
   const [email, setEmail] = useState('')
@@ -90,7 +91,7 @@ export default function OnboardingCompletePage() {
 
       const { report } = await reportResponse.json()
 
-      setProcessingStage('Saving your personalized report...')
+      setProcessingStage('Finalizing your report...')
       
       // Save the AI report to database
       const { saveAIReport } = await import('@/lib/database')
@@ -107,50 +108,54 @@ export default function OnboardingCompletePage() {
 
       console.log('AI report saved successfully:', reportId)
 
-      setProcessingStage('Generating your PDF report...')
+      // Get user ID for background processing
+      const { data: { user } } = await supabase.auth.getUser()
       
-      // Generate and send PDF report via email
-      try {
-        // Get the current session token
-        const sessionToken = await getSessionToken()
-        
-        if (!sessionToken) {
-          throw new Error('No authentication session found')
-        }
+      if (!user) {
+        console.error('No authenticated user found')
+        throw new Error('Authentication required')
+      }
 
-        // Send email with PDF attachment (this generates the PDF internally)
-        const emailResponse = await fetch('/api/generate-email', {
+      // Trigger background PDF generation and email sending (fire-and-forget)
+      try {
+        console.log('🚀 Triggering background report processing...')
+        
+        fetch('/api/process-background-report', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${sessionToken}`,
           },
           body: JSON.stringify({
-            reportData: report,
+            reportData: {
+              ...report,
+              userProfile: {
+                firstName: firstName,
+                lastName: lastName
+              },
+              assessmentData: {
+                age: formData?.age,
+                gender: formData?.gender,
+                initialReason: localStorage.getItem('gutRootInitialReason')
+              }
+            },
             reportId: reportId,
             assessmentId: assessmentId,
-            userEmail: email
+            userEmail: email,
+            userId: user.id
           }),
+        }).catch(error => {
+          // Fire-and-forget: log error but don't block user flow
+          console.error('Background processing trigger failed:', error)
         })
-
-        if (!emailResponse.ok) {
-          const errorData = await emailResponse.json()
-          console.error('Email generation failed:', errorData.error)
-          // Continue with flow even if email fails
-        } else {
-          const { emailSent, messageId } = await emailResponse.json()
-          console.log('Email with PDF sent successfully:', emailSent, messageId)
-        }
-      } catch (emailError) {
-        console.error('Email generation error:', emailError)
-        // Continue with flow even if email fails
+        
+        console.log('✅ Background processing triggered successfully')
+      } catch (bgError) {
+        // Fire-and-forget: log error but don't block user flow
+        console.error('Background processing setup failed:', bgError)
       }
-
-      setProcessingStage('Preparing your results...')
       
-      
-      console.log('Report generated successfully:', report)
-      console.log('Email for delivery:', email)
+      console.log('✅ Assessment and report generation completed!')
+      console.log('📧 Your personalized report will be sent to:', email)
       
     } catch (error) {
       console.error('Error during submission:', error)
@@ -163,8 +168,6 @@ export default function OnboardingCompletePage() {
     localStorage.removeItem('gutRootOnboardingForm')
     localStorage.removeItem('gutRootOnboardingStep')
     localStorage.removeItem('gutRootInitialReason')
-    
-    console.log('✅ Assessment and report completed successfully!')
     
     // Clear weekly report cache since new assessment data is available
     clearWeeklyReportCache()
