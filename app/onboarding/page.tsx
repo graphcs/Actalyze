@@ -227,12 +227,11 @@ export default function OnboardingPage() {
         style={{
           background: `linear-gradient(
             45deg,
-            rgba(245, 166, 35, 0.4) 0%,
-            rgba(245, 166, 35, 0.25) 25%,
-            rgba(255, 244, 230, 0.15) 50%,
-            rgba(255, 244, 230, 0.05) 70%,
+            rgba(250, 219, 107, 0.8) 0%,
+            rgba(255, 248, 225, 0.6) 40%,
+            rgba(255, 251, 236, 0.4) 70%,
             transparent 85%
-          )`
+          )`,
         }}
       />
 

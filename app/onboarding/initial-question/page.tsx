@@ -26,16 +26,16 @@ export default function InitialQuestionPage() {
   }
 
   return (
-    <div className="min-h-screen bg-cream-light flex items-center justify-center px-4 relative overflow-hidden">
-      {/* Orange Gradient Overlay - Bottom Left */}
+    <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden">
+      {/* Yellow Gradient Overlay - Bottom Left */}
       <div 
         className="absolute inset-0 w-full h-full pointer-events-none"
         style={{
           background: `linear-gradient(
             45deg,
-            rgba(248, 234, 190, 1) 0%,
-            rgba(254, 250, 237, 1) 50%,
-            rgba(249, 245, 241, 1) 70%,
+            rgba(250, 219, 107, 0.8) 0%,
+            rgba(255, 248, 225, 0.6) 40%,
+            rgba(255, 251, 236, 0.4) 70%,
             transparent 85%
           )`
         }}
