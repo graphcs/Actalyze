@@ -3,7 +3,7 @@
 import { FormQuestion, FoodUploadData, FoodImage } from '@/types/onboarding'
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { useAuth } from '@/lib/auth'
-import { processFoodImages, validateImageFile } from '@/lib/food-image-upload'
+import { processFoodImages, validateImageFile, deleteFoodImages } from '@/lib/food-image-upload'
 
 interface FoodUploadQuestionProps {
   question: FormQuestion
@@ -24,7 +24,22 @@ export default function FoodUploadQuestion({ question, value, onChange }: FoodUp
   }, [])
 
   // Handle mode selection
-  const handleModeChange = useCallback((mode: 'text' | 'upload') => {
+  const handleModeChange = useCallback(async (mode: 'text' | 'upload') => {
+    // Clean up any uploaded images when switching modes
+    if (mode === 'text' && value.mode === 'upload') {
+      const uploadedImages = (value.images || []).filter(img => img.status === 'uploaded' && img.url)
+      if (uploadedImages.length > 0) {
+        try {
+          const imageUrls = uploadedImages.map(img => img.url!)
+          await deleteFoodImages(imageUrls)
+          console.log('Cleaned up uploaded images on mode change:', uploadedImages.length)
+        } catch (error) {
+          console.error('Failed to cleanup images on mode change:', error)
+          // Continue anyway
+        }
+      }
+    }
+    
     // Clear all data and set new mode
     const newValue: FoodUploadData = {
       mode,
@@ -34,10 +49,23 @@ export default function FoodUploadQuestion({ question, value, onChange }: FoodUp
     
     onChange(newValue)
     setCurrentStep('input')
-  }, [onChange])
+  }, [value.mode, value.images, onChange])
 
   // Handle back navigation
-  const handleBack = useCallback(() => {
+  const handleBack = useCallback(async () => {
+    // Clean up any uploaded images from storage
+    const uploadedImages = (value.images || []).filter(img => img.status === 'uploaded' && img.url)
+    if (uploadedImages.length > 0) {
+      try {
+        const imageUrls = uploadedImages.map(img => img.url!)
+        await deleteFoodImages(imageUrls)
+        console.log('Cleaned up uploaded images on back navigation:', uploadedImages.length)
+      } catch (error) {
+        console.error('Failed to cleanup images on back navigation:', error)
+        // Continue anyway
+      }
+    }
+    
     // Clear all data and return to selection step
     const newValue: FoodUploadData = {
       mode: 'text', // Default mode
@@ -47,7 +75,7 @@ export default function FoodUploadQuestion({ question, value, onChange }: FoodUp
     
     onChange(newValue)
     setCurrentStep('selection')
-  }, [onChange])
+  }, [value.images, onChange])
 
   // Handle text input change
   const handleTextChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -123,7 +151,21 @@ export default function FoodUploadQuestion({ question, value, onChange }: FoodUp
   }, [handleFileSelect])
 
   // Handle remove image
-  const handleRemoveImage = useCallback((imageId: string) => {
+  const handleRemoveImage = useCallback(async (imageId: string) => {
+    const imageToRemove = (value.images || []).find(img => img.id === imageId)
+    
+    // Delete from Supabase if image was successfully uploaded
+    if (imageToRemove && imageToRemove.status === 'uploaded' && imageToRemove.url) {
+      try {
+        await deleteFoodImages([imageToRemove.url])
+        console.log('Successfully deleted image from storage:', imageToRemove.name)
+      } catch (error) {
+        console.error('Failed to delete image from storage:', error)
+        // Continue with UI removal even if storage deletion fails
+      }
+    }
+    
+    // Remove from UI
     onChange({
       ...value,
       images: (value.images || []).filter(img => img.id !== imageId)
