@@ -154,7 +154,7 @@ export default function Home() {
             <div className="absolute left-8 md:left-20 lg:left-54 xl:left-150 top-0 h-full flex flex-col py-4 max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl">
               {/* Brand Title */}
               <div className="pt-4 md:pt-6 lg:pt-8 xl:pt-10 md:mb-42 xl:mb-45">
-                <h1 className="brand-title md:text-5xl font-black text-dark-green">
+                <h1 className="brand-title md:text-5xl text-dark-green">
                   GutRoot
                 </h1>
               </div>
