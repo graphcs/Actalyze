@@ -276,14 +276,13 @@ export default function AuthPage() {
       <div 
         className="absolute inset-0 w-full h-full pointer-events-none"
         style={{
-          background: `linear-gradient(
-            45deg,
-            rgba(245, 166, 35, 0.4) 0%,
-            rgba(245, 166, 35, 0.25) 25%,
-            rgba(255, 244, 230, 0.15) 50%,
-            rgba(255, 244, 230, 0.05) 70%,
-            transparent 85%
-          )`
+          background: `linear-gradient(45deg,
+                        rgba(250, 219, 107, 1) 0%, 
+                        rgba(254, 250, 231, 1) 50%, 
+                        rgba(255, 251, 236, 1) 70%,
+                        transparent 85%
+          )`,
+              mixBlendMode: 'multiply'
         }}
       />
 
