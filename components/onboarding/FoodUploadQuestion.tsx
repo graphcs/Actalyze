@@ -234,7 +234,7 @@ export default function FoodUploadQuestion({ question, value, onChange }: FoodUp
             placeholder={question.placeholder}
             value={value.textInput || ''}
             onChange={handleTextChange}
-            className="w-full px-4 py-4 bg-white rounded-lg border-2 border-gray-200 focus:border-orange-primary focus:outline-none transition-all duration-200 text-dark resize-none"
+            className="w-full px-4 py-4 bg-white rounded-lg border-2 border-white focus:border-orange-primary focus:outline-none transition-all duration-200 text-dark resize-none text-xl"
             rows={4}
           />
         </div>

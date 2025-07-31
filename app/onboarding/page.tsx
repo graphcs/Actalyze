@@ -296,9 +296,9 @@ export default function OnboardingPage() {
                   <img 
                     src="/bubble-question.png" 
                     alt="Question bubble" 
-                    className="w-full h-auto"
+                    className="w-full h-[200px]"
                   />
-                  <div className="absolute inset-0 flex items-center justify-center px-8">
+                  <div className="absolute inset-0 flex items-start justify-center px-8 pt-8 md:pt-10">
                     <p className="text-dark text-2xl leading-relaxed text-start font-medium">
                       {currentQuestion.title}
                     </p>
@@ -319,7 +319,7 @@ export default function OnboardingPage() {
                 <button
                   onClick={handleNext}
                   disabled={currentQuestion.required && !isStepValid()}
-                  className="w-full md:w-[80%] max-w-md py-4 rounded-full font-semibold transition-all duration-200 bg-orange-primary text-dark cursor-pointer disabled:cursor-not-allowed"
+                  className="w-full md:w-[80%] max-w-md py-4 text-xl rounded-full font-semibold transition-all duration-200 bg-orange-primary text-dark cursor-pointer disabled:cursor-not-allowed"
                 >
                   {currentStep === totalSteps - 1 ? 'Submit' : 'Continue'}
                 </button>
