@@ -11,6 +11,7 @@ import ProgressModal from '@/components/ProgressModal'
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const router = useRouter()
@@ -480,8 +481,9 @@ export default function AuthPage() {
               <label className="block text-sm font-medium text-dark-gray mb-2">
                 Confirm Password
               </label>
+              <div className="relative">
               <input
-                type="password"
+                type={showConfirmPassword ? 'text' : 'password'}
                 placeholder="Confirm password"
                 className={`w-full px-4 py-3 no-border bg-white rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent outline-none transition-all duration-200 ${
                   errors.confirmPassword ? 'border-red-300' : 'border-pale-gray'
@@ -492,6 +494,19 @@ export default function AuthPage() {
                   if (errors.confirmPassword) setErrors({ ...errors, confirmPassword: '' })
                 }}
               />
+               <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-medium-gray hover:text-dark-gray cursor-pointer"
+                >
+                  <img 
+                    src={showConfirmPassword ? "/Hide.png" : "/Show.png"} 
+                    alt={showConfirmPassword ? "Hide password" : "Show password"} 
+                    width={20} 
+                    height={20} 
+                  />
+                </button>
+              </div>
               {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
             </div>
 
