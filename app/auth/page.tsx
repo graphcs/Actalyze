@@ -392,7 +392,7 @@ export default function AuthPage() {
               </label>
               <input
                 type="text"
-                placeholder="John"
+                placeholder="Enter first name"
                 className={`w-full px-4 py-3 no-border bg-white rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent outline-none transition-all duration-200 ${
                   errors.firstName ? 'border-red-300' : 'border-pale-gray'
                 }`}
@@ -411,7 +411,7 @@ export default function AuthPage() {
               </label>
               <input
                 type="text"
-                placeholder="Doe"
+                placeholder="Enter last name"
                 className={`w-full px-4 py-3 no-border bg-white rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent outline-none transition-all duration-200 ${
                   errors.lastName ? 'border-red-300' : 'border-pale-gray'
                 }`}
@@ -430,7 +430,7 @@ export default function AuthPage() {
               </label>
               <input
                 type="email"
-                placeholder="123@gutroot.com"
+                placeholder="Enter email"
                 className={`w-full px-4 py-3 no-border bg-white rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent outline-none transition-all duration-200 ${
                   errors.email ? 'border-red-300' : 'border-pale-gray'
                 }`}
@@ -450,7 +450,7 @@ export default function AuthPage() {
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="123456"
+                  placeholder="Enter password"
                   className={`w-full px-4 py-3 no-border bg-white rounded-lg focus:ring-2 focus:ring-orange-primary focus:border-transparent outline-none transition-all duration-200 pr-10 ${
                     errors.password ? 'border-red-300' : 'border-pale-gray'
                   }`}
