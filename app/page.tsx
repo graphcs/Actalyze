@@ -64,37 +64,6 @@ export default function Home() {
 
   return (
     <>
-      <div className="min-h-screen relative overflow-hidden bg-cream-50">
-        {/* Mobile Background */}
-        <div 
-          className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat md:hidden"
-          style={{
-            backgroundImage: "url('/green-mobile-banner.png')",
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
-        />
-        
-        {/* Desktop Background */}
-        <div 
-          className="absolute inset-0 w-full h-full bg-no-repeat hidden lg:block"
-          style={{
-            backgroundImage: "url('/green-desktop-banner.png')",
-            backgroundSize: 'contain',
-            backgroundPosition: 'center top',
-          }}
-        />
-        
-        {/* Medium screens background - full width */}
-        <div 
-          className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat hidden md:block lg:hidden"
-          style={{
-            backgroundImage: "url('/green-desktop-banner.png')",
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
-        />
-
         {/* Gradient Overlay - Bottom Right to Top Left */}
         <div 
           className="absolute inset-0 w-full h-full"
@@ -109,82 +78,40 @@ export default function Home() {
             mixBlendMode: 'multiply'
           }}
         />
-        
-        {/* Content */}
-        <div className="relative z-10 min-h-screen">
-          {/* Mobile Layout */}
-          <div className="md:hidden h-[80%] flex flex-col px-8">
-            {/* Brand Title */}
-            <div className="pt-6 mb-32">
-              <h1 className="brand-title text-3xl font-black text-dark-green">
-                GutRoot
-              </h1>
-            </div>
-            
-            {/* Headline - Aligned with Brand Title */}
-            <div className="mb-48">
-              <div className="max-w-sm">
-                <h2 className="text-5xl font-semibold text-dark-gray leading-tight text-left">
-                  Gut Health,
-                  <br />
-                  Personalized
-                  <br />
-                  from the
-                  <br />
-                  Root Up.
-                </h2>
-              </div>
-            </div>
-            
-            {/* CTA Button - Centered */}
-            <div className="pb-8 flex justify-center">
-              <button 
-                onClick={handleGetStarted}
-                disabled={loading}
-                className="btn-primary text-xl px-8 py-3 font-medium max-w-xs w-full text-center"
-              >
-                Start Your Gut Check
-              </button>
-            </div>
-          </div>
+        <div className="h-screen w-screen flex flex-col items-center">
+           <div className="relative w-full md:max-w-3xl xl:max-w-5xl h-full">
+             <div className='absolute inset-0 w-full h-full -z-1 md:max-w-3xl xl:max-w-5xl mx-auto'>
+               <img src="/green-desktop-banner.png" alt="GutRoot" className="w-full h-full object-cover hidden md:block" />
+               <img src="/green-mobile-banner.png" alt="GutRoot" className="w-full h-full object-cover block md:hidden" />
+             </div>
+             
+             {/* Brand Title - Top positioned */}
+             <div className="absolute top-8 md:top-12 left-5 md:left-25">
+               <h1 className="brand-title text-3xl font-black text-dark-green">
+                 GutRoot
+               </h1>
+             </div>
+             
+             {/* Gut Health Text - Centered */}
+             <div className="absolute inset-0 flex items-center justify-start pl-10 md:pl-35">
+               <h2 className="text-5xl md:text-6xl xl:text-7xl leading-tight font-semibold text-dark-gray text-left">
+                 Gut Health,
+                 <br />
+                 Personalized
+                 <br />
+                 from the Root Up.
+               </h2>
+             </div>
+             
+             {/* Button - Bottom positioned but above screen bottom */}
+             <div className="absolute bottom-25 md:bottom-15 left-1/2 transform -translate-x-1/2">
+               <button className="btn-primary rounded-full text-xl text-nowrap md:text-2xl lg:text-3xl xl:text-4xl px-10 md:px-20 lg:px-20 xl:px-20 py-3.5 md:py-5 xl:py-5 font-bold" onClick={handleGetStarted}>
+                 Start Your Gut Check
+               </button>
+             </div>
 
-          {/* Desktop Layout */}
-          <div className="hidden md:block min-h-screen">
-            {/* Content Container - Responsive Left Side */}
-            <div className="absolute left-8 md:left-20 lg:left-54 xl:left-150 top-0 h-full flex flex-col py-4 max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl">
-              {/* Brand Title */}
-              <div className="pt-4 md:pt-6 lg:pt-8 xl:pt-10 md:mb-42 xl:mb-45">
-                <h1 className="brand-title md:text-5xl text-dark-green">
-                  GutRoot
-                </h1>
-              </div>
-              
-              {/* Headline */}
-              <div className="md:mb-52 lg:mb-48 xl:mb-45">
-                <h2 className="md:text-5xl lg:text-6xl xl:text-7xl font-semibold text-dark-gray leading-tight text-left">
-                  Gut Health,
-                  <br />
-                  Personalized
-                  <br />
-                  from the Root Up.
-                </h2>
-              </div>
-              
-              {/* CTA Button */}
-              <div className="flex justify-center">
-                <button 
-                  onClick={handleGetStarted}
-                  disabled={loading}
-                  className="btn-primary lg:text-3xl px-6 md:px-8 lg:px-10 xl:px-12 py-3 md:py-4 lg:py-5 xl:py-6 font-bold inline-block"
-                >
-                  Start Your Gut Check
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
+           </div>
+         </div>
       {/* Progress Modal */}
       <ProgressModal
         isOpen={showProgressModal}
