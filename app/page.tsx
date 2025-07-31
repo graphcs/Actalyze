@@ -69,7 +69,7 @@ export default function Home() {
         <div 
           className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat md:hidden"
           style={{
-            backgroundImage: "url('/green-banner-mobile.png')",
+            backgroundImage: "url('/green-mobile-banner.png')",
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
@@ -79,7 +79,7 @@ export default function Home() {
         <div 
           className="absolute inset-0 w-full h-full bg-no-repeat hidden lg:block"
           style={{
-            backgroundImage: "url('/green-banner-desktop.png')",
+            backgroundImage: "url('/green-desktop-banner.png')",
             backgroundSize: 'contain',
             backgroundPosition: 'center top',
           }}
@@ -89,7 +89,7 @@ export default function Home() {
         <div 
           className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat hidden md:block lg:hidden"
           style={{
-            backgroundImage: "url('/green-banner-desktop.png')",
+            backgroundImage: "url('/green-desktop-banner.png')",
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
