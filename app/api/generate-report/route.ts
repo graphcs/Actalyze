@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
-import { OnboardingFormData } from '@/types/onboarding'
+import { OnboardingFormData, FoodUploadData } from '@/types/onboarding'
+import { deleteFoodImages } from '@/lib/food-image-upload'
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
@@ -14,8 +15,31 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Assessment data is required' }, { status: 400 })
         }
 
+        // Extract food image URLs for cleanup
+        const foodData = formData.foodRating as FoodUploadData
+        const imageUrls: string[] = []
+
+        if (foodData.mode === 'upload' && foodData.images) {
+            foodData.images.forEach(image => {
+                if (image.status === 'uploaded' && image.url) {
+                    imageUrls.push(image.url)
+                }
+            })
+        }
+
         // Generate the AI report
         const report = await generateGutHealthReport(formData, initialReason, userProfile)
+
+        // Clean up uploaded food images after successful report generation
+        if (imageUrls.length > 0) {
+            try {
+                await deleteFoodImages(imageUrls)
+                console.log(`Cleaned up ${imageUrls.length} food images after report generation`)
+            } catch (cleanupError) {
+                console.error('Failed to cleanup food images:', cleanupError)
+                // Don't fail the request if cleanup fails
+            }
+        }
 
         return NextResponse.json({ report })
     } catch (error) {
@@ -32,20 +56,54 @@ async function generateGutHealthReport(
     initialReason?: string,
     userProfile?: { firstName?: string; lastName?: string }
 ) {
-    const prompt = buildComprehensivePrompt(formData, initialReason, userProfile)
+    const { prompt, hasImages, imageUrls } = buildComprehensivePrompt(formData, initialReason, userProfile)
 
-    const completion = await openai.chat.completions.create({
-        model: "gpt-4.1",
-        messages: [
+    // Determine model and message structure based on whether images are present
+    const model = "gpt-4.1"
+    const systemMessage = "You are a certified nutritionist and gut health specialist with over 15 years of experience. You provide evidence-based, personalized recommendations for improving digestive health. Your advice is practical, actionable, and considers individual lifestyle factors."
+
+    let messages: any[]
+
+    if (hasImages && imageUrls.length > 0) {
+        // Use Vision API for image analysis
+        const imageContent = imageUrls.map(url => ({
+            type: "image_url",
+            image_url: { url }
+        }))
+
+        messages = [
             {
                 role: "system",
-                content: "You are a certified nutritionist and gut health specialist with over 15 years of experience. You provide evidence-based, personalized recommendations for improving digestive health. Your advice is practical, actionable, and considers individual lifestyle factors."
+                content: systemMessage
+            },
+            {
+                role: "user",
+                content: [
+                    {
+                        type: "text",
+                        text: prompt
+                    },
+                    ...imageContent
+                ]
+            }
+        ]
+    } else {
+        // Standard text-only request
+        messages = [
+            {
+                role: "system",
+                content: systemMessage
             },
             {
                 role: "user",
                 content: prompt
             }
-        ],
+        ]
+    }
+
+    const completion = await openai.chat.completions.create({
+        model,
+        messages,
         temperature: 0.7,
         max_tokens: 3000
     })
@@ -60,14 +118,28 @@ async function generateGutHealthReport(
     return parseAIResponse(response)
 }
 
+function formatFoodRating(foodRating: FoodUploadData): string {
+    if (foodRating.mode === 'text') {
+        return foodRating.textInput || 'No food information provided'
+    } else if (foodRating.mode === 'upload') {
+        const uploadedImages = foodRating.images?.filter(img => img.status === 'uploaded') || []
+        if (uploadedImages.length > 0) {
+            return `${uploadedImages.length} food images uploaded for AI analysis. Please analyze the foods shown in the images and provide personalized gut health recommendations based on what you can identify.`
+        } else {
+            return 'Food images were selected but not successfully uploaded'
+        }
+    }
+    return 'No food rating information available'
+}
+
 function buildComprehensivePrompt(
     formData: OnboardingFormData,
     initialReason?: string,
     userProfile?: { firstName?: string; lastName?: string }
-): string {
+): { prompt: string; hasImages: boolean; imageUrls: string[] } {
     const userName = userProfile?.firstName || "there"
 
-    return `
+    const prompt = `
 # Gut Health Assessment Analysis
 
 Hello ${userName}, I need you to analyze this comprehensive gut health assessment and provide personalized recommendations.
@@ -92,7 +164,7 @@ Hello ${userName}, I need you to analyze this comprehensive gut health assessmen
 - **Dietary Pattern**: ${formData.dietaryPattern}
 - **Cultural Food Preferences**: ${formData.culturalPreference}
 - **Food Sensitivities**: ${Array.isArray(formData.foodSensitivities) ? formData.foodSensitivities.join(', ') : formData.foodSensitivities}
-- **Overall Food Experience Rating**: ${formData.foodRating}
+- **Food Rating**: ${formatFoodRating(formData.foodRating)}
 
 ## Analysis Required
 
@@ -192,6 +264,25 @@ IMPORTANT FORMATTING RULES:
 
 Make your recommendations evidence-based, practical, and personalized to this individual's specific situation. Consider their cultural background, current lifestyle, and primary concerns throughout your analysis.
 `
+
+    // Extract image URLs if food rating includes uploaded images
+    const foodData = formData.foodRating as FoodUploadData
+    const imageUrls: string[] = []
+    const hasImages = foodData.mode === 'upload' && foodData.images && foodData.images.length > 0
+
+    if (hasImages && foodData.images) {
+        foodData.images.forEach(image => {
+            if (image.status === 'uploaded' && image.url) {
+                imageUrls.push(image.url)
+            }
+        })
+    }
+
+    return {
+        prompt,
+        hasImages: Boolean(hasImages && imageUrls.length > 0),
+        imageUrls
+    }
 }
 
 interface ParsedReport {

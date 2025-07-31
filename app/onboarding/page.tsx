@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { 
   OnboardingFormData, 
+  FoodUploadData,
   FORM_QUESTIONS, 
   DEFAULT_FORM_DATA 
 } from '@/types/onboarding'
@@ -16,6 +17,7 @@ import SliderQuestion from '@/components/onboarding/SliderQuestion'
 import ImageSelectQuestion from '@/components/onboarding/ImageSelectQuestion'
 import TextInputQuestion from '@/components/onboarding/TextInputQuestion'
 import TextAreaQuestion from '@/components/onboarding/TextAreaQuestion'
+import FoodUploadQuestion from '@/components/onboarding/FoodUploadQuestion'
 
 // Function to get initial state from localStorage
 const getInitialFormData = (): OnboardingFormData => {
@@ -136,6 +138,17 @@ export default function OnboardingPage() {
         return value !== null && value !== undefined
       case 'multi-select':
         return Array.isArray(value) && value.length > 0
+      case 'food-upload':
+        const foodData = value as FoodUploadData
+        if (!foodData || !foodData.mode) return false
+        
+        if (foodData.mode === 'text') {
+          return !!(foodData.textInput && foodData.textInput.trim().length > 0)
+        } else if (foodData.mode === 'upload') {
+          return !!(foodData.images && foodData.images.length > 0 && 
+            foodData.images.some(img => img.status === 'uploaded'))
+        }
+        return false
       default:
         return true
     }
@@ -190,6 +203,14 @@ export default function OnboardingPage() {
           <TextAreaQuestion 
             question={currentQuestion}
             value={formData[currentQuestion.id] as string}
+            onChange={onChange}
+          />
+        )
+      case 'food-upload':
+        return (
+          <FoodUploadQuestion 
+            question={currentQuestion}
+            value={formData[currentQuestion.id] as FoodUploadData}
             onChange={onChange}
           />
         )

@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import { OnboardingFormData } from '@/types/onboarding'
+import { OnboardingFormData, FoodUploadData } from '@/types/onboarding'
 import {
     InsertAssessment,
     InsertQuestionResponse,
@@ -79,19 +79,39 @@ export async function saveQuestionResponses(
                 } else if (typeof value === 'number') {
                     questionType = 'slider'
                     responseText = value.toString()
+                } else if (questionId === 'foodRating' && typeof value === 'object') {
+                    // Handle FoodUploadData object
+                    questionType = 'food-upload'
+                    const foodData = value as FoodUploadData
+
+                    if (foodData.mode === 'text') {
+                        responseText = foodData.textInput || ''
+                    } else if (foodData.mode === 'upload') {
+                        // Create a summary of uploaded images for responseText
+                        const uploadedImages = foodData.images?.filter(img => img.status === 'uploaded') || []
+                        responseText = uploadedImages.length > 0
+                            ? `${uploadedImages.length} food images uploaded: ${uploadedImages.map(img => img.name).join(', ')}`
+                            : 'No images uploaded'
+                    } else {
+                        responseText = 'Invalid food rating mode'
+                    }
                 } else {
                     // Determine if it's single-select, text-input, text-area, or image-select
                     // You can enhance this logic based on your question configuration
                     if (questionId === 'age') {
                         questionType = 'text-input'
+                        responseText = value.toString()
                     } else if (questionId === 'foodRating') {
+                        // Fallback for legacy string-based food ratings
                         questionType = 'text-area'
+                        responseText = value.toString()
                     } else if (questionId === 'stoolType') {
                         questionType = 'image-select'
+                        responseText = value.toString()
                     } else {
                         questionType = 'single-select'
+                        responseText = value.toString()
                     }
-                    responseText = value.toString()
                 }
 
                 responses.push({
