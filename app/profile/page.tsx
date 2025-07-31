@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { brandFont } from '@/app/fonts'
+import Link from 'next/link'
 
 interface ProfileData {
   firstName: string
@@ -200,9 +201,11 @@ export default function ProfilePage() {
       <div className="w-full max-w-lg h-full flex flex-col relative z-10">
         {/* Brand Title */}
         <div className="pb-5 pt-5">
-          <h1 className={`brand-title text-3xl font-bold text-dark-green ${brandFont.className}`}>
-            GutRoot
-          </h1>
+          <Link href="/">
+            <h1 className="brand-title text-4xl font-bold text-dark-green">
+              GutRoot
+            </h1>
+          </Link>
         </div>
 
         {/* Content */}
