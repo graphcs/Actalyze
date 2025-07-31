@@ -105,7 +105,7 @@ export default function Home() {
              
              {/* Button - Bottom positioned but above screen bottom */}
              <div className="absolute bottom-25 md:bottom-15 left-1/2 transform -translate-x-1/2">
-               <button className="btn-primary rounded-full text-xl text-nowrap md:text-2xl lg:text-3xl xl:text-4xl px-10 md:px-20 lg:px-20 xl:px-20 py-3.5 md:py-5 xl:py-5 font-bold" onClick={handleGetStarted}>
+               <button className="bg-orange-light text-dark-gray cursor-pointer rounded-full text-xl text-nowrap md:text-2xl lg:text-3xl xl:text-4xl px-10 md:px-20 lg:px-20 xl:px-20 py-3.5 md:py-5 xl:py-5 font-semibold" onClick={handleGetStarted}>
                  Start Your Gut Check
                </button>
              </div>
