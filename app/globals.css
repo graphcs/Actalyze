@@ -267,7 +267,7 @@ body {
   font-family: 'Inter', var(--font-sans);
   font-weight: 600;
   cursor: pointer;
-  @apply py-3 px-6 rounded-full;
+  @apply py-3 px-6 rounded-full text-xl text-nowrap;
 }
 
 .btn-secondary {

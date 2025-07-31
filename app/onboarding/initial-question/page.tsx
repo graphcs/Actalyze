@@ -33,10 +33,9 @@ export default function InitialQuestionPage() {
         style={{
           background: `linear-gradient(
             45deg,
-            rgba(245, 166, 35, 0.4) 0%,
-            rgba(245, 166, 35, 0.25) 25%,
-            rgba(255, 244, 230, 0.15) 50%,
-            rgba(255, 244, 230, 0.05) 70%,
+            rgba(248, 234, 190, 1) 0%,
+            rgba(254, 250, 237, 1) 50%,
+            rgba(249, 245, 241, 1) 70%,
             transparent 85%
           )`
         }}
@@ -45,7 +44,7 @@ export default function InitialQuestionPage() {
       {/* Main Container - Centered with full height */}
       <div className="w-full max-w-lg h-full flex flex-col relative z-10">
         {/* Brand Title - Top left of container */}
-        <div className="md:pb-12 mb-8">
+        <div className="md:pb-12 mb-8 md:mt-5 md:mb-0">
           <Link href="/">
             <h1 className="brand-title text-4xl font-bold text-dark-green">
               GutRoot
@@ -57,14 +56,14 @@ export default function InitialQuestionPage() {
         <div className="flex-1 flex items-center justify-center">
           <div className="w-full md:px-2 max-w-sm mx-auto">
         {/* Question with Bubble Image */}
-        <div className="relative">
+        <div className="relative mb-10">
           <img 
             src="/bubble-question.png" 
             alt="Question bubble" 
             className="w-full h-auto"
           />
-          <div className="absolute inset-0 flex items-center justify-center px-8">
-            <p className="text-dark text-xl leading-relaxed text-left font-medium">
+          <div className="absolute inset-0 flex items-start justify-center pt-8 px-8">
+            <p className="text-dark text-2xl leading-relaxed text-left font-medium">
               Hi, I&apos;m your personalized gut health guide. 
               What brings you here today?
             </p>
@@ -77,7 +76,7 @@ export default function InitialQuestionPage() {
             <button
               key={reason}
               onClick={() => setSelectedReason(reason)}
-              className={`w-full py-4 px-6 rounded-full text-dark font-medium transition-all duration-100`}
+              className={`w-full py-4 px-6 text-xl text-nowrap rounded-full text-dark font-medium transition-all duration-100`}
               style={{ 
                 backgroundColor: '#FAE4B2',
                 ...(selectedReason === reason && {
@@ -94,11 +93,11 @@ export default function InitialQuestionPage() {
         </div>
 
         {/* Continue Button */}
-        <div className="fixed bottom-8 left-4 right-4 md:relative md:bottom-auto md:left-auto md:right-auto">
+        <div className="fixed bottom-10 left-4 right-4 md:relative md:bottom-auto md:left-auto md:right-auto">
           <button
             onClick={handleContinue}
             disabled={!selectedReason}
-            className="w-full py-4 px-6 rounded-full font-semibold transition-all duration-200 bg-orange-primary text-dark cursor-pointer disabled:cursor-not-allowed"
+            className="w-full py-4 px-6 rounded-full text-xl text-nowrap font-semibold bg-orange-primary text-dark cursor-pointer disabled:cursor-not-allowed"
           >
             Continue
           </button>
