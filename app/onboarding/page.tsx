@@ -278,10 +278,10 @@ export default function OnboardingPage() {
                 <img 
                   src="/bubble-question.png" 
                   alt="Question bubble" 
-                  className="w-full h-auto"
+                  className="w-full h-[200px]"
                 />
-                <div className="absolute inset-0 flex items-center justify-center px-8">
-                  <p className="text-dark text-xl leading-relaxed text-left font-medium">
+                <div className="absolute inset-0 flex items-start justify-center px-8 pt-8 md:pt-10">
+                  <p className="text-dark text-2xl leading-relaxed text-left font-medium">
                     I will ask you a few quick questions to personalize your plan.
                   </p>
                 </div>
