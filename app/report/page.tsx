@@ -244,11 +244,11 @@ export default function ReportPage() {
         <div className="flex-1 overflow-y-auto pb-8">
           {/* Weekly Digestive Score Section */}
           <div className="mb-6">
-            <h2 className="text-2xl font-semibold text-black mb-4">
+            <h2 className="text-3xl font-semibold text-black mb-4">
               Digestive score
             </h2>
             
-            <div className="flex items-baseline justify-center mb-4">
+            <div className="flex items-baseline justify-center mb-3">
               <span className="text-7xl font-semibold text-orange-primary">
                 {reportData.digestive_score}
               </span>
@@ -257,7 +257,7 @@ export default function ReportPage() {
               </span>
             </div>
             
-            <div className="text-2xl text-center font-medium text-gray-500 mb-2">
+            <div className="text-xl text-center font-medium text-gray-500 mb-2">
               {getScoreDescription(reportData.digestive_score)}
             </div>
 
@@ -265,7 +265,7 @@ export default function ReportPage() {
             <div className="flex justify-center mb-6">
               <Link
                 href="/onboarding/initial-question"
-                className="w-[90%] md:w-[50%] py-4 px-8 bg-orange-light text-dark font-semibold rounded-full text-center"
+                className="w-[90%] md:w-[50%] py-4 px-8 bg-orange-light text-xl text-dark font-semibold rounded-full text-center"
               >
                 + Daily Log
               </Link>
@@ -385,8 +385,8 @@ export default function ReportPage() {
 
           {/* AI Tip of the Week - Highlighted Box */}
           {reportData.ai_tip_of_week && (
-            <div className="bg-orange-pale rounded-lg p-4 mb-8">
-              <h3 className="text-base font-semibold text-black mb-3">
+            <div className="bg-orange-pale rounded-xl p-4 mb-8">
+              <h3 className="text-xl font-semibold text-black mb-3">
                 This week&apos;s power tip
               </h3>
               <div className="text-xl font-medium text-black leading-relaxed">
