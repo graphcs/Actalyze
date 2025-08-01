@@ -80,7 +80,10 @@ const styles = StyleSheet.create({
   scoreSection: {
     backgroundColor: '#FFE8C0',
     borderRadius: 16,
-    padding: 40,
+    paddingTop: 20,
+    paddingBottom: 20,
+    paddingLeft: 40,
+    paddingRight: 40,
     textAlign: 'center',
     marginBottom: 5,
     alignItems: 'center',
@@ -89,7 +92,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#2B2B2B',
-    marginBottom: 20,
+    marginBottom: 10,
   },
   scoreValueContainer: {
     flexDirection: 'row',
@@ -98,7 +101,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   scoreValue: {
-    fontSize: 100,
+    fontSize: 60,
     fontWeight: 'bold',
     color: '#F5A623',
     lineHeight: 1,
