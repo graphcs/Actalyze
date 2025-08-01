@@ -62,6 +62,7 @@ async function generateGutHealthReport(
     const model = "gpt-4.1"
     const systemMessage = "You are a certified nutritionist and gut health specialist with over 15 years of experience. You provide evidence-based, personalized recommendations for improving digestive health. Your advice is practical, actionable, and considers individual lifestyle factors."
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let messages: any[]
 
     if (hasImages && imageUrls.length > 0) {
