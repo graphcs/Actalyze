@@ -25,7 +25,7 @@ export default function ProgressModal({
     }
 
     if (progress.currentStep) {
-      const totalSteps = 12
+      const totalSteps = 13
       return `You're on step ${progress.currentStep} of ${totalSteps} questions`
     }
 

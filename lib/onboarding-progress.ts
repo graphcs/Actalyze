@@ -48,7 +48,7 @@ export function getProgressDescription(progress: OnboardingProgress): string {
     }
 
     if (progress.currentStep) {
-        const totalSteps = 12 // Total number of onboarding steps
+        const totalSteps = 13 // Total number of onboarding steps
         return `You're on step ${progress.currentStep} of ${totalSteps} questions`
     }
 
