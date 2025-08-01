@@ -26,7 +26,7 @@ export default function InitialQuestionPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden">
+    <div className="h-screen flex items-center justify-center px-4 relative overflow-hidden">
       {/* Yellow Gradient Overlay - Bottom Left */}
       <div 
         className="absolute inset-0 w-full h-full pointer-events-none"
@@ -42,9 +42,9 @@ export default function InitialQuestionPage() {
       />
 
       {/* Main Container - Centered with full height */}
-      <div className="w-full max-w-lg h-full flex flex-col relative z-10">
+      <div className="w-full max-w-lg h-screen flex flex-col relative z-10 ">
         {/* Brand Title - Top left of container */}
-        <div className="md:pb-12 mb-8 md:mt-5 md:mb-0">
+        <div className="mt-7">
           <Link href="/">
             <h1 className="brand-title text-4xl font-bold text-dark-green">
               GutRoot
@@ -53,16 +53,16 @@ export default function InitialQuestionPage() {
         </div>
 
         {/* Content - Centered vertically in remaining space */}
-        <div className="flex-1 flex items-center justify-center">
-          <div className="w-full md:px-2 max-w-sm mx-auto">
+        <div className="flex-1 flex flex-col items-center justify-center">
+          <div className="w-full md:px-2 max-w-sm mx-auto flex flex-col h-[80%]">
         {/* Question with Bubble Image */}
-        <div className="relative mb-10">
+        <div className="relative mb-4">
           <img 
             src="/bubble-question.png" 
             alt="Question bubble" 
             className="w-full h-auto"
           />
-          <div className="absolute inset-0 flex items-start justify-center pt-8 px-8">
+          <div className="absolute inset-0 pt-8 px-8">
             <p className="text-dark text-2xl leading-relaxed text-left font-medium">
               Hi, I&apos;m your personalized gut health guide. 
               What brings you here today?
@@ -71,7 +71,8 @@ export default function InitialQuestionPage() {
         </div>
 
         {/* Choice Buttons */}
-        <div className="space-y-4 mb-12">
+        <div className="flex-1 question-scroll">
+        <div className="space-y-4">
           {reasons.map((reason) => (
             <button
               key={reason}
@@ -92,16 +93,18 @@ export default function InitialQuestionPage() {
           ))}
         </div>
 
-        {/* Continue Button */}
-        <div className="fixed bottom-10 left-4 right-4 md:relative md:bottom-auto md:left-auto md:right-auto">
-          <button
-            onClick={handleContinue}
-            disabled={!selectedReason}
-            className="w-full py-4 px-6 rounded-full text-xl text-nowrap font-semibold bg-orange-primary text-dark cursor-pointer disabled:cursor-not-allowed"
-          >
-            Continue
-          </button>
         </div>
+
+                  {/* Continue Button */}
+          <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 w-full max-w-sm px-4 md:px-3">
+            <button
+              onClick={handleContinue}
+              disabled={!selectedReason}
+              className="w-full py-4 px-6 rounded-full text-xl text-nowrap font-semibold bg-orange-primary text-dark cursor-pointer disabled:cursor-not-allowed"
+            >
+              Continue
+            </button>
+          </div>
           </div>
         </div>
       </div>

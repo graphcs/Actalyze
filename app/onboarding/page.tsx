@@ -17,6 +17,7 @@ import SliderQuestion from '@/components/onboarding/SliderQuestion'
 import ImageSelectQuestion from '@/components/onboarding/ImageSelectQuestion'
 import TextInputQuestion from '@/components/onboarding/TextInputQuestion'
 import TextAreaQuestion from '@/components/onboarding/TextAreaQuestion'
+import ModeSelectQuestion from '@/components/onboarding/ModeSelectQuestion'
 import FoodUploadQuestion from '@/components/onboarding/FoodUploadQuestion'
 
 // Function to get initial state from localStorage
@@ -99,10 +100,28 @@ export default function OnboardingPage() {
   }
 
   const updateFormData = (field: keyof OnboardingFormData, value: unknown) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }))
+    setFormData(prev => {
+      // Smart data clearing logic for food mode changes
+      if (field === 'foodMode' && prev.foodMode && prev.foodMode !== value) {
+        // Mode changed - clear food rating data but preserve the new mode
+        const newMode = value as 'text' | 'upload'
+        console.log(`Food mode changed from ${prev.foodMode} to ${newMode} - clearing food data`)
+        return {
+          ...prev,
+          foodMode: newMode,
+          foodRating: {
+            mode: newMode,
+            textInput: '',
+            images: []
+          }
+        }
+      }
+      
+      return {
+        ...prev,
+        [field]: value
+      }
+    })
   }
 
   const handleNext = () => {
@@ -133,6 +152,7 @@ export default function OnboardingPage() {
       case 'image-select':
       case 'text-input':
       case 'text-area':
+      case 'mode-select':
         return value !== '' && value !== null && value !== undefined
       case 'slider':
         return value !== null && value !== undefined
@@ -140,11 +160,12 @@ export default function OnboardingPage() {
         return Array.isArray(value) && value.length > 0
       case 'food-upload':
         const foodData = value as FoodUploadData
-        if (!foodData || !foodData.mode) return false
+        const selectedMode = formData.foodMode
+        if (!selectedMode) return false
         
-        if (foodData.mode === 'text') {
+        if (selectedMode === 'text') {
           return !!(foodData.textInput && foodData.textInput.trim().length > 0)
-        } else if (foodData.mode === 'upload') {
+        } else if (selectedMode === 'upload') {
           return !!(foodData.images && foodData.images.length > 0 && 
             foodData.images.some(img => img.status === 'uploaded'))
         }
@@ -206,12 +227,21 @@ export default function OnboardingPage() {
             onChange={onChange}
           />
         )
+      case 'mode-select':
+        return (
+          <ModeSelectQuestion 
+            question={currentQuestion}
+            value={formData[currentQuestion.id] as string}
+            onChange={onChange}
+          />
+        )
       case 'food-upload':
         return (
           <FoodUploadQuestion 
             question={currentQuestion}
             value={formData[currentQuestion.id] as FoodUploadData}
             onChange={onChange}
+            mode={formData.foodMode as 'text' | 'upload'}
           />
         )
       default:
@@ -251,7 +281,7 @@ export default function OnboardingPage() {
           <div className="flex items-center">
             <button 
               onClick={handleBack}
-              className="mr-4 p-2 bg-white rounded-full hover:opacity-70 transition-opacity shadow-sm"
+              className="mr-4 p-2 bg-white rounded-full cursor-pointer"
             >
               <img src="/back-arrow.png" alt="Back" className="w-6 h-6" />
             </button>
@@ -313,12 +343,12 @@ export default function OnboardingPage() {
             </div>
 
             {/* Continue Button */}
-            <div className="fixed bottom-8 left-4 right-4">
+            <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 w-full max-w-sm px-4 md:px-0">
               <div className="flex justify-center">
                 <button
                   onClick={handleNext}
                   disabled={currentQuestion.required && !isStepValid()}
-                  className="w-full md:w-[80%] max-w-md py-4 text-xl rounded-full font-semibold transition-all duration-200 bg-orange-primary text-dark cursor-pointer disabled:cursor-not-allowed"
+                  className="w-full py-4 px-6 text-xl text-nowrap rounded-full font-semibold transition-all duration-200 bg-orange-primary text-dark cursor-pointer disabled:cursor-not-allowed"
                 >
                   {currentStep === totalSteps - 1 ? 'Submit' : 'Continue'}
                 </button>

@@ -30,23 +30,23 @@ export default function ImageSelectQuestion({ question, value, onChange }: Image
                 })
               }}
             >
-              <div className="text-left">
+              <div className="text-left h-full flex flex-col">
                 
                 {/* Title */}
-                <div className="font-semibold text-black text-lg mb-1">
+                <div className="font-semibold text-black text-lg">
                   {option.title}
                 </div>
                 
                 {/* Description */}
-                <div className="text-sm font-medium text-black leading-tight mb-1">
+                <div className="text-sm font-medium text-black leading-tight">
                   {option.description}
                 </div>
                 {/* Image */}
-                <div className="mb-3 flex justify-center">
+                <div className="flex justify-center flex-1 items-center">
                   <img 
                     src={option.imageSrc} 
                     alt={option.title}
-                    className="w-full h-16 object-contain"
+                    className="w-full h-full object-contain"
                   />
                 </div>
               </div>

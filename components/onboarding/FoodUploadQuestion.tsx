@@ -9,73 +9,27 @@ interface FoodUploadQuestionProps {
   question: FormQuestion
   value: FoodUploadData
   onChange: (value: FoodUploadData) => void
+  mode: 'text' | 'upload'
 }
 
-export default function FoodUploadQuestion({ question, value, onChange }: FoodUploadQuestionProps) {
+export default function FoodUploadQuestion({ question, value, onChange, mode }: FoodUploadQuestionProps) {
   const { user } = useAuth()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [isUploading, setIsUploading] = useState(false)
-  const [currentStep, setCurrentStep] = useState<'selection' | 'input'>('selection')
 
-  // Always start at step 1 (selection) regardless of existing data
+  // Set mode when component mounts or mode changes
   useEffect(() => {
-    setCurrentStep('selection')
-  }, [])
+    if (value.mode !== mode) {
+      onChange({
+        mode,
+        textInput: mode === 'text' ? value.textInput || '' : '',
+        images: mode === 'upload' ? value.images || [] : []
+      })
+    }
+  }, [mode, value.mode, onChange, value.textInput, value.images])
 
-  // Handle mode selection
-  const handleModeChange = useCallback(async (mode: 'text' | 'upload') => {
-    // Clean up any uploaded images when switching modes
-    if (mode === 'text' && value.mode === 'upload') {
-      const uploadedImages = (value.images || []).filter(img => img.status === 'uploaded' && img.url)
-      if (uploadedImages.length > 0) {
-        try {
-          const imageUrls = uploadedImages.map(img => img.url!)
-          await deleteFoodImages(imageUrls)
-          console.log('Cleaned up uploaded images on mode change:', uploadedImages.length)
-        } catch (error) {
-          console.error('Failed to cleanup images on mode change:', error)
-          // Continue anyway
-        }
-      }
-    }
-    
-    // Clear all data and set new mode
-    const newValue: FoodUploadData = {
-      mode,
-      textInput: mode === 'text' ? '' : undefined,
-      images: mode === 'upload' ? [] : undefined
-    }
-    
-    onChange(newValue)
-    setCurrentStep('input')
-  }, [value.mode, value.images, onChange])
 
-  // Handle back navigation
-  const handleBack = useCallback(async () => {
-    // Clean up any uploaded images from storage
-    const uploadedImages = (value.images || []).filter(img => img.status === 'uploaded' && img.url)
-    if (uploadedImages.length > 0) {
-      try {
-        const imageUrls = uploadedImages.map(img => img.url!)
-        await deleteFoodImages(imageUrls)
-        console.log('Cleaned up uploaded images on back navigation:', uploadedImages.length)
-      } catch (error) {
-        console.error('Failed to cleanup images on back navigation:', error)
-        // Continue anyway
-      }
-    }
-    
-    // Clear all data and return to selection step
-    const newValue: FoodUploadData = {
-      mode: 'text', // Default mode
-      textInput: '',
-      images: []
-    }
-    
-    onChange(newValue)
-    setCurrentStep('selection')
-  }, [value.images, onChange])
 
   // Handle text input change
   const handleTextChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -180,55 +134,12 @@ export default function FoodUploadQuestion({ question, value, onChange }: FoodUp
   const currentImages = value.images || []
   const canAddMore = currentImages.length < 3
 
-  // Step 1: Mode Selection
-  if (currentStep === 'selection') {
-    return (
-      <div className="space-y-6">
-
-        {/* Mode Selection Buttons */}
-        <div className="grid grid-rows-2 gap-4">
-          <button
-            type="button"
-            onClick={() => handleModeChange('upload')}
-            className="py-4 px-6 w-full md:w-3/4 mx-auto rounded-full font-medium text-base bg-orange-light text-dark-gray cursor-pointer"
-          >
-            Upload (AI)
-          </button>
-          
-          <button
-            type="button"
-            onClick={() => handleModeChange('text')}
-            className="py-4 px-6 w-full md:w-3/4 mx-auto rounded-full font-medium text-base bg-orange-light text-dark-gray cursor-pointer"
-          >
-            List (Manual)
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  // Step 2: Input Based on Selected Mode
+  // Always render input form based on the mode prop
   return (
     <div className="space-y-6">
 
-      {/* Back Button */}
-      <div className="mb-6">
-        <button
-          type="button"
-          onClick={handleBack}
-          className="flex items-center gap-2 text-dark-gray cursor-pointer"
-        >
-          <img 
-            src="/back-arrow.png" 
-            alt="Back" 
-            className="w-6 h-6"
-          />
-          <span className="text-base font-medium">Back to selection</span>
-        </button>
-      </div>
-
       {/* Text Input Mode */}
-      {value.mode === 'text' && (
+      {mode === 'text' && (
         <div className="space-y-4">
           <textarea
             placeholder={question.placeholder}
@@ -241,7 +152,8 @@ export default function FoodUploadQuestion({ question, value, onChange }: FoodUp
       )}
 
       {/* Image Upload Mode */}
-      {value.mode === 'upload' && (
+      {mode === 'upload' && (
+        <div className="food-scroll pr-4 pt-3">
         <div className="space-y-4">
           {/* Image Placeholders/Preview */}
           <div className="grid grid-cols-3 gap-4 mb-6">
@@ -261,16 +173,12 @@ export default function FoodUploadQuestion({ question, value, onChange }: FoodUp
                     <>
                       {/* Image Preview */}
                       <div className="w-full h-full rounded-lg overflow-hidden">
-                        {image.thumbnail ? (
+                        {image.thumbnail && (
                           <img
                             src={image.thumbnail}
                             alt={image.name}
                             className="w-full h-full object-cover"
                           />
-                        ) : (
-                          <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                            <span className="text-gray-500 text-sm">Loading...</span>
-                          </div>
                         )}
                       </div>
 
@@ -289,16 +197,16 @@ export default function FoodUploadQuestion({ question, value, onChange }: FoodUp
                       )}
 
                       {image.status === 'error' && (
-                        <div className="absolute inset-0 bg-red-500 bg-opacity-80 rounded-lg flex items-center justify-center">
-                          <div className="text-white text-center px-2">
+                        <div className="absolute inset-0 bg-orange-pale bg-opacity-80 rounded-lg flex items-center justify-center">
+                          <div className="text-dark-gray text-center px-2">
                             <div className="text-xl mb-1">⚠️</div>
-                            <div className="text-xs">{image.error}</div>
+                            <div className="text-sm">{image.error}</div>
                           </div>
                         </div>
                       )}
 
                       {/* Close Button */}
-                      {image.status === 'uploaded' && (
+                      {(image.status === 'uploaded' || image.status === 'error') && (
                         <div className="absolute -top-3 -right-3">
                           <button
                             type="button"
@@ -316,7 +224,7 @@ export default function FoodUploadQuestion({ question, value, onChange }: FoodUp
                       )}
 
                       {/* File Name */}
-                      <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-70 text-white text-xs p-1 rounded-b-lg truncate">
+                      <div className="absolute bottom-0 left-0 right-0 bg-orange-pale bg-opacity-70 text-dark-gray text-xs p-1 rounded-b-lg truncate">
                         {image.name}
                       </div>
                     </>
@@ -334,7 +242,7 @@ export default function FoodUploadQuestion({ question, value, onChange }: FoodUp
             type="button"
             onClick={triggerFilePicker}
             disabled={!canAddMore || isUploading}
-            className={`py-4 px-6 w-full md:w-3/4 mx-auto flex items-center justify-center rounded-full font-medium text-base bg-orange-light text-dark-gray ${
+            className={`py-4 px-6 w-full md:w-3/4 mx-auto text-xl flex items-center justify-center rounded-full font-semibold bg-orange-light text-dark-gray ${
               canAddMore && !isUploading
                 ? 'cursor-pointer'
                 : 'cursor-not-allowed'
@@ -352,6 +260,7 @@ export default function FoodUploadQuestion({ question, value, onChange }: FoodUp
             className="hidden"
             onChange={handleFileInputChange}
           />
+          </div>
         </div>
       )}
     </div>

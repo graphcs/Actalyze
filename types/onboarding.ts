@@ -31,13 +31,14 @@ export interface OnboardingFormData {
     culturalPreference: string
     foodSensitivities: string[]
     stoolType: string
+    foodMode: 'text' | 'upload' | ''
     foodRating: FoodUploadData
 }
 
 export interface FormQuestion {
     id: keyof OnboardingFormData
     title: string
-    type: 'single-select' | 'multi-select' | 'slider' | 'image-select' | 'text-input' | 'text-area' | 'food-upload'
+    type: 'single-select' | 'multi-select' | 'slider' | 'image-select' | 'text-input' | 'text-area' | 'mode-select' | 'food-upload'
     required: boolean
     options?: QuestionOption[]
     sliderConfig?: SliderConfig
@@ -285,6 +286,17 @@ export const FORM_QUESTIONS: FormQuestion[] = [
         ]
     },
     {
+        id: 'foodMode',
+        title: 'Tell me 3 foods from your fridge or pantry I will rate them for gut health.',
+        type: 'mode-select',
+        required: true,
+        showBubble: true,
+        options: [
+            { value: 'upload', label: 'Upload (AI)' },
+            { value: 'text', label: 'List (Manual)' }
+        ]
+    },
+    {
         id: 'foodRating',
         title: 'Tell me 3 foods from your fridge or pantry I will rate them for gut health.',
         type: 'food-upload',
@@ -308,6 +320,7 @@ export const DEFAULT_FORM_DATA: OnboardingFormData = {
     culturalPreference: '',
     foodSensitivities: [],
     stoolType: '',
+    foodMode: '',
     foodRating: {
         mode: 'text',
         textInput: '',
