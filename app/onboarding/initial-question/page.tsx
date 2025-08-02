@@ -63,7 +63,7 @@ export default function InitialQuestionPage() {
             className="w-full h-auto"
           />
           <div className="absolute inset-0 pt-8 px-8">
-            <p className="text-dark text-2xl leading-relaxed text-left font-medium">
+            <p className="text-dark text-xl md:text-2xl leading-relaxed text-left font-medium">
               Hi, I&apos;m your personalized gut health guide. 
               What brings you here today?
             </p>
