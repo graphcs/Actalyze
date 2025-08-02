@@ -174,20 +174,6 @@ export default function FoodUploadQuestion({ question, value, onChange, mode, on
                   )}
                 </div>
 
-                {/* Image Status Overlay */}
-                {image.status === 'uploading' && (
-                  <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center">
-                    <div className="text-white text-center">
-                      <div className="mb-2">
-                        <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>
-                      </div>
-                      <div className="text-sm">
-                        {image.uploadProgress || 0}%
-                      </div>
-                    </div>
-                  </div>
-                )}
-
                 {image.status === 'error' && (
                   <div className="absolute inset-0 bg-orange-pale bg-opacity-80 rounded-lg flex items-center justify-center">
                     <div className="text-dark-gray text-center px-2">
