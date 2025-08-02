@@ -233,6 +233,7 @@ export default function OnboardingPage() {
             question={currentQuestion}
             value={formData[currentQuestion.id] as string}
             onChange={onChange}
+            onModeSelected={handleNext}
           />
         )
       case 'food-upload':
@@ -242,6 +243,7 @@ export default function OnboardingPage() {
             value={formData[currentQuestion.id] as FoodUploadData}
             onChange={onChange}
             mode={formData.foodMode as 'text' | 'upload'}
+            onSubmit={formData.foodMode === 'upload' ? handleNext : undefined}
           />
         )
       default:
@@ -329,7 +331,9 @@ export default function OnboardingPage() {
                   />
                   <div className="absolute inset-0 flex items-start justify-center px-8 pt-8 md:pt-10">
                     <p className="text-dark text-2xl leading-relaxed text-start font-medium">
-                      {currentQuestion.title}
+                      {currentQuestion.type === 'food-upload' && formData.foodMode === 'upload' 
+                        ? "Upload images of 3 food in your fridge or pantry." 
+                        : currentQuestion.title}
                     </p>
                   </div>
                 </div>
@@ -342,18 +346,20 @@ export default function OnboardingPage() {
               {renderQuestion()}
             </div>
 
-            {/* Continue Button */}
-            <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 w-full max-w-sm px-4 md:px-0">
-              <div className="flex justify-center">
-                <button
-                  onClick={handleNext}
-                  disabled={currentQuestion.required && !isStepValid()}
-                  className="w-full py-4 px-6 text-xl text-nowrap rounded-full font-semibold transition-all duration-200 bg-orange-primary text-dark cursor-pointer disabled:cursor-not-allowed"
-                >
-                  {currentStep === totalSteps - 1 ? 'Submit' : 'Continue'}
-                </button>
+            {/* Continue Button - Hidden for mode-select (auto-progress) and upload mode in food-upload step */}
+            {!(currentQuestion.type === 'mode-select' || (currentQuestion.type === 'food-upload' && formData.foodMode === 'upload')) && (
+              <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 w-full max-w-sm px-4 md:px-0">
+                <div className="flex justify-center">
+                  <button
+                    onClick={handleNext}
+                    disabled={currentQuestion.required && !isStepValid()}
+                    className="w-full py-4 px-6 text-xl text-nowrap rounded-full font-semibold transition-all duration-200 bg-orange-primary text-dark cursor-pointer disabled:cursor-not-allowed"
+                  >
+                    {currentStep === totalSteps - 1 ? 'Submit' : 'Continue'}
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

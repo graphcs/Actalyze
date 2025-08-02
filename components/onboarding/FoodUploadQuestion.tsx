@@ -1,18 +1,19 @@
 'use client'
 
-import { FormQuestion, FoodUploadData, FoodImage } from '@/types/onboarding'
+import { FormQuestion, FoodUploadData } from '@/types/onboarding'
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { useAuth } from '@/lib/auth'
-import { processFoodImages, validateImageFile, deleteFoodImages } from '@/lib/food-image-upload'
+import { processFoodImages, deleteFoodImages } from '@/lib/food-image-upload'
 
 interface FoodUploadQuestionProps {
   question: FormQuestion
   value: FoodUploadData
   onChange: (value: FoodUploadData) => void
   mode: 'text' | 'upload'
+  onSubmit?: () => void
 }
 
-export default function FoodUploadQuestion({ question, value, onChange, mode }: FoodUploadQuestionProps) {
+export default function FoodUploadQuestion({ question, value, onChange, mode, onSubmit }: FoodUploadQuestionProps) {
   const { user } = useAuth()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -132,7 +133,6 @@ export default function FoodUploadQuestion({ question, value, onChange, mode }: 
   }, [])
 
   const currentImages = value.images || []
-  const canAddMore = currentImages.length < 3
 
   // Always render input form based on the mode prop
   return (
@@ -155,95 +155,97 @@ export default function FoodUploadQuestion({ question, value, onChange, mode }: 
       {mode === 'upload' && (
         <div className="food-scroll pr-4 pt-3">
         <div className="space-y-4">
-          {/* Image Placeholders/Preview */}
-          <div className="grid grid-cols-3 gap-4 mb-6">
-            {Array.from({ length: 3 }, (_, index) => {
-              const image = currentImages[index]
-              
-              return (
-                <div
-                  key={index}
-                  className={`relative aspect-square rounded-lg transition-all duration-200 ${
-                    image
-                      ? 'bg-white'
-                      : 'bg-orange-pale'
-                  }`}
-                >
-                  {image ? (
-                    <>
-                      {/* Image Preview */}
-                      <div className="w-full h-full rounded-lg overflow-hidden">
-                        {image.thumbnail && (
-                          <img
-                            src={image.thumbnail}
-                            alt={image.name}
-                            className="w-full h-full object-cover"
-                          />
-                        )}
-                      </div>
-
-                      {/* Image Status Overlay */}
-                      {image.status === 'uploading' && (
-                        <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center">
-                          <div className="text-white text-center">
-                            <div className="mb-2">
-                              <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>
-                            </div>
-                            <div className="text-sm">
-                              {image.uploadProgress || 0}%
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {image.status === 'error' && (
-                        <div className="absolute inset-0 bg-orange-pale bg-opacity-80 rounded-lg flex items-center justify-center">
-                          <div className="text-dark-gray text-center px-2">
-                            <div className="text-xl mb-1">⚠️</div>
-                            <div className="text-sm">{image.error}</div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Close Button */}
-                      {(image.status === 'uploaded' || image.status === 'error') && (
-                        <div className="absolute -top-3 -right-3">
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveImage(image.id)}
-                            className="w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-sm cursor-pointer"
-                            title="Remove"
-                          >
-                            <img 
-                              src="/Close.png" 
-                              alt="Close" 
-                              className="w-3 h-3"
-                            />
-                          </button>
-                        </div>
-                      )}
-
-                      {/* File Name */}
-                      <div className="absolute bottom-0 left-0 right-0 bg-orange-pale bg-opacity-70 text-dark-gray text-xs p-1 rounded-b-lg truncate">
-                        {image.name}
-                      </div>
-                    </>
-                  ) : (
-                    /* Empty Placeholder */
-                    <div className="w-full h-full rounded-lg"></div>
+          {/* Dynamic Image Gallery */}
+          <div className="grid grid-cols-3 gap-4 mb-10">
+            {/* Uploaded Images */}
+            {currentImages.map((image) => (
+              <div
+                key={image.id}
+                className="relative aspect-square rounded-lg bg-white"
+              >
+                {/* Image Preview */}
+                <div className="w-full h-full rounded-lg overflow-hidden">
+                  {image.thumbnail && (
+                    <img
+                      src={image.thumbnail}
+                      alt={image.name}
+                      className="w-full h-full object-cover"
+                    />
                   )}
                 </div>
-              )
-            })}
+
+                {/* Image Status Overlay */}
+                {image.status === 'uploading' && (
+                  <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center">
+                    <div className="text-white text-center">
+                      <div className="mb-2">
+                        <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>
+                      </div>
+                      <div className="text-sm">
+                        {image.uploadProgress || 0}%
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {image.status === 'error' && (
+                  <div className="absolute inset-0 bg-orange-pale bg-opacity-80 rounded-lg flex items-center justify-center">
+                    <div className="text-dark-gray text-center px-2">
+                      <div className="text-xl mb-1">⚠️</div>
+                      <div className="text-sm">{image.error}</div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Close Button */}
+                {(image.status === 'uploaded' || image.status === 'error') && (
+                  <div className="absolute -top-3 -right-3">
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveImage(image.id)}
+                      className="w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-sm cursor-pointer"
+                      title="Remove"
+                    >
+                      <img 
+                        src="/Close.png" 
+                        alt="Close" 
+                        className="w-3 h-3"
+                      />
+                    </button>
+                  </div>
+                )}
+
+                {/* File Name */}
+                <div className="absolute bottom-0 left-0 right-0 bg-orange-pale bg-opacity-70 text-dark-gray text-xs p-1 rounded-b-lg truncate">
+                  {image.name}
+                </div>
+              </div>
+            ))}
+
+            {/* Dynamic Placeholder - only show if less than 3 images */}
+            {currentImages.length < 3 && (
+              <div
+                onClick={triggerFilePicker}
+                className="relative aspect-square rounded-lg bg-transparent cursor-pointer border-2 border-gray-400 flex items-center justify-center"
+              >
+                <div className="text-dark-gray text-center">
+                  <img 
+                    src="/Plus.png" 
+                    alt="Plus" 
+                    className="w-8 h-8"
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Upload Button */}
+          {/* Upload/Submit Button */}
           <button
             type="button"
-            onClick={triggerFilePicker}
-            disabled={!canAddMore || isUploading}
+            onClick={onSubmit}
+            disabled={currentImages.length === 0 || isUploading}
             className={`py-4 px-6 w-full md:w-3/4 mx-auto text-xl flex items-center justify-center rounded-full font-semibold bg-orange-light text-dark-gray ${
-              canAddMore && !isUploading
+              currentImages.length > 0 && !isUploading
                 ? 'cursor-pointer'
                 : 'cursor-not-allowed'
             }`}
