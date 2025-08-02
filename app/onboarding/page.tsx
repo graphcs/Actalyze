@@ -312,7 +312,7 @@ export default function OnboardingPage() {
                   className="w-full h-[200px]"
                 />
                 <div className="absolute inset-0 flex items-start justify-center px-8 pt-8 md:pt-10">
-                  <p className="text-dark text-2xl leading-relaxed text-left font-medium">
+                  <p className="text-dark text-xl md:text-2xl leading-relaxed text-left font-medium">
                     I will ask you a few quick questions to personalize your plan.
                   </p>
                 </div>
@@ -330,7 +330,8 @@ export default function OnboardingPage() {
                     className="w-full h-[200px]"
                   />
                   <div className="absolute inset-0 flex items-start justify-center px-8 pt-8 md:pt-10">
-                    <p className="text-dark text-2xl leading-relaxed text-start font-medium">
+                    <p className={`text-dark leading-relaxed text-start font-medium ${
+                      currentQuestion.type === 'food-upload' && formData.foodMode === 'upload' ? 'text-2xl' : 'text-xl md:text-2xl'}`}>
                       {currentQuestion.type === 'food-upload' && formData.foodMode === 'upload' 
                         ? "Upload images of 3 food in your fridge or pantry." 
                         : currentQuestion.title}

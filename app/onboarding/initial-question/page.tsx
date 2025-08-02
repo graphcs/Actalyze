@@ -60,7 +60,7 @@ export default function InitialQuestionPage() {
           <img 
             src="/bubble-question.png" 
             alt="Question bubble" 
-            className="w-full h-auto"
+            className="w-full h-45 md:h-auto"
           />
           <div className="absolute inset-0 pt-8 px-8">
             <p className="text-dark text-xl md:text-2xl leading-relaxed text-left font-medium">
