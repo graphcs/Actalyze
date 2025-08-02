@@ -78,9 +78,9 @@ export default function Home() {
             mixBlendMode: 'multiply'
           }}
         />
-        <div className="h-screen w-screen flex flex-col items-center">
-           <div className="relative w-full md:max-w-3xl xl:max-w-5xl h-full">
-             <div className='absolute inset-0 w-full h-full -z-1 md:max-w-3xl xl:max-w-5xl mx-auto'>
+        <div className="h-screen w-screen flex flex-col items-center overflow-hidden">
+           <div className="relative w-full md:max-w-4xl xl:max-w-5xl h-full overflow-hidden">
+             <div className='absolute inset-0 w-full h-full -z-1 mx-auto'>
                <img src="/green-desktop-banner.png" alt="GutRoot" className="w-full h-full object-cover hidden md:block" />
                <img src="/green-mobile-banner.png" alt="GutRoot" className="w-full h-full object-cover block md:hidden" />
              </div>
