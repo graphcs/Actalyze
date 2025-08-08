@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '@/lib/auth'
 import { useRouter } from 'next/navigation'
 import { checkOnboardingProgress, clearOnboardingProgress, OnboardingProgress } from '@/lib/onboarding-progress'
@@ -11,6 +11,14 @@ export default function Home() {
   const router = useRouter()
   const [showProgressModal, setShowProgressModal] = useState(false)
   const [existingProgress, setExistingProgress] = useState<OnboardingProgress>({ hasProgress: false })
+
+  // Prevent body scrolling when on home page
+  useEffect(() => {
+    document.body.classList.add('home-page')
+    return () => {
+      document.body.classList.remove('home-page')
+    }
+  }, [])
 
   const handleGetStarted = () => {
     if (!isAuthenticated) {
@@ -63,8 +71,22 @@ export default function Home() {
   }
 
   return (
-    <>
-        {/* Gradient Overlay - Bottom Right to Top Left */}
+    <div className="fixed inset-0 w-full h-full overflow-hidden">
+        {/* Background Images - Fixed */}
+        <div className="absolute inset-0 w-full h-full">
+          <img 
+            src="/green-desktop-banner.png" 
+            alt="GutRoot" 
+            className="w-full h-full object-cover hidden md:block" 
+          />
+          <img 
+            src="/green-mobile-banner.png" 
+            alt="GutRoot" 
+            className="w-full h-full object-cover block md:hidden" 
+          />
+        </div>
+
+        {/* Gradient Overlay - Fixed */}
         <div 
           className="absolute inset-0 w-full h-full"
           style={{
@@ -78,12 +100,10 @@ export default function Home() {
             mixBlendMode: 'multiply'
           }}
         />
-        <div className="h-screen w-screen flex flex-col items-center overflow-hidden">
-           <div className="relative w-full md:max-w-4xl xl:max-w-5xl h-full overflow-hidden">
-             <div className='absolute inset-0 w-full h-full -z-1 mx-auto'>
-               <img src="/green-desktop-banner.png" alt="GutRoot" className="w-full h-full object-cover hidden md:block" />
-               <img src="/green-mobile-banner.png" alt="GutRoot" className="w-full h-full object-cover block md:hidden" />
-             </div>
+
+        {/* Content Container */}
+        <div className="relative w-full h-full flex flex-col items-center justify-center">
+          <div className="relative w-full md:max-w-4xl xl:max-w-5xl h-full">
              
              {/* Brand Title - Top positioned */}
              <div className="absolute top-8 md:top-12 left-5 md:left-25">
@@ -112,6 +132,7 @@ export default function Home() {
 
            </div>
          </div>
+
       {/* Progress Modal */}
       <ProgressModal
         isOpen={showProgressModal}
@@ -120,6 +141,6 @@ export default function Home() {
         onStartOver={handleStartOver}
         onClose={handleCloseModal}
       />
-    </>
+    </div>
   );
 }

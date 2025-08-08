@@ -260,6 +260,12 @@ body {
   overflow: hidden;
 }
 
+/* Prevent scrolling on home page */
+.home-page {
+  height: 100vh;
+  overflow: hidden;
+}
+
 /* Custom Component Classes */
 .btn-primary {
   background-color: var(--color-orange-light);
