@@ -18,6 +18,7 @@ import {
 export async function createAssessment(data: {
     initialReason?: string
     assessmentType?: 'daily_check' | 'full_assessment' | 'follow_up'
+    status?: 'draft' | 'completed'
 }): Promise<{ assessment: Assessment | null; error: string | null }> {
     try {
         const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -30,7 +31,7 @@ export async function createAssessment(data: {
             user_id: user.id,
             initial_reason: data.initialReason,
             assessment_type: data.assessmentType || 'full_assessment',
-            status: 'completed'
+            status: data.status || 'completed'
         }
 
         const { data: assessment, error } = await supabase
@@ -302,7 +303,9 @@ export async function saveSymptomPatterns(
     }
 }
 
-// Comprehensive save function
+
+
+// Complete assessment save function
 export async function saveCompleteAssessment(
     formData: OnboardingFormData,
     initialReason?: string

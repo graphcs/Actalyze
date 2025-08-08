@@ -14,12 +14,14 @@ import ProgressModal from '@/components/ProgressModal'
 export default function OnboardingCompletePage() {
   const [email, setEmail] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSubmissionComplete, setIsSubmissionComplete] = useState(false)
   const [formData, setFormData] = useState<OnboardingFormData | null>(null)
   const [, setProcessingStage] = useState('')
   const [isValidating, setIsValidating] = useState(true)
   const [hasValidAccess, setHasValidAccess] = useState(false)
   const [showProgressModal, setShowProgressModal] = useState(false)
   const [progressData, setProgressData] = useState<OnboardingProgress | null>(null)
+
   const router = useRouter()
 
   useEffect(() => {
@@ -99,81 +101,54 @@ export default function OnboardingCompletePage() {
     try {
       setProcessingStage('Saving your assessment...')
       
-      // Get user profile data
-      const { getUserProfile } = await import('@/lib/database')
-      const { profile, error: profileError } = await getUserProfile()
-      
-      if (profileError) {
+      // Save assessment and get user profile in parallel for optimized performance
+      const [profileResult, assessmentResult] = await Promise.all([
+        // Get user profile data
+        (async () => {
+          try {
+            const { getUserProfile } = await import('@/lib/database')
+            const { profile, error } = await getUserProfile()
+            return { profile, error }
+          } catch (error) {
+            return { profile: null, error: 'Failed to get user profile' }
+          }
+        })(),
+        
+        // Save assessment to database
+        (async () => {
+          if (!formData) {
+            return { assessmentId: null, error: 'No form data available' }
+          }
+          
+          try {
+            const { saveCompleteAssessment } = await import('@/lib/database')
+            const initialReason = localStorage.getItem('gutRootInitialReason')
+            const result = await saveCompleteAssessment(formData, initialReason || undefined)
+            return result
+          } catch (error) {
+            return { assessmentId: null, error: `Assessment save failed` }
+          }
+        })()
+      ])
+
+      // Handle results
+      const profile = profileResult.profile
+      if (profileResult.error) {
         console.error('Failed to get user profile')
       }
-      
+
+      const { assessmentId, error: assessmentError } = assessmentResult
+      if (assessmentError || !assessmentId) {
+        console.error('Failed to save assessment')
+        throw new Error(assessmentError || 'No assessment ID available for report generation')
+      }
+
       // Extract user name for personalization (fallback to 'there' if not available)
       const firstName = profile?.first_name || 'there'
       const lastName = profile?.last_name || undefined
 
-      // Save assessment to database
-      let assessmentId = null
-      if (formData) {
-        const { saveCompleteAssessment } = await import('@/lib/database')
-        
-        const initialReason = localStorage.getItem('gutRootInitialReason')
-        const { assessmentId: savedAssessmentId, error } = await saveCompleteAssessment(
-          formData, 
-          initialReason || undefined
-        )
-
-        if (error) {
-          console.error('Failed to save assessment')
-          throw new Error(`Assessment save failed: ${error}`)
-        } else {
-          assessmentId = savedAssessmentId
-        }
-      }
-
-      if (!assessmentId) {
-        throw new Error('No assessment ID available for report generation')
-      }
-
-      setProcessingStage('Analyzing your gut health...')
+      setProcessingStage('Generating your personalized report...')
       
-      // Generate AI report
-      const reportResponse = await fetch('/api/generate-report', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          formData,
-          initialReason: localStorage.getItem('gutRootInitialReason'),
-          userProfile: {
-            firstName: firstName,
-            lastName: lastName
-          }
-        }),
-      })
-
-      if (!reportResponse.ok) {
-        const errorData = await reportResponse.json()
-        throw new Error(`Report generation failed: ${errorData.error}`)
-      }
-
-      const { report } = await reportResponse.json()
-
-      setProcessingStage('Finalizing your report...')
-      
-      // Save the AI report to database
-      const { saveAIReport } = await import('@/lib/database')
-      const { reportId, error: reportError } = await saveAIReport(assessmentId, report)
-
-      if (reportError) {
-        console.error('Failed to save AI report:', reportError)
-        throw new Error(`Failed to save report: ${reportError}`)
-      }
-
-      if (!reportId) {
-        throw new Error('No report ID returned from database')
-      }
-
       // Get user ID for background processing
       const { data: { user } } = await supabase.auth.getUser()
       
@@ -181,58 +156,69 @@ export default function OnboardingCompletePage() {
         throw new Error('Authentication required')
       }
 
-      // Trigger background PDF generation and email sending (fire-and-forget)
+      // Trigger ALL processing in background (fire-and-forget)
       try {
+        // Get session token for background API authentication
+        const { data: { session } } = await supabase.auth.getSession()
         
-        fetch('/api/process-background-report', {
+        fetch('/api/process-complete-report', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session?.access_token || ''}`
           },
           body: JSON.stringify({
-            reportData: {
-              ...report,
-              userProfile: {
-                firstName: firstName,
-                lastName: lastName
-              },
-              assessmentData: {
-                age: formData?.age,
-                gender: formData?.gender,
-                initialReason: localStorage.getItem('gutRootInitialReason')
-              }
-            },
-            reportId: reportId,
             assessmentId: assessmentId,
+            formData: formData,
             userEmail: email,
+            userProfile: {
+              firstName: firstName,
+              lastName: lastName
+            },
+            initialReason: localStorage.getItem('gutRootInitialReason'),
             userId: user.id
           }),
         }).catch(error => {
           // Fire-and-forget: log error but don't block user flow
-          console.error('Background processing trigger failed')
+          console.error('Background report processing trigger failed')
         })
         
       } catch (bgError) {
         // Fire-and-forget: log error but don't block user flow
-        console.error('Background processing setup failed')
+        console.error('Background report processing setup failed')
       }
+
+      // Show success immediately
+      setProcessingStage('Report ready! Check your email shortly.')
+      setIsSubmissionComplete(true)
+      
+      // Wait 2 seconds then redirect
+      setTimeout(() => {
+        // Clear form data from localStorage after processing
+        localStorage.removeItem('gutRootOnboardingForm')
+        localStorage.removeItem('gutRootOnboardingStep')
+        localStorage.removeItem('gutRootInitialReason')
+        
+        // Clear weekly report cache since new assessment data is available
+        clearWeeklyReportCache()
+        
+        router.push('/onboarding/upgrade')
+      }, 2000)
       
     } catch (error) {
       console.error('Error during submission')
       
       // Show user a helpful error message but continue with flow
       setProcessingStage('Completing setup...')
+      setIsSubmissionComplete(true)
+      
+      // Still redirect even on error to avoid blocking user
+      setTimeout(() => {
+        router.push('/onboarding/upgrade')
+      }, 2000)
+    } finally {
+      setIsSubmitting(false)
     }
-    
-    // Clear form data from localStorage after processing
-    localStorage.removeItem('gutRootOnboardingForm')
-    localStorage.removeItem('gutRootOnboardingStep')
-    localStorage.removeItem('gutRootInitialReason')
-    
-    // Clear weekly report cache since new assessment data is available
-    clearWeeklyReportCache()
-    
-    router.push('/onboarding/upgrade')
   }
 
   const validateEmail = (email: string) => {
@@ -314,7 +300,7 @@ export default function OnboardingCompletePage() {
           <div className="flex-1 flex items-center justify-center">
             <div className="w-full max-w-md">
             
-            {isSubmitting ? (
+            {isSubmitting || isSubmissionComplete ? (
             /* Submission Processing State */
             <>
               {/* Opened Inbox Icon */}

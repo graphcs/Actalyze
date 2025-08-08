@@ -89,7 +89,6 @@ export async function POST(request: NextRequest) {
         }
 
         console.log('Generating PDF and sending email for user:', user.email)
-        console.log('Report Data:', reportData)
 
         // Step 1: Generate and upload PDF to Supabase Storage
         const pdfStartTime = Date.now()
