@@ -20,10 +20,7 @@ export async function createAssessment(data: {
     assessmentType?: 'daily_check' | 'full_assessment' | 'follow_up'
 }): Promise<{ assessment: Assessment | null; error: string | null }> {
     try {
-        console.log('Checking auth state...')
         const { data: { user }, error: authError } = await supabase.auth.getUser()
-        console.log('Auth state:', user, authError)
-        console.log('Session:', await supabase.auth.getSession())
 
         if (!user) {
             return { assessment: null, error: 'User not authenticated' }
@@ -340,7 +337,7 @@ export async function saveCompleteAssessment(
         ].filter(Boolean)
 
         if (errors.length > 0) {
-            console.warn('Some data failed to save:', errors)
+            console.warn('Some data failed to save')
         }
 
         return { assessmentId: assessment.id, error: null }
@@ -409,10 +406,10 @@ export async function saveAIReport(
             .eq('user_id', user.id) // Ensure user can only update their own assessments
 
         if (updateError) {
-            console.warn('Failed to update assessment with digestive score:', updateError.message)
+            console.warn('Failed to update assessment with digestive score')
             // Continue anyway - report was saved successfully
         } else {
-            console.log(`Updated assessment ${assessmentId} with digestive score: ${reportData.digestive_score}`)
+            console.log(`Updated assessment with digestive score`)
         }
 
         return { reportId: report.id, error: null }

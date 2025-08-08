@@ -50,8 +50,6 @@ export default function AuthPage() {
         }
 
         if (session) {
-          console.log('Session found, checking for existing progress...', session)
-          
           // Check for existing onboarding progress
           const progress = checkOnboardingProgress()
           
@@ -72,10 +70,7 @@ export default function AuthPage() {
 
     // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state change:', event, session)
-      
       if (event === 'SIGNED_IN' && session) {
-        console.log('User signed in, redirecting...')
         
         // For OAuth users, create user profile if it doesn't exist
         if (session.user) {
@@ -87,7 +82,7 @@ export default function AuthPage() {
               email: session.user.email
             })
           } catch (error) {
-            console.error('Error creating user profile:', error)
+            console.error('Error creating user profile')
           }
         }
         

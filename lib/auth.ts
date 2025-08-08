@@ -49,7 +49,6 @@ export function useAuth() {
         // Listen for auth changes (includes automatic token refresh)
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
             async (event, session) => {
-                console.log('Auth state changed:', event, session?.user?.email)
 
                 // Update auth state
                 setAuthState({
@@ -58,16 +57,6 @@ export function useAuth() {
                     loading: false,
                     isAuthenticated: !!session?.user
                 })
-
-                // Handle token refresh automatically (Supabase handles this internally)
-                if (event === 'TOKEN_REFRESHED') {
-                    console.log('Token refreshed automatically')
-                }
-
-                // Handle session expired
-                if (event === 'SIGNED_OUT') {
-                    console.log('User signed out or session expired')
-                }
             }
         )
 
@@ -85,12 +74,10 @@ export const getSessionToken = async (): Promise<string | null> => {
     try {
         const { data: { session }, error } = await supabase.auth.getSession()
         if (error || !session) {
-            console.error('No valid session found:', error)
             return null
         }
         return session.access_token
     } catch (error) {
-        console.error('Error getting session token:', error)
         return null
     }
 }

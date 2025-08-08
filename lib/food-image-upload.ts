@@ -275,58 +275,6 @@ export async function deleteFoodImages(imageUrls: string[]): Promise<{ success: 
 }
 
 /**
- * Creates the food-images bucket and sets up policies (run once during setup)
- */
-export async function setupFoodImagesBucket(): Promise<{ success: boolean; error?: string }> {
-    try {
-        // This function would need to be run with service role key
-        // For now, we'll document the manual setup required
-        console.log('Food images bucket setup required. Please run the following SQL in Supabase:')
-
-        const setupSQL = `
--- Create food-images bucket
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('food-images', 'food-images', true)
-ON CONFLICT (id) DO NOTHING;
-
--- Set up RLS policies for food-images bucket
-CREATE POLICY "Users can upload their own food images"
-ON storage.objects FOR INSERT
-WITH CHECK (
-    bucket_id = 'food-images' 
-    AND auth.uid()::text = (storage.foldername(name))[1]
-);
-
-CREATE POLICY "Users can view their own food images"
-ON storage.objects FOR SELECT
-USING (
-    bucket_id = 'food-images' 
-    AND auth.uid()::text = (storage.foldername(name))[1]
-);
-
-CREATE POLICY "Users can delete their own food images"
-ON storage.objects FOR DELETE
-USING (
-    bucket_id = 'food-images' 
-    AND auth.uid()::text = (storage.foldername(name))[1]
-);
-
--- Auto-delete policy for food images older than 24 hours
--- This can be set up as a Supabase Edge Function or database trigger
-`;
-
-        console.log(setupSQL)
-
-        return { success: true }
-    } catch (error) {
-        return {
-            success: false,
-            error: error instanceof Error ? error.message : 'Setup failed'
-        }
-    }
-}
-
-/**
  * Utility to generate file names for food images
  */
 export function generateFoodImageFileName(userId: string, originalName: string): string {

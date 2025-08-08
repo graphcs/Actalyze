@@ -33,17 +33,13 @@ export default function OnboardingCompletePage() {
       // Step 1: Validate assessment completion
       const validation = validateAssessmentCompletion()
       
-      console.log('🔍 Assessment validation result:', validation)
-      
       if (validation.isComplete) {
         // Assessment is complete - allow access
         const completedFormData = getAssessmentDataSafely()
         if (completedFormData) {
           setFormData(completedFormData)
           setHasValidAccess(true)
-          console.log('✅ Assessment complete - access granted')
         } else {
-          console.log('❌ Assessment data corrupted - redirecting')
           handleInvalidAccess()
         }
       } else if (validation.hasData && validation.completionPercentage > 0) {
@@ -52,19 +48,16 @@ export default function OnboardingCompletePage() {
         if (progress.hasProgress) {
           setProgressData(progress)
           setShowProgressModal(true)
-          console.log('🔄 Partial progress detected - showing resume modal')
         } else {
-          console.log('❌ Invalid progress data - redirecting')
           handleInvalidAccess()
         }
       } else {
         // No valid progress - redirect to start
-        console.log('❌ No assessment progress - redirecting to start')
         handleInvalidAccess()
       }
       
     } catch (error) {
-      console.error('Error validating page access:', error)
+      console.error('Error validating page access')
       handleInvalidAccess()
     } finally {
       setIsValidating(false)
@@ -97,7 +90,6 @@ export default function OnboardingCompletePage() {
     
     // Additional validation before submission
     if (!hasValidAccess || !formData) {
-      console.error('❌ Invalid access or missing form data')
       handleInvalidAccess()
       return
     }
@@ -112,7 +104,7 @@ export default function OnboardingCompletePage() {
       const { profile, error: profileError } = await getUserProfile()
       
       if (profileError) {
-        console.error('Failed to get user profile:', profileError)
+        console.error('Failed to get user profile')
       }
       
       // Extract user name for personalization (fallback to 'there' if not available)
@@ -131,10 +123,9 @@ export default function OnboardingCompletePage() {
         )
 
         if (error) {
-          console.error('Failed to save assessment:', error)
+          console.error('Failed to save assessment')
           throw new Error(`Assessment save failed: ${error}`)
         } else {
-          console.log('Assessment saved successfully:', savedAssessmentId)
           assessmentId = savedAssessmentId
         }
       }
@@ -183,19 +174,15 @@ export default function OnboardingCompletePage() {
         throw new Error('No report ID returned from database')
       }
 
-      console.log('AI report saved successfully:', reportId)
-
       // Get user ID for background processing
       const { data: { user } } = await supabase.auth.getUser()
       
       if (!user) {
-        console.error('No authenticated user found')
         throw new Error('Authentication required')
       }
 
       // Trigger background PDF generation and email sending (fire-and-forget)
       try {
-        console.log('🚀 Triggering background report processing...')
         
         fetch('/api/process-background-report', {
           method: 'POST',
@@ -222,20 +209,16 @@ export default function OnboardingCompletePage() {
           }),
         }).catch(error => {
           // Fire-and-forget: log error but don't block user flow
-          console.error('Background processing trigger failed:', error)
+          console.error('Background processing trigger failed')
         })
         
-        console.log('✅ Background processing triggered successfully')
       } catch (bgError) {
         // Fire-and-forget: log error but don't block user flow
-        console.error('Background processing setup failed:', bgError)
+        console.error('Background processing setup failed')
       }
       
-      console.log('✅ Assessment and report generation completed!')
-      console.log('📧 Your personalized report will be sent to:', email)
-      
     } catch (error) {
-      console.error('Error during submission:', error)
+      console.error('Error during submission')
       
       // Show user a helpful error message but continue with flow
       setProcessingStage('Completing setup...')

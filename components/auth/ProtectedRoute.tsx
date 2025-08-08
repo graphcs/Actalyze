@@ -22,12 +22,9 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
 
     // Redirect to auth if not authenticated
     if (!isAuthenticated) {
-      console.log('User not authenticated, redirecting to /auth')
       router.push('/auth')
       return
     }
-
-    console.log('User authenticated, allowing access to:', pathname)
   }, [isAuthenticated, loading, pathname, router])
 
   // Show loading state while checking authentication

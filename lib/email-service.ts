@@ -48,7 +48,6 @@ export async function sendEmail({
         }
 
         const info = await transporter.sendMail(mailOptions)
-        console.log('Email sent successfully:', info.messageId)
 
         return {
             success: true,
@@ -57,7 +56,7 @@ export async function sendEmail({
         }
 
     } catch (error) {
-        console.error('Email service error:', error)
+        console.error('Email service error')
         return {
             success: false,
             error: error instanceof Error ? error.message : 'Unknown email error'

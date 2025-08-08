@@ -65,12 +65,6 @@ export default function OnboardingPage() {
 
   // Ensure component is properly loaded with saved state
   useEffect(() => {
-    console.log('Onboarding component loaded with:', {
-      currentStep,
-      hasFormData: Object.keys(formData).length > 0,
-      initialReason,
-      savedStepInStorage: localStorage.getItem('gutRootOnboardingStep')
-    })
     setIsLoaded(true)
   }, [currentStep, formData, initialReason])
 
@@ -105,7 +99,6 @@ export default function OnboardingPage() {
       if (field === 'foodMode' && prev.foodMode && prev.foodMode !== value) {
         // Mode changed - clear food rating data but preserve the new mode
         const newMode = value as 'text' | 'upload'
-        console.log(`Food mode changed from ${prev.foodMode} to ${newMode} - clearing food data`)
         return {
           ...prev,
           foodMode: newMode,

@@ -88,7 +88,7 @@ export default function FoodUploadQuestion({ question, value, onChange, mode, on
       })
 
     } catch (error) {
-      console.error('Error processing images:', error)
+      console.error('Error processing images')
       alert('Failed to process images. Please try again.')
     } finally {
       setIsUploading(false)
@@ -113,9 +113,8 @@ export default function FoodUploadQuestion({ question, value, onChange, mode, on
     if (imageToRemove && imageToRemove.status === 'uploaded' && imageToRemove.url) {
       try {
         await deleteFoodImages([imageToRemove.url])
-        console.log('Successfully deleted image from storage:', imageToRemove.name)
       } catch (error) {
-        console.error('Failed to delete image from storage:', error)
+        console.error('Failed to delete image from storage')
         // Continue with UI removal even if storage deletion fails
       }
     }

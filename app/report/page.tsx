@@ -41,12 +41,9 @@ export default function ReportPage() {
       const sessionToken = await getSessionToken()
       
       if (!sessionToken) {
-        console.error('No authentication session found')
         router.push('/auth')
         return
       }
-
-      console.log('Fetching weekly assessment metadata...')
 
       // First, get assessment metadata for cache validation
       const metadataResponse = await fetch('/api/weekly-assessment-metadata', {

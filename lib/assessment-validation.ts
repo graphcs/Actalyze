@@ -98,9 +98,8 @@ export function clearInvalidAssessmentData(): void {
         localStorage.removeItem('gutRootOnboardingForm')
         localStorage.removeItem('gutRootOnboardingStep')
         localStorage.removeItem('gutRootInitialReason')
-        console.log('🧹 Cleared invalid assessment data')
     } catch (error) {
-        console.error('Error clearing assessment data:', error)
+        console.error('Error clearing assessment data')
     }
 }
 

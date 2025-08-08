@@ -74,11 +74,10 @@ export function getCachedWeeklyReport(
             return null
         }
 
-        console.log('✅ Using cached weekly report')
         return cachedReport
 
     } catch (error) {
-        console.error('Error reading cached weekly report:', error)
+        console.error('Error reading cached weekly report') 
         localStorage.removeItem(CACHE_KEY)
         return null
     }
@@ -108,10 +107,9 @@ export function setCachedWeeklyReport(
         }
 
         localStorage.setItem(CACHE_KEY, JSON.stringify(cachedReport))
-        console.log('💾 Cached weekly report for', cachedReport.metadata.weekStart)
 
     } catch (error) {
-        console.error('Error caching weekly report:', error)
+        console.error('Error caching weekly report')
     }
 }
 
@@ -121,9 +119,8 @@ export function setCachedWeeklyReport(
 export function clearWeeklyReportCache(): void {
     try {
         localStorage.removeItem(CACHE_KEY)
-        console.log('🗑️ Cleared weekly report cache')
     } catch (error) {
-        console.error('Error clearing weekly report cache:', error)
+        console.error('Error clearing weekly report cache')
     }
 }
 
