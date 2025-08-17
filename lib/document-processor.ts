@@ -202,13 +202,19 @@ async function extractPDFText(file: File): Promise<{ text: string; error?: strin
             }
         }
 
-        // Clean up the extracted text
+        // Clean up the extracted text while preserving paragraph structure
         const cleanedText = data.text
-            .replace(/\s+/g, ' ') // Normalize whitespace
-            .replace(/\n\s*\n/g, '\n') // Remove extra empty lines
+            .replace(/\r\n/g, '\n') // Normalize line endings
+            .replace(/\r/g, '\n')   // Handle old Mac line endings
+            .replace(/[ \t]+/g, ' ') // Normalize spaces and tabs but keep newlines
+            .replace(/\n[ \t]+/g, '\n') // Remove leading spaces/tabs from lines
+            .replace(/[ \t]+\n/g, '\n') // Remove trailing spaces/tabs from lines
+            .replace(/\n{3,}/g, '\n\n') // Replace 3+ consecutive newlines with 2
             .trim()
 
-        console.log(`PDF processed successfully: ${data.numpages} pages, ${cleanedText.length} characters extracted`)
+        // Debug: Check paragraph structure
+        const paragraphCount = cleanedText.split(/\n\s*\n/).filter(p => p.trim().length > 0).length
+        console.log(`PDF processed successfully: ${data.numpages} pages, ${cleanedText.length} characters extracted, ${paragraphCount} paragraphs detected`)
 
         return {
             text: cleanedText,
@@ -250,8 +256,11 @@ async function extractDOCXText(file: File): Promise<{ text: string; error?: stri
     try {
         const arrayBuffer = await file.arrayBuffer()
 
+        // Convert ArrayBuffer to Buffer for mammoth
+        const buffer = Buffer.from(arrayBuffer)
+
         // Use mammoth library for robust DOCX text extraction
-        const result = await mammoth.extractRawText({ arrayBuffer: arrayBuffer })
+        const result = await mammoth.extractRawText({ buffer: buffer })
 
         if (!result.value || result.value.trim().length === 0) {
             return {
@@ -260,10 +269,14 @@ async function extractDOCXText(file: File): Promise<{ text: string; error?: stri
             }
         }
 
-        // Clean up the extracted text
+        // Clean up the extracted text while preserving paragraph structure
         const cleanedText = result.value
-            .replace(/\s+/g, ' ') // Normalize whitespace
-            .replace(/\n\s*\n/g, '\n') // Remove extra empty lines
+            .replace(/\r\n/g, '\n') // Normalize line endings
+            .replace(/\r/g, '\n')   // Handle old Mac line endings
+            .replace(/[ \t]+/g, ' ') // Normalize spaces and tabs but keep newlines
+            .replace(/\n[ \t]+/g, '\n') // Remove leading spaces/tabs from lines
+            .replace(/[ \t]+\n/g, '\n') // Remove trailing spaces/tabs from lines
+            .replace(/\n{3,}/g, '\n\n') // Replace 3+ consecutive newlines with 2
             .trim()
 
         // Log any conversion messages/warnings from mammoth
@@ -271,7 +284,9 @@ async function extractDOCXText(file: File): Promise<{ text: string; error?: stri
             console.log('DOCX conversion messages:', result.messages.map(m => m.message))
         }
 
-        console.log(`DOCX processed successfully: ${cleanedText.length} characters extracted`)
+        // Debug: Check paragraph structure
+        const paragraphCount = cleanedText.split(/\n\s*\n/).filter(p => p.trim().length > 0).length
+        console.log(`DOCX processed successfully: ${cleanedText.length} characters extracted, ${paragraphCount} paragraphs detected`)
 
         return {
             text: cleanedText,
@@ -498,14 +513,18 @@ export async function saveDocumentChunks(
         const chunksWithEmbeddings: Partial<DocumentChunk>[] = []
 
         // Generate embeddings for each chunk
+        console.log(`Generating embeddings for ${chunks.length} chunks...`)
         for (let i = 0; i < chunks.length; i++) {
             const chunk = chunks[i]
+            console.log(`Processing chunk ${i + 1}/${chunks.length} (${chunk.content.length} chars)`)
             const { embedding, error } = await generateEmbedding(chunk.content)
 
             if (error) {
-                console.warn(`Failed to generate embedding for chunk ${i}:`, error)
+                console.error(`Failed to generate embedding for chunk ${i}:`, error)
+                console.error(`Chunk content preview:`, chunk.content.slice(0, 100) + '...')
                 continue // Skip this chunk but continue processing others
             }
+            console.log(`Successfully generated embedding for chunk ${i + 1}`)
 
             chunksWithEmbeddings.push({
                 document_id: documentId,
@@ -520,16 +539,20 @@ export async function saveDocumentChunks(
         }
 
         if (chunksWithEmbeddings.length === 0) {
+            console.error('No valid chunks with embeddings could be processed')
             return { success: false, error: 'No valid chunks could be processed' }
         }
 
+        console.log(`Inserting ${chunksWithEmbeddings.length} chunks into database...`)
         const { error } = await supabase
             .from('document_chunks')
             .insert(chunksWithEmbeddings)
 
         if (error) {
+            console.error('Database insertion error:', error)
             return { success: false, error: error.message }
         }
+        console.log(`Successfully inserted ${chunksWithEmbeddings.length} chunks into database`)
 
         // Update document status to completed
         await supabase
@@ -610,16 +633,21 @@ export async function processDocument(
 
         // Process chunks and generate embeddings
         if (options.generate_embeddings) {
+            console.log(`Processing document "${document.title}" (${content.length} chars)`)
             const chunks = chunkText(content, options.chunking)
+            console.log(`Generated ${chunks.length} chunks:`, chunks.map(c => c.content.length))
 
             if (chunks.length === 0) {
+                console.error('No chunks generated for document:', document.id)
                 return { documentId: document.id, success: false, error: 'No chunks could be generated from content' }
             }
 
             const { success: chunkSuccess, error: chunkError } = await saveDocumentChunks(document.id, chunks)
             if (!chunkSuccess) {
+                console.error('Failed to save chunks for document:', document.id, chunkError)
                 return { documentId: document.id, success: false, error: chunkError }
             }
+            console.log(`Successfully saved ${chunks.length} chunks for document:`, document.id)
         }
 
         // Auto-approve if enabled
@@ -661,18 +689,28 @@ export async function searchDocuments(
     try {
         const {
             limit = 10,
-            threshold = 0.7,
+            threshold = 0.5, // Balanced threshold for good matches
             categories = [],
             source_types = []
         } = options
 
+        console.log('🔍 Starting document search:', { query, limit, threshold })
+
         // Generate embedding for query
         const { embedding, error: embeddingError } = await generateEmbedding(query)
         if (embeddingError) {
+            console.error('❌ Embedding generation failed:', embeddingError)
             return { results: [], error: embeddingError }
         }
+        console.log('✅ Generated embedding for query')
 
         // Call the search function
+        console.log('🔍 Calling search_documents with:', {
+            embedding_length: embedding.length,
+            match_threshold: threshold,
+            match_count: limit
+        })
+
         const { data, error } = await supabase.rpc('search_documents', {
             query_embedding: embedding,
             match_threshold: threshold,
@@ -680,8 +718,16 @@ export async function searchDocuments(
         })
 
         if (error) {
+            console.error('❌ Database search failed:', error)
+            console.error('Error details:', error)
             return { results: [], error: error.message }
         }
+
+        console.log('📊 Raw search results:', {
+            count: data?.length || 0,
+            threshold,
+            hasData: !!data
+        })
 
         // Filter by categories and source types if specified
         let results = data || []
@@ -690,13 +736,20 @@ export async function searchDocuments(
             results = results.filter((r: Record<string, unknown>) =>
                 r.document_category && typeof r.document_category === 'string' && categories.includes(r.document_category)
             )
+            console.log('🏷️ Filtered by categories:', { before: data?.length, after: results.length })
         }
 
         if (source_types.length > 0) {
             results = results.filter((r: Record<string, unknown>) =>
                 r.document_source_type && typeof r.document_source_type === 'string' && source_types.includes(r.document_source_type)
             )
+            console.log('📝 Filtered by source types:', { before: data?.length, after: results.length })
         }
+
+        console.log('🎯 Final search results:', {
+            count: results.length,
+            titles: results.map((r: Record<string, unknown>) => r.document_title as string).slice(0, 3)
+        })
 
         return { results }
     } catch (error) {
