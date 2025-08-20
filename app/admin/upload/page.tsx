@@ -47,9 +47,21 @@ export default function DocumentUploadPage() {
                 .eq('user_id', user.id)
                 .single()
 
-            if (!adminCheck || (!adminCheck.permissions.includes('upload'))) {
+            if (!adminCheck) {
                 setIsAdmin(false)
-                setError('Upload permission required')
+                setError('Admin access required')
+                setLoading(false)
+                return
+            }
+
+            // Check for upload_documents permission
+            const permissions = Array.isArray(adminCheck.permissions) 
+                ? adminCheck.permissions 
+                : JSON.parse(adminCheck.permissions as unknown as string || '[]')
+
+            if (!permissions.includes('upload_documents')) {
+                setIsAdmin(false)
+                setError('Upload Documents permission required')
                 setLoading(false)
                 return
             }
@@ -335,9 +347,6 @@ export default function DocumentUploadPage() {
                                     <p className="text-sm text-medium-gray mt-1">
                                         Supported formats: PDF, TXT, MD/Markdown, DOCX (max 50MB)
                                         <br />
-                                        <span className="text-xs text-green-600">
-                                            ✅ Robust processing with multiple fallback methods for reliable text extraction.
-                                        </span>
                                     </p>
                                 </div>
                             ) : (

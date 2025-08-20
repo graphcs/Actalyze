@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
-import { Document } from '@/types/rag'
+import { Document, DOCUMENT_CATEGORIES } from '@/types/rag'
 
 interface DocumentWithUploader extends Document {
     uploader?: {
@@ -47,6 +47,15 @@ export default function ManageDocumentsPage() {
     const [processingIds, setProcessingIds] = useState<Set<string>>(new Set())
     const [selectedDocument, setSelectedDocument] = useState<DocumentWithUploader | null>(null)
     const [showContentModal, setShowContentModal] = useState(false)
+
+    const [activeTab, setActiveTab] = useState<'view' | 'edit'>('view')
+    const [editForm, setEditForm] = useState({
+        title: '',
+        category: '',
+        tags: [] as string[],
+        source_type: '',
+        metadata: {} as Record<string, unknown>
+    })
     const router = useRouter()
 
     useEffect(() => {
@@ -150,7 +159,7 @@ export default function ManageDocumentsPage() {
         }
     }
 
-    const updateDocumentStatus = async (documentId: string, status: 'approved' | 'rejected' | 'archived') => {
+    const approveDocument = async (documentId: string) => {
         try {
             setProcessingIds(prev => new Set(prev).add(documentId))
             const { data: { session } } = await supabase.auth.getSession()
@@ -161,19 +170,19 @@ export default function ManageDocumentsPage() {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${session?.access_token || ''}`
                 },
-                body: JSON.stringify({ status })
+                body: JSON.stringify({ status: 'approved' })
             })
 
             if (!response.ok) {
                 const error = await response.json()
-                throw new Error(error.error || 'Failed to update document')
+                throw new Error(error.error || 'Failed to approve document')
             }
 
             // Reload documents to reflect changes
             await loadDocuments()
         } catch (error) {
-            console.error('Error updating document:', error)
-            setError(error instanceof Error ? error.message : 'Failed to update document')
+            console.error('Error approving document:', error)
+            setError(error instanceof Error ? error.message : 'Failed to approve document')
         } finally {
             setProcessingIds(prev => {
                 const newSet = new Set(prev)
@@ -183,8 +192,104 @@ export default function ManageDocumentsPage() {
         }
     }
 
+    const rejectDocument = async (documentId: string) => {
+        if (!confirm('Are you sure you want to reject this document? This will permanently delete it and cannot be undone.')) {
+            return
+        }
+
+        try {
+            setProcessingIds(prev => new Set(prev).add(documentId))
+            const { data: { session } } = await supabase.auth.getSession()
+
+            // Reject = hard delete
+            const response = await fetch(`/api/admin/documents?id=${documentId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${session?.access_token || ''}`
+                }
+            })
+
+            if (!response.ok) {
+                const error = await response.json()
+                throw new Error(error.error || 'Failed to reject document')
+            }
+
+            // Close modal if the rejected document was being viewed
+            if (selectedDocument?.id === documentId) {
+                setShowContentModal(false)
+                setSelectedDocument(null)
+            }
+
+            // Reload documents to reflect changes
+            await loadDocuments()
+        } catch (error) {
+            console.error('Error rejecting document:', error)
+            setError(error instanceof Error ? error.message : 'Failed to reject document')
+        } finally {
+            setProcessingIds(prev => {
+                const newSet = new Set(prev)
+                newSet.delete(documentId)
+                return newSet
+            })
+        }
+    }
+
+
+
+    const saveDocumentEdit = async () => {
+        if (!selectedDocument) return
+
+        setProcessingIds(prev => new Set(prev).add(selectedDocument.id))
+
+        try {
+            const { data: { session } } = await supabase.auth.getSession()
+            
+            const response = await fetch(`/api/admin/documents?id=${selectedDocument.id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${session?.access_token || ''}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    title: editForm.title,
+                    category: editForm.category,
+                    tags: editForm.tags,
+                    source_type: editForm.source_type,
+                    metadata: editForm.metadata
+                })
+            })
+
+            if (!response.ok) {
+                const error = await response.json()
+                throw new Error(error.error || 'Failed to update document')
+            }
+
+            // Update the selected document with the new data
+            setSelectedDocument(prev => prev ? {
+                ...prev,
+                title: editForm.title,
+                category: editForm.category,
+                tags: editForm.tags,
+                source_type: editForm.source_type as 'pubmed' | 'clinical_trial' | 'medical_journal' | 'manual_upload',
+                metadata: editForm.metadata
+            } : null)
+            
+            setActiveTab('view')
+            await loadDocuments()
+        } catch (error) {
+            console.error('Error updating document:', error)
+            setError(error instanceof Error ? error.message : 'Failed to update document')
+        } finally {
+            setProcessingIds(prev => {
+                const newSet = new Set(prev)
+                newSet.delete(selectedDocument.id)
+                return newSet
+            })
+        }
+    }
+
     const deleteDocument = async (documentId: string) => {
-        if (!confirm('Are you sure you want to delete this document? This action cannot be undone.')) {
+        if (!confirm('Are you sure you want to permanently delete this document? This action cannot be undone and will remove all document chunks.')) {
             return
         }
 
@@ -202,6 +307,12 @@ export default function ManageDocumentsPage() {
             if (!response.ok) {
                 const error = await response.json()
                 throw new Error(error.error || 'Failed to delete document')
+            }
+
+            // Close modal if the deleted document was being viewed
+            if (selectedDocument?.id === documentId) {
+                setShowContentModal(false)
+                setSelectedDocument(null)
             }
 
             // Reload documents to reflect changes
@@ -223,7 +334,6 @@ export default function ManageDocumentsPage() {
             case 'approved': return 'text-green-600 bg-green-100'
             case 'pending': return 'text-yellow-600 bg-yellow-100'
             case 'rejected': return 'text-red-600 bg-red-100'
-            case 'archived': return 'text-gray-600 bg-gray-100'
             default: return 'text-gray-600 bg-gray-100'
         }
     }
@@ -246,14 +356,47 @@ export default function ManageDocumentsPage() {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
     }
 
-    const openDocumentModal = (document: DocumentWithUploader) => {
+    const openDocumentModal = (document: DocumentWithUploader, tab: 'view' | 'edit' = 'view') => {
         setSelectedDocument(document)
+        setActiveTab(tab)
         setShowContentModal(true)
+        
+        // If opening edit tab, prepare edit form
+        if (tab === 'edit') {
+            setEditForm({
+                title: document.title || '',
+                category: document.category || '',
+                tags: document.tags || [],
+                source_type: document.source_type || '',
+                metadata: document.metadata || {}
+            })
+        }
     }
 
     const closeDocumentModal = () => {
         setSelectedDocument(null)
         setShowContentModal(false)
+        setActiveTab('view')
+        setEditForm({
+            title: '',
+            category: '',
+            tags: [],
+            source_type: '',
+            metadata: {}
+        })
+    }
+
+    const switchToEditTab = () => {
+        if (selectedDocument) {
+            setEditForm({
+                title: selectedDocument.title || '',
+                category: selectedDocument.category || '',
+                tags: selectedDocument.tags || [],
+                source_type: selectedDocument.source_type || '',
+                metadata: selectedDocument.metadata || {}
+            })
+            setActiveTab('edit')
+        }
     }
 
     const formatUserName = (user?: { first_name?: string; last_name?: string }) => {
@@ -288,6 +431,32 @@ export default function ManageDocumentsPage() {
         setSelectedStatus('all')
         setCurrentPage(1)
     }
+
+    const handleEditFormChange = (field: keyof typeof editForm, value: string | string[]) => {
+        setEditForm(prev => ({ ...prev, [field]: value }))
+    }
+
+    const addEditTag = () => {
+        const tagInput = (document.getElementById('editTagInput') as HTMLInputElement)?.value?.trim()
+        if (tagInput && !editForm.tags.includes(tagInput)) {
+            setEditForm(prev => ({
+                ...prev,
+                tags: [...prev.tags, tagInput]
+            }))
+            if (tagInput) {
+                ;(document.getElementById('editTagInput') as HTMLInputElement).value = ''
+            }
+        }
+    }
+
+    const removeEditTag = (tagToRemove: string) => {
+        setEditForm(prev => ({
+            ...prev,
+            tags: prev.tags.filter(tag => tag !== tagToRemove)
+        }))
+    }
+
+
 
     if (loading && isAdmin === null) {
         return (
@@ -401,7 +570,6 @@ export default function ManageDocumentsPage() {
                                 <option value="pending">Pending</option>
                                 <option value="approved">Approved</option>
                                 <option value="rejected">Rejected</option>
-                                <option value="archived">Archived</option>
                             </select>
                         </div>
                     </div>
@@ -557,14 +725,14 @@ export default function ManageDocumentsPage() {
                                                     {document.status === 'pending' && (
                                                         <>
                                                             <button
-                                                                onClick={() => updateDocumentStatus(document.id, 'approved')}
+                                                                onClick={() => approveDocument(document.id)}
                                                                 disabled={processingIds.has(document.id)}
                                                                 className="bg-green-100 text-green-700 px-3 py-1 rounded text-xs font-medium hover:bg-green-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                                             >
                                                                 {processingIds.has(document.id) ? '...' : 'Approve'}
                                                             </button>
                                                             <button
-                                                                onClick={() => updateDocumentStatus(document.id, 'rejected')}
+                                                                onClick={() => rejectDocument(document.id)}
                                                                 disabled={processingIds.has(document.id)}
                                                                 className="bg-red-100 text-red-700 px-3 py-1 rounded text-xs font-medium hover:bg-red-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                                             >
@@ -573,13 +741,15 @@ export default function ManageDocumentsPage() {
                                                         </>
                                                     )}
                                                     {document.status === 'approved' && (
-                                                        <button
-                                                            onClick={() => updateDocumentStatus(document.id, 'archived')}
-                                                            disabled={processingIds.has(document.id)}
-                                                            className="bg-gray-100 text-gray-700 px-3 py-1 rounded text-xs font-medium hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                                        >
-                                                            {processingIds.has(document.id) ? '...' : 'Archive'}
-                                                        </button>
+                                                        <>
+                                                            <button
+                                                                onClick={() => openDocumentModal(document, 'edit')}
+                                                                disabled={processingIds.has(document.id)}
+                                                                className="bg-orange-100 text-orange-700 px-3 py-1 rounded text-xs font-medium hover:bg-orange-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            >
+                                                                {processingIds.has(document.id) ? '...' : 'Edit'}
+                                                            </button>
+                                                        </>
                                                     )}
                                                     <button
                                                         onClick={() => deleteDocument(document.id)}
@@ -629,37 +799,74 @@ export default function ManageDocumentsPage() {
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] flex flex-col">
                         {/* Modal Header */}
-                        <div className="flex items-center justify-between p-6 border-b">
-                            <div className="flex-1">
-                                <h2 className="text-xl font-semibold text-dark-gray truncate">
-                                    {selectedDocument.title}
-                                </h2>
-                                <div className="flex items-center space-x-4 mt-2 text-sm text-medium-gray">
-                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(selectedDocument.status)}`}>
-                                        {selectedDocument.status}
-                                    </span>
-                                    <span>
-                                        {selectedDocument.source_type.replace('_', ' ')}
-                                    </span>
-                                    <span>
-                                        {formatDate(selectedDocument.created_at)}
-                                    </span>
-                                    <span>
-                                        by {formatUserName(selectedDocument.uploader)}
-                                    </span>
+                        <div className="p-6 border-b">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="flex-1">
+                                    <h2 className="text-xl font-semibold text-dark-gray truncate">
+                                        {selectedDocument.title}
+                                    </h2>
+                                    <div className="flex items-center space-x-4 mt-2 text-sm text-medium-gray">
+                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(selectedDocument.status)}`}>
+                                            {selectedDocument.status}
+                                        </span>
+                                        <span>
+                                            {selectedDocument.source_type.replace('_', ' ')}
+                                        </span>
+                                        <span>
+                                            {formatDate(selectedDocument.created_at)}
+                                        </span>
+                                        <span>
+                                            by {formatUserName(selectedDocument.uploader)}
+                                        </span>
+                                    </div>
                                 </div>
+                                <button
+                                    onClick={closeDocumentModal}
+                                    className="ml-4 text-gray-400 hover:text-gray-600 text-2xl font-bold"
+                                >
+                                    ×
+                                </button>
                             </div>
-                            <button
-                                onClick={closeDocumentModal}
-                                className="ml-4 text-gray-400 hover:text-gray-600 text-2xl font-bold"
-                            >
-                                ×
-                            </button>
+                            
+                            {/* Tabs */}
+                            <div className="flex border-b border-gray-200">
+                                <button
+                                    onClick={() => setActiveTab('view')}
+                                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                                        activeTab === 'view'
+                                            ? 'border-orange-primary text-orange-600'
+                                            : 'border-transparent text-medium-gray hover:text-dark-gray'
+                                    }`}
+                                >
+                                    <svg className="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                    View Content
+                                </button>
+                                {selectedDocument.status === 'approved' && (
+                                    <button
+                                        onClick={switchToEditTab}
+                                        className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                                            activeTab === 'edit'
+                                                ? 'border-orange-primary text-orange-600'
+                                                : 'border-transparent text-medium-gray hover:text-dark-gray'
+                                        }`}
+                                    >
+                                        <svg className="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                        Edit Document
+                                    </button>
+                                )}
+                            </div>
                         </div>
 
                         {/* Modal Body */}
                         <div className="flex-1 p-6 overflow-y-auto">
-                            {/* Document Metadata */}
+                            {activeTab === 'view' ? (
+                                // View Content Tab
+                                <div>
                             <div className="mb-6">
                                 <div className="grid grid-cols-2 gap-4 text-sm">
                                     <div>
@@ -692,70 +899,181 @@ export default function ManageDocumentsPage() {
                                     </pre>
                                 </div>
                             </div>
+                                </div>
+                            ) : (
+                                // Edit Document Tab
+                                <div className="space-y-6">
+                                    {/* Title */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-dark-gray mb-1">
+                                            Document Title *
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={editForm.title}
+                                            onChange={(e) => handleEditFormChange('title', e.target.value)}
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent outline-none transition-all duration-200"
+                                            placeholder="Enter document title"
+                                            required
+                                        />
+                                    </div>
+
+                                    {/* Category */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-dark-gray mb-1">
+                                            Category
+                                        </label>
+                                        <select
+                                            value={editForm.category}
+                                            onChange={(e) => handleEditFormChange('category', e.target.value)}
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent outline-none transition-all duration-200"
+                                        >
+                                            <option value="">Select category</option>
+                                            {DOCUMENT_CATEGORIES.map(category => (
+                                                <option key={category} value={category}>
+                                                    {category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    {/* Source Type */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-dark-gray mb-1">
+                                            Source Type
+                                        </label>
+                                        <select
+                                            value={editForm.source_type}
+                                            onChange={(e) => handleEditFormChange('source_type', e.target.value)}
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent outline-none transition-all duration-200"
+                                        >
+                                            <option value="manual_upload">Manual Upload</option>
+                                            <option value="pubmed">PubMed</option>
+                                            <option value="clinical_trial">Clinical Trial</option>
+                                            <option value="medical_journal">Medical Journal</option>
+                                        </select>
+                                    </div>
+
+                                    {/* Tags */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-dark-gray mb-1">
+                                            Tags
+                                        </label>
+                                        <div className="flex flex-wrap gap-2 mb-2">
+                                            {editForm.tags.map((tag, index) => (
+                                                <span
+                                                    key={index}
+                                                    className="inline-flex items-center bg-cream-100 text-dark-gray px-3 py-1 rounded-full text-sm"
+                                                >
+                                                    {tag}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removeEditTag(tag)}
+                                                        className="ml-2 text-medium-gray hover:text-red-600"
+                                                    >
+                                                        ×
+                                                    </button>
+                                                </span>
+                                            ))}
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <input
+                                                id="editTagInput"
+                                                type="text"
+                                                placeholder="Add a tag"
+                                                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent outline-none transition-all duration-200"
+                                                onKeyPress={(e) => {
+                                                    if (e.key === 'Enter') {
+                                                        e.preventDefault()
+                                                        addEditTag()
+                                                    }
+                                                }}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={addEditTag}
+                                                className="bg-orange-light text-dark-gray px-4 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity"
+                                            >
+                                                Add
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Modal Footer */}
                         <div className="p-6 border-t bg-gray-50">
-                            <div className="flex justify-between items-center">
-                                <div className="flex space-x-2">
-                                    {selectedDocument.status === 'pending' && (
-                                        <>
-                                            <button
-                                                onClick={() => {
-                                                    updateDocumentStatus(selectedDocument.id, 'approved')
-                                                    closeDocumentModal()
-                                                }}
-                                                disabled={processingIds.has(selectedDocument.id)}
-                                                className="bg-green-100 text-green-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                            >
-                                                {processingIds.has(selectedDocument.id) ? 'Processing...' : 'Approve'}
-                                            </button>
-                                            <button
-                                                onClick={() => {
-                                                    updateDocumentStatus(selectedDocument.id, 'rejected')
-                                                    closeDocumentModal()
-                                                }}
-                                                disabled={processingIds.has(selectedDocument.id)}
-                                                className="bg-red-100 text-red-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                            >
-                                                {processingIds.has(selectedDocument.id) ? 'Processing...' : 'Reject'}
-                                            </button>
-                                        </>
-                                    )}
-                                    {selectedDocument.status === 'approved' && (
+                            {activeTab === 'view' ? (
+                                // View tab footer - document actions
+                                <div className="flex justify-between items-center">
+                                    <div className="flex space-x-2">
+                                        {selectedDocument.status === 'pending' && (
+                                            <>
+                                                <button
+                                                    onClick={() => {
+                                                        approveDocument(selectedDocument.id)
+                                                        closeDocumentModal()
+                                                    }}
+                                                    disabled={processingIds.has(selectedDocument.id)}
+                                                    className="bg-green-100 text-green-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                >
+                                                    {processingIds.has(selectedDocument.id) ? 'Processing...' : 'Approve'}
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        rejectDocument(selectedDocument.id)
+                                                        closeDocumentModal()
+                                                    }}
+                                                    disabled={processingIds.has(selectedDocument.id)}
+                                                    className="bg-red-100 text-red-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                >
+                                                    {processingIds.has(selectedDocument.id) ? 'Processing...' : 'Reject'}
+                                                </button>
+                                            </>
+                                        )}
                                         <button
                                             onClick={() => {
-                                                updateDocumentStatus(selectedDocument.id, 'archived')
+                                                deleteDocument(selectedDocument.id)
                                                 closeDocumentModal()
                                             }}
                                             disabled={processingIds.has(selectedDocument.id)}
-                                            className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="bg-red-100 text-red-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
-                                            {processingIds.has(selectedDocument.id) ? 'Processing...' : 'Archive'}
+                                            {processingIds.has(selectedDocument.id) ? 'Processing...' : 'Delete'}
                                         </button>
-                                    )}
+                                    </div>
                                     <button
-                                        onClick={() => {
-                                            deleteDocument(selectedDocument.id)
-                                            closeDocumentModal()
-                                        }}
-                                        disabled={processingIds.has(selectedDocument.id)}
-                                        className="bg-red-100 text-red-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        onClick={closeDocumentModal}
+                                        className="bg-orange-light text-dark-gray px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
                                     >
-                                        {processingIds.has(selectedDocument.id) ? 'Processing...' : 'Delete'}
+                                        Close
                                     </button>
                                 </div>
-                                <button
-                                    onClick={closeDocumentModal}
-                                    className="bg-gray-200 text-dark-gray px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-300"
-                                >
-                                    Close
-                                </button>
-                            </div>
+                            ) : (
+                                // Edit tab footer - save/cancel
+                                <div className="flex justify-end space-x-4">
+                                    <button
+                                        onClick={() => setActiveTab('view')}
+                                        className="bg-orange-light text-dark-gray px-6 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={saveDocumentEdit}
+                                        disabled={!editForm.title.trim() || processingIds.has(selectedDocument.id)}
+                                        className="bg-orange-primary text-white px-6 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {processingIds.has(selectedDocument.id) ? 'Saving...' : 'Save Changes'}
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
             )}
+
+
         </div>
     )
 }

@@ -1,7 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import OpenAI from 'openai'
 import { searchDocuments } from '@/lib/document-processor'
+
+// Define types for better TypeScript support
+interface DocumentChunk {
+    id: string
+    content: string
+    document_title: string
+    similarity: number
+    [key: string]: unknown
+}
+
+interface DocumentChunksWithList extends Array<DocumentChunk> {
+    documentList?: string[]
+}
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -28,7 +41,7 @@ async function saveConversationAfterStream(
     userMessage: string,
     conversationId: string | null,
     userId: string,
-    supabase: any
+    supabase: SupabaseClient
 ) {
     if (!conversationId) return
 
@@ -180,7 +193,7 @@ export async function POST(request: NextRequest) {
             }).join('\n\n---\n\n')
 
                 // Store document list for reference generation
-                ; (relevantChunks as any).documentList = documentList
+                ; (relevantChunks as DocumentChunksWithList).documentList = documentList
 
             console.log('Built context length:', context.length)
         } else {
@@ -215,8 +228,13 @@ Use numbered citations in square brackets [1], [2], etc. for all factual claims 
 - Place citations immediately after the relevant information: "Probiotics are generally safe [1]."
 - Use the same number for all references to the same document
 - Write naturally without mentioning document names in the text
-- At the end of your response, I will automatically add a "References:" section
-- Focus on providing clear, accurate information with proper citations
+
+CRITICAL INSTRUCTION - DO NOT ADD REFERENCES SECTION:
+- NEVER add "References:", "Sources:", "Bibliography:" or any similar section at the end
+- NEVER list the document titles or sources
+- End your response with your final content sentence
+- I will automatically handle the references section for you
+- Your job is ONLY to provide the content with inline citations [1], [2], etc.
 
 OFF-TOPIC RESPONSE:
 If asked about anything unrelated to gut health, nutrition, or wellness, respond with: "I'm GutRoot AI, specialized in gut health and nutrition. I can help you with questions about digestive health, probiotics, diet, microbiome, and wellness. Is there something about gut health I can help you with today?"
@@ -269,14 +287,20 @@ Please provide a helpful response to the user's question, incorporating relevant
                     }
 
                     // Add references section if we have documents
-                    if (relevantChunks && relevantChunks.length > 0 && (relevantChunks as any).documentList) {
-                        const documentList = (relevantChunks as any).documentList as string[]
-                        const referencesSection = '\n\nReferences:\n' +
-                            documentList.map((title, index) => `[${index + 1}] ${title}`).join('\n')
-                        fullResponse += referencesSection
+                    if (relevantChunks && relevantChunks.length > 0 && (relevantChunks as DocumentChunksWithList).documentList) {
+                        const documentList = (relevantChunks as DocumentChunksWithList).documentList as string[]
 
-                        // Send references as a separate chunk
-                        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: referencesSection })}\n\n`))
+                        // Check if AI already added a References section (case insensitive)
+                        const hasReferencesSection = /references?\s*:/i.test(fullResponse)
+
+                        if (!hasReferencesSection) {
+                            const referencesSection = '\n\nReferences:\n' +
+                                documentList.map((title, index) => `[${index + 1}] ${title}`).join('\n')
+                            fullResponse += referencesSection
+
+                            // Send references as a separate chunk
+                            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: referencesSection })}\n\n`))
+                        }
                     }
 
                     // Send final metadata

@@ -46,9 +46,21 @@ export async function POST(request: NextRequest) {
             .eq('user_id', user.id)
             .single()
 
-        if (!adminCheck || (!adminCheck.permissions.includes('upload'))) {
+        if (!adminCheck) {
             return NextResponse.json(
-                { error: 'Insufficient permissions. Admin access required.' },
+                { error: 'Admin access required' },
+                { status: 403 }
+            )
+        }
+
+        // Check for upload_documents permission
+        const permissions = Array.isArray(adminCheck.permissions)
+            ? adminCheck.permissions
+            : JSON.parse(adminCheck.permissions as unknown as string || '[]')
+
+        if (!permissions.includes('upload_documents')) {
+            return NextResponse.json(
+                { error: 'Upload Documents permission required' },
                 { status: 403 }
             )
         }

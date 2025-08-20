@@ -37,6 +37,7 @@ interface DashboardStats {
 
 export default function AdminDashboardPage() {
     const [isAdmin, setIsAdmin] = useState<boolean | null>(null)
+    const [adminPermissions, setAdminPermissions] = useState<string[]>([])
     const [stats, setStats] = useState<DashboardStats | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -69,7 +70,13 @@ export default function AdminDashboardPage() {
                 return
             }
 
+            // Parse permissions
+            const permissions = Array.isArray(adminCheck.permissions) 
+                ? adminCheck.permissions 
+                : JSON.parse(adminCheck.permissions as unknown as string || '[]')
+
             setIsAdmin(true)
+            setAdminPermissions(permissions)
             await loadDashboardStats()
         } catch (error) {
             console.error('Error checking admin access:', error)
@@ -166,18 +173,30 @@ export default function AdminDashboardPage() {
                             <h2 className="text-xl font-semibold text-dark-gray">Admin Dashboard</h2>
                         </div>
                         <div className="flex items-center space-x-4">
-                            <Link 
-                                href="/admin/documents"
-                                className="bg-orange-light text-dark-gray px-4 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity"
-                            >
-                                Manage Documents
-                            </Link>
-                            <Link 
-                                href="/admin/upload"
-                                className="bg-orange-primary text-white px-4 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity"
-                            >
-                                Upload Document
-                            </Link>
+                            {(adminPermissions.includes('approve_documents') || adminPermissions.includes('edit_documents') || adminPermissions.includes('delete_documents')) && (
+                                <Link 
+                                    href="/admin/documents"
+                                    className="bg-orange-light text-dark-gray px-4 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity"
+                                >
+                                    Manage Documents
+                                </Link>
+                            )}
+                            {adminPermissions.includes('manage_users') && (
+                                <Link 
+                                    href="/admin/users"
+                                    className="bg-orange-light text-dark-gray px-4 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity"
+                                >
+                                    Manage Users
+                                </Link>
+                            )}
+                            {adminPermissions.includes('upload_documents') && (
+                                <Link 
+                                    href="/admin/upload"
+                                    className="bg-orange-primary text-white px-4 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity"
+                                >
+                                    Upload Document
+                                </Link>
+                            )}
                         </div>
                     </div>
                 </div>

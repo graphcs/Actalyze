@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
             .select('*')
 
         // Apply filters
-        if (status && ['pending', 'approved', 'rejected', 'archived'].includes(status)) {
+        if (status && ['pending', 'approved', 'rejected'].includes(status)) {
             query = query.eq('status', status)
         }
 
@@ -105,7 +105,7 @@ export async function GET(request: NextRequest) {
             .select('*', { count: 'exact', head: true })
 
         // Apply same filters to count query
-        if (status && ['pending', 'approved', 'rejected', 'archived'].includes(status)) {
+        if (status && ['pending', 'approved', 'rejected'].includes(status)) {
             countQuery.eq('status', status)
         }
         if (sourceType && ['pubmed', 'clinical_trial', 'medical_journal', 'manual_upload'].includes(sourceType)) {
@@ -262,12 +262,25 @@ export async function PATCH(request: NextRequest) {
         }
 
         const body = await request.json()
-        const { status, category, tags, is_active } = body
+        const { status, title, category, tags, source_type, metadata, is_active } = body
+
+        // Parse permissions
+        const permissions = Array.isArray(adminCheck.permissions)
+            ? adminCheck.permissions
+            : JSON.parse(adminCheck.permissions as unknown as string || '[]')
 
         // Prepare update data
         const updateData: Record<string, unknown> = {}
 
-        if (status && ['pending', 'approved', 'rejected', 'archived'].includes(status)) {
+        // Status updates require approve_documents permission
+        if (status && ['pending', 'approved', 'rejected'].includes(status)) {
+            if (!permissions.includes('approve_documents')) {
+                return NextResponse.json(
+                    { error: 'Approve Documents permission required' },
+                    { status: 403 }
+                )
+            }
+
             updateData.status = status
 
             // Set approval fields for approved status
@@ -277,12 +290,20 @@ export async function PATCH(request: NextRequest) {
             }
         }
 
-        if (category !== undefined) {
-            updateData.category = category
-        }
+        // Metadata updates require edit_documents permission
+        if (title !== undefined || category !== undefined || tags !== undefined || source_type !== undefined || metadata !== undefined) {
+            if (!permissions.includes('edit_documents')) {
+                return NextResponse.json(
+                    { error: 'Edit Documents permission required' },
+                    { status: 403 }
+                )
+            }
 
-        if (Array.isArray(tags)) {
-            updateData.tags = tags
+            if (title !== undefined) updateData.title = title
+            if (category !== undefined) updateData.category = category
+            if (source_type !== undefined) updateData.source_type = source_type
+            if (metadata !== undefined) updateData.metadata = metadata
+            if (Array.isArray(tags)) updateData.tags = tags
         }
 
         if (typeof is_active === 'boolean') {
@@ -296,24 +317,51 @@ export async function PATCH(request: NextRequest) {
             )
         }
 
-        // Update document
+        // First verify the document exists
+        const { data: existingDoc, error: checkError } = await supabase
+            .from('documents')
+            .select('id, status')
+            .eq('id', documentId)
+            .single()
+
+        console.log('Document exists check:', existingDoc, 'Error:', checkError)
+
+        if (checkError || !existingDoc) {
+            return NextResponse.json(
+                { error: 'Document not found in database' },
+                { status: 404 }
+            )
+        }
+
+        console.log('Updating document:', documentId, 'with data:', updateData)
+
+        // Update document using user's authenticated session
+        // RLS policies should now allow admins with proper permissions to update
         const { data: updatedDocument, error } = await supabase
             .from('documents')
             .update(updateData)
             .eq('id', documentId)
             .select()
-            .single()
 
         if (error) {
+            console.error('Database update error:', error)
             return NextResponse.json(
                 { error: `Failed to update document: ${error.message}` },
                 { status: 500 }
             )
         }
 
+        // Check if any rows were affected
+        if (!updatedDocument || updatedDocument.length === 0) {
+            return NextResponse.json(
+                { error: 'Document not found or no changes made' },
+                { status: 404 }
+            )
+        }
+
         return NextResponse.json({
             success: true,
-            document: updatedDocument,
+            document: updatedDocument[0],
             message: 'Document updated successfully'
         })
 
@@ -377,9 +425,21 @@ export async function DELETE(request: NextRequest) {
             .eq('user_id', user.id)
             .single()
 
-        if (!adminCheck || (!adminCheck.permissions.includes('delete') && adminCheck.role !== 'super_admin')) {
+        if (!adminCheck) {
             return NextResponse.json(
-                { error: 'Delete permission required' },
+                { error: 'Admin access required' },
+                { status: 403 }
+            )
+        }
+
+        // Check for delete_documents permission
+        const permissions = Array.isArray(adminCheck.permissions)
+            ? adminCheck.permissions
+            : JSON.parse(adminCheck.permissions as unknown as string || '[]')
+
+        if (!permissions.includes('delete_documents')) {
+            return NextResponse.json(
+                { error: 'Delete Documents permission required' },
                 { status: 403 }
             )
         }

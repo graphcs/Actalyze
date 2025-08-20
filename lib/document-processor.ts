@@ -689,7 +689,7 @@ export async function searchDocuments(
     try {
         const {
             limit = 10,
-            threshold = 0.5, // Balanced threshold for good matches
+            threshold = 0.3, // Balanced threshold for good matches
             categories = [],
             source_types = []
         } = options

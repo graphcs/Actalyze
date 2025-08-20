@@ -12,7 +12,7 @@ export interface Document {
     category?: string
     tags: string[]
     metadata: Record<string, any>
-    status: 'pending' | 'approved' | 'rejected' | 'archived'
+    status: 'pending' | 'approved' | 'rejected'
     upload_status: 'processing' | 'completed' | 'failed'
     processing_error?: string
     version: number
@@ -40,7 +40,7 @@ export interface DocumentChunk {
 export interface AdminRole {
     id: string
     user_id: string
-    role: 'admin' | 'super_admin'
+    role: 'admin' // Always 'admin' - no more super_admin concept
     permissions: string[]
     created_at: string
     updated_at: string
@@ -189,16 +189,16 @@ export const SOURCE_TYPES = [
 export const DOCUMENT_STATUSES = [
     'pending',
     'approved',
-    'rejected',
-    'archived'
+    'rejected'
 ] as const
 
 export const ADMIN_PERMISSIONS = [
-    'upload',
-    'delete',
-    'edit',
-    'approve',
-    'manage_users'
+    'upload_documents',
+    'edit_documents',
+    'approve_documents',
+    'delete_documents',
+    'manage_users',
+    'view_analytics'
 ] as const
 
 // Default chunking configuration

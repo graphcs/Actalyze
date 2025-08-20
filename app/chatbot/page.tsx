@@ -336,7 +336,7 @@ export default function ChatbotPage() {
                                     <div className="mb-8">
                                         <h2 className="text-3xl font-bold text-gray-900 mb-4">Welcome to GutRoot AI</h2>
                                         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                                            I'm your personal gut health assistant, powered by the latest scientific research. 
+                                            I&apos;m your personal gut health assistant, powered by the latest scientific research. 
                                             Ask me anything about nutrition, digestive health, probiotics, and more!
                                         </p>
                                     </div>
