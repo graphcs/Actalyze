@@ -297,7 +297,7 @@ export default function OnboardingPage() {
           <div className="w-full max-w-sm md:max-w-xl mx-auto">
             
             {/* Show intro text in bubble on first step */}
-            {currentStep === 0 && initialReason && (
+            {currentStep === 1 && initialReason && (
               <div className="relative mb-8">
                 <img 
                   src="/bubble-question.png" 

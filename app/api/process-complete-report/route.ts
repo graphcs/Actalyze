@@ -165,7 +165,6 @@ async function processCompleteReportWithRetry(
                     userProfile: data.userProfile,
                     assessmentData: {
                         age: data.formData?.age,
-                        gender: data.formData?.gender,
                         initialReason: data.initialReason
                     }
                 },

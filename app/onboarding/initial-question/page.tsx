@@ -10,10 +10,10 @@ export default function InitialQuestionPage() {
 
   const reasons = [
     'Constipation',
-    'Bloating', 
+    'Bloating/Gas', 
     'Heartburn / Acid Reflux',
-    'Colonoscopy Prep',
-    'Just Curious'
+    'Diarrhea',
+    'General Gut Health'
   ]
 
   const handleContinue = () => {
@@ -65,7 +65,7 @@ export default function InitialQuestionPage() {
           <div className="absolute inset-0 pt-8 px-8">
             <p className="text-dark text-xl md:text-2xl leading-relaxed text-left font-medium">
               Hi, I&apos;m your personalized gut health guide. 
-              What brings you here today?
+              What is your primary digestive concern?
             </p>
           </div>
         </div>

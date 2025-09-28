@@ -20,14 +20,14 @@ export interface FoodUploadData {
 
 export interface OnboardingFormData {
     age: string
-    gender: string
     gutConcerns: string[]
     bowelFrequency: string
     energyLevel: number
     hydrationHabits: string
     sleepQuality: string | null // Optional
     moodTracking: string
-    dietaryPattern: string
+    dietaryPattern: string,
+    severityRating: string,
     culturalPreference: string
     foodSensitivities: string[]
     stoolType: string
@@ -79,28 +79,8 @@ export interface FormStep {
 // Form questions configuration
 export const FORM_QUESTIONS: FormQuestion[] = [
     {
-        id: 'age',
-        title: 'What is your age?',
-        type: 'text-input',
-        required: true,
-        placeholder: 'Enter your age'
-    },
-    {
-        id: 'gender',
-        title: 'What is your gender?',
-        type: 'single-select',
-        required: true,
-        options: [
-            { value: 'man', label: 'Man' },
-            { value: 'woman', label: 'Woman' },
-            { value: 'non-binary', label: 'Non-binary' },
-            { value: 'self-identify', label: 'Self Identify' },
-            { value: 'prefer-not-to-say', label: 'Prefer not to say' }
-        ]
-    },
-    {
         id: 'gutConcerns',
-        title: 'What are your primary gut concerns? (multi-select)',
+        title: 'Do you have any secondary symptoms? (select all that apply)',
         type: 'multi-select',
         required: true,
         options: [
@@ -115,6 +95,13 @@ export const FORM_QUESTIONS: FormQuestion[] = [
             { value: 'brain-fog', label: 'Brain fog' },
             { value: 'skin-issues', label: 'Skin issues' }
         ]
+    },
+    {
+        id: 'age',
+        title: 'What is your age?',
+        type: 'text-input',
+        required: true,
+        placeholder: 'Enter your age'
     },
     {
         id: 'bowelFrequency',
@@ -197,12 +184,20 @@ export const FORM_QUESTIONS: FormQuestion[] = [
         type: 'single-select',
         required: true,
         options: [
-            { value: 'veg', label: 'Veg' },
-            { value: 'non-veg', label: 'Non-Veg' },
+            { value: 'veg', label: 'Vegetarian' },
+            { value: 'non-veg', label: 'Non-Vegetarian' },
             { value: 'vegan', label: 'Vegan' },
-            { value: 'keto', label: 'Keto' },
-            { value: 'if', label: 'IF' },
-            { value: 'other', label: 'Other' }
+        ]
+    },
+    {
+        id: 'severityRating',
+        title: 'How would you rate your symptom severity?',
+        type: "single-select",
+        required: true,
+        options: [
+            { value: 'mild', label: 'Mild - Occasional discomfort' },
+            { value: 'moderate', label: 'Moderate - Daily symptoms' },
+            { value: 'severe', label: 'Severe - Significantly impacts life' }
         ]
     },
     {
@@ -211,13 +206,10 @@ export const FORM_QUESTIONS: FormQuestion[] = [
         type: 'single-select',
         required: true,
         options: [
-            { value: 'south-asian', label: 'South Asian' },
-            { value: 'east-southeast-asian', label: 'East & Southeast Asian' },
+            { value: 'south-asian-indian', label: 'South Asian/Indian' },
+            { value: 'western', label: 'Western' },
             { value: 'mediterranean-middle-eastern', label: 'Mediterranean & Middle Eastern' },
-            { value: 'latin-american', label: 'Latin American' },
-            { value: 'european', label: 'European (Western, Central, Eastern)' },
-            { value: 'african', label: 'African (Primarily West)' },
-            { value: 'north-american', label: 'North American' }
+            { value: 'no-preference', label: 'No preference' },
         ]
     },
     {
@@ -232,53 +224,57 @@ export const FORM_QUESTIONS: FormQuestion[] = [
             { value: 'fodmap-intolerance', label: 'FODMAP intolerance' },
             { value: 'soy-allergy', label: 'Soy allergy' },
             { value: 'shellfish-allergy', label: 'Shellfish allergy' },
-            { value: 'egg-allergy', label: 'Egg allergy' }
+            { value: 'egg-allergy', label: 'Egg allergy' },
+            { value: 'wheat-allergy', label: 'Wheat allergy' },
+            { value: 'histamine-intolerance', label: 'Histamine intolerance' },
+            { value: 'caffeine-sensitivity', label: 'Caffeine sensitivity' },
+            { value: 'no-sensitivities', label: 'No sensitivities' }
         ]
     },
     {
         id: 'stoolType',
-        title: 'What is your stool type?',
+        title: 'What is your stool type generally?',
         type: 'image-select',
         required: true,
         imageOptions: [
             {
-                value: 'type-1',
+                value: 'separate-hard-lumps-stool',
                 imageSrc: '/stool-type-1.png',
                 title: 'Type 1',
                 description: 'Separate hard lumps'
             },
             {
-                value: 'type-2',
+                value: 'lumpy-and-sausage-like-stool',
                 imageSrc: '/stool-type-2.png',
                 title: 'Type 2',
                 description: 'Lumpy and sausage like'
             },
             {
-                value: 'type-3',
+                value: 'sausage-shape-with-cracks-stool',
                 imageSrc: '/stool-type-3.png',
                 title: 'Type 3',
                 description: 'A sausage shape with cracks in the surface'
             },
             {
-                value: 'type-4',
+                value: 'smooth-soft-snake-sausage-stool',
                 imageSrc: '/stool-type-4.png',
                 title: 'Type 4',
                 description: 'Like a smooth, soft sausage or snake'
             },
             {
-                value: 'type-5',
+                value: 'soft-blobs-clear-cut-edges-stool',
                 imageSrc: '/stool-type-5.png',
                 title: 'Type 5',
                 description: 'Soft blobs with clear-cut edges'
             },
             {
-                value: 'type-6',
+                value: 'mushy-with-ragged-edges-stool',
                 imageSrc: '/stool-type-6.png',
                 title: 'Type 6',
                 description: 'Mushy consistency with ragged edges'
             },
             {
-                value: 'type-7',
+                value: 'entirely-liquid-no-solid-pieces-stool',
                 imageSrc: '/stool-type-7.png',
                 title: 'Type 7',
                 description: 'Liquid consistency with no solid pieces'
@@ -309,7 +305,6 @@ export const FORM_QUESTIONS: FormQuestion[] = [
 // Default form data
 export const DEFAULT_FORM_DATA: OnboardingFormData = {
     age: '',
-    gender: '',
     gutConcerns: [],
     bowelFrequency: '',
     energyLevel: 3,
@@ -318,6 +313,7 @@ export const DEFAULT_FORM_DATA: OnboardingFormData = {
     moodTracking: '',
     dietaryPattern: '',
     culturalPreference: '',
+    severityRating: '',
     foodSensitivities: [],
     stoolType: '',
     foodMode: '',

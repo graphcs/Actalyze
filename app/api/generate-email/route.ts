@@ -83,7 +83,6 @@ export async function POST(request: NextRequest) {
             },
             assessmentData: {
                 age: formData.age,
-                gender: formData.gender,
                 initialReason: assessmentResult.data?.initial_reason
             }
         }

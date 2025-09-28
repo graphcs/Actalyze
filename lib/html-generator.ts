@@ -13,7 +13,6 @@ interface ReportData {
   }
   assessmentData?: {
     age?: string
-    gender?: string
     initialReason?: string
   }
 }

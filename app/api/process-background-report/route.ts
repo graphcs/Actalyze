@@ -22,7 +22,6 @@ interface BackgroundJobData {
         }
         assessmentData?: {
             age?: string
-            gender?: string
             initialReason?: string
         }
     }
@@ -110,7 +109,6 @@ async function processBackgroundJob(jobData: BackgroundJobData, attempt: number 
             },
             assessmentData: {
                 age: formData.age as string,
-                gender: formData.gender as string,
                 initialReason: assessmentResult.data?.initial_reason || reportData.assessmentData?.initialReason
             }
         }
