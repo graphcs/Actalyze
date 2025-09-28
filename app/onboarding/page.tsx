@@ -1,84 +1,83 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { 
-  OnboardingFormData, 
-  FoodUploadData,
-  FORM_QUESTIONS, 
-  DEFAULT_FORM_DATA 
-} from '@/types/onboarding'
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import {
+  OnboardingFormData,
+  FORM_QUESTIONS,
+  DEFAULT_FORM_DATA,
+} from "@/types/onboarding";
 
 // Question Components
-import SingleSelectQuestion from '@/components/onboarding/SingleSelectQuestion'
-import MultiSelectQuestion from '@/components/onboarding/MultiSelectQuestion'
-import SliderQuestion from '@/components/onboarding/SliderQuestion'
-import ImageSelectQuestion from '@/components/onboarding/ImageSelectQuestion'
-import TextInputQuestion from '@/components/onboarding/TextInputQuestion'
-import TextAreaQuestion from '@/components/onboarding/TextAreaQuestion'
-import ModeSelectQuestion from '@/components/onboarding/ModeSelectQuestion'
-import FoodUploadQuestion from '@/components/onboarding/FoodUploadQuestion'
+import SingleSelectQuestion from "@/components/onboarding/SingleSelectQuestion";
+import MultiSelectQuestion from "@/components/onboarding/MultiSelectQuestion";
+import SliderQuestion from "@/components/onboarding/SliderQuestion";
+import ImageSelectQuestion from "@/components/onboarding/ImageSelectQuestion";
+import TextInputQuestion from "@/components/onboarding/TextInputQuestion";
+import TextAreaQuestion from "@/components/onboarding/TextAreaQuestion";
 
 // Function to get initial state from localStorage
 const getInitialFormData = (): OnboardingFormData => {
-  if (typeof window === 'undefined') return DEFAULT_FORM_DATA
-  
-  const savedFormData = localStorage.getItem('gutRootOnboardingForm')
+  if (typeof window === "undefined") return DEFAULT_FORM_DATA;
+
+  const savedFormData = localStorage.getItem("gutRootOnboardingForm");
   if (savedFormData) {
     try {
-      return JSON.parse(savedFormData)
+      return JSON.parse(savedFormData);
     } catch (error) {
-      console.error('Error parsing saved form data:', error)
-      return DEFAULT_FORM_DATA
+      console.error("Error parsing saved form data:", error);
+      return DEFAULT_FORM_DATA;
     }
   }
-  return DEFAULT_FORM_DATA
-}
+  return DEFAULT_FORM_DATA;
+};
 
 const getInitialStep = (): number => {
-  if (typeof window === 'undefined') return 0
-  
-  const savedStep = localStorage.getItem('gutRootOnboardingStep')
+  if (typeof window === "undefined") return 0;
+
+  const savedStep = localStorage.getItem("gutRootOnboardingStep");
   if (savedStep) {
-    const stepNumber = parseInt(savedStep)
+    const stepNumber = parseInt(savedStep);
     // Ensure step is valid
     if (stepNumber >= 0 && stepNumber < FORM_QUESTIONS.length) {
-      return stepNumber
+      return stepNumber;
     }
   }
-  return 0
-}
+  return 0;
+};
 
 const getInitialReason = (): string => {
-  if (typeof window === 'undefined') return ''
-  
-  return localStorage.getItem('gutRootInitialReason') || ''
-}
+  if (typeof window === "undefined") return "";
+
+  return localStorage.getItem("gutRootInitialReason") || "";
+};
 
 export default function OnboardingPage() {
-  const [currentStep, setCurrentStep] = useState(() => getInitialStep())
-  const [formData, setFormData] = useState<OnboardingFormData>(() => getInitialFormData())
-  const [initialReason, setInitialReason] = useState<string>(() => getInitialReason())
-  const [isLoaded, setIsLoaded] = useState(false)
-  const router = useRouter()
+  const [currentStep, setCurrentStep] = useState(() => getInitialStep());
+  const [formData, setFormData] = useState<OnboardingFormData>(() =>
+    getInitialFormData()
+  );
+  const [initialReason] = useState<string>(() => getInitialReason());
+  const [isLoaded, setIsLoaded] = useState(false);
+  const router = useRouter();
 
   // Ensure component is properly loaded with saved state
   useEffect(() => {
-    setIsLoaded(true)
-  }, [currentStep, formData, initialReason])
+    setIsLoaded(true);
+  }, [currentStep, formData, initialReason]);
 
   // Save form data to localStorage whenever it changes
   useEffect(() => {
     if (isLoaded) {
-      localStorage.setItem('gutRootOnboardingForm', JSON.stringify(formData))
-      localStorage.setItem('gutRootOnboardingStep', currentStep.toString())
+      localStorage.setItem("gutRootOnboardingForm", JSON.stringify(formData));
+      localStorage.setItem("gutRootOnboardingStep", currentStep.toString());
     }
-  }, [formData, currentStep, isLoaded])
+  }, [formData, currentStep, isLoaded]);
 
-  const currentQuestion = FORM_QUESTIONS[currentStep]
-  const totalSteps = FORM_QUESTIONS.length
-  const progressPercentage = ((currentStep + 1) / totalSteps) * 100
+  const currentQuestion = FORM_QUESTIONS[currentStep];
+  const totalSteps = FORM_QUESTIONS.length;
+  const progressPercentage = ((currentStep + 1) / totalSteps) * 100;
 
   // Don't render until state is properly loaded
   if (!isLoaded) {
@@ -86,168 +85,126 @@ export default function OnboardingPage() {
       <div className="min-h-screen bg-cream-light flex items-center justify-center">
         <div className="flex space-x-2">
           <div className="w-3 h-3 bg-orange-primary rounded-full animate-bounce"></div>
-          <div className="w-3 h-3 bg-orange-primary rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-          <div className="w-3 h-3 bg-orange-primary rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+          <div
+            className="w-3 h-3 bg-orange-primary rounded-full animate-bounce"
+            style={{ animationDelay: "0.1s" }}
+          ></div>
+          <div
+            className="w-3 h-3 bg-orange-primary rounded-full animate-bounce"
+            style={{ animationDelay: "0.2s" }}
+          ></div>
         </div>
       </div>
-    )
+    );
   }
 
   const updateFormData = (field: keyof OnboardingFormData, value: unknown) => {
-    setFormData(prev => {
-      // Smart data clearing logic for food mode changes
-      if (field === 'foodMode' && prev.foodMode && prev.foodMode !== value) {
-        // Mode changed - clear food rating data but preserve the new mode
-        const newMode = value as 'text' | 'upload'
-        return {
-          ...prev,
-          foodMode: newMode,
-          foodRating: {
-            mode: newMode,
-            textInput: '',
-            images: []
-          }
-        }
-      }
-      
-      return {
-        ...prev,
-        [field]: value
-      }
-    })
-  }
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
 
   const handleNext = () => {
     if (currentStep < totalSteps - 1) {
-      setCurrentStep(currentStep + 1)
+      setCurrentStep(currentStep + 1);
     } else {
       // Form completed, redirect to results page
-      router.push('/onboarding/complete')
+      router.push("/onboarding/complete");
     }
-  }
+  };
 
   const handleBack = () => {
     if (currentStep > 0) {
-      setCurrentStep(currentStep - 1)
+      setCurrentStep(currentStep - 1);
     } else {
       // Go back to initial question page
-      router.push('/onboarding/initial-question')
+      router.push("/onboarding/initial-question");
     }
-  }
+  };
 
   const isStepValid = () => {
-    if (!currentQuestion.required) return true
-    
-    const value = formData[currentQuestion.id]
-    
+    if (!currentQuestion.required) return true;
+
+    const value = formData[currentQuestion.id];
+
     switch (currentQuestion.type) {
-      case 'single-select':
-      case 'image-select':
-      case 'text-input':
-      case 'text-area':
-      case 'mode-select':
-        return value !== '' && value !== null && value !== undefined
-      case 'slider':
-        return value !== null && value !== undefined
-      case 'multi-select':
-        return Array.isArray(value) && value.length > 0
-      case 'food-upload':
-        const foodData = value as FoodUploadData
-        const selectedMode = formData.foodMode
-        if (!selectedMode) return false
-        
-        if (selectedMode === 'text') {
-          return !!(foodData.textInput && foodData.textInput.trim().length > 0)
-        } else if (selectedMode === 'upload') {
-          return !!(foodData.images && foodData.images.length > 0 && 
-            foodData.images.some(img => img.status === 'uploaded'))
-        }
-        return false
+      case "single-select":
+      case "image-select":
+      case "text-input":
+      case "text-area":
+        return value !== "" && value !== null && value !== undefined;
+      case "slider":
+        return value !== null && value !== undefined;
+      case "multi-select":
+        return Array.isArray(value) && value.length > 0;
       default:
-        return true
+        return true;
     }
-  }
+  };
 
   const renderQuestion = () => {
-    const onChange = (value: unknown) => updateFormData(currentQuestion.id, value)
+    const onChange = (value: unknown) =>
+      updateFormData(currentQuestion.id, value);
 
     switch (currentQuestion.type) {
-      case 'single-select':
+      case "single-select":
         return (
-          <SingleSelectQuestion 
+          <SingleSelectQuestion
             question={currentQuestion}
             value={formData[currentQuestion.id] as string | null}
             onChange={onChange}
           />
-        )
-      case 'multi-select':
+        );
+      case "multi-select":
         return (
-          <MultiSelectQuestion 
+          <MultiSelectQuestion
             question={currentQuestion}
             value={formData[currentQuestion.id] as string[]}
             onChange={onChange}
           />
-        )
-      case 'slider':
+        );
+      case "slider":
         return (
-          <SliderQuestion 
+          <SliderQuestion
             question={currentQuestion}
             value={formData[currentQuestion.id] as number}
             onChange={onChange}
           />
-        )
-      case 'image-select':
+        );
+      case "image-select":
         return (
-          <ImageSelectQuestion 
+          <ImageSelectQuestion
             question={currentQuestion}
             value={formData[currentQuestion.id] as string}
             onChange={onChange}
           />
-        )
-      case 'text-input':
+        );
+      case "text-input":
         return (
-          <TextInputQuestion 
+          <TextInputQuestion
             question={currentQuestion}
             value={formData[currentQuestion.id] as string}
             onChange={onChange}
           />
-        )
-      case 'text-area':
+        );
+      case "text-area":
         return (
-          <TextAreaQuestion 
+          <TextAreaQuestion
             question={currentQuestion}
             value={formData[currentQuestion.id] as string}
             onChange={onChange}
           />
-        )
-      case 'mode-select':
-        return (
-          <ModeSelectQuestion 
-            question={currentQuestion}
-            value={formData[currentQuestion.id] as string}
-            onChange={onChange}
-            onModeSelected={handleNext}
-          />
-        )
-      case 'food-upload':
-        return (
-          <FoodUploadQuestion 
-            question={currentQuestion}
-            value={formData[currentQuestion.id] as FoodUploadData}
-            onChange={onChange}
-            mode={formData.foodMode as 'text' | 'upload'}
-            onSubmit={formData.foodMode === 'upload' ? handleNext : undefined}
-          />
-        )
+        );
       default:
-        return null
+        return null;
     }
-  }
+  };
 
   return (
     <div className="onboarding-page bg-cream-light flex items-center justify-center px-4 relative h-screen">
       {/* Orange Gradient Overlay */}
-      <div 
+      <div
         className="absolute inset-0 w-full h-full pointer-events-none"
         style={{
           background: `linear-gradient(
@@ -274,18 +231,18 @@ export default function OnboardingPage() {
         {/* Progress Bar */}
         <div>
           <div className="flex items-center">
-            <button 
+            <button
               onClick={handleBack}
               className="mr-4 p-2 bg-white rounded-full cursor-pointer"
             >
               <img src="/back-arrow.png" alt="Back" className="w-6 h-6" />
             </button>
             <div className="flex-1 bg-white rounded-full h-3">
-              <div 
+              <div
                 className="h-3 rounded-full transition-all duration-300"
-                style={{ 
+                style={{
                   width: `${progressPercentage}%`,
-                  background: 'linear-gradient(to right, #A8CBA1, #0D4C47)'
+                  background: "linear-gradient(to right, #A8CBA1, #0D4C47)",
                 }}
               />
             </div>
@@ -295,18 +252,18 @@ export default function OnboardingPage() {
         {/* Content */}
         <div className="flex-1 pt-12">
           <div className="w-full max-w-sm md:max-w-xl mx-auto">
-            
             {/* Show intro text in bubble on first step */}
             {currentStep === 1 && initialReason && (
               <div className="relative mb-8">
-                <img 
-                  src="/bubble-question.png" 
-                  alt="Question bubble" 
+                <img
+                  src="/bubble-question.png"
+                  alt="Question bubble"
                   className="w-full h-[200px]"
                 />
                 <div className="absolute inset-0 flex items-start justify-center px-8 pt-8 md:pt-10">
                   <p className="text-dark text-xl md:text-2xl leading-relaxed text-left font-medium">
-                    I will ask you a few quick questions to personalize your plan.
+                    I will ask you a few quick questions to personalize your
+                    plan.
                   </p>
                 </div>
               </div>
@@ -317,17 +274,14 @@ export default function OnboardingPage() {
               {/* Show bubble question for questions with showBubble property (not first step) */}
               {currentQuestion.showBubble && currentStep !== 0 ? (
                 <div className="relative mb-8">
-                  <img 
-                    src="/bubble-question.png" 
-                    alt="Question bubble" 
+                  <img
+                    src="/bubble-question.png"
+                    alt="Question bubble"
                     className="w-full h-[200px]"
                   />
                   <div className="absolute inset-0 flex items-start justify-center px-8 pt-8 md:pt-10">
-                    <p className={`text-dark leading-relaxed text-start font-medium ${
-                      currentQuestion.type === 'food-upload' && formData.foodMode === 'upload' ? 'text-2xl' : 'text-xl md:text-2xl'}`}>
-                      {currentQuestion.type === 'food-upload' && formData.foodMode === 'upload' 
-                        ? "Upload images of 3 food in your fridge or pantry." 
-                        : currentQuestion.title}
+                    <p className="text-dark text-xl md:text-2xl leading-relaxed text-start font-medium">
+                      {currentQuestion.title}
                     </p>
                   </div>
                 </div>
@@ -336,27 +290,25 @@ export default function OnboardingPage() {
                   {currentQuestion.title}
                 </h2>
               )}
-              
+
               {renderQuestion()}
             </div>
 
-            {/* Continue Button - Hidden for mode-select (auto-progress) and upload mode in food-upload step */}
-            {!(currentQuestion.type === 'mode-select' || (currentQuestion.type === 'food-upload' && formData.foodMode === 'upload')) && (
-              <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 w-full max-w-sm px-4 md:px-0">
-                <div className="flex justify-center">
-                  <button
-                    onClick={handleNext}
-                    disabled={currentQuestion.required && !isStepValid()}
-                    className="w-full py-4 px-6 text-xl text-nowrap rounded-full font-semibold transition-all duration-200 bg-orange-primary text-dark cursor-pointer disabled:cursor-not-allowed"
-                  >
-                    {currentStep === totalSteps - 1 ? 'Submit' : 'Continue'}
-                  </button>
-                </div>
+            {/* Continue Button */}
+            <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 w-full max-w-sm px-4 md:px-0">
+              <div className="flex justify-center">
+                <button
+                  onClick={handleNext}
+                  disabled={currentQuestion.required && !isStepValid()}
+                  className="w-full py-4 px-6 text-xl text-nowrap rounded-full font-semibold transition-all duration-200 bg-orange-primary text-dark cursor-pointer disabled:cursor-not-allowed"
+                >
+                  {currentStep === totalSteps - 1 ? "Submit" : "Continue"}
+                </button>
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
     </div>
-  )
-} 
+  );
+}

@@ -1,23 +1,3 @@
-// Food upload related interfaces
-export interface FoodImage {
-    id: string
-    file?: File
-    url?: string
-    name: string
-    size: number
-    type: string
-    uploadProgress?: number
-    status: 'pending' | 'uploading' | 'uploaded' | 'error'
-    error?: string
-    thumbnail?: string
-}
-
-export interface FoodUploadData {
-    mode: 'text' | 'upload'
-    textInput?: string
-    images?: FoodImage[]
-}
-
 export interface OnboardingFormData {
     age: string
     gutConcerns: string[]
@@ -31,14 +11,12 @@ export interface OnboardingFormData {
     culturalPreference: string
     foodSensitivities: string[]
     stoolType: string
-    foodMode: 'text' | 'upload' | ''
-    foodRating: FoodUploadData
 }
 
 export interface FormQuestion {
     id: keyof OnboardingFormData
     title: string
-    type: 'single-select' | 'multi-select' | 'slider' | 'image-select' | 'text-input' | 'text-area' | 'mode-select' | 'food-upload'
+    type: 'single-select' | 'multi-select' | 'slider' | 'image-select' | 'text-input' | 'text-area'
     required: boolean
     options?: QuestionOption[]
     sliderConfig?: SliderConfig
@@ -164,7 +142,7 @@ export const FORM_QUESTIONS: FormQuestion[] = [
     },
     {
         id: 'moodTracking',
-        title: 'How are you feeling today? (single-select)',
+        title: 'How are you feeling today?',
         type: 'single-select',
         required: true,
         options: [
@@ -280,25 +258,6 @@ export const FORM_QUESTIONS: FormQuestion[] = [
                 description: 'Liquid consistency with no solid pieces'
             }
         ]
-    },
-    {
-        id: 'foodMode',
-        title: 'Tell me 3 foods from your fridge or pantry I will rate them for gut health.',
-        type: 'mode-select',
-        required: true,
-        showBubble: true,
-        options: [
-            { value: 'upload', label: 'Upload (AI)' },
-            { value: 'text', label: 'List (Manual)' }
-        ]
-    },
-    {
-        id: 'foodRating',
-        title: 'Tell me 3 foods from your fridge or pantry I will rate them for gut health.',
-        type: 'food-upload',
-        required: true,
-        placeholder: 'List 3 food from your fridge or pantry...',
-        showBubble: true
     }
 ]
 
@@ -315,11 +274,5 @@ export const DEFAULT_FORM_DATA: OnboardingFormData = {
     culturalPreference: '',
     severityRating: '',
     foodSensitivities: [],
-    stoolType: '',
-    foodMode: '',
-    foodRating: {
-        mode: 'text',
-        textInput: '',
-        images: []
-    }
+    stoolType: ''
 } 

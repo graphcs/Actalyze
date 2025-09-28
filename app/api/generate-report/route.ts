@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
-import { OnboardingFormData, FoodUploadData } from '@/types/onboarding'
-import { deleteFoodImages } from '@/lib/food-image-upload'
+import { OnboardingFormData } from '@/types/onboarding'
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
@@ -15,31 +14,8 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Assessment data is required' }, { status: 400 })
         }
 
-        // Extract food image URLs for cleanup
-        const foodData = formData.foodRating as FoodUploadData
-        const imageUrls: string[] = []
-
-        if (foodData.mode === 'upload' && foodData.images) {
-            foodData.images.forEach(image => {
-                if (image.status === 'uploaded' && image.url) {
-                    imageUrls.push(image.url)
-                }
-            })
-        }
-
         // Generate the AI report
         const report = await generateGutHealthReport(formData, initialReason, userProfile)
-
-        // Clean up uploaded food images after successful report generation
-        if (imageUrls.length > 0) {
-            try {
-                await deleteFoodImages(imageUrls)
-                console.log(`Cleaned up ${imageUrls.length} food images after report generation`)
-            } catch (cleanupError) {
-                console.error('Failed to cleanup food images:', cleanupError)
-                // Don't fail the request if cleanup fails
-            }
-        }
 
         return NextResponse.json({ report })
     } catch (error) {
@@ -119,20 +95,6 @@ async function generateGutHealthReport(
     return parseAIResponse(response)
 }
 
-function formatFoodRating(foodRating: FoodUploadData): string {
-    if (foodRating.mode === 'text') {
-        return foodRating.textInput || 'No food information provided'
-    } else if (foodRating.mode === 'upload') {
-        const uploadedImages = foodRating.images?.filter(img => img.status === 'uploaded') || []
-        if (uploadedImages.length > 0) {
-            return `${uploadedImages.length} food images uploaded for AI analysis. Please analyze the foods shown in the images and provide personalized gut health recommendations based on what you can identify.`
-        } else {
-            return 'Food images were selected but not successfully uploaded'
-        }
-    }
-    return 'No food rating information available'
-}
-
 function buildComprehensivePrompt(
     formData: OnboardingFormData,
     initialReason?: string,
@@ -147,7 +109,6 @@ Hello ${userName}, I need you to analyze this comprehensive gut health assessmen
 
 ## Patient Information
 - **Age**: ${formData.age}
-- **Gender**: ${formData.gender}
 - **Primary Concern**: ${initialReason || 'General gut health improvement'}
 
 ## Current Symptoms & Concerns
@@ -165,7 +126,6 @@ Hello ${userName}, I need you to analyze this comprehensive gut health assessmen
 - **Dietary Pattern**: ${formData.dietaryPattern}
 - **Cultural Food Preferences**: ${formData.culturalPreference}
 - **Food Sensitivities**: ${Array.isArray(formData.foodSensitivities) ? formData.foodSensitivities.join(', ') : formData.foodSensitivities}
-- **Food Rating**: ${formatFoodRating(formData.foodRating)}
 
 ## Analysis Required
 
@@ -266,23 +226,10 @@ IMPORTANT FORMATTING RULES:
 Make your recommendations evidence-based, practical, and personalized to this individual's specific situation. Consider their cultural background, current lifestyle, and primary concerns throughout your analysis.
 `
 
-    // Extract image URLs if food rating includes uploaded images
-    const foodData = formData.foodRating as FoodUploadData
-    const imageUrls: string[] = []
-    const hasImages = foodData.mode === 'upload' && foodData.images && foodData.images.length > 0
-
-    if (hasImages && foodData.images) {
-        foodData.images.forEach(image => {
-            if (image.status === 'uploaded' && image.url) {
-                imageUrls.push(image.url)
-            }
-        })
-    }
-
     return {
         prompt,
-        hasImages: Boolean(hasImages && imageUrls.length > 0),
-        imageUrls
+        hasImages: false,
+        imageUrls: []
     }
 }
 
