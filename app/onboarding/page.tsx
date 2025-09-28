@@ -64,8 +64,19 @@ export default function OnboardingPage() {
 
   // Ensure component is properly loaded with saved state
   useEffect(() => {
+    // If no saved data and no initial reason, redirect to initial question
+    const hasSavedForm = localStorage.getItem("gutRootOnboardingForm");
+    const hasSavedStep = localStorage.getItem("gutRootOnboardingStep");
+    const hasInitialReason = localStorage.getItem("gutRootInitialReason");
+
+    if (!hasSavedForm && !hasSavedStep && !hasInitialReason) {
+      // No saved onboarding data, redirect to initial question page
+      router.push("/onboarding/initial-question");
+      return;
+    }
+
     setIsLoaded(true);
-  }, [currentStep, formData, initialReason]);
+  }, [currentStep, formData, initialReason, router]);
 
   // Save form data to localStorage whenever it changes
   useEffect(() => {
@@ -109,8 +120,8 @@ export default function OnboardingPage() {
     if (currentStep < totalSteps - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Form completed, redirect to results page
-      router.push("/onboarding/complete");
+      // Form completed, redirect directly to report page
+      router.push("/report");
     }
   };
 

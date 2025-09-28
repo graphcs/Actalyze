@@ -244,13 +244,13 @@ interface WeeklyData {
 // Helper function to map stool types to descriptions
 function getStoolTypeDescription(stoolType: string): string {
     const stoolTypeMap: Record<string, string> = {
-        'type-1': 'Bristol Type 1 (Hard lumps)',
-        'type-2': 'Bristol Type 2 (Lumpy sausage)',
-        'type-3': 'Bristol Type 3 (Cracked sausage)',
-        'type-4': 'Bristol Type 4 (Smooth sausage)',
-        'type-5': 'Bristol Type 5 (Soft blobs)',
-        'type-6': 'Bristol Type 6 (Mushy consistency)',
-        'type-7': 'Bristol Type 7 (Liquid consistency)'
+        'type-1': 'Bristol Type 1 (Separate Hard lumps)',
+        'type-2': 'Bristol Type 2 (Lumpy and sausage like)',
+        'type-3': 'Bristol Type 3 (Cracked sausage surface)',
+        'type-4': 'Bristol Type 4 (Smooth soft sausage)',
+        'type-5': 'Bristol Type 5 (Soft blobs with clear cut edges)',
+        'type-6': 'Bristol Type 6 (Mushy consistency with ragged edges)',
+        'type-7': 'Bristol Type 7 (Liquid consistency with no solid pieces)'
     }
     return stoolTypeMap[stoolType] || stoolType
 }

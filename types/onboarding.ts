@@ -194,7 +194,7 @@ export const FORM_QUESTIONS: FormQuestion[] = [
         id: 'foodSensitivities',
         title: 'Food sensitivities or allergies:',
         type: 'multi-select',
-        required: false,
+        required: true,
         options: [
             { value: 'lactose-intolerance', label: 'Lactose intolerance' },
             { value: 'gluten-sensitivity', label: 'Gluten sensitivity' },
@@ -216,43 +216,43 @@ export const FORM_QUESTIONS: FormQuestion[] = [
         required: true,
         imageOptions: [
             {
-                value: 'separate-hard-lumps-stool',
+                value: 'type-1',
                 imageSrc: '/stool-type-1.png',
                 title: 'Type 1',
                 description: 'Separate hard lumps'
             },
             {
-                value: 'lumpy-and-sausage-like-stool',
+                value: 'type-2',
                 imageSrc: '/stool-type-2.png',
                 title: 'Type 2',
                 description: 'Lumpy and sausage like'
             },
             {
-                value: 'sausage-shape-with-cracks-stool',
+                value: 'type-3',
                 imageSrc: '/stool-type-3.png',
                 title: 'Type 3',
                 description: 'A sausage shape with cracks in the surface'
             },
             {
-                value: 'smooth-soft-snake-sausage-stool',
+                value: 'type-4',
                 imageSrc: '/stool-type-4.png',
                 title: 'Type 4',
                 description: 'Like a smooth, soft sausage or snake'
             },
             {
-                value: 'soft-blobs-clear-cut-edges-stool',
+                value: 'type-5',
                 imageSrc: '/stool-type-5.png',
                 title: 'Type 5',
                 description: 'Soft blobs with clear-cut edges'
             },
             {
-                value: 'mushy-with-ragged-edges-stool',
+                value: 'type-6',
                 imageSrc: '/stool-type-6.png',
                 title: 'Type 6',
                 description: 'Mushy consistency with ragged edges'
             },
             {
-                value: 'entirely-liquid-no-solid-pieces-stool',
+                value: 'type-7',
                 imageSrc: '/stool-type-7.png',
                 title: 'Type 7',
                 description: 'Liquid consistency with no solid pieces'
