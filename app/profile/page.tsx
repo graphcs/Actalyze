@@ -175,11 +175,6 @@ export default function ProfilePage() {
     }
   }
 
-  const handleManageSubscription = () => {
-    // Placeholder for subscription management
-    alert('Subscription management coming soon!')
-  }
-
   return (
     <div className="min-h-screen bg-cream-light flex items-center justify-center px-4 relative overflow-hidden">
       {/* Orange Gradient Overlay */}
@@ -223,17 +218,6 @@ export default function ProfilePage() {
                 {successMessage}
               </div>
             )}
-
-            {/* Premium Subscription Section */}
-            <div className="mb-4">
-              <h2 className="text-2xl font-bold text-black mb-4">Premium subscription</h2>
-              <button
-                onClick={handleManageSubscription}
-                className="w-full py-3 px-6 bg-orange-pale text-dark font-medium rounded-full"
-              >
-                Manage subscription
-              </button>
-            </div>
 
             {/* Profile Section */}
             <div className="mb-8">
