@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { OnboardingFormData } from '@/types/onboarding'
+import { getStoolTypeDescription, getMoodScore, getSymptomSeverityDescription } from '@/app/utils/utils'
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
@@ -32,51 +33,23 @@ async function generateGutHealthReport(
     initialReason?: string,
     userProfile?: { firstName?: string; lastName?: string }
 ) {
-    const { prompt, hasImages, imageUrls } = buildComprehensivePrompt(formData, initialReason, userProfile)
+    const { prompt } = buildComprehensivePrompt(formData, initialReason, userProfile)
 
     // Determine model and message structure based on whether images are present
     const model = "gpt-4.1"
     const systemMessage = "You are a certified nutritionist and gut health specialist with over 15 years of experience. You provide evidence-based, personalized recommendations for improving digestive health. Your advice is practical, actionable, and considers individual lifestyle factors."
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let messages: any[]
-
-    if (hasImages && imageUrls.length > 0) {
-        // Use Vision API for image analysis
-        const imageContent = imageUrls.map(url => ({
-            type: "image_url",
-            image_url: { url }
-        }))
-
-        messages = [
-            {
-                role: "system",
-                content: systemMessage
-            },
-            {
-                role: "user",
-                content: [
-                    {
-                        type: "text",
-                        text: prompt
-                    },
-                    ...imageContent
-                ]
-            }
-        ]
-    } else {
-        // Standard text-only request
-        messages = [
-            {
-                role: "system",
-                content: systemMessage
-            },
-            {
-                role: "user",
-                content: prompt
-            }
-        ]
-    }
+    const messages: any[] = [
+        {
+            role: "system",
+            content: systemMessage
+        },
+        {
+            role: "user",
+            content: prompt
+        }
+    ]
 
     const completion = await openai.chat.completions.create({
         model,
@@ -99,7 +72,7 @@ function buildComprehensivePrompt(
     formData: OnboardingFormData,
     initialReason?: string,
     userProfile?: { firstName?: string; lastName?: string }
-): { prompt: string; hasImages: boolean; imageUrls: string[] } {
+): { prompt: string; } {
     const userName = userProfile?.firstName || "there"
 
     const prompt = `
@@ -109,17 +82,19 @@ Hello ${userName}, I need you to analyze this comprehensive gut health assessmen
 
 ## Patient Information
 - **Age**: ${formData.age}
-- **Primary Concern**: ${initialReason || 'General gut health improvement'}
+- **Primary Concern**: ${initialReason}
+- **Secondary Concerns**: ${Array.isArray(formData.gutConcerns) ? formData.gutConcerns.join(', ') : formData.gutConcerns}
+- **Symptoms Severity**: ${getSymptomSeverityDescription(formData.severityRating)}
 
 ## Current Symptoms & Concerns
 - **Gut Concerns**: ${Array.isArray(formData.gutConcerns) ? formData.gutConcerns.join(', ') : formData.gutConcerns}
 - **Bowel Movement Frequency**: ${formData.bowelFrequency}
-- **Stool Type**: ${formData.stoolType}
+- **Stool Type**: ${getStoolTypeDescription(formData.stoolType)}
 
 ## Energy & Lifestyle Factors
 - **Energy Level**: ${formData.energyLevel}/5
 - **Sleep Quality**: ${formData.sleepQuality || 'Not specified'}
-- **Mood Tracking**: ${formData.moodTracking}
+- **Mood Tracking**: ${formData.moodTracking} (Score: ${getMoodScore(formData.moodTracking)})
 - **Hydration Habits**: ${formData.hydrationHabits}
 
 ## Dietary Information
@@ -227,9 +202,7 @@ Make your recommendations evidence-based, practical, and personalized to this in
 `
 
     return {
-        prompt,
-        hasImages: false,
-        imageUrls: []
+        prompt
     }
 }
 

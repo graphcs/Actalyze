@@ -192,9 +192,9 @@ export const FORM_QUESTIONS: FormQuestion[] = [
     },
     {
         id: 'foodSensitivities',
-        title: 'Food sensitivities or allergies:',
+        title: 'Food sensitivities or allergies: (Optional)',
         type: 'multi-select',
-        required: true,
+        required: false,
         options: [
             { value: 'lactose-intolerance', label: 'Lactose intolerance' },
             { value: 'gluten-sensitivity', label: 'Gluten sensitivity' },
@@ -206,7 +206,6 @@ export const FORM_QUESTIONS: FormQuestion[] = [
             { value: 'wheat-allergy', label: 'Wheat allergy' },
             { value: 'histamine-intolerance', label: 'Histamine intolerance' },
             { value: 'caffeine-sensitivity', label: 'Caffeine sensitivity' },
-            { value: 'no-sensitivities', label: 'No sensitivities' }
         ]
     },
     {
