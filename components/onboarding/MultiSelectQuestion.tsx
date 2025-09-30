@@ -23,7 +23,7 @@ export default function MultiSelectQuestion({ question, value, onChange }: Multi
   }
 
   return (
-    <div className="space-y-4 question-scroll md:flex md:flex-col md:items-center">
+    <div className="space-y-3 question-scroll md:flex md:flex-col md:items-center">
       {question.options.map((option) => {
         const isSelected = value?.includes(option.value) || false
         
@@ -31,7 +31,7 @@ export default function MultiSelectQuestion({ question, value, onChange }: Multi
           <button
             key={option.value}
             onClick={() => handleToggle(option.value)}
-            className={`w-full md:w-[80%] py-2 px-6 rounded-full text-md text-nowrap text-dark font-medium transition-all duration-200 text-left`}
+            className={`w-full md:w-[80%] py-2 md:py-3 px-6 rounded-full text-md text-nowrap text-dark font-medium transition-all duration-200 text-left`}
             style={{ 
               backgroundColor: '#FAE4B2',
               ...(isSelected && {

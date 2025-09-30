@@ -80,7 +80,7 @@ export default function InitialQuestionPage() {
 
         {/* Choice Buttons */}
         <div className="flex-1 question-scroll">
-        <div className="space-y-4">
+        <div className="space-y-3">
           {reasons.map((reason) => (
             <button
               key={reason}
