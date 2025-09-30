@@ -1,6 +1,7 @@
 interface CachedWeeklyReport {
     report: {
         digestive_score: number
+        digestive_score_explanation: string
         bowel_trends: string
         goal_reminders: string
         symptom_patterns_analysis: string
@@ -74,10 +75,16 @@ export function getCachedWeeklyReport(
             return null
         }
 
+        // Ensure report contains required explanation field (invalidate old cache versions)
+        if (!cachedReport.report.digestive_score_explanation) {
+            localStorage.removeItem(CACHE_KEY)
+            return null
+        }
+
         return cachedReport
 
     } catch (error) {
-        console.error('Error reading cached weekly report') 
+        console.error('Error reading cached weekly report', error) 
         localStorage.removeItem(CACHE_KEY)
         return null
     }
@@ -109,7 +116,7 @@ export function setCachedWeeklyReport(
         localStorage.setItem(CACHE_KEY, JSON.stringify(cachedReport))
 
     } catch (error) {
-        console.error('Error caching weekly report')
+        console.error('Error caching weekly report', error)
     }
 }
 
@@ -120,7 +127,7 @@ export function clearWeeklyReportCache(): void {
     try {
         localStorage.removeItem(CACHE_KEY)
     } catch (error) {
-        console.error('Error clearing weekly report cache')
+        console.error('Error clearing weekly report cache', error)
     }
 }
 

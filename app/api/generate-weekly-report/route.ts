@@ -481,6 +481,13 @@ Based on the week's data (bowel movements, symptoms, energy, mood, hydration), p
 - 4-5: Moderate digestive health, needs attention
 - 1-3: Poor digestive health, significant issues
 
+### DIGESTIVE_SCORE_EXPLANATION
+Immediately after the score, output a concise ledger showing how the points add up.
+- Use one line per factor, formatted like +3 points · Regular bowel movements (7 of 7 days).
+- List the strongest positive contributors first, followed by any deductions with a minus sign (e.g., -1 point · Bloating reported 2 days at 3/5).
+- Finish with a summary line such as Net: +4 points this week (no prior comparison) or Net: +5 points (up 1 vs last week).
+- Keep this focused purely on the score math—do not restate detailed recommendations from later sections.
+
 ### BOWEL_TRENDS
 Example: "You pooped ${weeklyData.bowelMovements.daysWithBM} out of 7 days this week — ${comparison ? (comparison.bmFrequencyChange > 0 ? `up from ${weeklyData.bowelMovements.daysWithBM - comparison.bmFrequencyChange}` : `down from ${weeklyData.bowelMovements.daysWithBM - comparison.bmFrequencyChange}`) + ' last week' : 'good consistency this week'}. Most stools were ${weeklyData.bowelMovements.mostCommonStoolType}."
 
@@ -515,6 +522,7 @@ Generate the analysis focusing on progress, patterns, and practical next steps.
 function parseWeeklyAIResponse(response: string) {
     const sections = {
         digestive_score: 5, // Default to 5 if not found
+        digestive_score_explanation: '',
         bowel_trends: '',
         goal_reminders: '',
         symptom_patterns_analysis: '',
@@ -536,6 +544,11 @@ function parseWeeklyAIResponse(response: string) {
         }
 
         // Extract each section - the AI is using plain headers without ###
+        const explanationMatch = response.match(/DIGESTIVE_SCORE_EXPLANATION\s*\n([\s\S]*?)(?=\nBOWEL_TRENDS|$)/i)
+        if (explanationMatch) {
+            sections.digestive_score_explanation = explanationMatch[1].trim()
+        }
+
         const bowelMatch = response.match(/BOWEL_TRENDS\s*\n([\s\S]*?)(?=\nGOAL_REMINDERS|$)/i)
         if (bowelMatch) {
             sections.bowel_trends = bowelMatch[1].trim()

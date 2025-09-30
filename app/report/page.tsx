@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { getSessionToken } from "@/lib/auth";
 import {
   getCachedWeeklyReport,
@@ -11,6 +12,7 @@ import {
 
 interface WeeklyReportData {
   digestive_score: number;
+  digestive_score_explanation: string;
   bowel_trends: string;
   goal_reminders: string;
   symptom_patterns_analysis: string;
@@ -32,7 +34,12 @@ export default function ReportPage() {
   const [weeklyData, setWeeklyData] = useState<WeeklyData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const hasLoadedRef = useRef(false);
+  const [isScoreExplanationOpen, setIsScoreExplanationOpen] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    setIsScoreExplanationOpen(false);
+  }, [reportData?.digestive_score]);
 
   // Process fresh onboarding assessment in background
   const loadWeeklyReport = useCallback(async () => {
@@ -240,7 +247,13 @@ export default function ReportPage() {
             onClick={() => router.push("/profile")}
             className="p-2 hover:cursor-pointer"
           >
-            <img src="/Profile.png" alt="Profile" className="w-7 h-7" />
+            <Image
+              src="/Profile.png"
+              alt="Profile"
+              width={28}
+              height={28}
+              className="w-7 h-7"
+            />
           </button>
         </div>
 
@@ -261,9 +274,34 @@ export default function ReportPage() {
               </span>
             </div>
 
-            <div className="text-xl text-center font-medium text-gray-500 mb-2">
+            <div className="text-xl text-center font-medium text-gray-500 mb-4">
               {getScoreDescription(reportData.digestive_score)}
             </div>
+
+            {reportData.digestive_score_explanation && (
+              <div className="max-w-xl mx-auto mb-6">
+                <button
+                  type="button"
+                  onClick={() => setIsScoreExplanationOpen((prev) => !prev)}
+                  className="w-full flex items-center justify-between px-5 py-3 bg-orange-pale border border-orange-primary rounded-2xl shadow-sm text-left transition-all duration-200 hover:shadow-md"
+                >
+                  <span className="text-base font-semibold text-dark-gray">
+                    How we calculated this score
+                  </span>
+                  <span className="text-dark-gray text-xl leading-none">
+                    {isScoreExplanationOpen ? "−" : "+"}
+                  </span>
+                </button>
+
+                {isScoreExplanationOpen && (
+                  <div className="mt-3 px-5 py-4 bg-orange-pale border border-orange-primary rounded-2xl text-left">
+                    <p className="text-base text-medium-gray leading-relaxed whitespace-pre-line">
+                      {reportData.digestive_score_explanation}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Daily Log Button */}
             <div className="flex justify-center mb-6">
