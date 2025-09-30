@@ -1,12 +1,20 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 export default function InitialQuestionPage() {
-  const [selectedReason, setSelectedReason] = useState<string>('')
-  const router = useRouter()
+  const [selectedReason, setSelectedReason] = useState<string>("");
+  const router = useRouter();
+
+  // Load cached initial reason when component mounts
+  useEffect(() => {
+    const cachedReason = localStorage.getItem("gutRootInitialReason");
+    if (cachedReason) {
+      setSelectedReason(cachedReason);
+    }
+  }, []);
 
   const reasons = [
     'Constipation',
