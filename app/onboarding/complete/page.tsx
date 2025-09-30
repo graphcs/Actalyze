@@ -77,9 +77,6 @@ export default function CompletePage() {
   const triggerBackgroundProcessing = useCallback(async () => {
     // Prevent duplicate API calls
     if (hasProcessedRef.current) {
-      console.log(
-        "Background processing already triggered, skipping duplicate call"
-      );
       return;
     }
     hasProcessedRef.current = true;
@@ -185,48 +182,32 @@ export default function CompletePage() {
   useEffect(() => {
     // Wait for auth to load before making decisions
     if (loading) {
-      console.log("Auth still loading, waiting...");
       return;
     }
 
-    console.log("Auth loaded, checking validation...", {
-      user: !!user,
-      email: !!user?.email,
-    });
-
     const validation = validateAssessmentCompletion();
-    console.log("Assessment validation result:", validation);
 
     if (!validation.isComplete || !user?.email) {
       // No valid assessment data, redirect to initial question
-      console.log(
-        "Invalid assessment or no user, redirecting to initial question"
-      );
       router.push("/onboarding/initial-question");
       return;
     }
 
     // Check if processing was already completed
     const completedStage = localStorage.getItem("gutRootProcessingStage");
-    console.log("Processing stage from localStorage:", completedStage);
 
     if (completedStage === "complete") {
       // Already completed, redirect to report
-      console.log("Processing already complete, redirecting to report");
       router.push("/report");
       return;
     }
 
     // Prevent duplicate processing in React StrictMode
     if (hasProcessedRef.current) {
-      console.log(
-        "Processing already started, skipping duplicate useEffect call"
-      );
       return;
     }
 
     // Start processing from beginning or resume
-    console.log("Starting processing...");
     startProcessing();
   }, [user, router, startProcessing, loading]);
 

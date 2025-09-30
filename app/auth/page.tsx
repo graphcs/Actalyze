@@ -97,8 +97,6 @@ export default function AuthPage() {
           // No existing progress, start fresh
           router.push('/onboarding/initial-question')
         }
-      } else if (event === 'SIGNED_OUT') {
-        console.log('User signed out')
       }
     })
 

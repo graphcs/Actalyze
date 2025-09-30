@@ -80,11 +80,8 @@ export default function ReportPage() {
         // Use cached data
         setReportData(cachedReport.report);
         setWeeklyData(cachedReport.weeklyData);
-        console.log("📋 Loaded from cache:", cachedReport.metadata);
         return;
       }
-
-      console.log("🔄 Cache miss - generating new weekly report...");
 
       // Generate new weekly progress report
       const response = await fetch("/api/generate-weekly-report", {
@@ -108,7 +105,6 @@ export default function ReportPage() {
       }
 
       const { report, weeklyData: weekly } = await response.json();
-      console.log("✅ Generated new weekly report");
 
       const weeklyReport = {
         ...report,
