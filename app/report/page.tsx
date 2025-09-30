@@ -3,17 +3,11 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { getSessionToken, useAuth } from "@/lib/auth";
+import { getSessionToken } from "@/lib/auth";
 import {
   getCachedWeeklyReport,
   setCachedWeeklyReport,
 } from "@/lib/weekly-report-cache";
-import {
-  validateAssessmentCompletion,
-  getAssessmentDataSafely,
-} from "@/lib/assessment-validation";
-import { supabase } from "@/lib/supabase";
-import { clearWeeklyReportCache } from "@/lib/weekly-report-cache";
 
 interface WeeklyReportData {
   digestive_score: number;
@@ -34,146 +28,16 @@ interface WeeklyData {
 }
 
 export default function ReportPage() {
-  const { user } = useAuth();
   const [reportData, setReportData] = useState<WeeklyReportData | null>(null);
   const [weeklyData, setWeeklyData] = useState<WeeklyData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const hasLoadedRef = useRef(false);
-  const hasProcessedAssessmentRef = useRef(false);
-  const [isProcessingFreshAssessment, setIsProcessingFreshAssessment] =
-    useState(false);
-  const [shouldReloadReport, setShouldReloadReport] = useState(0);
   const router = useRouter();
 
   // Process fresh onboarding assessment in background
-  const processFreshAssessment = useCallback(async () => {
-    // Prevent multiple calls - this is the key fix!
-    if (hasProcessedAssessmentRef.current) return;
-
-    const validation = validateAssessmentCompletion();
-
-    if (validation.isComplete && user?.email) {
-      console.log(
-        "🎯 processFreshAssessment: Starting fresh assessment processing"
-      );
-      hasProcessedAssessmentRef.current = true;
-      setIsProcessingFreshAssessment(true);
-
-      // Clear weekly report cache IMMEDIATELY since new assessment data is available
-      // This prevents loadWeeklyReport from showing stale cached data
-      console.log(
-        "🗑️ processFreshAssessment: Clearing weekly report cache immediately"
-      );
-      clearWeeklyReportCache();
-
-      try {
-        const formData = getAssessmentDataSafely();
-        console.log("🔍 processFreshAssessment: Form data:", formData);
-        if (!formData) {
-          console.log("❌ processFreshAssessment: No form data found, exiting");
-          return;
-        }
-
-        // Save assessment and get user profile in parallel
-        const [profileResult, assessmentResult] = await Promise.all([
-          // Get user profile data
-          (async () => {
-            try {
-              const { getUserProfile } = await import("@/lib/database");
-              const { profile } = await getUserProfile();
-              return { profile };
-            } catch {
-              return { profile: null };
-            }
-          })(),
-
-          // Save assessment to database
-          (async () => {
-            try {
-              const { saveCompleteAssessment } = await import("@/lib/database");
-              const initialReason = localStorage.getItem(
-                "gutRootInitialReason"
-              );
-              const result = await saveCompleteAssessment(
-                formData,
-                initialReason || undefined
-              );
-              return result;
-            } catch {
-              return { assessmentId: null, error: "Assessment save failed" };
-            }
-          })(),
-        ]);
-
-        const { profile } = profileResult;
-        const { assessmentId } = assessmentResult;
-
-        if (assessmentId) {
-          // Trigger background report processing (fire-and-forget)
-          const {
-            data: { session },
-          } = await supabase.auth.getSession();
-
-          fetch("/api/process-complete-report", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${session?.access_token || ""}`,
-            },
-            body: JSON.stringify({
-              assessmentId,
-              formData,
-              userEmail: user.email,
-              userProfile: {
-                firstName: profile?.first_name || "there",
-                lastName: profile?.last_name,
-              },
-              initialReason: localStorage.getItem("gutRootInitialReason"),
-              userId: user.id,
-            }),
-          }).catch(() => {
-            console.log("Background report processing initiated");
-          });
-
-          // Clear localStorage after processing
-          localStorage.removeItem("gutRootOnboardingForm");
-          localStorage.removeItem("gutRootOnboardingStep");
-          localStorage.removeItem("gutRootInitialReason");
-        }
-      } catch {
-        console.log(
-          "✅ processFreshAssessment: Assessment processing completed in background"
-        );
-      } finally {
-        console.log(
-          "📝 processFreshAssessment: Cleaning up, setting processing to false"
-        );
-        setIsProcessingFreshAssessment(false);
-        // Keep hasProcessedAssessmentRef.current = true to prevent re-processing
-
-        // Trigger a report reload after background processing completes
-        setTimeout(() => {
-          console.log(
-            "🔄 Triggering report reload after background processing"
-          );
-          setShouldReloadReport((prev) => prev + 1);
-        }, 2000); // Small delay to ensure background processing is complete
-      }
-    }
-  }, [user]);
-
   const loadWeeklyReport = useCallback(async () => {
-    // Prevent double calls in React strict mode (but allow reloads triggered by shouldReloadReport)
-    if (hasLoadedRef.current && shouldReloadReport === 0) return;
-
-    // Reset the ref when shouldReloadReport changes to allow reloading
-    if (shouldReloadReport > 0) {
-      hasLoadedRef.current = false;
-      console.log(
-        "🔄 loadWeeklyReport: Reset hasLoadedRef due to shouldReloadReport change"
-      );
-    }
-
+    // Prevent double calls in React strict mode
+    if (hasLoadedRef.current) return;
     hasLoadedRef.current = true;
 
     try {
@@ -267,17 +131,11 @@ export default function ReportPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [router, shouldReloadReport]);
+  }, [router]);
 
   useEffect(() => {
-    // Process fresh assessment first, then load weekly report
-    const initializeReport = async () => {
-      await processFreshAssessment();
-      await loadWeeklyReport();
-    };
-
-    initializeReport();
-  }, [processFreshAssessment, loadWeeklyReport]);
+    loadWeeklyReport();
+  }, [loadWeeklyReport]);
 
   const getWeekRange = () => {
     const today = new Date();

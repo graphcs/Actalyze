@@ -120,8 +120,8 @@ export default function OnboardingPage() {
     if (currentStep < totalSteps - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Form completed, redirect directly to report page
-      router.push("/report");
+      // Form completed, redirect to complete page for processing
+      router.push("/onboarding/complete");
     }
   };
 
