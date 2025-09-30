@@ -297,7 +297,7 @@ export default function OnboardingPage() {
                   </div>
                 </div>
               ) : (
-                <h2 className="text-3xl font-semibold text-dark mb-6 leading-tight">
+                <h2 className="text-xl font-semibold text-dark mb-6 leading-tight">
                   {currentQuestion.title}
                 </h2>
               )}

@@ -388,7 +388,7 @@ input[type="checkbox"]:checked::after {
 .question-scroll {
   max-height: 60vh;
   overflow-y: auto;
-  padding-bottom: 160px;
+  padding-bottom: 40px;
   /* Extra space for continue button on mobile */
   margin-right: -16px;
   /* Push scrollbar to right on mobile */
@@ -402,7 +402,7 @@ input[type="checkbox"]:checked::after {
     /* Reset margin on medium screens */
     padding-right: 20px;
     /* Reset padding on medium screens */
-    padding-bottom: 100px;
+    padding-bottom: 40px;
     /* No extra space needed since button is now static on medium screens */
   }
 }
@@ -413,41 +413,7 @@ input[type="checkbox"]:checked::after {
     /* Reset margin on desktop */
     padding-right: 16px;
     /* Reset padding on desktop */
-    padding-bottom: 100px;
-    /* No extra padding needed on desktop */
-  }
-}
-
-/* Custom Food Upload Scrollbar */
-.food-scroll {
-  max-height: 110vh;
-  overflow-y: auto;
-  padding-bottom: 200px;
-  /* Extra space for continue button on mobile */
-  margin-right: -16px;
-  /* Push scrollbar to right on mobile */
-  padding-right: 20px;
-  /* Compensate for negative margin */
-}
-
-@media (min-width: 768px) and (max-width: 1023px) {
-  .food-scroll {
-    margin-right: -20px;
-    /* Reset margin on medium screens */
-    padding-right: 20px;
-    /* Reset padding on medium screens */
-    padding-bottom: 300px;
-    /* No extra space needed since button is now static on medium screens */
-  }
-}
-
-@media (min-width: 1024px) {
-  .food-scroll {
-    margin-right: -16px;
-    /* Reset margin on desktop */
-    padding-right: 16px;
-    /* Reset padding on desktop */
-    padding-bottom: 250px;
+    padding-bottom: 20px;
     /* No extra padding needed on desktop */
   }
 }
@@ -462,20 +428,6 @@ input[type="checkbox"]:checked::after {
 }
 
 .question-scroll::-webkit-scrollbar-thumb {
-  background: #F9F0DD;
-  border-radius: 12px;
-}
-
-.food-scroll::-webkit-scrollbar {
-  width: 12px;
-}
-
-.food-scroll::-webkit-scrollbar-track {
-  background: #FFFFFF;
-  border-radius: 12px;
-}
-
-.food-scroll::-webkit-scrollbar-thumb {
   background: #F9F0DD;
   border-radius: 12px;
 }

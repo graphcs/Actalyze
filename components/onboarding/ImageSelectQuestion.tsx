@@ -33,7 +33,7 @@ export default function ImageSelectQuestion({ question, value, onChange }: Image
               <div className="text-left h-full flex flex-col">
                 
                 {/* Title */}
-                <div className="font-semibold text-black text-lg">
+                <div className="font-semibold text-black text-md">
                   {option.title}
                 </div>
                 
@@ -46,7 +46,7 @@ export default function ImageSelectQuestion({ question, value, onChange }: Image
                   <img 
                     src={option.imageSrc} 
                     alt={option.title}
-                    className="w-full h-full object-contain"
+                    className="w-full h-[80%] object-contain"
                   />
                 </div>
               </div>

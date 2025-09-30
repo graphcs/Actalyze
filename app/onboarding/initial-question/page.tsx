@@ -60,10 +60,10 @@ export default function InitialQuestionPage() {
           <img 
             src="/bubble-question.png" 
             alt="Question bubble" 
-            className="w-full h-45 md:h-auto"
+            className="w-full h-45"
           />
           <div className="absolute inset-0 pt-8 px-8">
-            <p className="text-dark text-xl md:text-2xl leading-relaxed text-left font-medium">
+            <p className="text-dark text-xl md:text-xl leading-relaxed text-left font-medium">
               Hi, I&apos;m your personalized gut health guide. 
               What is your primary digestive concern?
             </p>
@@ -77,7 +77,7 @@ export default function InitialQuestionPage() {
             <button
               key={reason}
               onClick={() => setSelectedReason(reason)}
-              className={`w-full py-4 px-6 text-xl text-nowrap rounded-full text-dark font-medium transition-all duration-100`}
+              className={`w-full py-3 px-6 text-xl text-nowrap rounded-full text-dark font-medium transition-all duration-100`}
               style={{ 
                 backgroundColor: '#FAE4B2',
                 ...(selectedReason === reason && {
