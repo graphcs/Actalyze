@@ -261,7 +261,7 @@ export default function OnboardingPage() {
         </div>
 
         {/* Content */}
-        <div className="flex-1 pt-12">
+        <div className="flex-1 pt-6">
           <div className="w-full max-w-sm md:max-w-xl mx-auto">
             {/* Show intro text in bubble on first step */}
             {currentStep === 1 && initialReason && (
