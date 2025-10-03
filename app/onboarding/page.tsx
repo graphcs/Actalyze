@@ -213,7 +213,7 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="onboarding-page bg-cream-light flex items-center justify-center px-4 relative h-screen">
+    <div className="onboarding-page bg-cream-light flex items-center justify-center px-6 relative h-screen">
       {/* Orange Gradient Overlay */}
       <div
         className="absolute inset-0 w-full h-full pointer-events-none"
@@ -306,12 +306,12 @@ export default function OnboardingPage() {
             </div>
 
             {/* Continue Button */}
-            <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 w-full max-w-sm px-4 md:px-0">
+            <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 w-full max-w-sm px-8 md:px-0">
               <div className="flex justify-center">
                 <button
                   onClick={handleNext}
                   disabled={currentQuestion.required && !isStepValid()}
-                  className="w-full py-4 px-6 text-xl text-nowrap rounded-full font-semibold transition-all duration-200 bg-orange-primary text-dark cursor-pointer disabled:cursor-not-allowed"
+                  className="w-full py-2 md:py-3 px-6 text-xl text-nowrap rounded-full font-semibold transition-all duration-200 bg-orange-light text-dark cursor-pointer disabled:cursor-not-allowed"
                 >
                   {currentStep === totalSteps - 1 ? "Submit" : "Continue"}
                 </button>

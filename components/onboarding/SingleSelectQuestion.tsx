@@ -15,7 +15,7 @@ export default function SingleSelectQuestion({ question, value, onChange }: Sing
         <button
           key={option.value}
           onClick={() => onChange(option.value)}
-          className={`w-full md:w-[80%] py-2 md:py-3 px-6 rounded-full text-md text-nowrap text-dark font-medium transition-all duration-200 text-left`}
+          className={`w-full md:w-[80%] py-2 md:py-3 px-6 rounded-full text-md text-nowrap text-dark font-medium transition-all duration-200 text-center`}
           style={{ 
             backgroundColor: '#FAE4B2',
             ...(value === option.value && {
@@ -26,7 +26,7 @@ export default function SingleSelectQuestion({ question, value, onChange }: Sing
             })
           }}
         >
-          <span className="flex items-center">
+          <span className="flex items-center justify-center">
             {option.emoji && (
               <span className="mr-3 text-xl">{option.emoji}</span>
             )}

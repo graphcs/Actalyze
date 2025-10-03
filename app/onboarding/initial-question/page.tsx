@@ -62,7 +62,7 @@ export default function InitialQuestionPage() {
 
         {/* Content - Remove full vertical centering; allow natural flow */}
         <div className="flex-1 flex flex-col items-center">
-          <div className="w-full md:px-2 max-w-sm mx-auto flex flex-col">
+          <div className="w-full px-6 md:px-2 max-w-sm mx-auto flex flex-col">
             {/* Question with Bubble Image */}
             <div className="relative mb-4">
               <img
@@ -71,7 +71,7 @@ export default function InitialQuestionPage() {
                 className="w-full h-45"
               />
               <div className="absolute inset-0 pt-8 px-8">
-                <p className="text-dark text-xl md:text-xl leading-relaxed text-left font-medium">
+                <p className="text-dark text-lg md:text-xl leading-relaxed text-left font-medium">
                   Hi, I&apos;m your personalized gut health guide. What is your
                   primary digestive concern?
                 </p>
@@ -103,11 +103,11 @@ export default function InitialQuestionPage() {
             </div>
 
             {/* Continue Button */}
-            <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 w-full max-w-sm px-4 md:px-3">
+            <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 w-full max-w-sm px-10 md:px-3">
               <button
                 onClick={handleContinue}
                 disabled={!selectedReason}
-                className="w-full py-4 px-6 rounded-full text-xl text-nowrap font-semibold bg-orange-primary text-dark cursor-pointer disabled:cursor-not-allowed"
+                className="w-full py-2 md:py-3 px-6 rounded-full text-xl text-nowrap font-semibold bg-orange-light text-dark cursor-pointer disabled:cursor-not-allowed"
               >
                 Continue
               </button>

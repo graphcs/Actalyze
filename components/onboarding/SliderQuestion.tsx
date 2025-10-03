@@ -117,14 +117,14 @@ export default function SliderQuestion({ question, value, onChange }: SliderQues
             </div>
           ))}
         </div>
-      </div>
-      
       {/* Dynamic Label */}
-      <div className="text-start">
+      <div className="text-start mt-6">
         <div className="text-xl font-medium text-black">
           {value} = {currentLabel}
         </div>
       </div>
+      </div>
+      
     </div>
   )
 } 

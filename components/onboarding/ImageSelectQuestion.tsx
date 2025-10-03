@@ -20,7 +20,7 @@ export default function ImageSelectQuestion({ question, value, onChange }: Image
             <button
               key={option.value}
               onClick={() => onChange(option.value)}
-              className="p-4 rounded-2xl transition-all duration-200 bg-[#FAE4B2]"
+              className="p-4 rounded-2xl transition-all duration-200 bg-[#FAE4B2] aspect-square"
               style={{
                 ...(isSelected && {
                   borderTop: '2px solid #F5A623',
@@ -33,20 +33,20 @@ export default function ImageSelectQuestion({ question, value, onChange }: Image
               <div className="text-left h-full flex flex-col">
                 
                 {/* Title */}
-                <div className="font-semibold text-black text-md">
+                <div className="font-semibold text-black text-sm">
                   {option.title}
                 </div>
                 
                 {/* Description */}
-                <div className="text-sm font-medium text-black leading-tight">
+                <div className="text-[12px] font-medium text-black leading-tight mb-4">
                   {option.description}
                 </div>
                 {/* Image */}
-                <div className="flex justify-center flex-1 items-center">
+                <div className="flex items-center">
                   <img 
                     src={option.imageSrc} 
                     alt={option.title}
-                    className="w-full h-[80%] object-contain"
+                    className="w-full h-[78%] object-contain"
                   />
                 </div>
               </div>

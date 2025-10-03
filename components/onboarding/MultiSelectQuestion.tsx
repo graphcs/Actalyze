@@ -31,7 +31,7 @@ export default function MultiSelectQuestion({ question, value, onChange }: Multi
           <button
             key={option.value}
             onClick={() => handleToggle(option.value)}
-            className={`w-full md:w-[80%] py-2 md:py-3 px-6 rounded-full text-md text-nowrap text-dark font-medium transition-all duration-200 text-left`}
+            className={`w-full md:w-[80%] py-2 md:py-3 px-6 rounded-full text-md text-nowrap text-dark font-medium transition-all duration-200 text-center`}
             style={{ 
               backgroundColor: '#FAE4B2',
               ...(isSelected && {
@@ -42,14 +42,11 @@ export default function MultiSelectQuestion({ question, value, onChange }: Multi
               })
             }}
           >
-            <span className="flex items-center">
+            <span className="flex items-center justify-center">
               {option.emoji && (
                 <span className="mr-3 text-xl">{option.emoji}</span>
               )}
               {option.label}
-              {isSelected && (
-                <span className="ml-auto text-orange-primary font-bold">✓</span>
-              )}
             </span>
           </button>
         )
