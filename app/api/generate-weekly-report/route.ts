@@ -428,7 +428,7 @@ async function generateWeeklyProgressReport(weeklyData: WeeklyData) {
             }
         ],
         temperature: 0.7,
-        max_tokens: 2500
+        max_tokens: 3000
     })
 
     const response = completion.choices[0]?.message?.content
@@ -491,9 +491,6 @@ Immediately after the score, output a concise ledger showing how the points add 
 ### BOWEL_TRENDS
 Example: "You pooped ${weeklyData.bowelMovements.daysWithBM} out of 7 days this week — ${comparison ? (comparison.bmFrequencyChange > 0 ? `up from ${weeklyData.bowelMovements.daysWithBM - comparison.bmFrequencyChange}` : `down from ${weeklyData.bowelMovements.daysWithBM - comparison.bmFrequencyChange}`) + ' last week' : 'good consistency this week'}. Most stools were ${weeklyData.bowelMovements.mostCommonStoolType}."
 
-### GOAL_REMINDERS  
-Example: "Hydration slipped on ${weeklyData.hydration.daysUnderTarget} days — aim to drink at least 2 more glasses of water daily."
-
 ### SYMPTOM_PATTERNS
 Example format:
 "Bloating: Reported on ${weeklyData.symptoms.bloating.days} days — [pattern analysis]
@@ -503,6 +500,27 @@ Heartburn: [severity analysis if applicable]
 Energy: Avg. energy score: ${weeklyData.energy.avgLevel.toFixed(1)}/5 — [highest/lowest pattern analysis]
 
 Mood: Tracked ${weeklyData.mood.totalTracked} days — [correlation analysis]"
+
+### GOAL_REMINDERS  
+Example: "Hydration slipped on ${weeklyData.hydration.daysUnderTarget} days — aim to drink at least 2 more glasses of water daily."
+
+### LIFESTYLE_CHANGES
+Provide 3-5 specific, actionable lifestyle changes based on this week's data. Examples:
+- "Try to go for a 20-minute walk after dinner at least 4 times next week to aid digestion."
+- "Incorporate 1 serving of fermented foods (like yogurt or kimchi) into your diet 3 times next week to support gut health."
+- "Aim to reduce stress through mindfulness or meditation for at least 10 minutes daily."
+
+### DIET_RECOMMENDATIONS
+Provide 3-5 specific, actionable dietary recommendations based on this week's data. Examples:
+- "Increase your fiber intake by adding an extra serving of vegetables to two meals each day."
+- "Limit processed foods and sugary snacks to no more than once this week to help reduce bloating."
+- "Incorporate omega-3 rich foods like salmon or flaxseeds into your diet at least twice this week."
+
+### SUPPLEMENT_SUGGESTIONS
+If applicable, suggest 2-3 supplements based on this week's data. Examples:
+- "Consider taking a daily probiotic supplement to support healthy gut flora."
+- "A magnesium supplement may help improve bowel regularity if you experience constipation."
+- "Omega-3 supplements can help reduce inflammation and support overall digestive health."
 
 ### AI_TIP_OF_WEEK
 Provide one specific, actionable tip based on this week's patterns.
@@ -549,19 +567,34 @@ function parseWeeklyAIResponse(response: string) {
             sections.digestive_score_explanation = explanationMatch[1].trim()
         }
 
-        const bowelMatch = response.match(/BOWEL_TRENDS\s*\n([\s\S]*?)(?=\nGOAL_REMINDERS|$)/i)
+        const bowelMatch = response.match(/BOWEL_TRENDS\s*\n([\s\S]*?)(?=\nSYMPTOM_PATTERNS|$)/i)
         if (bowelMatch) {
             sections.bowel_trends = bowelMatch[1].trim()
         }
 
-        const goalMatch = response.match(/GOAL_REMINDERS\s*\n([\s\S]*?)(?=\nSYMPTOM_PATTERNS|$)/i)
+        const symptomMatch = response.match(/SYMPTOM_PATTERNS\s*\n([\s\S]*?)(?=\nGOAL_REMINDERS|$)/i)
+        if (symptomMatch) {
+            sections.symptom_patterns_analysis = symptomMatch[1].trim()
+        }
+
+        const goalMatch = response.match(/GOAL_REMINDERS\s*\n([\s\S]*?)(?=\nLIFESTYLE_CHANGES|$)/i)
         if (goalMatch) {
             sections.goal_reminders = goalMatch[1].trim()
         }
 
-        const symptomMatch = response.match(/SYMPTOM_PATTERNS\s*\n([\s\S]*?)(?=\nAI_TIP_OF_WEEK|$)/i)
-        if (symptomMatch) {
-            sections.symptom_patterns_analysis = symptomMatch[1].trim()
+        const lifestyleMatch = response.match(/LIFESTYLE_CHANGES\s*\n([\s\S]*?)(?=\nDIET_RECOMMENDATIONS|$)/i)
+        if (lifestyleMatch) {
+            sections.lifestyle_changes = lifestyleMatch[1].trim()
+        }
+
+        const dietMatch = response.match(/DIET_RECOMMENDATIONS\s*\n([\s\S]*?)(?=\nSUPPLEMENT_SUGGESTIONS|$)/i)
+        if (dietMatch) {
+            sections.diet_recommendations = dietMatch[1].trim()
+        }
+
+        const supplementMatch = response.match(/SUPPLEMENT_SUGGESTIONS\s*\n([\s\S]*?)(?=\nAI_TIP_OF_WEEK|$)/i)
+        if (supplementMatch) {
+            sections.supplement_suggestions = supplementMatch[1].trim()
         }
 
         const tipMatch = response.match(/AI_TIP_OF_WEEK\s*\n([\s\S]*?)$/i)

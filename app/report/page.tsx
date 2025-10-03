@@ -252,7 +252,7 @@ export default function ReportPage() {
               alt="Profile"
               width={28}
               height={28}
-              className="w-7 h-7"
+              className="w-5 h-5 lg:w-6 lg:h-6"
             />
           </button>
         </div>
@@ -261,15 +261,15 @@ export default function ReportPage() {
         <div className="flex-1 overflow-y-auto pb-8">
           {/* Weekly Digestive Score Section */}
           <div className="mb-6">
-            <h2 className="text-3xl font-semibold text-black mb-4">
+            <h2 className="text-[22px] lg:text-2xl font-semibold text-black mb-4">
               Digestive score
             </h2>
 
             <div className="flex items-baseline justify-center mb-3">
-              <span className="text-7xl font-semibold text-orange-primary">
+              <span className="text-[56px] lg:text-6xl font-semibold text-orange-primary">
                 {reportData.digestive_score}
               </span>
-              <span className="text-2xl font-semibold text-orange-primary ml-1">
+              <span className="text-lg lg:text-2xl font-semibold text-orange-primary ml-1">
                 /10
               </span>
             </div>
@@ -283,7 +283,7 @@ export default function ReportPage() {
                 <button
                   type="button"
                   onClick={() => setIsScoreExplanationOpen((prev) => !prev)}
-                  className="w-full flex items-center justify-between px-5 py-3 bg-orange-pale border border-orange-primary rounded-2xl shadow-sm text-left transition-all duration-200 hover:shadow-md"
+                  className="w-full flex items-center justify-between px-5 py-3 bg-orange-pale border border-orange-primary cursor-pointer rounded-2xl shadow-sm text-left transition-all duration-200 hover:shadow-md"
                 >
                   <span className="text-base font-semibold text-dark-gray">
                     How we calculated this score
@@ -307,14 +307,14 @@ export default function ReportPage() {
             <div className="flex justify-center mb-6">
               <Link
                 href="/onboarding/initial-question"
-                className="w-[90%] md:w-[50%] py-4 px-8 bg-orange-light text-xl text-dark font-semibold rounded-full text-center"
+                className="w-[90%] md:w-[50%] py-3 px-8 bg-orange-light text-[18px] text-dark font-semibold rounded-full text-center"
               >
                 + Daily Log
               </Link>
             </div>
 
             {/* Week Display */}
-            <div className="text-2xl font-medium text-dark-gray mb-8">
+            <div className="text-lg lg:text-xl font-medium text-dark-gray mb-8">
               {getWeekRange()}
             </div>
           </div>
@@ -323,12 +323,31 @@ export default function ReportPage() {
           <div className="mb-8">
             <div className="flex items-center mb-3">
               <div className="w-1 h-6 bg-orange-primary mr-3"></div>
-              <h3 className="text-3xl font-semibold text-dark-green">
+              <h3 className="text-2xl lg:text-3xl font-semibold text-dark-green">
                 Bowel trends
               </h3>
             </div>
-            <div className="text-xl font-medium text-black leading-relaxed">
+            <div className="text-[16px] lg:text-lg font-medium text-black leading-relaxed">
               {formatBulletPoints(reportData.bowel_trends).map(
+                (point, index) => (
+                  <div key={index} className="mb-2">
+                    {point}
+                  </div>
+                )
+              )}
+            </div>
+          </div>
+
+          {/* Symptom Patterns Analysis */}
+          <div className="mb-8">
+            <div className="flex items-center mb-3">
+              <div className="w-1 h-6 bg-orange-primary mr-3"></div>
+              <h3 className="text-2xl lg:text-3xl font-semibold text-dark-green">
+                Symptom patterns
+              </h3>
+            </div>
+            <div className="text-[16px] lg:text-lg font-medium text-black leading-relaxed">
+              {formatBulletPoints(reportData.symptom_patterns_analysis).map(
                 (point, index) => (
                   <div key={index} className="mb-2">
                     {point}
@@ -342,11 +361,11 @@ export default function ReportPage() {
           <div className="mb-8">
             <div className="flex items-center mb-3">
               <div className="w-1 h-6 bg-orange-primary mr-3"></div>
-              <h3 className="text-3xl font-semibold text-dark-green">
+              <h3 className="text-2xl lg:text-3xl font-semibold text-dark-green">
                 Goal reminder
               </h3>
             </div>
-            <div className="text-xl font-medium text-black leading-relaxed">
+            <div className="text-[16px] lg:text-lg font-medium text-black leading-relaxed">
               {formatBulletPoints(reportData.goal_reminders).map(
                 (point, index) => (
                   <div key={index} className="mb-2">
@@ -357,16 +376,37 @@ export default function ReportPage() {
             </div>
           </div>
 
+          {/* Lifestyle Changes Section if available */}
+            {reportData.lifestyle_changes && (
+            <div className="mb-8">
+              <div className="flex items-center mb-3">
+                <div className="w-1 h-6 bg-orange-primary mr-3"></div>
+                <h3 className="text-2xl lg:text-3xl font-semibold text-dark-green">
+                  Lifestyle changes
+                </h3>
+              </div>
+              <div className="text-[16px] lg:text-lg font-medium text-black leading-relaxed">
+                {formatBulletPoints(reportData.lifestyle_changes).map(
+                  (point, index) => (
+                    <div key={index} className="mb-2">
+                      {point}
+                    </div>
+                  )
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Additional sections if available */}
           {reportData.diet_recommendations && (
             <div className="mb-8">
               <div className="flex items-center mb-3">
                 <div className="w-1 h-6 bg-orange-primary mr-3"></div>
-                <h3 className="text-3xl font-semibold text-dark-green">
+                <h3 className="text-2xl lg:text-3xl font-semibold text-dark-green">
                   Diet recommendations
                 </h3>
               </div>
-              <div className="text-xl font-medium text-black leading-relaxed">
+              <div className="text-[16px] lg:text-lg font-medium text-black leading-relaxed">
                 {formatBulletPoints(reportData.diet_recommendations).map(
                   (point, index) => (
                     <div key={index} className="mb-2">
@@ -382,11 +422,11 @@ export default function ReportPage() {
             <div className="mb-8">
               <div className="flex items-center mb-3">
                 <div className="w-1 h-6 bg-orange-primary mr-3"></div>
-                <h3 className="text-3xl font-semibold text-dark-green">
+                <h3 className="text-2xl lg:text-3xl font-semibold text-dark-green">
                   Supplement suggestions
                 </h3>
               </div>
-              <div className="text-xl font-medium text-black leading-relaxed">
+              <div className="text-[16px] lg:text-lg font-medium text-black leading-relaxed">
                 {formatBulletPoints(reportData.supplement_suggestions).map(
                   (point, index) => (
                     <div key={index} className="mb-2">
@@ -397,45 +437,6 @@ export default function ReportPage() {
               </div>
             </div>
           )}
-
-          {reportData.lifestyle_changes && (
-            <div className="mb-8">
-              <div className="flex items-center mb-3">
-                <div className="w-1 h-6 bg-orange-primary mr-3"></div>
-                <h3 className="text-3xl font-semibold text-dark-green">
-                  Lifestyle changes
-                </h3>
-              </div>
-              <div className="text-xl font-medium text-black leading-relaxed">
-                {formatBulletPoints(reportData.lifestyle_changes).map(
-                  (point, index) => (
-                    <div key={index} className="mb-2">
-                      {point}
-                    </div>
-                  )
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Symptom Patterns Analysis */}
-          <div className="mb-8">
-            <div className="flex items-center mb-3">
-              <div className="w-1 h-6 bg-orange-primary mr-3"></div>
-              <h3 className="text-3xl font-semibold text-dark-green">
-                Symptom patterns
-              </h3>
-            </div>
-            <div className="text-xl font-medium text-black leading-relaxed">
-              {formatBulletPoints(reportData.symptom_patterns_analysis).map(
-                (point, index) => (
-                  <div key={index} className="mb-2">
-                    {point}
-                  </div>
-                )
-              )}
-            </div>
-          </div>
 
           {/* AI Tip of the Week - Highlighted Box */}
           {reportData.ai_tip_of_week && (

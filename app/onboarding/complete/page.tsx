@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/lib/auth";
 import {
@@ -247,7 +248,6 @@ export default function CompletePage() {
                   style={{ animationDelay: "0.2s" }}
                 ></div>
               </div>
-              <p className="text-medium-gray text-lg">Loading...</p>
             </div>
           </div>
         </div>
@@ -282,7 +282,7 @@ export default function CompletePage() {
             </p>
             <button
               onClick={handleRetry}
-              className="w-full py-3 px-6 bg-orange-primary text-dark font-semibold rounded-full hover:bg-orange-light transition-colors"
+              className="w-full py-3 px-6 cursor-pointer bg-orange-light text-dark font-semibold rounded-full"
             >
               Try Again
             </button>
@@ -294,7 +294,7 @@ export default function CompletePage() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden"
+      className="min-h-screen flex items-center justify-center px-6 relative overflow-hidden"
       style={{
         background: `
              radial-gradient(circle at top left, #B0D1A9 0%, transparent 50%),
@@ -307,8 +307,17 @@ export default function CompletePage() {
     >
       {/* Main Container */}
       <div className="w-full max-w-lg h-screen flex flex-col relative z-10">
+        {/* Brand Title */}
+        <div className="pt-10 mb-28 md:mb-38">
+          <Link href="/">
+            <h1 className="brand-title text-4xl font-bold text-dark-green">
+              GutRoot
+            </h1>
+          </Link>
+        </div>
+
         {/* Content - Centered in remaining space */}
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex justify-center px-4">
           <div className="w-full max-w-md text-center">
             {/* Opened Inbox Image */}
             <Image
@@ -337,21 +346,6 @@ export default function CompletePage() {
                 style={{ width: `${currentState.progress}%` }}
               />
             </div>
-
-            {/* Three Dots Loading Animation (hide when complete) */}
-            {currentState.stage !== "complete" && (
-              <div className="flex justify-center space-x-2">
-                <div className="w-3 h-3 bg-orange-primary rounded-full animate-bounce"></div>
-                <div
-                  className="w-3 h-3 bg-orange-primary rounded-full animate-bounce"
-                  style={{ animationDelay: "0.1s" }}
-                ></div>
-                <div
-                  className="w-3 h-3 bg-orange-primary rounded-full animate-bounce"
-                  style={{ animationDelay: "0.2s" }}
-                ></div>
-              </div>
-            )}
 
             {/* Checkmark when complete */}
             {currentState.stage === "complete" && (
