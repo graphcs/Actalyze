@@ -2,41 +2,41 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Young+Serif:wght@400&display=swap');
 
 :root {
-  /* Primary Brand Colors */
-  --color-sage-50: #f8faf9;
-  --color-sage-100: #f0f4f1;
-  --color-sage-200: #dce6df;
-  --color-sage-300: #c2d2c7;
-  --color-sage-400: #a3bfaa;
-  --color-sage-500: #7fa189;
-  --color-sage-600: #6b8a74;
-  --color-sage-700: #5a7362;
-  --color-sage-800: #4a5f52;
-  --color-sage-900: #3f5045;
+  /* Professional Government Blue - Primary Brand Colors */
+  --color-blue-50: #eff6ff;
+  --color-blue-100: #dbeafe;
+  --color-blue-200: #bfdbfe;
+  --color-blue-300: #93c5fd;
+  --color-blue-400: #60a5fa;
+  --color-blue-500: #3b82f6;
+  --color-blue-600: #2563eb;
+  --color-blue-700: #1d4ed8;
+  --color-blue-800: #1e40af;
+  --color-blue-900: #1e3a8a;
 
-  /* Warm Beige/Cream Tones */
-  --color-cream-50: #fefcfa;
-  --color-cream-100: #fdf9f3;
-  --color-cream-200: #faf4ea;
-  --color-cream-300: #f5edd8;
-  --color-cream-400: #ede0c1;
-  --color-cream-500: #e3d0a1;
-  --color-cream-600: #d4bc7e;
-  --color-cream-700: #c4a660;
-  --color-cream-800: #a68a4f;
-  --color-cream-900: #8a7242;
+  /* Professional Slate/Gray Tones */
+  --color-slate-50: #f8fafc;
+  --color-slate-100: #f1f5f9;
+  --color-slate-200: #e2e8f0;
+  --color-slate-300: #cbd5e1;
+  --color-slate-400: #94a3b8;
+  --color-slate-500: #64748b;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
+  --color-slate-900: #0f172a;
 
-  /* Orange/Amber Accent Colors */
-  --color-amber-50: #fffbeb;
-  --color-amber-100: #fef3c7;
-  --color-amber-200: #fde68a;
-  --color-amber-300: #fcd34d;
-  --color-amber-400: #fbbf24;
-  --color-amber-500: #f59e0b;
-  --color-amber-600: #d97706;
-  --color-amber-700: #b45309;
-  --color-amber-800: #92400e;
-  --color-amber-900: #78350f;
+  /* Accent Colors - Indigo for highlights */
+  --color-indigo-50: #eef2ff;
+  --color-indigo-100: #e0e7ff;
+  --color-indigo-200: #c7d2fe;
+  --color-indigo-300: #a5b4fc;
+  --color-indigo-400: #818cf8;
+  --color-indigo-500: #6366f1;
+  --color-indigo-600: #4f46e5;
+  --color-indigo-700: #4338ca;
+  --color-indigo-800: #3730a3;
+  --color-indigo-900: #312e81;
 
   /* Neutral Colors */
   --color-gray-50: #fafaf9;
@@ -56,36 +56,25 @@
   --color-error: #ef4444;
   --color-info: #3b82f6;
 
-  /* Green Tones */
-  --color-dark-green: #0D4C47;
-  --color-light-green: #A8CBA1;
+  /* Professional Navy Blue for headers */
+  --color-navy-primary: #1e3a8a;
+  --color-navy-dark: #0f172a;
+  --color-navy-light: #1e40af;
 
-  /* Cream/Beige Tones */
-  --color-cream-primary: #F9F4EF;
-  --color-cream-light: #FFF4E6;
-  --color-cream-warm: #F8ECC7;
-  --color-cream-soft: #F9F0DD;
-  --color-yellow-cream: #F7E4A0;
-
-  /* Orange Tones */
-  --color-orange-primary: #F5A623;
-  --color-orange-light: #FFC76C;
-  --color-orange-pale: #FFE8C0;
-
-  /* Gray Scale */
-  --color-dark-gray: #2B2B2B;
-  --color-medium-gray: #666666;
-  --color-light-gray: #A1A1A1;
-  --color-pale-gray: #CACACA;
+  /* Professional Grays */
+  --color-gray-primary: #334155;
+  --color-gray-medium: #64748b;
+  --color-gray-light: #94a3b8;
+  --color-gray-pale: #cbd5e1;
   --color-pure-white: #FFFFFF;
 
-  /* Background and Foreground */
-  --background: #fefcfa;
-  --foreground: #1c1917;
-  --muted: #f5edd8;
-  --muted-foreground: #78716c;
-  --input: #fefcfa;
-  --ring: #7fa189;
+  /* Background and Foreground - Professional Theme */
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --muted: #e2e8f0;
+  --muted-foreground: #64748b;
+  --input: #ffffff;
+  --ring: #3b82f6;
 }
 
 @theme inline {
@@ -252,194 +241,4 @@ body {
   font-feature-settings: "rlig" 1, "calt" 1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-/* Prevent page scrolling on onboarding pages */
-.onboarding-page {
-  height: 100vh;
-  overflow: hidden;
-}
-
-/* Prevent scrolling on home page */
-.home-page {
-  height: 100vh;
-  overflow: hidden;
-}
-
-/* Custom Component Classes */
-.btn-primary {
-  background-color: var(--color-orange-light);
-  color: var(--color-dark-gray);
-  font-family: 'Inter', var(--font-sans);
-  font-weight: 600;
-  cursor: pointer;
-  @apply py-3 px-6 rounded-full text-xl text-nowrap;
-}
-
-.btn-secondary {
-  @apply bg-cream-200 hover:bg-cream-300 text-gray-900 font-medium py-3 px-6 rounded-xl transition-colors duration-200;
-}
-
-.card {
-  @apply bg-white rounded-xl shadow-sm border border-gray-200 p-6;
-}
-
-.input {
-  @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent outline-none transition-all duration-200;
-}
-
-.container {
-  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
-}
-
-.no-border {
-  border: none !important;
-}
-
-/* Brand Title Class - Custom Brand Font */
-.brand-title {
-  font-family: var(--font-brand), var(--font-serif), serif;
-  font-weight: 900;
-  letter-spacing: -0.02em;
-  font-size: 1.75rem;
-}
-
-@media (min-width: 768px) and (max-width: 1023px) {
-  .brand-title {
-    font-size: 2.5rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .brand-title {
-    font-size: 2.5rem;
-  }
-}
-
-/* Hide browser's default password reveal button */
-input[type="password"]::-ms-reveal,
-input[type="password"]::-ms-clear {
-  display: none;
-}
-
-input[type="password"]::-webkit-credentials-auto-fill-button {
-  display: none !important;
-}
-
-input[type="password"]::-webkit-caps-lock-indicator {
-  display: none !important;
-}
-
-/* Hide number input spinner arrows */
-input[type="number"]::-webkit-outer-spin-button,
-input[type="number"]::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-/* Firefox */
-input[type="number"] {
-  -moz-appearance: textfield;
-}
-
-/* Ensure number inputs look consistent */
-input[type="number"] {
-  appearance: textfield;
-}
-
-/* Custom Checkbox Styling */
-input[type="checkbox"] {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  width: 1.1rem;
-  height: 1.1rem;
-  border: 2px solid var(--color-dark-gray);
-  background-color: transparent;
-  border-radius: 3px;
-  position: relative;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-input[type="checkbox"]:checked {
-  background-color: transparent;
-  border-color: var(--color-dark-gray);
-}
-
-input[type="checkbox"]:checked::after {
-  content: '✓';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: var(--color-dark-gray);
-  font-size: 12px;
-  font-weight: bold;
-}
-
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--color-gray-100);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--color-sage-400);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-sage-500);
-}
-
-/* Custom Question Scrollbar */
-.question-scroll {
-  max-height: 60vh;
-  overflow-y: auto;
-  padding-bottom: 46px;
-  /* Extra space for continue button on mobile */
-  margin-right: -16px;
-  /* Push scrollbar to right on mobile */
-  padding-right: 20px;
-  /* Compensate for negative margin */
-}
-
-@media (min-width: 768px) and (max-width: 1023px) {
-  .question-scroll {
-    margin-right: -20px;
-    /* Reset margin on medium screens */
-    padding-right: 20px;
-    /* Reset padding on medium screens */
-    padding-bottom: 40px;
-    /* No extra space needed since button is now static on medium screens */
-  }
-}
-
-@media (min-width: 1024px) {
-  .question-scroll {
-    margin-right: -16px;
-    /* Reset margin on desktop */
-    padding-right: 16px;
-    /* Reset padding on desktop */
-    padding-bottom: 20px;
-    /* No extra padding needed on desktop */
-  }
-}
-
-.question-scroll::-webkit-scrollbar {
-  width: 12px;
-}
-
-.question-scroll::-webkit-scrollbar-track {
-  background: #FFFFFF;
-  border-radius: 12px;
-}
-
-.question-scroll::-webkit-scrollbar-thumb {
-  background: #F9F0DD;
-  border-radius: 12px;
 }

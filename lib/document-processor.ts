@@ -458,14 +458,9 @@ export async function uploadFileToStorage(
 export async function saveDocument(
     uploadData: DocumentUploadData,
     content: string,
-    fileUrl?: string,
-    userId?: string
+    fileUrl?: string
 ): Promise<{ document: Document; error?: string }> {
     try {
-        if (!userId) {
-            return { document: {} as Document, error: 'User ID is required' }
-        }
-
         const documentRecord = {
             title: uploadData.title,
             content: content,
@@ -475,11 +470,13 @@ export async function saveDocument(
             file_size: uploadData.file?.size,
             source_type: uploadData.source_type,
             category: uploadData.category,
-            tags: uploadData.tags,
+            jurisdiction: uploadData.jurisdiction,
+            year: uploadData.year,
+            bill_number: uploadData.bill_number,
+            case_citation: uploadData.case_citation,
             metadata: uploadData.metadata,
-            uploaded_by: userId,
-            status: 'pending' as const,
-            upload_status: 'processing' as const
+            status: 'active' as const,
+            upload_status: 'completed' as const
         }
 
         const { data, error } = await supabase
@@ -575,11 +572,10 @@ export async function saveDocumentChunks(
  */
 export async function processDocument(
     uploadData: DocumentUploadData,
-    options: DocumentProcessingOptions & { userId: string } = {
+    options: DocumentProcessingOptions = {
         chunking: DEFAULT_CHUNKING_OPTIONS,
         generate_embeddings: true,
-        auto_approve: false,
-        userId: ''
+        auto_approve: false
     }
 ): Promise<{ documentId: string; success: boolean; error?: string }> {
     try {
@@ -611,7 +607,7 @@ export async function processDocument(
         }
 
         // Save document to database first
-        const { document, error: saveError } = await saveDocument(uploadData, content, fileUrl, options.userId)
+        const { document, error: saveError } = await saveDocument(uploadData, content, fileUrl)
         if (saveError) {
             return { documentId: '', success: false, error: saveError }
         }
@@ -650,15 +646,13 @@ export async function processDocument(
             console.log(`Successfully saved ${chunks.length} chunks for document:`, document.id)
         }
 
-        // Auto-approve if enabled
+        // Auto-approve if enabled (no longer requires auth)
         if (options.auto_approve) {
-            const { data: user } = await supabase.auth.getUser()
             await supabase
                 .from('documents')
                 .update({
-                    status: 'approved',
-                    approved_by: user.user?.id,
-                    approved_at: new Date().toISOString()
+                    status: 'active',
+                    updated_at: new Date().toISOString()
                 })
                 .eq('id', document.id)
         }

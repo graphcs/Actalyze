@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { brandFont } from "./fonts";
 import "./globals.css";
-import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -10,12 +9,13 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "GutRoot - Gut Health, Personalized from the Root Up",
-  description: "Your personalized AI-powered gut health guide for better digestion and overall wellness.",
+  title: "Actalyze - US Legislation Document Intelligence",
+  description:
+    "AI-powered assistant for US federal and state legislation, regulations, case law, and legal documents.",
   icons: {
-    icon: '/favicon.ico',
-    shortcut: '/favicon.ico',
-    apple: '/favicon.ico',
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/favicon.ico",
   },
 };
 
@@ -26,12 +26,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${inter.variable} ${brandFont.variable} antialiased`}
-      >
-        <ProtectedRoute>
-          {children}
-        </ProtectedRoute>
+      <body className={`${inter.variable} ${brandFont.variable} antialiased`}>
+        {children}
       </body>
     </html>
   );

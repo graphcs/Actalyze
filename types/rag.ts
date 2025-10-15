@@ -1,4 +1,5 @@
-// RAG (Retrieval-Augmented Generation) Type Definitions
+// RAG (Retrieval-Augmented Generation) Type Definitions for Actalyze
+// US Legislation Document Management System
 
 export interface Document {
     id: string
@@ -8,18 +9,14 @@ export interface Document {
     file_name?: string
     file_type?: string
     file_size?: number
-    source_type: 'pubmed' | 'clinical_trial' | 'medical_journal' | 'manual_upload'
+    source_type: 'federal_law' | 'state_law' | 'regulation' | 'case_law' | 'bill'
     category?: string
-    tags: string[]
     metadata: Record<string, any>
-    status: 'pending' | 'approved' | 'rejected'
+    status: 'active' | 'archived'
     upload_status: 'processing' | 'completed' | 'failed'
     processing_error?: string
     version: number
     is_active: boolean
-    uploaded_by?: string
-    approved_by?: string
-    approved_at?: string
     created_at: string
     updated_at: string
 }
@@ -37,32 +34,16 @@ export interface DocumentChunk {
     created_at: string
 }
 
-export interface AdminRole {
-    id: string
-    user_id: string
-    role: 'admin' // Always 'admin' - no more super_admin concept
-    permissions: string[]
-    created_at: string
-    updated_at: string
-}
-
-export interface ChatConversation {
-    id: string
-    user_id: string
-    title?: string
-    is_active: boolean
-    created_at: string
-    updated_at: string
-}
-
+// Chat message for single session (no persistence)
 export interface ChatMessage {
-    id: string
-    conversation_id: string
     role: 'user' | 'assistant' | 'system'
     content: string
-    context_sources: string[] // Document IDs used for context
-    token_count?: number
-    created_at: string
+    timestamp: string
+    sources?: Array<{
+        title: string
+        category?: string
+        relevanceScore: number
+    }>
 }
 
 export interface DocumentProcessingJob {
@@ -95,8 +76,11 @@ export interface DocumentUploadData {
     content?: string // For manual text entry
     source_type: Document['source_type']
     category?: string
-    tags: string[]
     metadata: Record<string, any>
+    jurisdiction?: string // e.g., "Federal", "California", "New York"
+    year?: number
+    bill_number?: string
+    case_citation?: string
 }
 
 export interface EmbeddingResponse {
@@ -116,13 +100,14 @@ export interface DocumentProcessingOptions {
     auto_approve: boolean
 }
 
-// Admin Dashboard Types
-export interface AdminDashboardStats {
+// Document Statistics
+export interface DocumentStats {
     total_documents: number
-    pending_approval: number
     processing_jobs: number
     storage_used: number // in bytes
     recent_uploads: Document[]
+    by_category: Record<string, number>
+    by_source_type: Record<string, number>
 }
 
 export interface DocumentFilter {
@@ -130,7 +115,8 @@ export interface DocumentFilter {
     source_type?: Document['source_type']
     category?: string
     search_query?: string
-    uploaded_by?: string
+    jurisdiction?: string
+    year?: number
     date_range?: {
         start: string
         end: string
@@ -166,39 +152,48 @@ export interface AdminActionResponse {
     error?: RAGError
 }
 
-// Constants
+// Constants for US Legislation
 export const DOCUMENT_CATEGORIES = [
-    'gut_health',
-    'nutrition',
-    'supplements',
-    'probiotics',
-    'digestive_disorders',
-    'microbiome',
-    'diet_therapy',
-    'clinical_trials',
+    'constitutional_law',
+    'criminal_law',
+    'civil_law',
+    'administrative_law',
+    'tax_law',
+    'corporate_law',
+    'labor_law',
+    'environmental_law',
+    'healthcare_law',
+    'intellectual_property',
+    'immigration_law',
     'general'
 ] as const
 
 export const SOURCE_TYPES = [
-    'pubmed',
-    'clinical_trial',
-    'medical_journal',
-    'manual_upload'
+    'federal_law',
+    'state_law',
+    'regulation',
+    'case_law',
+    'bill'
 ] as const
 
 export const DOCUMENT_STATUSES = [
-    'pending',
-    'approved',
-    'rejected'
+    'active',
+    'archived'
 ] as const
 
-export const ADMIN_PERMISSIONS = [
-    'upload_documents',
-    'edit_documents',
-    'approve_documents',
-    'delete_documents',
-    'manage_users',
-    'view_analytics'
+export const US_JURISDICTIONS = [
+    'Federal',
+    'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
+    'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia',
+    'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa',
+    'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland',
+    'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi', 'Missouri',
+    'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey',
+    'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio',
+    'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina',
+    'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont',
+    'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming',
+    'District of Columbia', 'Puerto Rico'
 ] as const
 
 // Default chunking configuration
