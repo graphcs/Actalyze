@@ -32,6 +32,60 @@ interface DocumentChunksWithList extends Array<DocumentChunk> {
     documentList?: string[]
 }
 
+// Helper function to extract financial data from AI response for charting
+function extractFinancialData(response: string, query: string): { type: string; title: string; data: unknown[] } | null {
+    try {
+        // Pattern to match financial allocations like "Category: $X billion/million"
+        const allocationPattern = /([A-Z][A-Za-z\s&,]+?):\s*\$?([\d,.]+)\s*(billion|million|trillion)/gi
+        const matches = [...response.matchAll(allocationPattern)]
+
+        if (matches.length < 2) {
+            return null // Need at least 2 categories to make a meaningful chart
+        }
+
+        const allocations = matches.slice(0, 10).map(match => {
+            const category = match[1].trim()
+            const amount = parseFloat(match[2].replace(/,/g, ''))
+            const unit = match[3].toLowerCase()
+
+            let value = amount
+            if (unit === 'trillion') value = amount * 1e12
+            else if (unit === 'billion') value = amount * 1e9
+            else if (unit === 'million') value = amount * 1e6
+
+            return {
+                category,
+                amount: value,
+                name: category,
+                value: value
+            }
+        })
+
+        // Determine chart type based on query
+        const isComparison = /compare|comparison|versus|vs\.?/i.test(query)
+        const isBreakdown = /breakdown|distribution|composition/i.test(query)
+
+        // Extract title from query
+        let title = 'Budget Overview'
+        if (query.toLowerCase().includes('infrastructure')) {
+            title = 'Infrastructure Investment and Jobs Act - Budget Breakdown'
+        } else if (query.toLowerCase().includes('inflation reduction')) {
+            title = 'Inflation Reduction Act - Funding Allocations'
+        } else if (isComparison) {
+            title = 'Federal Spending Comparison'
+        }
+
+        return {
+            type: isBreakdown || allocations.length <= 8 ? 'pie' : 'bar',
+            title,
+            data: allocations
+        }
+    } catch (error) {
+        console.error('Error extracting financial data:', error)
+        return null
+    }
+}
+
 export async function POST(request: NextRequest) {
     try {
         const { message, history = [] }: ChatRequest = await request.json()
@@ -98,7 +152,10 @@ export async function POST(request: NextRequest) {
             ? conversationHistory.map(msg => `${msg.role}: ${msg.content}`).join('\n')
             : ''
 
-        // Step 4: Create the system prompt with context
+        // Step 4: Detect if query is about bill financials/budget
+        const isFinancialQuery = /\b(budget|funding|allocation|spending|cost|financial|money|billion|million|trillion|appropriation|expenditure)\b/i.test(message)
+
+        // Step 5: Create the system prompt with context
         const systemPrompt = `You are Actalyze AI, a specialized US legislation and legal document assistant. You provide accurate, well-researched information about federal and state laws, regulations, case law, and bills.
 
 CORE RESPONSIBILITIES:
@@ -127,13 +184,21 @@ CRITICAL INSTRUCTION - DO NOT ADD REFERENCES SECTION:
 - The references section will be automatically added for you
 - Your job is ONLY to provide content with inline citations [1], [2], etc. when using provided documents
 
+${isFinancialQuery ? `
+SPECIAL INSTRUCTION FOR FINANCIAL QUERIES:
+- If this query is about bill budgets, funding allocations, or spending, structure your response to include specific dollar amounts
+- Break down major categories with their amounts (e.g., "Transportation: $110 billion, Broadband: $65 billion")
+- Use clear category names and precise numbers from the documents or your knowledge
+- Format: "Category Name: $X billion/million" on separate lines when listing multiple allocations
+` : ''}
+
 ${context ? `RELEVANT LEGAL DOCUMENTS:\n${context}\n` : ''}
 
 ${historyText ? `CONVERSATION HISTORY:\n${historyText}\n` : ''}
 
 Please provide a helpful, accurate response to the user's question, incorporating relevant information from the legal documents using numbered citations [1], [2], etc.`
 
-        // Step 5: Generate AI response with streaming
+        // Step 6: Generate AI response with streaming
         const stream = await openai.chat.completions.create({
             model: 'gpt-4',
             messages: [
@@ -167,6 +232,12 @@ Please provide a helpful, accurate response to the user's question, incorporatin
                         }
                     }
 
+                    // Extract financial data for charts if this is a financial query
+                    let chartData = null
+                    if (isFinancialQuery) {
+                        chartData = extractFinancialData(fullResponse, message)
+                    }
+
                     // Add references section if we have documents
                     if (relevantChunks && relevantChunks.length > 0 && (relevantChunks as DocumentChunksWithList).documentList) {
                         const documentList = (relevantChunks as DocumentChunksWithList).documentList as string[]
@@ -184,7 +255,7 @@ Please provide a helpful, accurate response to the user's question, incorporatin
                         }
                     }
 
-                    // Send final metadata with sources
+                    // Send final metadata with sources and chart data
                     controller.enqueue(encoder.encode(`data: ${JSON.stringify({
                         done: true,
                         sourcesUsed: relevantChunks ? relevantChunks.length : 0,
@@ -204,7 +275,8 @@ Please provide a helpful, accurate response to the user's question, incorporatin
                                     }
                                     return map
                                 }, new Map<string, { title: string; category: string; relevanceScore: number }>()).values()
-                            ) : []
+                            ) : [],
+                        chart: chartData
                     })}\n\n`))
 
                     controller.enqueue(encoder.encode('data: [DONE]\n\n'))

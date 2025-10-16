@@ -2,11 +2,35 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
+
+// Dynamically import chart components to avoid SSR issues
+const BudgetBreakdownChart = dynamic(
+  () => import("@/app/components/BudgetBreakdownChart"),
+  { ssr: false }
+);
+const AllocationBarChart = dynamic(
+  () => import("@/app/components/AllocationBarChart"),
+  { ssr: false }
+);
+
+interface ChartData {
+  type: string;
+  title: string;
+  data: Array<{
+    category?: string;
+    amount?: number;
+    name?: string;
+    value?: number;
+  }>;
+  total?: number;
+}
 
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
   timestamp: string;
+  chart?: ChartData;
   sources?: Array<{
     title: string;
     category: string;
@@ -120,8 +144,8 @@ export default function ChatbotPage() {
                     }
                   }
 
-                  if (parsed.done && parsed.sources) {
-                    // Update last message with sources
+                  if (parsed.done && (parsed.sources || parsed.chart)) {
+                    // Update last message with sources and chart data
                     setMessages((prev) => {
                       const newMessages = [...prev];
                       if (
@@ -131,6 +155,7 @@ export default function ChatbotPage() {
                         newMessages[newMessages.length - 1] = {
                           ...newMessages[newMessages.length - 1],
                           sources: parsed.sources,
+                          chart: parsed.chart || undefined,
                         };
                       }
                       return newMessages;
@@ -210,46 +235,46 @@ export default function ChatbotPage() {
                 <button
                   onClick={() =>
                     setInputMessage(
-                      "What are the key provisions of the Clean Air Act?"
+                      "Show me the budget breakdown for the Infrastructure Investment and Jobs Act"
                     )
                   }
                   className="p-4 bg-white border border-slate-200 rounded-lg hover:border-blue-500 hover:shadow-md transition-all text-left"
                 >
                   <div className="font-medium text-slate-800 mb-1">
-                    Environmental Law
+                    📊 Bill Financials
                   </div>
                   <div className="text-sm text-slate-600">
-                    What are the key provisions of the Clean Air Act?
+                    Budget breakdown for Infrastructure Investment and Jobs Act
                   </div>
                 </button>
                 <button
                   onClick={() =>
                     setInputMessage(
-                      "Explain the differences between federal and state jurisdiction"
+                      "What are the funding allocations in the Inflation Reduction Act?"
                     )
                   }
                   className="p-4 bg-white border border-slate-200 rounded-lg hover:border-blue-500 hover:shadow-md transition-all text-left"
                 >
                   <div className="font-medium text-slate-800 mb-1">
-                    Jurisdiction
+                    💰 Budget Analysis
                   </div>
                   <div className="text-sm text-slate-600">
-                    Explain federal vs. state jurisdiction
+                    Funding allocations in the Inflation Reduction Act
                   </div>
                 </button>
                 <button
                   onClick={() =>
                     setInputMessage(
-                      "What is the process for a bill to become law?"
+                      "Compare federal spending across defense, education, and healthcare in 2024"
                     )
                   }
                   className="p-4 bg-white border border-slate-200 rounded-lg hover:border-blue-500 hover:shadow-md transition-all text-left"
                 >
                   <div className="font-medium text-slate-800 mb-1">
-                    Legislative Process
+                    📈 Spending Comparison
                   </div>
                   <div className="text-sm text-slate-600">
-                    How does a bill become law?
+                    Compare defense, education & healthcare spending
                   </div>
                 </button>
                 <button
@@ -284,6 +309,35 @@ export default function ChatbotPage() {
                 <div className="prose prose-slate max-w-none">
                   <div className="whitespace-pre-wrap">{message.content}</div>
                 </div>
+
+                {message.chart && message.role === "assistant" && (
+                  <div className="mt-4">
+                    {message.chart.type === "pie" ? (
+                      <BudgetBreakdownChart
+                        data={message.chart.data.map((item) => ({
+                          name: item.name || item.category || "",
+                          value: item.value || item.amount || 0,
+                        }))}
+                        title={message.chart.title}
+                        total={
+                          message.chart.total ||
+                          message.chart.data.reduce(
+                            (sum, item) => sum + (item.value || item.amount || 0),
+                            0
+                          )
+                        }
+                      />
+                    ) : (
+                      <AllocationBarChart
+                        data={message.chart.data.map((item) => ({
+                          category: item.category || item.name || "",
+                          amount: item.amount || item.value || 0,
+                        }))}
+                        title={message.chart.title}
+                      />
+                    )}
+                  </div>
+                )}
 
                 {message.sources && message.sources.length > 0 && (
                   <div className="mt-4 pt-4 border-t border-slate-200">
