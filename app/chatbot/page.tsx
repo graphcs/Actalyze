@@ -356,8 +356,7 @@ export default function ChatbotPage() {
             </button>
           </div>
           <div className="mt-2 text-xs text-slate-500 text-center">
-            This is informational content only and not legal advice. Consult a
-            qualified attorney for specific legal matters.
+            Actalyze: From Acts to Actions. Your AI Legislative Assistant.
           </div>
         </div>
       </div>
