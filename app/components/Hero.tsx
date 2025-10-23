@@ -1,23 +1,29 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { TrendingUp, Upload, MessageSquare, Users, MapPinned } from "lucide-react";
 import { Button } from "./ui/Button";
 import { Badge } from "./ui/Badge";
 import { Card, CardHeader, CardContent } from "./ui/Card";
+
+// Dynamically import the map to avoid SSR issues
+const CongressionalDistrictMap = dynamic(
+  () => import("./CongressionalDistrictMap"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-full flex items-center justify-center bg-zinc-50 dark:bg-zinc-900/40">
+        <div className="text-sm text-zinc-600">Loading map...</div>
+      </div>
+    )
+  }
+);
 
 interface HeroProps {
   onExplore: () => void;
   onUpload: () => void;
   onChat: () => void;
 }
-
-const USAMapEmbed = () => (
-  <iframe
-    title="USA Map"
-    className="w-full h-full border-0 rounded-xl"
-    src="https://www.openstreetmap.org/export/embed.html?bbox=-129.6%2C24.3%2C-66.9%2C49.4&layer=mapnik"
-  />
-);
 
 export default function Hero({ onExplore, onUpload, onChat }: HeroProps) {
   return (
@@ -54,16 +60,16 @@ export default function Hero({ onExplore, onUpload, onChat }: HeroProps) {
         <Card className="relative">
           <CardHeader className="flex flex-row items-center justify-between">
             <div className="font-semibold text-zinc-900 dark:text-white">
-              Policy Pulse Map
+              Congressional Districts
             </div>
             <Badge className="bg-zinc-900 text-white dark:bg-white dark:text-zinc-900">
               <MapPinned className="w-3 h-3" />
-              States
+              435 Districts
             </Badge>
           </CardHeader>
           <CardContent>
             <div className="h-[360px] w-full rounded-xl overflow-hidden">
-              <USAMapEmbed />
+              <CongressionalDistrictMap />
             </div>
           </CardContent>
         </Card>
