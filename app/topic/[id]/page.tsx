@@ -111,7 +111,25 @@ export default function TopicPage() {
   };
 
   const handleShare = () => {
-    alert("Share functionality coming soon!");
+    // Copy URL to clipboard
+    if (navigator.share) {
+      navigator.share({
+        title: topic?.title,
+        text: `Check out ${topic?.title} on Actalyze`,
+        url: window.location.href,
+      });
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      alert("Link copied to clipboard!");
+    }
+  };
+
+  const handleSourceData = () => {
+    // Link to Twitter search for this topic
+    if (topic) {
+      const searchQuery = encodeURIComponent(topic.title);
+      window.open(`https://twitter.com/search?q=${searchQuery}&f=live`, "_blank");
+    }
   };
 
   if (loading || !topic) {
@@ -179,7 +197,7 @@ export default function TopicPage() {
               <Share2 className="w-4 h-4" />
               Share
             </Button>
-            <Button variant="ghost">
+            <Button variant="ghost" onClick={handleSourceData}>
               <ExternalLink className="w-4 h-4" />
               Source Data
             </Button>

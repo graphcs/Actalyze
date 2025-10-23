@@ -22,15 +22,18 @@ export async function GET() {
     // Check cache first
     const now = Date.now();
     if (cachedTrending && (now - cacheTimestamp) < CACHE_DURATION) {
+      console.log("Returning cached trending topics");
       return NextResponse.json(cachedTrending);
     }
 
     const bearerToken = process.env.TWITTER_BEARER_TOKEN;
 
     if (!bearerToken) {
-      console.log("No Twitter bearer token found, returning mock data");
+      console.log("❌ No Twitter bearer token found, returning mock data");
       return NextResponse.json(getMockTrendingTopics());
     }
+
+    console.log("✓ Twitter bearer token found, attempting to fetch live data...");
 
     // Initialize Twitter client
     const client = new TwitterApi(bearerToken);
@@ -88,9 +91,11 @@ export async function GET() {
           });
         }
       } catch (error) {
-        console.error(`Error fetching tweets for "${keyword}":`, error);
+        console.error(`❌ Error fetching tweets for "${keyword}":`, error);
       }
     }
+
+    console.log(`✓ Fetched ${trendingTopics.length} trending topics from Twitter`);
 
     // Sort by momentum
     trendingTopics.sort((a, b) => b.momentum - a.momentum);
@@ -100,16 +105,19 @@ export async function GET() {
 
     // If we got results, cache them
     if (result.length > 0) {
+      console.log("✓ Caching live trending topics");
       cachedTrending = result;
       cacheTimestamp = now;
       return NextResponse.json(result);
     }
 
     // Fallback to mock data if API fails
+    console.log("⚠️ No topics found from Twitter API, returning mock data");
     return NextResponse.json(getMockTrendingTopics());
 
   } catch (error) {
-    console.error("Error fetching trending topics:", error);
+    console.error("❌ Error fetching trending topics:", error);
+    console.log("⚠️ Falling back to mock data due to error");
     return NextResponse.json(getMockTrendingTopics());
   }
 }
