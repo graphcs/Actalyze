@@ -26,18 +26,25 @@ export async function GET() {
       return NextResponse.json(cachedTrending);
     }
 
-    const bearerToken = process.env.TWITTER_BEARER_TOKEN;
+    const apiKey = process.env.TWITTER_API_KEY;
+    const apiSecret = process.env.TWITTER_API_SECRET;
 
-    if (!bearerToken) {
-      console.log("❌ No Twitter bearer token found, returning mock data");
+    if (!apiKey || !apiSecret) {
+      console.log("❌ No Twitter API credentials found, returning mock data");
       return NextResponse.json(getMockTrendingTopics());
     }
 
-    console.log("✓ Twitter bearer token found, attempting to fetch live data...");
+    console.log("✓ Twitter API credentials found, attempting to fetch live data...");
 
-    // Initialize Twitter client
-    const client = new TwitterApi(bearerToken);
-    const readOnlyClient = client.readOnly;
+    // Initialize Twitter client with API key and secret
+    const client = new TwitterApi({
+      appKey: apiKey,
+      appSecret: apiSecret,
+    });
+
+    // Get app-only authentication
+    const appOnlyClient = await client.appLogin();
+    const readOnlyClient = appOnlyClient.readOnly;
 
     // Search for political/legislative keywords
     const keywords = [
@@ -56,8 +63,7 @@ export async function GET() {
     // Fetch tweets for each keyword and calculate momentum
     for (const keyword of keywords) {
       try {
-        const recentTweets = await readOnlyClient.v2.search({
-          query: `${keyword} -is:retweet lang:en`,
+        const recentTweets = await readOnlyClient.v2.search(`${keyword} -is:retweet lang:en`, {
           max_results: 10,
           'tweet.fields': ['created_at', 'public_metrics'],
         });
