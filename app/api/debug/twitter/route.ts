@@ -38,7 +38,7 @@ export async function GET() {
 
     // Try a simple search
     const result = await appOnlyClient.v2.search("test -is:retweet lang:en", {
-      max_results: 5,
+      max_results: 10,
     });
 
     debug.searchSuccess = true;
