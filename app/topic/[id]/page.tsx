@@ -35,22 +35,18 @@ interface CongressData {
   status: string;
 }
 
+interface TopicDetailData {
+  mentions: Array<{ week: string; count: number }>;
+  totalMentions: number;
+}
+
+// Mock fiscal data - real CBO data would require Congress.gov API integration
 const fiscalSeries = [
   { year: 2021, spend: 260, subsidies: 70 },
   { year: 2022, spend: 320, subsidies: 85 },
   { year: 2023, spend: 410, subsidies: 102 },
   { year: 2024, spend: 390, subsidies: 110 },
   { year: 2025, spend: 430, subsidies: 120 },
-];
-
-const mentionsSeries = [
-  { w: "W1", x: 12 },
-  { w: "W2", x: 18 },
-  { w: "W3", x: 20 },
-  { w: "W4", x: 23 },
-  { w: "W5", x: 30 },
-  { w: "W6", x: 28 },
-  { w: "W7", x: 35 },
 ];
 
 function numberFmt(n: number): string {
@@ -63,6 +59,7 @@ export default function TopicPage() {
   const router = useRouter();
   const [topic, setTopic] = useState<Topic | null>(null);
   const [congressData, setCongressData] = useState<CongressData | null>(null);
+  const [mentionsData, setMentionsData] = useState<Array<{ w: string; x: number }>>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -79,6 +76,31 @@ export default function TopicPage() {
       })
       .catch((error) => {
         console.error("Error fetching topic:", error);
+      });
+
+    // Fetch topic-specific data (mentions over time)
+    fetch(`/api/topic/${topicId}`)
+      .then((res) => res.json())
+      .then((data: TopicDetailData) => {
+        // Transform mentions data for chart
+        const chartData = data.mentions.map((m) => ({
+          w: m.week,
+          x: m.count,
+        }));
+        setMentionsData(chartData);
+      })
+      .catch((error) => {
+        console.error("Error fetching topic details:", error);
+        // Use fallback data
+        setMentionsData([
+          { w: "W1", x: 12 },
+          { w: "W2", x: 18 },
+          { w: "W3", x: 20 },
+          { w: "W4", x: 23 },
+          { w: "W5", x: 30 },
+          { w: "W6", x: 28 },
+          { w: "W7", x: 35 },
+        ]);
       });
 
     // Fetch Congress data
@@ -257,7 +279,7 @@ export default function TopicPage() {
             <CardContent>
               <div className="h-60">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={mentionsSeries}>
+                  <BarChart data={mentionsData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="w" />
                     <YAxis />
