@@ -48,7 +48,7 @@ export default function Hero({ onExplore, onUpload, onChat }: HeroProps) {
           </div>
           <div className="mt-6 flex items-center gap-3 text-sm text-zinc-500">
             <Users className="w-4 h-4" />
-            Built for analysts, comms teams, and civic orgs
+            Built for congressional staffers, comms teams, and civic orgs
           </div>
         </div>
         <Card className="relative">

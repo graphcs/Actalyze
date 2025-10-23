@@ -101,7 +101,7 @@ export default function Home() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>Actalyze © {new Date().getFullYear()}</div>
           <div>MVP • Real data powered by X API & Congress.gov</div>
-          <div>Built with React + Next.js + Tailwind + Recharts</div>
+          <div>Built for congressional staffers, comms teams, and civic orgs</div>
         </div>
       </footer>
     </div>
