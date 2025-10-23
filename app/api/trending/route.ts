@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { TwitterApi } from "twitter-api-v2";
 
-// Cache trending topics for 15 minutes
+// Cache trending topics for 2 hours to reduce API calls
 let cachedTrending: TrendingTopic[] | null = null;
 let cacheTimestamp = 0;
-const CACHE_DURATION = 15 * 60 * 1000; // 15 minutes
+const CACHE_DURATION = 2 * 60 * 60 * 1000; // 2 hours
 
 interface TrendingTopic {
   id: string;
@@ -46,23 +46,25 @@ export async function GET() {
     const appOnlyClient = await client.appLogin();
     const readOnlyClient = appOnlyClient.readOnly;
 
-    // Search for political/legislative keywords
+    // Search for political/legislative keywords (reduced to avoid rate limits)
     const keywords = [
       "infrastructure bill",
       "healthcare reform",
       "farm bill",
-      "defense appropriations",
-      "climate legislation",
-      "education funding",
-      "immigration reform",
-      "tax reform"
+      "defense appropriations"
     ];
 
     const trendingTopics: TrendingTopic[] = [];
 
     // Fetch tweets for each keyword and calculate momentum
-    for (const keyword of keywords) {
+    for (let i = 0; i < keywords.length; i++) {
+      const keyword = keywords[i];
       try {
+        // Add small delay between requests to avoid rate limits
+        if (i > 0) {
+          await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+        }
+
         const recentTweets = await readOnlyClient.v2.search(`${keyword} -is:retweet lang:en`, {
           max_results: 10,
           'tweet.fields': ['created_at', 'public_metrics'],
@@ -96,7 +98,12 @@ export async function GET() {
             tweetIds: tweets.slice(0, 5).map((t: { id: string }) => t.id),
           });
         }
-      } catch (error) {
+      } catch (error: unknown) {
+        const err = error as { code?: number };
+        if (err.code === 429) {
+          console.error(`❌ Rate limit hit for "${keyword}" - stopping searches`);
+          break; // Stop searching if we hit rate limit
+        }
         console.error(`❌ Error fetching tweets for "${keyword}":`, error);
       }
     }
@@ -106,11 +113,11 @@ export async function GET() {
     // Sort by momentum
     trendingTopics.sort((a, b) => b.momentum - a.momentum);
 
-    // Take top 6
-    const result = trendingTopics.slice(0, 6);
+    // Take top 4
+    const result = trendingTopics.slice(0, 4);
 
-    // If we got results, cache them
-    if (result.length > 0) {
+    // If we got at least 2 results, cache and return them
+    if (result.length >= 2) {
       console.log("✓ Caching live trending topics");
       cachedTrending = result;
       cacheTimestamp = now;
@@ -185,24 +192,6 @@ function getMockTrendingTopics(): TrendingTopic[] {
       momentum: 72,
       cost: 840,
       color: "#ef4444",
-    },
-    {
-      id: "climate",
-      title: "Climate Action Bill",
-      tags: ["Climate", "Environment"],
-      mentions: 31000,
-      momentum: 65,
-      cost: 550,
-      color: "#10b981",
-    },
-    {
-      id: "education",
-      title: "Education Funding",
-      tags: ["Education", "Schools"],
-      mentions: 24500,
-      momentum: 58,
-      cost: 180,
-      color: "#f59e0b",
     },
   ];
 }
