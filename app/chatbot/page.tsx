@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
 import dynamic from "next/dynamic";
+import Nav from "../components/Nav";
+import { useRouter } from "next/navigation";
 
 // Dynamically import chart components to avoid SSR issues
 const BudgetBreakdownChart = dynamic(
@@ -39,6 +40,7 @@ interface ChatMessage {
 }
 
 export default function ChatbotPage() {
+  const router = useRouter();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -50,11 +52,6 @@ export default function ChatbotPage() {
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  const startNewChat = () => {
-    setMessages([]);
-    setInputMessage("");
   };
 
   const sendMessage = async () => {
@@ -71,7 +68,6 @@ export default function ChatbotPage() {
     setIsLoading(true);
 
     // Add assistant message placeholder
-    const assistantMessageId = Date.now().toString();
     let assistantMessageAdded = false;
 
     try {
@@ -193,31 +189,9 @@ export default function ChatbotPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-slate-50">
-      {/* Header */}
-      <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-sm">
-        <div className="flex items-center gap-4">
-          <Link href="/" className="text-2xl font-bold text-slate-800">
-            Actalyze
-          </Link>
-          <span className="text-slate-400">|</span>
-          <span className="text-slate-600">US Legislation Assistant</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <button
-            onClick={startNewChat}
-            className="px-4 py-2 text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
-          >
-            New Chat
-          </button>
-          <Link
-            href="/upload"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Upload Documents
-          </Link>
-        </div>
-      </header>
+    <div className="flex flex-col h-screen bg-gradient-to-b from-white to-zinc-50 dark:from-zinc-950 dark:to-zinc-900">
+      {/* Navigation */}
+      <Nav onUploadClick={() => router.push("/upload")} />
 
       {/* Chat Area */}
       <div className="flex-1 overflow-y-auto px-4 py-6">
