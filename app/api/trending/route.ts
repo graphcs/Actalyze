@@ -151,11 +151,26 @@ export async function GET() {
 
           // Skip generic, conversational, or irrelevant terms
           if (phrase.length < 5 ||
+              // Generic references
               normalizedPhrase === 'the bill' ||
               normalizedPhrase === 'this bill' ||
               normalizedPhrase === 'that act' ||
+              normalizedPhrase === 'proposed bill' ||
+              normalizedPhrase === 'this piece of legislation' ||
+              normalizedPhrase === 'that legislation' ||
+              normalizedPhrase === 'the legislation' ||
+              normalizedPhrase === 'this act' ||
+              // Conversational about bills
               normalizedPhrase.includes('my bill') ||
               normalizedPhrase.includes('your bill') ||
+              normalizedPhrase.includes('bought off') ||
+              normalizedPhrase.includes('aspects of bill') ||
+              normalizedPhrase.includes('part of bill') ||
+              normalizedPhrase.includes('to start passing') ||
+              normalizedPhrase.includes('to pass') ||
+              normalizedPhrase.includes('we need to') ||
+              normalizedPhrase.includes('they need to') ||
+              // Personal bills (utilities)
               normalizedPhrase.includes('my phone') ||
               normalizedPhrase.includes('your phone') ||
               normalizedPhrase.includes('pay off') ||
@@ -163,10 +178,12 @@ export async function GET() {
               normalizedPhrase.includes('water bill') ||
               normalizedPhrase.includes('electric bill') ||
               normalizedPhrase.includes('cable bill') ||
+              // Personal pronouns
               normalizedPhrase.includes('i ') ||
               normalizedPhrase.includes(' me ') ||
               normalizedPhrase.includes('you ') ||
               normalizedPhrase.includes(' us ') ||
+              // Payment related
               normalizedPhrase.includes('always pay') ||
               normalizedPhrase.includes('never pay') ||
               normalizedPhrase.includes('money from') ||
