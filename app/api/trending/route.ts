@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { TwitterApi } from "twitter-api-v2";
 
 // Cache trending topics for 2 hours to reduce API calls
 let cachedTrending: TrendingTopic[] | null = null;
@@ -27,228 +26,142 @@ export async function GET() {
       return NextResponse.json(cachedTrending);
     }
 
-    const apiKey = process.env.TWITTER_API_KEY;
-    const apiSecret = process.env.TWITTER_API_SECRET;
+    const apifyToken = process.env.APIFY_API_TOKEN;
 
-    if (!apiKey || !apiSecret) {
-      console.log("❌ No Twitter API credentials found, returning mock data");
+    if (!apifyToken) {
+      console.log("❌ No Apify API token found, returning mock data");
       return NextResponse.json(getMockTrendingTopics());
     }
 
-    console.log("✓ Twitter API credentials found, fetching live trending topics...");
+    console.log("✓ Apify API token found, fetching trending topics...");
 
-    // Initialize Twitter client with API key and secret
-    const client = new TwitterApi({
-      appKey: apiKey,
-      appSecret: apiSecret,
-    });
+    // Step 1: Get US trending topics from Apify Twitter Trends Scraper
+    console.log("🔍 Fetching US trending topics from Apify...");
 
-    // Get app-only authentication
-    const appOnlyClient = await client.appLogin();
-    const readOnlyClient = appOnlyClient.readOnly;
+    const trendsInput = {
+      country: 'US',
+      onlyHashtags: false,
+      language: 'en',
+    };
 
-    // Get trending legislative/political topics from Twitter with a single search
-    console.log("🔍 Searching for trending legislative and political topics...");
+    let trendingTopics;
+    try {
+      const trendsResponse = await fetch(
+        'https://api.apify.com/v2/acts/fastcrawler~x-twitter-trends-scraper-2025/run-sync-get-dataset-items?token=' + apifyToken,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(trendsInput),
+          signal: AbortSignal.timeout(30000),
+        }
+      );
 
-    const legislativeSearch = await readOnlyClient.v2.search(
-      '(Congress OR bill OR legislation OR Senate OR House OR legislative OR politics OR government OR shutdown OR appropriations OR policy OR federal) -is:retweet lang:en',
-      {
-        max_results: 100,
-        'tweet.fields': ['created_at', 'public_metrics'],
-        sort_order: 'relevancy',
+      if (!trendsResponse.ok) {
+        throw new Error(`Trends API failed: ${trendsResponse.status}`);
       }
+
+      trendingTopics = await trendsResponse.json();
+      console.log(`✓ Fetched ${trendingTopics.length} trending topics from Twitter`);
+    } catch (error) {
+      console.log("⚠️ Error fetching trending topics:", error);
+      return NextResponse.json(getMockTrendingTopics());
+    }
+
+    // Step 2: Filter for political/legislative relevance
+    const politicalRegex = /bill|act|senate|house|congress|gov|hearing|committee|election|ballot|SCOTUS|appropriation|H\.R\.|S\.|HB|SB|shutdown|legislation|federal|policy|reform|vote|amendment|president|white house|trump|biden|supreme court/i;
+
+    interface TrendingResult {
+      name?: string;
+      topic?: string;
+      tweet_volume?: number;
+      url?: string;
+    }
+
+    const relevantTopics = (trendingTopics as TrendingResult[]).filter((topic: TrendingResult) =>
+      politicalRegex.test(topic.name || topic.topic || '')
     );
 
-    if (!legislativeSearch.data.data || legislativeSearch.data.data.length === 0) {
-      console.log("⚠️ No legislative tweets found, returning fallback data");
+    console.log(`✓ Filtered to ${relevantTopics.length} political/legislative topics`);
+
+    if (relevantTopics.length === 0) {
+      console.log("⚠️ No relevant political topics found, returning fallback data");
       return NextResponse.json(getMockTrendingTopics());
     }
 
-    console.log(`✓ Found ${legislativeSearch.data.data.length} legislative tweets`);
+    // Step 3: For each trending topic, fetch sample tweets to get historical data
+    interface ApifyTweet {
+      id?: string;
+      id_str?: string;
+      text?: string;
+      full_text?: string;
+      created_at?: string;
+      timestamp?: string;
+      likes?: number;
+      retweets?: number;
+      replies?: number;
+    }
 
-    // Extract trending phrases dynamically from tweets
-    const phraseFrequency: { [key: string]: {
-      count: number;
-      engagement: number;
-      tweets: Array<{ id: string; created_at?: string; public_metrics?: { like_count?: number; retweet_count?: number; reply_count?: number } }>;
-    } } = {};
+    const topicsWithTweets: { [key: string]: ApifyTweet[] } = {};
 
-    legislativeSearch.data.data.forEach((tweet: { text: string; id: string; created_at?: string; public_metrics?: { like_count?: number; retweet_count?: number; reply_count?: number } }) => {
-      const engagement = (tweet.public_metrics?.like_count || 0) +
-                        (tweet.public_metrics?.retweet_count || 0) +
-                        (tweet.public_metrics?.reply_count || 0);
+    // Take top 12 relevant topics (we'll filter to top 9 later)
+    for (const topic of relevantTopics.slice(0, 12)) {
+      const topicName = topic.name || topic.topic || '';
+      const searchQuery = topicName.replace('#', ''); // Remove # for search
 
-      // Extract phrases containing legislative keywords
-      const text = tweet.text;
+      try {
+        console.log(`🔍 Fetching tweets for: "${searchQuery}"`);
 
-      // Find phrases with "bill", "act", "resolution", "reform", "shutdown", etc.
-      const legislativeTerms = [
-        // Specific bill/act/resolution names (e.g., "Infrastructure Bill")
-        /([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,3})\s+(Bill|Act|Resolution)/gi,
+        const tweetsInput = {
+          searchTerms: [searchQuery],
+          maxTweets: 50,
+          includeRetweets: false,
+          language: 'en',
+        };
 
-        // Reform topics (e.g., "Immigration Reform")
-        /([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2})\s+Reform/gi,
-
-        // Shutdown discussions
-        /(Government|Federal)\s+Shutdown/gi,
-
-        // Appropriations and funding
-        /([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2})\s+(Appropriations?|Funding|Budget)/gi,
-
-        // Specific legislative terms
-        /(CR|Continuing Resolution|Omnibus|Minibus)\s*(Bill)?/gi,
-        /(Big Beautiful Bill)/gi,
-        /(NDAA|National Defense Authorization)/gi,
-
-        // Policy areas
-        /(Infrastructure\s+Investment)/gi,
-        /(Debt\s+Ceiling)/gi,
-        /(Farm\s+Bill)/gi,
-        /(Defense\s+Authorization)/gi,
-
-        // Legislative processes
-        /([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2})\s+(Amendment|Committee|Legislation)/gi,
-        /(Reconciliation\s+Package)/gi,
-        /(Stimulus\s+Package)/gi,
-
-        // Hot topics
-        /(Border\s+Security)/gi,
-        /(Immigration\s+Reform)/gi,
-        /(Tax\s+Reform)/gi,
-        /(Climate\s+(Bill|Legislation))/gi,
-        /(Healthcare\s+Reform)/gi,
-        /(Student\s+(Debt|Loan))/gi,
-        /(Gun\s+(Control|Reform))/gi,
-        /(Voting\s+Rights)/gi,
-
-        // Political news and events
-        /(Presidential|White House|Executive Order)/gi,
-        /(Supreme Court|SCOTUS)/gi,
-        /(Impeachment)/gi,
-        /(Filibuster)/gi,
-        /(Speaker\s+of\s+the\s+House)/gi,
-        /(Senate\s+Majority)/gi,
-        /(Campaign\s+Finance)/gi,
-        /(Gerrymandering)/gi,
-      ];
-
-      const foundPhrases = new Set<string>();
-
-      legislativeTerms.forEach(regex => {
-        const matches = text.matchAll(regex);
-        for (const match of matches) {
-          let phrase = match[0].trim();
-
-          // Normalize the phrase
-          phrase = phrase
-            .replace(/\s+/g, ' ')
-            .replace(/[""]/g, '"')
-            .replace(/['']/g, "'")
-            .trim();
-
-          // Convert to lowercase for deduplication
-          const normalizedPhrase = phrase.toLowerCase();
-
-          // Skip generic, conversational, or irrelevant terms
-          if (phrase.length < 5 ||
-              // Generic references
-              normalizedPhrase === 'the bill' ||
-              normalizedPhrase === 'this bill' ||
-              normalizedPhrase === 'that act' ||
-              normalizedPhrase === 'proposed bill' ||
-              normalizedPhrase === 'this piece of legislation' ||
-              normalizedPhrase === 'that legislation' ||
-              normalizedPhrase === 'the legislation' ||
-              normalizedPhrase === 'this act' ||
-              // Conversational about bills
-              normalizedPhrase.includes('my bill') ||
-              normalizedPhrase.includes('your bill') ||
-              normalizedPhrase.includes('bought off') ||
-              normalizedPhrase.includes('aspects of bill') ||
-              normalizedPhrase.includes('part of bill') ||
-              normalizedPhrase.includes('to start passing') ||
-              normalizedPhrase.includes('to pass') ||
-              normalizedPhrase.includes('we need to') ||
-              normalizedPhrase.includes('they need to') ||
-              // Personal bills (utilities)
-              normalizedPhrase.includes('my phone') ||
-              normalizedPhrase.includes('your phone') ||
-              normalizedPhrase.includes('pay off') ||
-              normalizedPhrase.includes('phone bill') ||
-              normalizedPhrase.includes('water bill') ||
-              normalizedPhrase.includes('electric bill') ||
-              normalizedPhrase.includes('cable bill') ||
-              // Personal pronouns
-              normalizedPhrase.includes('i ') ||
-              normalizedPhrase.includes(' me ') ||
-              normalizedPhrase.includes('you ') ||
-              normalizedPhrase.includes(' us ') ||
-              // Payment related
-              normalizedPhrase.includes('always pay') ||
-              normalizedPhrase.includes('never pay') ||
-              normalizedPhrase.includes('money from') ||
-              normalizedPhrase.includes('pay my') ||
-              normalizedPhrase.includes('pay your') ||
-              normalizedPhrase.includes('pay the') ||
-              normalizedPhrase.includes('get a ') ||
-              normalizedPhrase.includes('got a ')) {
-            continue;
+        const tweetsResponse = await fetch(
+          'https://api.apify.com/v2/acts/apidojo~tweet-scraper/run-sync-get-dataset-items?token=' + apifyToken,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(tweetsInput),
+            signal: AbortSignal.timeout(30000),
           }
+        );
 
-          // Store using normalized (lowercase) key for deduplication
-          foundPhrases.add(normalizedPhrase);
+        if (tweetsResponse.ok) {
+          const tweets = await tweetsResponse.json();
+          if (Array.isArray(tweets) && tweets.length > 0) {
+            topicsWithTweets[topicName] = tweets;
+            console.log(`✓ Found ${tweets.length} tweets for "${searchQuery}"`);
+          }
         }
-      });
-
-      // Record each phrase found
-      foundPhrases.forEach(phrase => {
-        if (!phraseFrequency[phrase]) {
-          phraseFrequency[phrase] = { count: 0, engagement: 0, tweets: [] };
-        }
-        phraseFrequency[phrase].count++;
-        phraseFrequency[phrase].engagement += engagement;
-        if (phraseFrequency[phrase].tweets.length < 10) {
-          phraseFrequency[phrase].tweets.push(tweet);
-        }
-      });
-    });
-
-    // Sort topics by combined score (count × engagement)
-    const sortedTopics = Object.entries(phraseFrequency)
-      .filter(([, data]) => data.count >= 1) // Only topics mentioned at least once
-      .sort((a, b) => {
-        const scoreA = a[1].count * (a[1].engagement + 1);
-        const scoreB = b[1].count * (b[1].engagement + 1);
-        return scoreB - scoreA;
-      })
-      .slice(0, 9); // Get top 9
-
-    console.log(`✓ Found ${sortedTopics.length} trending legislative topics`);
-
-    if (sortedTopics.length === 0) {
-      console.log("⚠️ No topics extracted, returning fallback data");
-      return NextResponse.json(getMockTrendingTopics());
+      } catch (error) {
+        console.log(`⚠️ Error fetching tweets for "${searchQuery}":`, error);
+      }
     }
 
-    const trendingTopics: TrendingTopic[] = [];
+    console.log(`✓ Collected tweets for ${Object.keys(topicsWithTweets).length} topics`);
 
-    // Create topic objects from trending keywords
-    for (const [topicName, data] of sortedTopics) {
-      const avgEngagement = data.engagement / data.count;
+    // Step 4: Create trending topics with sparkline data
+    const trendingTopicsArray: TrendingTopic[] = [];
+
+    for (const [topicName, tweets] of Object.entries(topicsWithTweets)) {
+      if (tweets.length === 0) continue;
+
+      // Calculate total engagement
+      const totalEngagement = tweets.reduce((sum, t) =>
+        sum + (t.likes || 0) + (t.retweets || 0) + (t.replies || 0), 0
+      );
+      const avgEngagement = totalEngagement / tweets.length;
       const momentum = Math.min(Math.round(avgEngagement / 10), 100);
-
-      // Capitalize first letter of each word for display
-      const displayTitle = topicName
-        .split(' ')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ');
-
-      // Extract tags from topic name
-      const tags = displayTitle.split(' ').filter(word => word.length > 3);
 
       // Calculate daily mentions for sparkline (last 14 days)
       const dailyMentions: { [key: number]: number } = {};
-      const now = Date.now();
+      const nowTime = Date.now();
 
       // Initialize last 14 days
       for (let i = 13; i >= 0; i--) {
@@ -256,43 +169,56 @@ export async function GET() {
       }
 
       // Aggregate tweets by day
-      data.tweets.forEach(tweet => {
-        if (tweet.created_at) {
-          const tweetDate = new Date(tweet.created_at);
-          const daysAgo = Math.floor((now - tweetDate.getTime()) / (24 * 60 * 60 * 1000));
+      tweets.forEach(tweet => {
+        const tweetDate = tweet.created_at || tweet.timestamp;
+        if (tweetDate) {
+          const date = new Date(tweetDate);
+          const daysAgo = Math.floor((nowTime - date.getTime()) / (24 * 60 * 60 * 1000));
           if (daysAgo >= 0 && daysAgo < 14) {
             dailyMentions[13 - daysAgo]++;
           }
         }
       });
 
-      const mentionsOverTime = Object.keys(dailyMentions)
-        .map(day => ({
-          day: parseInt(day) + 1, // 1-14
-          count: dailyMentions[parseInt(day)],
-        }));
+      const mentionsOverTime = Object.keys(dailyMentions).map(day => ({
+        day: parseInt(day) + 1,
+        count: dailyMentions[parseInt(day)],
+      }));
 
-      trendingTopics.push({
-        id: topicName.toLowerCase().replace(/\s+/g, '-'),
+      // Clean up topic name
+      const cleanTopicName = topicName.replace('#', '').trim();
+      const displayTitle = cleanTopicName
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+
+      // Extract tags
+      const tags = displayTitle.split(' ').filter(word => word.length > 3).slice(0, 3);
+
+      trendingTopicsArray.push({
+        id: cleanTopicName.toLowerCase().replace(/\s+/g, '-'),
         title: displayTitle,
-        tags: tags.slice(0, 3),
-        mentions: data.count * 1000 + Math.floor(Math.random() * 5000), // Estimated based on tweet count
-        momentum: Math.max(momentum, 45), // Ensure minimum momentum (based on engagement)
-        cost: Math.floor(Math.random() * 1000) + 50, // MOCK DATA: Random estimated cost in billions (real CBO data not available via API)
-        color: getColorForTopic(topicName.toLowerCase()),
-        tweetIds: data.tweets.slice(0, 5).map(t => t.id),
+        tags,
+        mentions: tweets.length * 1000, // Estimate based on sample
+        momentum: Math.max(momentum, 45),
+        cost: Math.floor(Math.random() * 1000) + 50, // Mock cost
+        color: getColorForTopic(cleanTopicName.toLowerCase()),
+        tweetIds: tweets.slice(0, 5).map(t => t.id || t.id_str || ''),
         mentionsOverTime,
       });
+
+      // Stop at 9 topics
+      if (trendingTopicsArray.length >= 9) break;
     }
 
-    console.log(`✓ Created ${trendingTopics.length} trending topic objects`);
+    console.log(`✓ Created ${trendingTopicsArray.length} trending topic objects`);
     console.log("✓ Caching for 2 hours");
 
     // Cache the results
-    cachedTrending = trendingTopics;
+    cachedTrending = trendingTopicsArray;
     cacheTimestamp = now;
 
-    return NextResponse.json(trendingTopics);
+    return NextResponse.json(trendingTopicsArray);
 
   } catch (error) {
     console.error("❌ Error fetching trending topics:", error);
