@@ -22,7 +22,7 @@ export async function GET() {
     // Check cache first
     const now = Date.now();
     if (cachedTrending && (now - cacheTimestamp) < CACHE_DURATION) {
-      console.log("Returning cached trending topics");
+      console.log("✓ Returning cached trending topics (cached for 2 hours)");
       return NextResponse.json(cachedTrending);
     }
 
@@ -34,7 +34,7 @@ export async function GET() {
       return NextResponse.json(getMockTrendingTopics());
     }
 
-    console.log("✓ Twitter API credentials found, attempting to fetch live data...");
+    console.log("✓ Twitter API credentials found, fetching live trending topics...");
 
     // Initialize Twitter client with API key and secret
     const client = new TwitterApi({
@@ -46,87 +46,116 @@ export async function GET() {
     const appOnlyClient = await client.appLogin();
     const readOnlyClient = appOnlyClient.readOnly;
 
-    // Search for political/legislative keywords (reduced to avoid rate limits)
-    const keywords = [
-      "infrastructure bill",
-      "healthcare reform",
-      "farm bill",
-      "defense appropriations"
-    ];
+    // Get trending legislative/political topics from Twitter with a single search
+    console.log("🔍 Searching for trending legislative topics...");
+
+    const legislativeSearch = await readOnlyClient.v2.search(
+      '(Congress OR bill OR legislation OR Senate OR House OR legislative) -is:retweet lang:en',
+      {
+        max_results: 100,
+        'tweet.fields': ['created_at', 'public_metrics'],
+        sort_order: 'relevancy',
+      }
+    );
+
+    if (!legislativeSearch.data.data || legislativeSearch.data.data.length === 0) {
+      console.log("⚠️ No legislative tweets found, returning fallback data");
+      return NextResponse.json(getMockTrendingTopics());
+    }
+
+    console.log(`✓ Found ${legislativeSearch.data.data.length} legislative tweets`);
+
+    // Extract topics/keywords from tweets using pattern matching
+    const topicFrequency: { [key: string]: {
+      count: number;
+      engagement: number;
+      tweets: Array<{ id: string; public_metrics?: { like_count?: number; retweet_count?: number; reply_count?: number } }>;
+    } } = {};
+
+    legislativeSearch.data.data.forEach((tweet: { text: string; id: string; public_metrics?: { like_count?: number; retweet_count?: number; reply_count?: number } }) => {
+      const engagement = (tweet.public_metrics?.like_count || 0) +
+                        (tweet.public_metrics?.retweet_count || 0) +
+                        (tweet.public_metrics?.reply_count || 0);
+
+      // Define bill/legislative patterns to extract
+      const patterns = [
+        { regex: /infrastructure\s+(bill|act|law)/i, name: "Infrastructure Bill" },
+        { regex: /healthcare\s+(reform|bill|act)/i, name: "Healthcare Reform" },
+        { regex: /farm\s+bill/i, name: "Farm Bill" },
+        { regex: /defense\s+(appropriations|budget|spending|bill)/i, name: "Defense Appropriations" },
+        { regex: /climate\s+(bill|legislation|act|action)/i, name: "Climate Legislation" },
+        { regex: /education\s+(funding|bill|reform)/i, name: "Education Funding" },
+        { regex: /immigration\s+reform/i, name: "Immigration Reform" },
+        { regex: /tax\s+(reform|bill|cut)/i, name: "Tax Reform" },
+        { regex: /budget\s+(bill|resolution)/i, name: "Budget Bill" },
+        { regex: /energy\s+bill/i, name: "Energy Bill" },
+        { regex: /veterans\s+(affairs|benefits)/i, name: "Veterans Affairs" },
+        { regex: /social\s+security/i, name: "Social Security" },
+        { regex: /voting\s+(rights|reform)/i, name: "Voting Rights" },
+        { regex: /student\s+(loan|debt)/i, name: "Student Loans" },
+      ];
+
+      patterns.forEach(({ regex, name }) => {
+        if (regex.test(tweet.text)) {
+          if (!topicFrequency[name]) {
+            topicFrequency[name] = { count: 0, engagement: 0, tweets: [] };
+          }
+          topicFrequency[name].count++;
+          topicFrequency[name].engagement += engagement;
+          if (topicFrequency[name].tweets.length < 10) {
+            topicFrequency[name].tweets.push(tweet);
+          }
+        }
+      });
+    });
+
+    // Sort topics by combined score (count × engagement)
+    const sortedTopics = Object.entries(topicFrequency)
+      .filter(([_, data]) => data.count >= 2) // Only topics mentioned at least twice
+      .sort((a, b) => {
+        const scoreA = a[1].count * (a[1].engagement + 1);
+        const scoreB = b[1].count * (b[1].engagement + 1);
+        return scoreB - scoreA;
+      })
+      .slice(0, 6); // Get top 6
+
+    console.log(`✓ Found ${sortedTopics.length} trending legislative topics`);
+
+    if (sortedTopics.length === 0) {
+      console.log("⚠️ No topics extracted, returning fallback data");
+      return NextResponse.json(getMockTrendingTopics());
+    }
 
     const trendingTopics: TrendingTopic[] = [];
 
-    // Fetch tweets for each keyword and calculate momentum
-    for (let i = 0; i < keywords.length; i++) {
-      const keyword = keywords[i];
-      try {
-        // Add small delay between requests to avoid rate limits
-        if (i > 0) {
-          await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
-        }
+    // Create topic objects from trending keywords
+    for (const [topicName, data] of sortedTopics) {
+      const avgEngagement = data.engagement / data.count;
+      const momentum = Math.min(Math.round(avgEngagement / 10), 100);
 
-        const recentTweets = await readOnlyClient.v2.search(`${keyword} -is:retweet lang:en`, {
-          max_results: 10,
-          'tweet.fields': ['created_at', 'public_metrics'],
-        });
+      // Extract tags from topic name
+      const tags = topicName.split(' ').filter(word => word.length > 3);
 
-        if (recentTweets.data && recentTweets.data.data && recentTweets.data.data.length > 0) {
-          const tweets = recentTweets.data.data;
-
-          // Calculate total mentions and engagement
-          const totalEngagement = tweets.reduce((sum, tweet: { public_metrics?: { like_count?: number; retweet_count?: number; reply_count?: number } }) => {
-            const metrics = tweet.public_metrics || {};
-            return sum + (metrics.like_count || 0) + (metrics.retweet_count || 0) + (metrics.reply_count || 0);
-          }, 0);
-
-          // Calculate momentum (simplified: based on recent engagement)
-          const momentum = Math.min(Math.round((totalEngagement / tweets.length) / 10), 100);
-
-          // Extract tags from keyword
-          const tags = keyword.split(' ').map(word =>
-            word.charAt(0).toUpperCase() + word.slice(1)
-          );
-
-          trendingTopics.push({
-            id: keyword.replace(/\s+/g, '-').toLowerCase(),
-            title: keyword.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
-            tags: tags.slice(0, 3),
-            mentions: tweets.length * 1000 + Math.floor(Math.random() * 10000), // Estimated
-            momentum,
-            cost: Math.floor(Math.random() * 1000) + 50, // Mock cost data
-            color: getColorForTopic(keyword),
-            tweetIds: tweets.slice(0, 5).map((t: { id: string }) => t.id),
-          });
-        }
-      } catch (error: unknown) {
-        const err = error as { code?: number };
-        if (err.code === 429) {
-          console.error(`❌ Rate limit hit for "${keyword}" - stopping searches`);
-          break; // Stop searching if we hit rate limit
-        }
-        console.error(`❌ Error fetching tweets for "${keyword}":`, error);
-      }
+      trendingTopics.push({
+        id: topicName.toLowerCase().replace(/\s+/g, '-'),
+        title: topicName,
+        tags: tags.slice(0, 3),
+        mentions: data.count * 1000 + Math.floor(Math.random() * 5000), // Estimated
+        momentum: Math.max(momentum, 45), // Ensure minimum momentum
+        cost: Math.floor(Math.random() * 1000) + 50, // Mock cost data (requires CBO)
+        color: getColorForTopic(topicName.toLowerCase()),
+        tweetIds: data.tweets.slice(0, 5).map(t => t.id),
+      });
     }
 
-    console.log(`✓ Fetched ${trendingTopics.length} trending topics from Twitter`);
+    console.log(`✓ Created ${trendingTopics.length} trending topic objects`);
+    console.log("✓ Caching for 2 hours");
 
-    // Sort by momentum
-    trendingTopics.sort((a, b) => b.momentum - a.momentum);
+    // Cache the results
+    cachedTrending = trendingTopics;
+    cacheTimestamp = now;
 
-    // Take top 4
-    const result = trendingTopics.slice(0, 4);
-
-    // If we got at least 2 results, cache and return them
-    if (result.length >= 2) {
-      console.log("✓ Caching live trending topics");
-      cachedTrending = result;
-      cacheTimestamp = now;
-      return NextResponse.json(result);
-    }
-
-    // Fallback to mock data if API fails
-    console.log("⚠️ No topics found from Twitter API, returning mock data");
-    return NextResponse.json(getMockTrendingTopics());
+    return NextResponse.json(trendingTopics);
 
   } catch (error) {
     console.error("❌ Error fetching trending topics:", error);
@@ -145,10 +174,16 @@ function getColorForTopic(keyword: string): string {
     education: "#f59e0b",
     immigration: "#8b5cf6",
     tax: "#ec4899",
+    budget: "#6366f1",
+    energy: "#14b8a6",
+    veterans: "#f43f5e",
+    social: "#8b5cf6",
+    voting: "#a855f7",
+    student: "#f59e0b",
   };
 
   for (const [key, color] of Object.entries(colorMap)) {
-    if (keyword.toLowerCase().includes(key)) {
+    if (keyword.includes(key)) {
       return color;
     }
   }
@@ -158,36 +193,36 @@ function getColorForTopic(keyword: string): string {
 function getMockTrendingTopics(): TrendingTopic[] {
   return [
     {
-      id: "ijia",
-      title: "Infrastructure & Jobs Act",
-      tags: ["Infrastructure", "Energy", "Transportation"],
+      id: "infrastructure-bill",
+      title: "Infrastructure Bill",
+      tags: ["Infrastructure", "Transportation"],
       mentions: 42000,
       momentum: 78,
       cost: 1100,
       color: "#111827",
     },
     {
-      id: "aca",
-      title: "Affordable Care Act",
-      tags: ["Healthcare", "Subsidies"],
+      id: "healthcare-reform",
+      title: "Healthcare Reform",
+      tags: ["Healthcare", "Reform"],
       mentions: 37000,
       momentum: 69,
       cost: 210,
       color: "#0ea5e9",
     },
     {
-      id: "farmbill",
+      id: "farm-bill",
       title: "Farm Bill",
-      tags: ["Agriculture", "Food", "Rural"],
+      tags: ["Agriculture", "Farm"],
       mentions: 19500,
       momentum: 61,
       cost: 95,
       color: "#16a34a",
     },
     {
-      id: "defense",
+      id: "defense-appropriations",
       title: "Defense Appropriations",
-      tags: ["Defense", "Security"],
+      tags: ["Defense", "Appropriations"],
       mentions: 26500,
       momentum: 72,
       cost: 840,
