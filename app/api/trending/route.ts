@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 
-// Cache trending topics for 2 hours to reduce API calls
-let cachedTrending: TrendingTopic[] | null = null;
-let cacheTimestamp = 0;
-const CACHE_DURATION = 2 * 60 * 60 * 1000; // 2 hours
+// Cache disabled for debugging
+// let cachedTrending: TrendingTopic[] | null = null;
+// let cacheTimestamp = 0;
+// const CACHE_DURATION = 2 * 60 * 60 * 1000; // 2 hours
 
 interface TrendingTopic {
   id: string;
@@ -22,12 +22,12 @@ export async function GET() {
     const startTime = Date.now();
     console.log("🚀 Trending API called at", new Date().toISOString());
 
-    // Check cache first
-    const now = Date.now();
-    if (cachedTrending && (now - cacheTimestamp) < CACHE_DURATION) {
-      console.log("✓ Returning cached trending topics (cached for 2 hours)");
-      return NextResponse.json(cachedTrending);
-    }
+    // Cache disabled for debugging
+    // const now = Date.now();
+    // if (cachedTrending && (now - cacheTimestamp) < CACHE_DURATION) {
+    //   console.log("✓ Returning cached trending topics (cached for 2 hours)");
+    //   return NextResponse.json(cachedTrending);
+    // }
 
     const apifyToken = process.env.APIFY_API_TOKEN;
 
@@ -157,11 +157,11 @@ export async function GET() {
     });
 
     console.log(`✓ Created ${trendingTopicsArray.length} trending topic objects`);
-    console.log("✓ Caching for 2 hours");
+    // console.log("✓ Caching for 2 hours");
 
-    // Cache the results
-    cachedTrending = trendingTopicsArray;
-    cacheTimestamp = now;
+    // Cache disabled for debugging
+    // cachedTrending = trendingTopicsArray;
+    // cacheTimestamp = now;
 
     return NextResponse.json(trendingTopicsArray);
 
