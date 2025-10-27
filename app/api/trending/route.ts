@@ -19,6 +19,9 @@ interface TrendingTopic {
 
 export async function GET() {
   try {
+    const startTime = Date.now();
+    console.log("🚀 Trending API called at", new Date().toISOString());
+
     // Check cache first
     const now = Date.now();
     if (cachedTrending && (now - cacheTimestamp) < CACHE_DURATION) {
@@ -30,10 +33,12 @@ export async function GET() {
 
     if (!apifyToken) {
       console.log("❌ No Apify API token found, returning mock data");
+      console.log("❌ Environment variables available:", Object.keys(process.env).filter(k => k.includes('APIFY')));
       return NextResponse.json(getMockTrendingTopics());
     }
 
     console.log("✓ Apify API token found, fetching trending topics...");
+    console.log("✓ Token starts with:", apifyToken.substring(0, 15) + "...");
 
     // Step 1: Get US trending topics from Apify Twitter Trends Scraper
     console.log("🔍 Fetching US trending topics from Apify...");
@@ -46,6 +51,7 @@ export async function GET() {
 
     let trendingTopics;
     try {
+      const fetchStart = Date.now();
       const trendsResponse = await fetch(
         'https://api.apify.com/v2/acts/fastcrawler~x-twitter-trends-scraper-2025/run-sync-get-dataset-items?token=' + apifyToken,
         {
@@ -54,23 +60,32 @@ export async function GET() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(trendsInput),
-          signal: AbortSignal.timeout(30000),
+          signal: AbortSignal.timeout(8000),
         }
       );
+      console.log(`✓ Trends API responded in ${Date.now() - fetchStart}ms`);
 
       if (!trendsResponse.ok) {
+        const errorText = await trendsResponse.text();
+        console.log(`❌ Trends API failed: ${trendsResponse.status}`, errorText.substring(0, 200));
         throw new Error(`Trends API failed: ${trendsResponse.status}`);
       }
 
       trendingTopics = await trendsResponse.json();
       console.log(`✓ Fetched ${trendingTopics.length} trending topics from Twitter`);
     } catch (error) {
-      console.log("⚠️ Error fetching trending topics:", error);
+      console.log("⚠️ Error fetching trending topics:", error instanceof Error ? error.message : String(error));
+      console.log("⚠️ Falling back to mock data");
       return NextResponse.json(getMockTrendingTopics());
     }
 
-    // Step 2: Filter for political/legislative relevance
-    const politicalRegex = /bill|act|senate|house|congress|gov|hearing|committee|election|ballot|SCOTUS|appropriation|H\.R\.|S\.|HB|SB|shutdown|legislation|federal|policy|reform|vote|amendment|president|white house|trump|biden|supreme court/i;
+    // Step 2: Use OpenAI to filter for political/legislative relevance
+    const openaiKey = process.env.OPENAI_API_KEY;
+
+    if (!openaiKey || openaiKey.includes('placeholder')) {
+      console.log("⚠️ No OpenAI API key found, using fallback data");
+      return NextResponse.json(getMockTrendingTopics());
+    }
 
     interface TrendingResult {
       name?: string;
@@ -79,18 +94,57 @@ export async function GET() {
       url?: string;
     }
 
-    const relevantTopics = (trendingTopics as TrendingResult[]).filter((topic: TrendingResult) =>
-      politicalRegex.test(topic.name || topic.topic || '')
-    );
+    const topicNames = (trendingTopics as TrendingResult[])
+      .map(t => t.name || t.topic || '')
+      .filter(Boolean)
+      .slice(0, 50); // Analyze top 50 trends
 
-    console.log(`✓ Filtered to ${relevantTopics.length} political/legislative topics`);
+    console.log(`🤖 Using OpenAI to identify political/legislative topics from ${topicNames.length} trends...`);
 
-    if (relevantTopics.length === 0) {
+    let relevantTopicNames: string[] = [];
+    try {
+      const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openaiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are an expert at identifying political, legislative, and government-related topics. Return ONLY a JSON array of topic names that are related to US politics, legislation, government, policy, or political figures. Exclude sports, entertainment, and non-political topics.'
+            },
+            {
+              role: 'user',
+              content: `From this list of trending topics, identify which ones are political/legislative/government-related:\n\n${topicNames.join(', ')}\n\nReturn ONLY a JSON array like: ["Topic1", "Topic2"]`
+            }
+          ],
+          temperature: 0.3,
+        }),
+        signal: AbortSignal.timeout(5000),
+      });
+
+      if (aiResponse.ok) {
+        const aiData = await aiResponse.json();
+        const aiContent = aiData.choices?.[0]?.message?.content || '[]';
+        relevantTopicNames = JSON.parse(aiContent.trim());
+        console.log(`✓ OpenAI identified ${relevantTopicNames.length} political topics`);
+      } else {
+        console.log(`⚠️ OpenAI API failed: ${aiResponse.status}`);
+        return NextResponse.json(getMockTrendingTopics());
+      }
+    } catch (error) {
+      console.log("⚠️ Error using OpenAI:", error instanceof Error ? error.message : String(error));
+      return NextResponse.json(getMockTrendingTopics());
+    }
+
+    if (relevantTopicNames.length === 0) {
       console.log("⚠️ No relevant political topics found, returning fallback data");
       return NextResponse.json(getMockTrendingTopics());
     }
 
-    // Step 3: For each trending topic, fetch sample tweets to get historical data
     interface ApifyTweet {
       id?: string;
       id_str?: string;
@@ -105,9 +159,9 @@ export async function GET() {
 
     const topicsWithTweets: { [key: string]: ApifyTweet[] } = {};
 
+    // Step 3: For each relevant political topic, fetch sample tweets to get historical data
     // Take top 12 relevant topics (we'll filter to top 9 later)
-    for (const topic of relevantTopics.slice(0, 12)) {
-      const topicName = topic.name || topic.topic || '';
+    for (const topicName of relevantTopicNames.slice(0, 12)) {
       const searchQuery = topicName.replace('#', ''); // Remove # for search
 
       try {
@@ -128,7 +182,7 @@ export async function GET() {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify(tweetsInput),
-            signal: AbortSignal.timeout(30000),
+            signal: AbortSignal.timeout(6000), // Reduced timeout
           }
         );
 
