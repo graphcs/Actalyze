@@ -65,8 +65,8 @@ export async function GET() {
 
     console.log(`✓ Found ${legislativeSearch.data.data.length} legislative tweets`);
 
-    // Extract topics/keywords from tweets using pattern matching
-    const topicFrequency: { [key: string]: {
+    // Extract trending phrases dynamically from tweets
+    const phraseFrequency: { [key: string]: {
       count: number;
       engagement: number;
       tweets: Array<{ id: string; public_metrics?: { like_count?: number; retweet_count?: number; reply_count?: number } }>;
@@ -77,41 +77,69 @@ export async function GET() {
                         (tweet.public_metrics?.retweet_count || 0) +
                         (tweet.public_metrics?.reply_count || 0);
 
-      // Define bill/legislative patterns to extract
-      const patterns = [
-        { regex: /infrastructure\s+(bill|act|law)/i, name: "Infrastructure Bill" },
-        { regex: /healthcare\s+(reform|bill|act)/i, name: "Healthcare Reform" },
-        { regex: /farm\s+bill/i, name: "Farm Bill" },
-        { regex: /defense\s+(appropriations|budget|spending|bill)/i, name: "Defense Appropriations" },
-        { regex: /climate\s+(bill|legislation|act|action)/i, name: "Climate Legislation" },
-        { regex: /education\s+(funding|bill|reform)/i, name: "Education Funding" },
-        { regex: /immigration\s+reform/i, name: "Immigration Reform" },
-        { regex: /tax\s+(reform|bill|cut)/i, name: "Tax Reform" },
-        { regex: /budget\s+(bill|resolution)/i, name: "Budget Bill" },
-        { regex: /energy\s+bill/i, name: "Energy Bill" },
-        { regex: /veterans\s+(affairs|benefits)/i, name: "Veterans Affairs" },
-        { regex: /social\s+security/i, name: "Social Security" },
-        { regex: /voting\s+(rights|reform)/i, name: "Voting Rights" },
-        { regex: /student\s+(loan|debt)/i, name: "Student Loans" },
+      // Extract phrases containing legislative keywords
+      const text = tweet.text;
+
+      // Find phrases with "bill", "act", "resolution", "reform", "shutdown", etc.
+      const legislativeTerms = [
+        /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+(Bill|Act|Resolution)/gi,
+        /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+Reform/gi,
+        /(Government|Federal)\s+Shutdown/gi,
+        /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+Appropriations?/gi,
+        /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+Funding/gi,
+        /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+Budget/gi,
+        /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+Legislation/gi,
+        /(CR|Continuing Resolution)/gi,
+        /(Omnibus|Minibus)\s+Bill/gi,
+        /(Big Beautiful Bill)/gi,
+        /(Infrastructure\s+Investment)/gi,
+        /(Debt\s+Ceiling)/gi,
+        /(Farm\s+Bill)/gi,
+        /(Defense\s+Authorization)/gi,
+        /(NDAA)/gi,
       ];
 
-      patterns.forEach(({ regex, name }) => {
-        if (regex.test(tweet.text)) {
-          if (!topicFrequency[name]) {
-            topicFrequency[name] = { count: 0, engagement: 0, tweets: [] };
+      const foundPhrases = new Set<string>();
+
+      legislativeTerms.forEach(regex => {
+        const matches = text.matchAll(regex);
+        for (const match of matches) {
+          let phrase = match[0].trim();
+
+          // Normalize the phrase
+          phrase = phrase
+            .replace(/\s+/g, ' ')
+            .replace(/[""]/g, '"')
+            .replace(/['']/g, "'");
+
+          // Skip generic terms
+          if (phrase.length < 5 ||
+              phrase === 'The Bill' ||
+              phrase === 'This Bill' ||
+              phrase === 'That Act') {
+            continue;
           }
-          topicFrequency[name].count++;
-          topicFrequency[name].engagement += engagement;
-          if (topicFrequency[name].tweets.length < 10) {
-            topicFrequency[name].tweets.push(tweet);
-          }
+
+          foundPhrases.add(phrase);
+        }
+      });
+
+      // Record each phrase found
+      foundPhrases.forEach(phrase => {
+        if (!phraseFrequency[phrase]) {
+          phraseFrequency[phrase] = { count: 0, engagement: 0, tweets: [] };
+        }
+        phraseFrequency[phrase].count++;
+        phraseFrequency[phrase].engagement += engagement;
+        if (phraseFrequency[phrase].tweets.length < 10) {
+          phraseFrequency[phrase].tweets.push(tweet);
         }
       });
     });
 
     // Sort topics by combined score (count × engagement)
-    const sortedTopics = Object.entries(topicFrequency)
-      .filter(([_, data]) => data.count >= 2) // Only topics mentioned at least twice
+    const sortedTopics = Object.entries(phraseFrequency)
+      .filter(([, data]) => data.count >= 2) // Only topics mentioned at least twice
       .sort((a, b) => {
         const scoreA = a[1].count * (a[1].engagement + 1);
         const scoreB = b[1].count * (b[1].engagement + 1);
