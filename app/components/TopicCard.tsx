@@ -53,10 +53,7 @@ export default function TopicCard({ topic, rank, onOpen }: TopicCardProps) {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="mb-3">
-          <Sparkline data={sparkData} stroke={topic.color} />
-        </div>
-        <div className="mt-3 flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-1">
           {topic.tags.map((tag) => (
             <span
               key={tag}
