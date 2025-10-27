@@ -17,6 +17,7 @@ interface Topic {
 
 interface TopicCardProps {
   topic: Topic;
+  rank: number;
   onOpen: (topic: Topic) => void;
 }
 
@@ -25,7 +26,7 @@ function numberFmt(n: number): string {
   return n.toString();
 }
 
-export default function TopicCard({ topic, onOpen }: TopicCardProps) {
+export default function TopicCard({ topic, rank, onOpen }: TopicCardProps) {
   const sparkData = generateSparkData();
 
   return (
@@ -37,7 +38,7 @@ export default function TopicCard({ topic, onOpen }: TopicCardProps) {
         <div className="flex items-center gap-2 flex-1">
           <Badge className="bg-zinc-900 text-white dark:bg-white dark:text-zinc-900">
             <TrendingUp className="w-3 h-3" />
-            #{Math.floor(topic.momentum)}
+            #{rank}
           </Badge>
           <div className="font-semibold text-zinc-900 dark:text-white">
             {topic.title}

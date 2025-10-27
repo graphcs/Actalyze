@@ -32,8 +32,8 @@ export default function TrendingGrid({ topics, onOpen }: TrendingGridProps) {
         </Button>
       </div>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {topics.map((topic) => (
-          <TopicCard key={topic.id} topic={topic} onOpen={onOpen} />
+        {topics.map((topic, index) => (
+          <TopicCard key={topic.id} topic={topic} rank={index + 1} onOpen={onOpen} />
         ))}
       </div>
     </div>

@@ -244,23 +244,36 @@ export default function TopicPage() {
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={fiscalSeries}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="year" />
-                    <YAxis />
-                    <Tooltip contentStyle={{ borderRadius: 12 }} />
+                    <XAxis
+                      dataKey="year"
+                      label={{ value: 'Year', position: 'insideBottom', offset: -5 }}
+                    />
+                    <YAxis
+                      label={{ value: 'Billions ($)', angle: -90, position: 'insideLeft' }}
+                    />
+                    <Tooltip
+                      contentStyle={{ borderRadius: 12 }}
+                      formatter={(value: number) => [`$${value}B`, '']}
+                    />
                     <Area
                       type="monotone"
                       dataKey="spend"
                       stroke="#111827"
                       fill="#11182710"
+                      name="Spending"
                     />
                     <Area
                       type="monotone"
                       dataKey="subsidies"
                       stroke="#0ea5e9"
                       fill="#0ea5e910"
+                      name="Subsidies"
                     />
                   </AreaChart>
                 </ResponsiveContainer>
+              </div>
+              <div className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+                Mock estimated data - Real CBO projections require Congressional Budget Office integration
               </div>
             </CardContent>
           </Card>
@@ -281,12 +294,23 @@ export default function TopicPage() {
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={mentionsData}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="w" />
-                    <YAxis />
-                    <Tooltip contentStyle={{ borderRadius: 12 }} />
+                    <XAxis
+                      dataKey="w"
+                      label={{ value: 'Week', position: 'insideBottom', offset: -5 }}
+                    />
+                    <YAxis
+                      label={{ value: 'Twitter Mentions', angle: -90, position: 'insideLeft' }}
+                    />
+                    <Tooltip
+                      contentStyle={{ borderRadius: 12 }}
+                      formatter={(value: number) => [`${value} mentions`, 'Count']}
+                    />
                     <Bar dataKey="x" fill="#111827" radius={[8, 8, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
+              </div>
+              <div className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+                Upward trend indicates increasing discussion and momentum
               </div>
             </CardContent>
           </Card>
