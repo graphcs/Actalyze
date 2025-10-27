@@ -39,7 +39,7 @@ export async function GET() {
     console.log("🔍 Fetching US trending topics from Apify...");
 
     const trendsInput = {
-      country: 'US',
+      country: 'united-states',
       onlyHashtags: false,
       language: 'en',
     };
