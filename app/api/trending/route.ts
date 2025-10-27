@@ -67,8 +67,9 @@ export async function GET() {
 
       if (!trendsResponse.ok) {
         const errorText = await trendsResponse.text();
-        console.log(`❌ Trends API failed: ${trendsResponse.status}`, errorText.substring(0, 200));
-        throw new Error(`Trends API failed: ${trendsResponse.status}`);
+        console.error(`❌ Trends API failed with status ${trendsResponse.status}`);
+        console.error(`❌ Error details:`, errorText);
+        throw new Error(`Trends API failed: ${trendsResponse.status} - ${errorText.substring(0, 100)}`);
       }
 
       trendingTopics = await trendsResponse.json();
