@@ -221,9 +221,9 @@ export async function GET() {
         id: topicName.toLowerCase().replace(/\s+/g, '-'),
         title: displayTitle,
         tags: tags.slice(0, 3),
-        mentions: data.count * 1000 + Math.floor(Math.random() * 5000), // Estimated
-        momentum: Math.max(momentum, 45), // Ensure minimum momentum
-        cost: Math.floor(Math.random() * 1000) + 50, // Mock cost data (requires CBO)
+        mentions: data.count * 1000 + Math.floor(Math.random() * 5000), // Estimated based on tweet count
+        momentum: Math.max(momentum, 45), // Ensure minimum momentum (based on engagement)
+        cost: Math.floor(Math.random() * 1000) + 50, // MOCK DATA: Random estimated cost in billions (real CBO data not available via API)
         color: getColorForTopic(topicName.toLowerCase()),
         tweetIds: data.tweets.slice(0, 5).map(t => t.id),
       });
