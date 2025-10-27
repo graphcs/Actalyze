@@ -15,6 +15,7 @@ interface TrendingTopic {
   cost: number;
   color: string;
   tweetIds?: string[];
+  mentionsOverTime?: Array<{ day: number; count: number }>;
 }
 
 export async function GET() {
@@ -69,10 +70,10 @@ export async function GET() {
     const phraseFrequency: { [key: string]: {
       count: number;
       engagement: number;
-      tweets: Array<{ id: string; public_metrics?: { like_count?: number; retweet_count?: number; reply_count?: number } }>;
+      tweets: Array<{ id: string; created_at?: string; public_metrics?: { like_count?: number; retweet_count?: number; reply_count?: number } }>;
     } } = {};
 
-    legislativeSearch.data.data.forEach((tweet: { text: string; id: string; public_metrics?: { like_count?: number; retweet_count?: number; reply_count?: number } }) => {
+    legislativeSearch.data.data.forEach((tweet: { text: string; id: string; created_at?: string; public_metrics?: { like_count?: number; retweet_count?: number; reply_count?: number } }) => {
       const engagement = (tweet.public_metrics?.like_count || 0) +
                         (tweet.public_metrics?.retweet_count || 0) +
                         (tweet.public_metrics?.reply_count || 0);
@@ -120,10 +121,6 @@ export async function GET() {
         /(Gun\s+(Control|Reform))/gi,
         /(Voting\s+Rights)/gi,
 
-        // General legislative language (broader match)
-        /(pass(ing|ed)?\s+(?:a|the)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2})\s+bill)/gi,
-        /(support(ing)?\s+(?:the|a)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2}))/gi,
-
         // Political news and events
         /(Presidential|White House|Executive Order)/gi,
         /(Supreme Court|SCOTUS)/gi,
@@ -159,10 +156,25 @@ export async function GET() {
               normalizedPhrase === 'that act' ||
               normalizedPhrase.includes('my bill') ||
               normalizedPhrase.includes('your bill') ||
+              normalizedPhrase.includes('my phone') ||
+              normalizedPhrase.includes('your phone') ||
+              normalizedPhrase.includes('pay off') ||
+              normalizedPhrase.includes('phone bill') ||
+              normalizedPhrase.includes('water bill') ||
+              normalizedPhrase.includes('electric bill') ||
+              normalizedPhrase.includes('cable bill') ||
               normalizedPhrase.includes('i ') ||
+              normalizedPhrase.includes(' me ') ||
               normalizedPhrase.includes('you ') ||
+              normalizedPhrase.includes(' us ') ||
               normalizedPhrase.includes('always pay') ||
-              normalizedPhrase.includes('money from')) {
+              normalizedPhrase.includes('never pay') ||
+              normalizedPhrase.includes('money from') ||
+              normalizedPhrase.includes('pay my') ||
+              normalizedPhrase.includes('pay your') ||
+              normalizedPhrase.includes('pay the') ||
+              normalizedPhrase.includes('get a ') ||
+              normalizedPhrase.includes('got a ')) {
             continue;
           }
 
@@ -217,6 +229,32 @@ export async function GET() {
       // Extract tags from topic name
       const tags = displayTitle.split(' ').filter(word => word.length > 3);
 
+      // Calculate daily mentions for sparkline (last 14 days)
+      const dailyMentions: { [key: number]: number } = {};
+      const now = Date.now();
+
+      // Initialize last 14 days
+      for (let i = 13; i >= 0; i--) {
+        dailyMentions[i] = 0;
+      }
+
+      // Aggregate tweets by day
+      data.tweets.forEach(tweet => {
+        if (tweet.created_at) {
+          const tweetDate = new Date(tweet.created_at);
+          const daysAgo = Math.floor((now - tweetDate.getTime()) / (24 * 60 * 60 * 1000));
+          if (daysAgo >= 0 && daysAgo < 14) {
+            dailyMentions[13 - daysAgo]++;
+          }
+        }
+      });
+
+      const mentionsOverTime = Object.keys(dailyMentions)
+        .map(day => ({
+          day: parseInt(day) + 1, // 1-14
+          count: dailyMentions[parseInt(day)],
+        }));
+
       trendingTopics.push({
         id: topicName.toLowerCase().replace(/\s+/g, '-'),
         title: displayTitle,
@@ -226,6 +264,7 @@ export async function GET() {
         cost: Math.floor(Math.random() * 1000) + 50, // MOCK DATA: Random estimated cost in billions (real CBO data not available via API)
         color: getColorForTopic(topicName.toLowerCase()),
         tweetIds: data.tweets.slice(0, 5).map(t => t.id),
+        mentionsOverTime,
       });
     }
 
@@ -272,6 +311,14 @@ function getColorForTopic(keyword: string): string {
 }
 
 function getMockTrendingTopics(): TrendingTopic[] {
+  // Generate simple trending sparkline data (14 days, increasing trend)
+  const generateMockSparkline = () => {
+    return Array.from({ length: 14 }, (_, i) => ({
+      day: i + 1,
+      count: Math.floor(20 + (i * 3) + Math.random() * 10),
+    }));
+  };
+
   return [
     {
       id: "infrastructure-bill",
@@ -281,6 +328,7 @@ function getMockTrendingTopics(): TrendingTopic[] {
       momentum: 78,
       cost: 1100,
       color: "#111827",
+      mentionsOverTime: generateMockSparkline(),
     },
     {
       id: "healthcare-reform",
@@ -290,6 +338,7 @@ function getMockTrendingTopics(): TrendingTopic[] {
       momentum: 69,
       cost: 210,
       color: "#0ea5e9",
+      mentionsOverTime: generateMockSparkline(),
     },
     {
       id: "farm-bill",
@@ -299,6 +348,7 @@ function getMockTrendingTopics(): TrendingTopic[] {
       momentum: 61,
       cost: 95,
       color: "#16a34a",
+      mentionsOverTime: generateMockSparkline(),
     },
     {
       id: "defense-appropriations",
@@ -308,6 +358,7 @@ function getMockTrendingTopics(): TrendingTopic[] {
       momentum: 72,
       cost: 840,
       color: "#ef4444",
+      mentionsOverTime: generateMockSparkline(),
     },
   ];
 }

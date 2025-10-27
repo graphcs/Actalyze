@@ -13,6 +13,7 @@ interface Topic {
   momentum: number;
   cost: number;
   color: string;
+  mentionsOverTime?: Array<{ day: number; count: number }>;
 }
 
 interface TopicCardProps {
@@ -27,7 +28,10 @@ function numberFmt(n: number): string {
 }
 
 export default function TopicCard({ topic, rank, onOpen }: TopicCardProps) {
-  const sparkData = generateSparkData();
+  // Convert mentionsOverTime to sparkline format, or use fallback
+  const sparkData = topic.mentionsOverTime
+    ? topic.mentionsOverTime.map(m => ({ d: m.day, v: m.count }))
+    : generateSparkData();
 
   return (
     <Card
@@ -49,16 +53,8 @@ export default function TopicCard({ topic, rank, onOpen }: TopicCardProps) {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-3 gap-4 items-center">
-          <div className="col-span-2">
-            <Sparkline data={sparkData} stroke={topic.color} />
-          </div>
-          <div className="text-right">
-            <div className="text-xs text-zinc-500">Est. Cost</div>
-            <div className="text-lg font-semibold text-zinc-900 dark:text-white">
-              ${topic.cost}B
-            </div>
-          </div>
+        <div className="mb-3">
+          <Sparkline data={sparkData} stroke={topic.color} />
         </div>
         <div className="mt-3 flex flex-wrap gap-1">
           {topic.tags.map((tag) => (
