@@ -37,63 +37,46 @@ export async function GET() {
       return NextResponse.json(getMockTrendingTopics());
     }
 
-    console.log("✓ Apify API token found, fetching trending topics...");
-    console.log("✓ Token starts with:", apifyToken.substring(0, 15) + "...");
+    // Step 1: Get US trending topics from Google Trends RSS (fast and free!)
+    console.log("🔍 Fetching US trending topics from Google Trends RSS...");
 
-    // Step 1: Get US trending topics from Apify Twitter Trends Scraper
-    console.log("🔍 Fetching US trending topics from Apify...");
-
-    const trendsInput = {
-      country: 'united-states',
-      onlyHashtags: false,
-      language: 'en',
-    };
-
-    let trendingTopics;
+    let relevantTopicNames: string[] = [];
     try {
       const fetchStart = Date.now();
       const trendsResponse = await fetch(
-        'https://api.apify.com/v2/acts/fastcrawler~x-twitter-trends-scraper-2025/run-sync-get-dataset-items?token=' + apifyToken,
+        'https://trends.google.com/trending/rss?geo=US',
         {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(trendsInput),
-          signal: AbortSignal.timeout(8000),
+          signal: AbortSignal.timeout(5000),
         }
       );
-      console.log(`✓ Trends API responded in ${Date.now() - fetchStart}ms`);
+      console.log(`✓ Google Trends RSS responded in ${Date.now() - fetchStart}ms`);
 
       if (!trendsResponse.ok) {
-        const errorText = await trendsResponse.text();
-        console.error(`❌ Trends API failed with status ${trendsResponse.status}`);
-        console.error(`❌ Error details:`, errorText);
-        throw new Error(`Trends API failed: ${trendsResponse.status} - ${errorText.substring(0, 100)}`);
+        throw new Error(`Google Trends RSS failed: ${trendsResponse.status}`);
       }
 
-      trendingTopics = await trendsResponse.json();
-      console.log(`✓ Fetched ${trendingTopics.length} trending topics from Twitter`);
+      const rssText = await trendsResponse.text();
+
+      // Parse RSS XML to extract trending topics
+      const titleMatches = rssText.matchAll(/<title>([^<]+)<\/title>/g);
+      const topics: string[] = [];
+
+      for (const match of titleMatches) {
+        const title = match[1].trim();
+        // Skip the RSS feed title itself
+        if (title !== 'Daily Search Trends' && title.length > 0) {
+          topics.push(title);
+        }
+      }
+
+      relevantTopicNames = topics.slice(0, 12); // Take top 12 trends
+      console.log(`✓ Found ${relevantTopicNames.length} trending topics from Google Trends`);
+
     } catch (error) {
-      console.log("⚠️ Error fetching trending topics:", error instanceof Error ? error.message : String(error));
+      console.log("⚠️ Error fetching Google Trends:", error instanceof Error ? error.message : String(error));
       console.log("⚠️ Falling back to mock data");
       return NextResponse.json(getMockTrendingTopics());
     }
-
-    // Step 2: Take top trending topics (no filtering for now)
-    interface TrendingResult {
-      name?: string;
-      topic?: string;
-      tweet_volume?: number;
-      url?: string;
-    }
-
-    const relevantTopicNames = (trendingTopics as TrendingResult[])
-      .map(t => t.name || t.topic || '')
-      .filter(Boolean)
-      .slice(0, 12); // Take top 12 trends
-
-    console.log(`✓ Using ${relevantTopicNames.length} trending topics from Apify`);
 
     if (relevantTopicNames.length === 0) {
       console.log("⚠️ No trending topics found, returning fallback data");
@@ -135,15 +118,8 @@ export async function GET() {
         count: Math.floor(baseCount + (i * 2.5) + (Math.random() * 8)),
       }));
 
-      // Find the corresponding trend to get tweet_volume
-      const trendData = (trendingTopics as TrendingResult[]).find(
-        t => (t.name || t.topic || '') === topicName
-      );
-
-      const tweetVolumeStr = trendData?.tweet_volume || '0';
-      const tweetVolume = typeof tweetVolumeStr === 'string'
-        ? parseInt(tweetVolumeStr.replace(/[^0-9]/g, '')) || 10000
-        : tweetVolumeStr || 10000;
+      // Google Trends doesn't provide volume, so generate random but realistic numbers
+      const tweetVolume = Math.floor(Math.random() * 50000) + 10000; // 10k-60k
 
       trendingTopicsArray.push({
         id: cleanTopicName.toLowerCase().replace(/\s+/g, '-'),
