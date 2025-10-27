@@ -79,14 +79,7 @@ export async function GET() {
       return NextResponse.json(getMockTrendingTopics());
     }
 
-    // Step 2: Use OpenAI to filter for political/legislative relevance
-    const openaiKey = process.env.OPENAI_API_KEY;
-
-    if (!openaiKey || openaiKey.includes('placeholder')) {
-      console.log("⚠️ No OpenAI API key found, using fallback data");
-      return NextResponse.json(getMockTrendingTopics());
-    }
-
+    // Step 2: Take top trending topics (no filtering for now)
     interface TrendingResult {
       name?: string;
       topic?: string;
@@ -94,54 +87,15 @@ export async function GET() {
       url?: string;
     }
 
-    const topicNames = (trendingTopics as TrendingResult[])
+    const relevantTopicNames = (trendingTopics as TrendingResult[])
       .map(t => t.name || t.topic || '')
       .filter(Boolean)
-      .slice(0, 50); // Analyze top 50 trends
+      .slice(0, 12); // Take top 12 trends
 
-    console.log(`🤖 Using OpenAI to identify political/legislative topics from ${topicNames.length} trends...`);
-
-    let relevantTopicNames: string[] = [];
-    try {
-      const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${openaiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            {
-              role: 'system',
-              content: 'You are an expert at identifying political, legislative, and government-related topics. Return ONLY a JSON array of topic names that are related to US politics, legislation, government, policy, or political figures. Exclude sports, entertainment, and non-political topics.'
-            },
-            {
-              role: 'user',
-              content: `From this list of trending topics, identify which ones are political/legislative/government-related:\n\n${topicNames.join(', ')}\n\nReturn ONLY a JSON array like: ["Topic1", "Topic2"]`
-            }
-          ],
-          temperature: 0.3,
-        }),
-        signal: AbortSignal.timeout(5000),
-      });
-
-      if (aiResponse.ok) {
-        const aiData = await aiResponse.json();
-        const aiContent = aiData.choices?.[0]?.message?.content || '[]';
-        relevantTopicNames = JSON.parse(aiContent.trim());
-        console.log(`✓ OpenAI identified ${relevantTopicNames.length} political topics`);
-      } else {
-        console.log(`⚠️ OpenAI API failed: ${aiResponse.status}`);
-        return NextResponse.json(getMockTrendingTopics());
-      }
-    } catch (error) {
-      console.log("⚠️ Error using OpenAI:", error instanceof Error ? error.message : String(error));
-      return NextResponse.json(getMockTrendingTopics());
-    }
+    console.log(`✓ Using ${relevantTopicNames.length} trending topics from Apify`);
 
     if (relevantTopicNames.length === 0) {
-      console.log("⚠️ No relevant political topics found, returning fallback data");
+      console.log("⚠️ No trending topics found, returning fallback data");
       return NextResponse.json(getMockTrendingTopics());
     }
 
@@ -159,9 +113,9 @@ export async function GET() {
 
     const topicsWithTweets: { [key: string]: ApifyTweet[] } = {};
 
-    // Step 3: For each relevant political topic, fetch sample tweets to get historical data
-    // Take top 12 relevant topics (we'll filter to top 9 later)
-    for (const topicName of relevantTopicNames.slice(0, 12)) {
+    // Step 3: For each trending topic, fetch sample tweets to get historical data
+    // Take top 9 topics
+    for (const topicName of relevantTopicNames.slice(0, 9)) {
       const searchQuery = topicName.replace('#', ''); // Remove # for search
 
       try {
