@@ -146,17 +146,28 @@ export async function GET() {
           phrase = phrase
             .replace(/\s+/g, ' ')
             .replace(/[""]/g, '"')
-            .replace(/['']/g, "'");
+            .replace(/['']/g, "'")
+            .trim();
 
-          // Skip generic terms
+          // Convert to lowercase for deduplication
+          const normalizedPhrase = phrase.toLowerCase();
+
+          // Skip generic, conversational, or irrelevant terms
           if (phrase.length < 5 ||
-              phrase === 'The Bill' ||
-              phrase === 'This Bill' ||
-              phrase === 'That Act') {
+              normalizedPhrase === 'the bill' ||
+              normalizedPhrase === 'this bill' ||
+              normalizedPhrase === 'that act' ||
+              normalizedPhrase.includes('my bill') ||
+              normalizedPhrase.includes('your bill') ||
+              normalizedPhrase.includes('i ') ||
+              normalizedPhrase.includes('you ') ||
+              normalizedPhrase.includes('always pay') ||
+              normalizedPhrase.includes('money from')) {
             continue;
           }
 
-          foundPhrases.add(phrase);
+          // Store using normalized (lowercase) key for deduplication
+          foundPhrases.add(normalizedPhrase);
         }
       });
 
@@ -197,12 +208,18 @@ export async function GET() {
       const avgEngagement = data.engagement / data.count;
       const momentum = Math.min(Math.round(avgEngagement / 10), 100);
 
+      // Capitalize first letter of each word for display
+      const displayTitle = topicName
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+
       // Extract tags from topic name
-      const tags = topicName.split(' ').filter(word => word.length > 3);
+      const tags = displayTitle.split(' ').filter(word => word.length > 3);
 
       trendingTopics.push({
         id: topicName.toLowerCase().replace(/\s+/g, '-'),
-        title: topicName,
+        title: displayTitle,
         tags: tags.slice(0, 3),
         mentions: data.count * 1000 + Math.floor(Math.random() * 5000), // Estimated
         momentum: Math.max(momentum, 45), // Ensure minimum momentum
