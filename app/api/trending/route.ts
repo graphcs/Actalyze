@@ -47,10 +47,10 @@ export async function GET() {
     const readOnlyClient = appOnlyClient.readOnly;
 
     // Get trending legislative/political topics from Twitter with a single search
-    console.log("🔍 Searching for trending legislative topics...");
+    console.log("🔍 Searching for trending legislative and political topics...");
 
     const legislativeSearch = await readOnlyClient.v2.search(
-      '(Congress OR bill OR legislation OR Senate OR House OR legislative) -is:retweet lang:en',
+      '(Congress OR bill OR legislation OR Senate OR House OR legislative OR politics OR government OR shutdown OR appropriations OR policy OR federal) -is:retweet lang:en',
       {
         max_results: 100,
         'tweet.fields': ['created_at', 'public_metrics'],
@@ -82,21 +82,57 @@ export async function GET() {
 
       // Find phrases with "bill", "act", "resolution", "reform", "shutdown", etc.
       const legislativeTerms = [
-        /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+(Bill|Act|Resolution)/gi,
-        /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+Reform/gi,
+        // Specific bill/act/resolution names (e.g., "Infrastructure Bill")
+        /([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,3})\s+(Bill|Act|Resolution)/gi,
+
+        // Reform topics (e.g., "Immigration Reform")
+        /([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2})\s+Reform/gi,
+
+        // Shutdown discussions
         /(Government|Federal)\s+Shutdown/gi,
-        /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+Appropriations?/gi,
-        /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+Funding/gi,
-        /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+Budget/gi,
-        /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+Legislation/gi,
-        /(CR|Continuing Resolution)/gi,
-        /(Omnibus|Minibus)\s+Bill/gi,
+
+        // Appropriations and funding
+        /([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2})\s+(Appropriations?|Funding|Budget)/gi,
+
+        // Specific legislative terms
+        /(CR|Continuing Resolution|Omnibus|Minibus)\s*(Bill)?/gi,
         /(Big Beautiful Bill)/gi,
+        /(NDAA|National Defense Authorization)/gi,
+
+        // Policy areas
         /(Infrastructure\s+Investment)/gi,
         /(Debt\s+Ceiling)/gi,
         /(Farm\s+Bill)/gi,
         /(Defense\s+Authorization)/gi,
-        /(NDAA)/gi,
+
+        // Legislative processes
+        /([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2})\s+(Amendment|Committee|Legislation)/gi,
+        /(Reconciliation\s+Package)/gi,
+        /(Stimulus\s+Package)/gi,
+
+        // Hot topics
+        /(Border\s+Security)/gi,
+        /(Immigration\s+Reform)/gi,
+        /(Tax\s+Reform)/gi,
+        /(Climate\s+(Bill|Legislation))/gi,
+        /(Healthcare\s+Reform)/gi,
+        /(Student\s+(Debt|Loan))/gi,
+        /(Gun\s+(Control|Reform))/gi,
+        /(Voting\s+Rights)/gi,
+
+        // General legislative language (broader match)
+        /(pass(ing|ed)?\s+(?:a|the)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2})\s+bill)/gi,
+        /(support(ing)?\s+(?:the|a)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2}))/gi,
+
+        // Political news and events
+        /(Presidential|White House|Executive Order)/gi,
+        /(Supreme Court|SCOTUS)/gi,
+        /(Impeachment)/gi,
+        /(Filibuster)/gi,
+        /(Speaker\s+of\s+the\s+House)/gi,
+        /(Senate\s+Majority)/gi,
+        /(Campaign\s+Finance)/gi,
+        /(Gerrymandering)/gi,
       ];
 
       const foundPhrases = new Set<string>();
@@ -139,13 +175,13 @@ export async function GET() {
 
     // Sort topics by combined score (count × engagement)
     const sortedTopics = Object.entries(phraseFrequency)
-      .filter(([, data]) => data.count >= 2) // Only topics mentioned at least twice
+      .filter(([, data]) => data.count >= 1) // Only topics mentioned at least once
       .sort((a, b) => {
         const scoreA = a[1].count * (a[1].engagement + 1);
         const scoreB = b[1].count * (b[1].engagement + 1);
         return scoreB - scoreA;
       })
-      .slice(0, 6); // Get top 6
+      .slice(0, 9); // Get top 9
 
     console.log(`✓ Found ${sortedTopics.length} trending legislative topics`);
 
