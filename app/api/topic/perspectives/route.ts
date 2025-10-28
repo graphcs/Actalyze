@@ -84,11 +84,11 @@ async function generatePerspective(
       method: 'POST',
       headers,
       body: JSON.stringify({
-        model: useOpenRouter ? 'perplexity/llama-3.1-sonar-large-128k-online' : 'gpt-4o-mini',
+        model: useOpenRouter ? 'perplexity/sonar' : 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
-            content: 'You are a political analyst summarizing party positions. Provide concise, factual, neutral summaries. Respond in JSON format with "summary" (2-3 sentences) and "talkingPoints" (array of 3-4 bullet points).',
+            content: 'You are a political analyst summarizing party positions. Provide concise, factual, neutral summaries. Respond ONLY with valid JSON format with "summary" (2-3 sentences) and "talkingPoints" (array of 3-4 bullet points). Do not include any markdown formatting or code blocks.',
           },
           {
             role: 'user',
@@ -96,12 +96,12 @@ async function generatePerspective(
 1. A brief summary (2-3 sentences) of their public position
 2. 3-4 key talking points they're emphasizing
 
-Return as JSON: {"summary": "...", "talkingPoints": ["...", "...", "..."]}`,
+Return ONLY this JSON format with no markdown: {"summary": "...", "talkingPoints": ["...", "...", "..."]}`,
           },
         ],
         temperature: 0.7,
         max_tokens: 300,
-        response_format: { type: "json_object" },
+        ...(useOpenRouter ? {} : { response_format: { type: "json_object" } }),
       }),
       signal: AbortSignal.timeout(10000),
     });
@@ -115,7 +115,7 @@ Return as JSON: {"summary": "...", "talkingPoints": ["...", "...", "..."]}`,
     }
 
     const data = await response.json();
-    const message = data.choices?.[0]?.message?.content;
+    let message = data.choices?.[0]?.message?.content;
 
     if (!message) {
       return {
@@ -123,6 +123,9 @@ Return as JSON: {"summary": "...", "talkingPoints": ["...", "...", "..."]}`,
         talkingPoints: [],
       };
     }
+
+    // Strip markdown code blocks if present (Perplexity wraps JSON in ```json blocks)
+    message = message.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
 
     const parsed = JSON.parse(message);
     return {

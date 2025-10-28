@@ -305,20 +305,20 @@ export async function fetchTopTweets(topic: string): Promise<Tweet[] | null> {
       method: 'POST',
       headers,
       body: JSON.stringify({
-        model: useOpenRouter ? 'perplexity/llama-3.1-sonar-large-128k-online' : 'gpt-4o-mini',
+        model: useOpenRouter ? 'perplexity/sonar' : 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
-            content: 'You are a social media analyst with web access. Generate 3 AUTHENTIC tweets based on REAL recent news and discourse about the topic. Search the web for actual recent tweets, news, and commentary. Make them sound like real people tweeting, with varied perspectives (supporters, critics, neutral). Include realistic Twitter handles and engagement counts. Return JSON: {"tweets": [{"text": "...", "author": "username", "engagement": 1234}, ...]}'
+            content: 'You are a social media analyst with web access. Generate 3 AUTHENTIC tweets based on REAL recent news and discourse about the topic. Search the web for actual recent tweets, news, and commentary. Make them sound like real people tweeting, with varied perspectives (supporters, critics, neutral). Include realistic Twitter handles and engagement counts. Return ONLY valid JSON with no markdown: {"tweets": [{"text": "...", "author": "username", "engagement": 1234}, ...]}'
           },
           {
             role: 'user',
-            content: `Search the web for recent tweets and discourse about "${topic}". Generate 3 authentic tweets that reflect REAL current opinions and news about this topic. Base them on actual recent events and commentary you find.`
+            content: `Search the web for recent tweets and discourse about "${topic}". Generate 3 authentic tweets that reflect REAL current opinions and news about this topic. Base them on actual recent events and commentary you find. Return ONLY JSON with no markdown.`
           }
         ],
         temperature: 0.8,
         max_tokens: 500,
-        response_format: { type: "json_object" },
+        ...(useOpenRouter ? {} : { response_format: { type: "json_object" } }),
       }),
       signal: AbortSignal.timeout(15000),
     });
@@ -329,9 +329,12 @@ export async function fetchTopTweets(topic: string): Promise<Tweet[] | null> {
     }
 
     const data = await response.json();
-    const message = data.choices?.[0]?.message?.content;
+    let message = data.choices?.[0]?.message?.content;
 
     if (!message) return null;
+
+    // Strip markdown code blocks if present (Perplexity wraps JSON in ```json blocks)
+    message = message.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
 
     const parsed = JSON.parse(message);
     const tweets: Tweet[] = (parsed.tweets || []).slice(0, 3).map((tweet: Tweet) => ({

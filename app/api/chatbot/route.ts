@@ -210,7 +210,7 @@ Please provide a helpful, accurate response to the user's question, incorporatin
         // Step 6: Generate AI response with streaming
         // Using Perplexity's online model for web access (or GPT-4 as fallback)
         const stream = await openai.chat.completions.create({
-            model: process.env.OPENROUTER_API_KEY ? 'perplexity/llama-3.1-sonar-large-128k-online' : 'gpt-4',
+            model: process.env.OPENROUTER_API_KEY ? 'perplexity/sonar' : 'gpt-4',
             messages: [
                 {
                     role: 'system',
