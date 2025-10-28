@@ -30,26 +30,51 @@ export interface TimeSeriesPoint {
   v: number; // Value 0-100 for trends, count for news
 }
 
+export interface Tweet {
+  text: string;
+  author: string;
+  engagement: number; // likes + retweets
+  url?: string;
+}
+
 /**
- * Fetch Google Trends time series data (last 7 days)
+ * Extract keywords from long topic names for better Google Trends queries
+ * Reduces long phrases to 2-4 most relevant words
  */
-export async function fetchTrendsSeries(topic: string): Promise<TimeSeriesPoint[] | null> {
-  const cacheKey = `series:trends:${topic.toLowerCase()}`;
-  const cached = getCached<TimeSeriesPoint[]>(cacheKey);
-  if (cached) return cached;
+function extractKeywordsForTrends(topic: string): string {
+  // Common stop words to remove
+  const stopWords = new Set([
+    'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
+    'of', 'with', 'by', 'from', 'up', 'about', 'into', 'through', 'during',
+    'including', 'is', 'are', 'was', 'were', 'been', 'being', 'have', 'has',
+    'had', 'do', 'does', 'did', 'will', 'would', 'should', 'could', 'may',
+    'might', 'must', 'can', 'this', 'that', 'these', 'those'
+  ]);
 
-  const apiKey = process.env.SERPAPI_KEY;
-  if (!apiKey) return null;
+  const words = topic
+    .split(' ')
+    .filter(word => {
+      const lower = word.toLowerCase();
+      return !stopWords.has(lower) && word.length > 2;
+    });
 
+  // Take first 3-4 meaningful words (usually proper nouns + key context)
+  return words.slice(0, 4).join(' ');
+}
+
+/**
+ * Internal helper to try fetching Google Trends with a specific query
+ */
+async function tryFetchTrends(query: string, apiKey: string): Promise<TimeSeriesPoint[] | null> {
   try {
     const url = new URL(SERPAPI_BASE);
     url.searchParams.set('engine', 'google_trends');
     url.searchParams.set('data_type', 'TIMESERIES');
-    url.searchParams.set('q', topic);
+    url.searchParams.set('q', query);
     url.searchParams.set('geo', 'US');
-    // Don't set date - defaults to 'today 12-m' which works
-    // Or use 'now 7-d' format, but 12 months provides better data
     url.searchParams.set('api_key', apiKey);
+
+    console.log(`🔍 Trying Google Trends with query: "${query}"`);
 
     const response = await fetch(url.toString(), {
       signal: AbortSignal.timeout(8000),
@@ -60,13 +85,25 @@ export async function fetchTrendsSeries(topic: string): Promise<TimeSeriesPoint[
     const data = await response.json();
     const timelineData = data.interest_over_time?.timeline_data || [];
 
-    // Accept any number of points (removed threshold check per user request)
     if (timelineData.length === 0) return null;
 
     const points: TimeSeriesPoint[] = timelineData
       .map((item: { date?: string; timestamp?: string; values?: Array<{ value?: string | number; extracted_value?: number }> }) => {
-        const timestamp = item.date || item.timestamp;
+        let timestamp = item.date || item.timestamp;
         if (!timestamp) return null;
+
+        // Normalize timestamp to ISO format and validate
+        try {
+          const date = new Date(timestamp);
+          if (isNaN(date.getTime())) {
+            console.warn(`Invalid timestamp from Google Trends: ${timestamp}`);
+            return null;
+          }
+          timestamp = date.toISOString();
+        } catch (e) {
+          console.warn(`Failed to parse timestamp: ${timestamp}`);
+          return null;
+        }
 
         // Extract value from the first value entry
         const valueEntry = item.values?.[0];
@@ -90,12 +127,57 @@ export async function fetchTrendsSeries(topic: string): Promise<TimeSeriesPoint[
       })
       .filter((p: TimeSeriesPoint | null): p is TimeSeriesPoint => p !== null);
 
-    setCache(cacheKey, points);
-    return points;
+    return points.length > 0 ? points : null;
   } catch (error) {
-    console.error('Error fetching trends series:', error);
+    console.error(`Error trying query "${query}":`, error);
     return null;
   }
+}
+
+/**
+ * Fetch Google Trends time series data with keyword extraction and retry logic
+ */
+export async function fetchTrendsSeries(topic: string): Promise<TimeSeriesPoint[] | null> {
+  const cacheKey = `series:trends:${topic.toLowerCase()}`;
+  const cached = getCached<TimeSeriesPoint[]>(cacheKey);
+  if (cached) return cached;
+
+  const apiKey = process.env.SERPAPI_KEY;
+  if (!apiKey) return null;
+
+  // Try 1: Extract keywords (removes stop words, takes 3-4 words)
+  const keywords = extractKeywordsForTrends(topic);
+  let data = await tryFetchTrends(keywords, apiKey);
+  if (data) {
+    console.log(`✅ Google Trends succeeded with keywords: "${keywords}"`);
+    setCache(cacheKey, data);
+    return data;
+  }
+
+  // Try 2: Just first 3 words
+  const shortQuery = topic.split(' ').slice(0, 3).join(' ');
+  if (shortQuery !== keywords) {
+    data = await tryFetchTrends(shortQuery, apiKey);
+    if (data) {
+      console.log(`✅ Google Trends succeeded with short query: "${shortQuery}"`);
+      setCache(cacheKey, data);
+      return data;
+    }
+  }
+
+  // Try 3: First 2 words as last resort
+  const veryShortQuery = topic.split(' ').slice(0, 2).join(' ');
+  if (veryShortQuery !== shortQuery) {
+    data = await tryFetchTrends(veryShortQuery, apiKey);
+    if (data) {
+      console.log(`✅ Google Trends succeeded with very short query: "${veryShortQuery}"`);
+      setCache(cacheKey, data);
+      return data;
+    }
+  }
+
+  console.log(`⚠️ Google Trends failed for all variations of: "${topic}"`);
+  return null;
 }
 
 /**
@@ -165,6 +247,85 @@ export async function fetchNewsVelocity(topic: string, hours = 36): Promise<Time
     return points;
   } catch (error) {
     console.error('Error fetching news velocity:', error);
+    return null;
+  }
+}
+
+/**
+ * Fetch top tweets about a topic using Twitter search
+ */
+export async function fetchTopTweets(topic: string): Promise<Tweet[] | null> {
+  const cacheKey = `series:tweets:${topic.toLowerCase()}`;
+  const cached = getCached<Tweet[]>(cacheKey);
+  if (cached) return cached;
+
+  const apiKey = process.env.SERPAPI_KEY;
+  if (!apiKey) return null;
+
+  try {
+    // Use keyword extraction for better Twitter search results
+    const keywords = extractKeywordsForTrends(topic);
+
+    const url = new URL(SERPAPI_BASE);
+    url.searchParams.set('engine', 'twitter');
+    url.searchParams.set('q', keywords);
+    url.searchParams.set('count', '5');
+    url.searchParams.set('api_key', apiKey);
+
+    console.log(`🐦 Fetching tweets for: "${keywords}"`);
+
+    const response = await fetch(url.toString(), {
+      signal: AbortSignal.timeout(8000),
+    });
+
+    if (!response.ok) return null;
+
+    const data = await response.json();
+    const results = data.organic_results || data.tweets || [];
+
+    if (results.length === 0) return null;
+
+    // Map to Tweet interface
+    const tweets: Tweet[] = results
+      .slice(0, 5)
+      .map((tweet: {
+        text?: string;
+        snippet?: string;
+        author?: { name?: string; username?: string };
+        user?: { name?: string; username?: string };
+        likes?: number;
+        retweets?: number;
+        engagement?: { likes?: number; retweets?: number };
+        link?: string;
+      }) => {
+        const text = tweet.text || tweet.snippet || '';
+        const author = tweet.author || tweet.user;
+        const authorName = author?.name || author?.username || 'Unknown';
+
+        // Calculate engagement
+        let engagement = 0;
+        if (tweet.likes !== undefined && tweet.retweets !== undefined) {
+          engagement = (tweet.likes || 0) + (tweet.retweets || 0);
+        } else if (tweet.engagement) {
+          engagement = (tweet.engagement.likes || 0) + (tweet.engagement.retweets || 0);
+        }
+
+        return {
+          text,
+          author: authorName,
+          engagement,
+          url: tweet.link,
+        };
+      })
+      .filter((tweet: Tweet) => tweet.text.length > 0);
+
+    if (tweets.length === 0) return null;
+
+    console.log(`✅ Found ${tweets.length} tweets`);
+    setCache(cacheKey, tweets);
+    return tweets;
+  } catch (error) {
+    console.error('Error fetching tweets:', error);
     return null;
   }
 }

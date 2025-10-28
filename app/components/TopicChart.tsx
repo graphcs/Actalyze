@@ -19,9 +19,17 @@ interface TopicChartProps {
   topic: string;
 }
 
+interface Tweet {
+  text: string;
+  author: string;
+  engagement: number;
+  url?: string;
+}
+
 interface SeriesResponse {
-  source: 'trends' | 'news' | 'queries';
+  source: 'trends' | 'tweets' | 'queries';
   points?: Array<{ t: string; v: number }>;
+  tweets?: Tweet[];
   queries?: string[];
 }
 
@@ -63,13 +71,30 @@ export default function TopicChart({ topic }: TopicChartProps) {
       {/* Source badge */}
       <div className="absolute top-0 right-0 text-[10px] px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
         {data.source === 'trends' && 'Trends'}
-        {data.source === 'news' && 'News'}
+        {data.source === 'tweets' && 'Tweets'}
         {data.source === 'queries' && 'Related'}
       </div>
 
-      {/* Render sparkline for trends or news */}
-      {(data.source === 'trends' || data.source === 'news') && data.points && data.points.length > 0 && (
-        <Sparkline points={data.points} source={data.source} />
+      {/* Render sparkline for trends */}
+      {data.source === 'trends' && data.points && data.points.length > 0 && (
+        <Sparkline points={data.points} />
+      )}
+
+      {/* Render tweets */}
+      {data.source === 'tweets' && data.tweets && data.tweets.length > 0 && (
+        <div className="space-y-2 text-xs">
+          {data.tweets.slice(0, 3).map((tweet, i) => (
+            <div key={i} className="p-2 rounded bg-zinc-50 dark:bg-zinc-800/50 space-y-1">
+              <div className="text-zinc-900 dark:text-zinc-100 line-clamp-2">
+                {tweet.text}
+              </div>
+              <div className="flex items-center justify-between text-[10px] text-zinc-500 dark:text-zinc-400">
+                <span>@{tweet.author}</span>
+                <span>{tweet.engagement.toLocaleString()} interactions</span>
+              </div>
+            </div>
+          ))}
+        </div>
       )}
 
       {/* Render related queries list */}
@@ -97,7 +122,7 @@ export default function TopicChart({ topic }: TopicChartProps) {
 /**
  * Simple SVG sparkline component with axis labels
  */
-function Sparkline({ points, source }: { points: Array<{ t: string; v: number }>; source: 'trends' | 'news' }) {
+function Sparkline({ points }: { points: Array<{ t: string; v: number }> }) {
   if (points.length === 0) return null;
 
   const width = 200;
@@ -123,11 +148,12 @@ function Sparkline({ points, source }: { points: Array<{ t: string; v: number }>
   const firstDate = new Date(points[0].t);
   const lastDate = new Date(points[points.length - 1].t);
   const formatDate = (d: Date) => {
+    if (isNaN(d.getTime())) return 'N/A';
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
-  // Y-axis label based on source
-  const yAxisLabel = source === 'trends' ? 'Search Interest (0-100)' : 'Articles per Hour';
+  // Y-axis label for trends
+  const yAxisLabel = 'Search Interest (0-100)';
 
   return (
     <div className="space-y-1">

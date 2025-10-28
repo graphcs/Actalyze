@@ -1,19 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import { fetchTrendsSeries, fetchNewsVelocity, fetchRelatedQueries } from "@/src/trending/series";
+import { fetchTrendsSeries, fetchTopTweets, fetchRelatedQueries, Tweet } from "@/src/trending/series";
 
 export interface SeriesResponse {
-  source: 'trends' | 'news' | 'queries';
+  source: 'trends' | 'tweets' | 'queries';
   points?: Array<{ t: string; v: number }>;
+  tweets?: Tweet[];
   queries?: string[];
 }
 
 /**
  * GET /api/trending/series?topic=...
- * Returns time-series data or related queries for a trending topic
+ * Returns time-series data, tweets, or related queries for a trending topic
  *
  * Fallback order:
- * 1. Google Trends timeseries (last 7 days)
- * 2. Google News velocity (hourly buckets, last 36 hours)
+ * 1. Google Trends timeseries (sparkline chart)
+ * 2. Top tweets about topic (5 recent tweets)
  * 3. Related queries (list of 5 related searches)
  */
 export async function GET(request: NextRequest) {
@@ -40,13 +41,13 @@ export async function GET(request: NextRequest) {
       } as SeriesResponse);
     }
 
-    // Fallback to News velocity
-    const newsData = await fetchNewsVelocity(topic);
-    if (newsData && newsData.length >= 3) {
-      console.log(`✅ Using News velocity (${newsData.length} points)`);
+    // Fallback to Twitter tweets
+    const tweets = await fetchTopTweets(topic);
+    if (tweets && tweets.length > 0) {
+      console.log(`✅ Using Twitter tweets (${tweets.length} tweets)`);
       return NextResponse.json({
-        source: 'news',
-        points: newsData,
+        source: 'tweets',
+        tweets,
       } as SeriesResponse);
     }
 
