@@ -4,10 +4,12 @@ export interface PartyPerspective {
   democrats: {
     summary: string;
     talkingPoints: string[];
+    citations?: string[];
   };
   republicans: {
     summary: string;
     talkingPoints: string[];
+    citations?: string[];
   };
 }
 
@@ -67,7 +69,7 @@ async function generatePerspective(
   party: string,
   apiKey: string,
   useOpenRouter: boolean
-): Promise<{ summary: string; talkingPoints: string[] }> {
+): Promise<{ summary: string; talkingPoints: string[]; citations?: string[] }> {
   try {
     const baseURL = useOpenRouter ? 'https://openrouter.ai/api/v1/chat/completions' : 'https://api.openai.com/v1/chat/completions';
     const headers: Record<string, string> = {
@@ -128,9 +130,14 @@ Return ONLY this JSON format with no markdown: {"summary": "...", "talkingPoints
     message = message.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
 
     const parsed = JSON.parse(message);
+
+    // Extract citations from Perplexity response (OpenRouter provides them)
+    const citations = useOpenRouter && data.citations ? data.citations : undefined;
+
     return {
       summary: parsed.summary || `No perspective available for ${party}.`,
       talkingPoints: parsed.talkingPoints || [],
+      citations,
     };
   } catch (error) {
     console.error(`Error generating ${party} perspective:`, error);

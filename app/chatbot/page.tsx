@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef, Suspense } from "react";
 import dynamic from "next/dynamic";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import Nav from "../components/Nav";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -350,8 +352,23 @@ function ChatbotContent() {
                     : "bg-white border border-slate-200 text-slate-800"
                 }`}
               >
-                <div className="prose prose-slate max-w-none">
-                  <div className="whitespace-pre-wrap">{message.content}</div>
+                <div className="prose prose-slate max-w-none whitespace-pre-wrap">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      // Custom styling for links
+                      a: ({...props}) => (
+                        <a {...props} className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer" />
+                      ),
+                      // Bold text
+                      strong: ({...props}) => (
+                        <strong {...props} className="font-bold" />
+                      ),
+                      // Tables supported via remarkGfm plugin
+                    }}
+                  >
+                    {message.content}
+                  </ReactMarkdown>
                 </div>
 
                 {message.chart && message.role === "assistant" && (

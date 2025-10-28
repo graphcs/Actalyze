@@ -32,10 +32,12 @@ interface PartyPerspectives {
   democrats: {
     summary: string;
     talkingPoints: string[];
+    citations?: string[];
   };
   republicans: {
     summary: string;
     talkingPoints: string[];
+    citations?: string[];
   };
 }
 
@@ -302,7 +304,15 @@ export default function TopicPage() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {headlines.slice(0, 5).map((headline, i) => (
+                  {headlines
+                    .sort((a, b) => {
+                      // Sort: headlines with thumbnails first, then without
+                      if (a.thumbnail && !b.thumbnail) return -1;
+                      if (!a.thumbnail && b.thumbnail) return 1;
+                      return 0; // Keep original order within each group
+                    })
+                    .slice(0, 5)
+                    .map((headline, i) => (
                     <a
                       key={i}
                       href={headline.url}
@@ -361,7 +371,7 @@ export default function TopicPage() {
                     {perspectives?.democrats?.summary || "Loading perspective..."}
                   </div>
                   {perspectives?.democrats?.talkingPoints && perspectives.democrats.talkingPoints.length > 0 && (
-                    <div className="space-y-1.5">
+                    <div className="space-y-1.5 mb-3">
                       <div className="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wide">
                         Key Talking Points
                       </div>
@@ -373,6 +383,27 @@ export default function TopicPage() {
                           </li>
                         ))}
                       </ul>
+                    </div>
+                  )}
+                  {perspectives?.democrats?.citations && perspectives.democrats.citations.length > 0 && (
+                    <div className="space-y-1 pt-2 border-t border-blue-200 dark:border-blue-800">
+                      <div className="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wide mb-1">
+                        Sources
+                      </div>
+                      <div className="space-y-0.5">
+                        {perspectives.democrats.citations.map((url, i) => (
+                          <div key={i} className="text-xs text-blue-600 dark:text-blue-400">
+                            <a
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="hover:underline break-all"
+                            >
+                              [{i + 1}] {new URL(url).hostname}
+                            </a>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -389,7 +420,7 @@ export default function TopicPage() {
                     {perspectives?.republicans?.summary || "Loading perspective..."}
                   </div>
                   {perspectives?.republicans?.talkingPoints && perspectives.republicans.talkingPoints.length > 0 && (
-                    <div className="space-y-1.5">
+                    <div className="space-y-1.5 mb-3">
                       <div className="text-xs font-semibold text-red-700 dark:text-red-300 uppercase tracking-wide">
                         Key Talking Points
                       </div>
@@ -401,6 +432,27 @@ export default function TopicPage() {
                           </li>
                         ))}
                       </ul>
+                    </div>
+                  )}
+                  {perspectives?.republicans?.citations && perspectives.republicans.citations.length > 0 && (
+                    <div className="space-y-1 pt-2 border-t border-red-200 dark:border-red-800">
+                      <div className="text-xs font-semibold text-red-700 dark:text-red-300 uppercase tracking-wide mb-1">
+                        Sources
+                      </div>
+                      <div className="space-y-0.5">
+                        {perspectives.republicans.citations.map((url, i) => (
+                          <div key={i} className="text-xs text-red-600 dark:text-red-400">
+                            <a
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="hover:underline break-all"
+                            >
+                              [{i + 1}] {new URL(url).hostname}
+                            </a>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
