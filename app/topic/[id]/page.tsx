@@ -9,15 +9,14 @@ import {
   MessageSquare,
   Share2,
   ExternalLink,
-  DollarSign,
-  TrendingUp,
   Scale,
+  Twitter,
+  Newspaper,
 } from "lucide-react";
 import Nav from "../../components/Nav";
 import { Button } from "../../components/ui/Button";
 import { Badge } from "../../components/ui/Badge";
 import { Card, CardHeader, CardContent } from "../../components/ui/Card";
-import { ResponsiveContainer, AreaChart, Area, BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip } from "recharts";
 
 interface Topic {
   id: string;
@@ -29,25 +28,24 @@ interface Topic {
   color: string;
 }
 
-interface CongressData {
-  sponsor: string;
-  committee: string;
-  status: string;
+interface PartyPerspectives {
+  democrats: string;
+  republicans: string;
 }
 
-interface TopicDetailData {
-  mentions: Array<{ week: string; count: number }>;
-  totalMentions: number;
+interface Tweet {
+  text: string;
+  author: string;
+  engagement: number;
+  url?: string;
 }
 
-// Mock fiscal data - real CBO data would require Congress.gov API integration
-const fiscalSeries = [
-  { year: 2021, spend: 260, subsidies: 70 },
-  { year: 2022, spend: 320, subsidies: 85 },
-  { year: 2023, spend: 410, subsidies: 102 },
-  { year: 2024, spend: 390, subsidies: 110 },
-  { year: 2025, spend: 430, subsidies: 120 },
-];
+interface Headline {
+  title: string;
+  url: string;
+  source: string;
+  date?: string;
+}
 
 function numberFmt(n: number): string {
   if (n >= 1000) return (n / 1000).toFixed(1) + "k";
@@ -58,8 +56,9 @@ export default function TopicPage() {
   const params = useParams();
   const router = useRouter();
   const [topic, setTopic] = useState<Topic | null>(null);
-  const [congressData, setCongressData] = useState<CongressData | null>(null);
-  const [mentionsData, setMentionsData] = useState<Array<{ w: string; x: number }>>([]);
+  const [perspectives, setPerspectives] = useState<PartyPerspectives | null>(null);
+  const [tweets, setTweets] = useState<Tweet[]>([]);
+  const [headlines, setHeadlines] = useState<Headline[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -72,52 +71,43 @@ export default function TopicPage() {
         const foundTopic = data.find((t: Topic) => t.id === topicId);
         if (foundTopic) {
           setTopic(foundTopic);
+
+          // Once we have the topic, fetch related data
+          const topicTitle = foundTopic.title;
+
+          // Fetch party perspectives
+          fetch(`/api/topic/perspectives?topic=${encodeURIComponent(topicTitle)}`)
+            .then((res) => res.json())
+            .then((data) => setPerspectives(data))
+            .catch((error) => {
+              console.error("Error fetching perspectives:", error);
+              setPerspectives({
+                democrats: "Unable to load perspective.",
+                republicans: "Unable to load perspective.",
+              });
+            });
+
+          // Fetch tweets
+          fetch(`/api/topic/tweets?topic=${encodeURIComponent(topicTitle)}`)
+            .then((res) => res.json())
+            .then((data) => setTweets(data.tweets || []))
+            .catch((error) => {
+              console.error("Error fetching tweets:", error);
+              setTweets([]);
+            });
+
+          // Fetch headlines
+          fetch(`/api/topic/headlines?topic=${encodeURIComponent(topicTitle)}`)
+            .then((res) => res.json())
+            .then((data) => setHeadlines(data.headlines || []))
+            .catch((error) => {
+              console.error("Error fetching headlines:", error);
+              setHeadlines([]);
+            });
         }
       })
       .catch((error) => {
         console.error("Error fetching topic:", error);
-      });
-
-    // Fetch topic-specific data (mentions over time)
-    fetch(`/api/topic/${topicId}`)
-      .then((res) => res.json())
-      .then((data: TopicDetailData) => {
-        // Transform mentions data for chart
-        const chartData = data.mentions.map((m) => ({
-          w: m.week,
-          x: m.count,
-        }));
-        setMentionsData(chartData);
-      })
-      .catch((error) => {
-        console.error("Error fetching topic details:", error);
-        // Use fallback data
-        setMentionsData([
-          { w: "W1", x: 12 },
-          { w: "W2", x: 18 },
-          { w: "W3", x: 20 },
-          { w: "W4", x: 23 },
-          { w: "W5", x: 30 },
-          { w: "W6", x: 28 },
-          { w: "W7", x: 35 },
-        ]);
-      });
-
-    // Fetch Congress data
-    fetch("/api/congress")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data && data.length > 0) {
-          const randomBill = data[Math.floor(Math.random() * data.length)];
-          setCongressData({
-            sponsor: randomBill.sponsor || "Unknown",
-            committee: randomBill.committee || "Unknown",
-            status: randomBill.status || "Unknown",
-          });
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching Congress data:", error);
       })
       .finally(() => {
         setLoading(false);
@@ -226,92 +216,82 @@ export default function TopicPage() {
           </div>
         </div>
 
-        {/* Infographics */}
+        {/* Content Sections */}
         <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-5 pb-16">
-          {/* Fiscal Impact Chart */}
+          {/* Top Tweets */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <div className="font-semibold flex items-center gap-2">
-                <DollarSign className="w-4 h-4" />
-                Fiscal Impact (Est.)
+                <Twitter className="w-4 h-4" />
+                Top Tweets
               </div>
               <Badge className="bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-200">
-                CBO-like
+                Social Media
               </Badge>
             </CardHeader>
             <CardContent>
-              <div className="h-60">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={fiscalSeries}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis
-                      dataKey="year"
-                      label={{ value: 'Year', position: 'insideBottom', offset: -5 }}
-                    />
-                    <YAxis
-                      label={{ value: 'Billions ($)', angle: -90, position: 'insideLeft' }}
-                    />
-                    <Tooltip
-                      contentStyle={{ borderRadius: 12 }}
-                      formatter={(value: number) => [`$${value}B`, '']}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="spend"
-                      stroke="#111827"
-                      fill="#11182710"
-                      name="Spending"
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="subsidies"
-                      stroke="#0ea5e9"
-                      fill="#0ea5e910"
-                      name="Subsidies"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
-                Mock estimated data - Real CBO projections require Congressional Budget Office integration
-              </div>
+              {tweets.length === 0 ? (
+                <div className="text-sm text-zinc-500 dark:text-zinc-400 py-8 text-center">
+                  No tweets available for this topic
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {tweets.slice(0, 3).map((tweet, i) => (
+                    <div
+                      key={i}
+                      className="p-3 rounded-lg bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800"
+                    >
+                      <div className="text-sm text-zinc-900 dark:text-zinc-100 mb-2">
+                        {tweet.text}
+                      </div>
+                      <div className="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
+                        <span>@{tweet.author}</span>
+                        <span>{tweet.engagement.toLocaleString()} interactions</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
 
-          {/* Mentions Over Time */}
+          {/* Top Headlines */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <div className="font-semibold flex items-center gap-2">
-                <TrendingUp className="w-4 h-4" />
-                Mentions Over Time
+                <Newspaper className="w-4 h-4" />
+                Top Headlines
               </div>
               <Badge className="bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-200">
-                Social Pulse
+                News
               </Badge>
             </CardHeader>
             <CardContent>
-              <div className="h-60">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={mentionsData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis
-                      dataKey="w"
-                      label={{ value: 'Week', position: 'insideBottom', offset: -5 }}
-                    />
-                    <YAxis
-                      label={{ value: 'Twitter Mentions', angle: -90, position: 'insideLeft' }}
-                    />
-                    <Tooltip
-                      contentStyle={{ borderRadius: 12 }}
-                      formatter={(value: number) => [`${value} mentions`, 'Count']}
-                    />
-                    <Bar dataKey="x" fill="#111827" radius={[8, 8, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
-                Upward trend indicates increasing discussion and momentum
-              </div>
+              {headlines.length === 0 ? (
+                <div className="text-sm text-zinc-500 dark:text-zinc-400 py-8 text-center">
+                  No headlines available for this topic
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {headlines.slice(0, 5).map((headline, i) => (
+                    <a
+                      key={i}
+                      href={headline.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block p-3 rounded-lg bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900/60 transition"
+                    >
+                      <div className="text-sm text-zinc-900 dark:text-zinc-100 font-medium mb-1">
+                        {headline.title}
+                      </div>
+                      <div className="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
+                        <span>{headline.source}</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -323,27 +303,34 @@ export default function TopicPage() {
                 Political Context
               </div>
               <Badge className="bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-200">
-                Sponsors • Votes
+                Party Perspectives
               </Badge>
             </CardHeader>
             <CardContent>
-              <div className="grid md:grid-cols-3 gap-4">
-                <div className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800">
-                  <div className="text-xs text-zinc-500">Primary Sponsors</div>
-                  <div className="font-semibold mt-1">
-                    {congressData?.sponsor || "Loading..."}
+              <div className="grid md:grid-cols-2 gap-4">
+                {/* Democrats */}
+                <div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-2xl">🫏</span>
+                    <div className="font-semibold text-blue-900 dark:text-blue-100">
+                      Democrats are saying
+                    </div>
+                  </div>
+                  <div className="text-sm text-blue-800 dark:text-blue-200">
+                    {perspectives?.democrats || "Loading perspective..."}
                   </div>
                 </div>
-                <div className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800">
-                  <div className="text-xs text-zinc-500">Committee</div>
-                  <div className="font-semibold mt-1">
-                    {congressData?.committee || "Loading..."}
+
+                {/* Republicans */}
+                <div className="p-4 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-2xl">🐘</span>
+                    <div className="font-semibold text-red-900 dark:text-red-100">
+                      Republicans are saying
+                    </div>
                   </div>
-                </div>
-                <div className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800">
-                  <div className="text-xs text-zinc-500">Status</div>
-                  <div className="font-semibold mt-1">
-                    {congressData?.status || "Loading..."}
+                  <div className="text-sm text-red-800 dark:text-red-200">
+                    {perspectives?.republicans || "Loading perspective..."}
                   </div>
                 </div>
               </div>
