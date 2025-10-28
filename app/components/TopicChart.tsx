@@ -125,9 +125,8 @@ export default function TopicChart({ topic }: TopicChartProps) {
 function Sparkline({ points }: { points: Array<{ t: string; v: number }> }) {
   if (points.length === 0) return null;
 
-  // Take only the rightmost 1/4 of data points (most recent quarter)
-  const quarterIndex = Math.floor(points.length * 0.75);
-  const recentPoints = points.slice(quarterIndex);
+  // Take only the last 7-10 data points (most recent weeks)
+  const recentPoints = points.slice(-10);
 
   if (recentPoints.length === 0) return null;
 
@@ -141,14 +140,29 @@ function Sparkline({ points }: { points: Array<{ t: string; v: number }> }) {
   const maxValue = Math.max(...values);
   const range = maxValue - minValue || 1;
 
-  // Generate path
-  const pathPoints = recentPoints.map((point, index) => {
+  // Generate coordinate points
+  const coords = recentPoints.map((point, index) => {
     const x = padding + (index / (recentPoints.length - 1)) * (width - 2 * padding);
     const y = height - padding - ((point.v - minValue) / range) * (height - 2 * padding);
-    return `${x},${y}`;
+    return { x, y };
   });
 
-  const pathD = `M ${pathPoints.join(' L ')}`;
+  // Generate smooth curve path using cubic bezier curves
+  let pathD = `M ${coords[0].x},${coords[0].y}`;
+
+  for (let i = 0; i < coords.length - 1; i++) {
+    const current = coords[i];
+    const next = coords[i + 1];
+
+    // Calculate control points for smooth cubic bezier curve
+    // Control points are offset by 1/3 of the distance to create smooth curves
+    const cp1x = current.x + (next.x - current.x) / 3;
+    const cp1y = current.y + (next.y - current.y) / 3;
+    const cp2x = current.x + 2 * (next.x - current.x) / 3;
+    const cp2y = current.y + 2 * (next.y - current.y) / 3;
+
+    pathD += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${next.x},${next.y}`;
+  }
 
   // Get date range for x-axis label
   const firstDate = new Date(recentPoints[0].t);
