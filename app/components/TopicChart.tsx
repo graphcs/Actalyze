@@ -125,19 +125,25 @@ export default function TopicChart({ topic }: TopicChartProps) {
 function Sparkline({ points }: { points: Array<{ t: string; v: number }> }) {
   if (points.length === 0) return null;
 
+  // Take only the rightmost 1/4 of data points (most recent quarter)
+  const quarterIndex = Math.floor(points.length * 0.75);
+  const recentPoints = points.slice(quarterIndex);
+
+  if (recentPoints.length === 0) return null;
+
   const width = 200;
   const height = 50;
   const padding = 2;
 
   // Find min/max for scaling
-  const values = points.map(p => p.v);
+  const values = recentPoints.map(p => p.v);
   const minValue = Math.min(...values);
   const maxValue = Math.max(...values);
   const range = maxValue - minValue || 1;
 
   // Generate path
-  const pathPoints = points.map((point, index) => {
-    const x = padding + (index / (points.length - 1)) * (width - 2 * padding);
+  const pathPoints = recentPoints.map((point, index) => {
+    const x = padding + (index / (recentPoints.length - 1)) * (width - 2 * padding);
     const y = height - padding - ((point.v - minValue) / range) * (height - 2 * padding);
     return `${x},${y}`;
   });
@@ -145,23 +151,15 @@ function Sparkline({ points }: { points: Array<{ t: string; v: number }> }) {
   const pathD = `M ${pathPoints.join(' L ')}`;
 
   // Get date range for x-axis label
-  const firstDate = new Date(points[0].t);
-  const lastDate = new Date(points[points.length - 1].t);
+  const firstDate = new Date(recentPoints[0].t);
+  const lastDate = new Date(recentPoints[recentPoints.length - 1].t);
   const formatDate = (d: Date) => {
     if (isNaN(d.getTime())) return 'N/A';
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
-  // Y-axis label for trends
-  const yAxisLabel = 'Search Interest (0-100)';
-
   return (
     <div className="space-y-1">
-      {/* Y-axis label */}
-      <div className="text-[10px] text-zinc-500 dark:text-zinc-400">
-        {yAxisLabel}
-      </div>
-
       {/* SVG Chart */}
       <svg
         width={width}
@@ -189,12 +187,9 @@ function Sparkline({ points }: { points: Array<{ t: string; v: number }> }) {
         />
       </svg>
 
-      {/* X-axis labels and value range */}
+      {/* X-axis time labels */}
       <div className="flex justify-between text-[10px] text-zinc-500 dark:text-zinc-400">
         <span>{formatDate(firstDate)}</span>
-        <span className="text-zinc-400 dark:text-zinc-500">
-          {minValue === maxValue ? maxValue : `${Math.round(minValue)}-${Math.round(maxValue)}`}
-        </span>
         <span>{formatDate(lastDate)}</span>
       </div>
     </div>
