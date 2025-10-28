@@ -188,13 +188,25 @@ function normalizeNewsCluster(cluster: SerpApiNewsItem[]): TrendingTopic {
     tokenCounts.set(token, (tokenCounts.get(token) || 0) + 1);
   });
 
-  // Get top 3 tokens as topic
-  const topTokens = Array.from(tokenCounts.entries())
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 3)
-    .map(([token]) => token);
+  // Use the first headline as base, then enhance with common tokens
+  // This preserves natural language structure better than just token frequency
+  const firstHeadline = cluster[0].title || '';
+  const headlineTokens = normalizeTopic(firstHeadline)
+    .split(' ')
+    .filter(t => t.length > 3);
 
-  const topic = topTokens.join(' ');
+  let topic: string;
+  // If first headline is good length, use it (limit to 6 words)
+  if (headlineTokens.length >= 3 && headlineTokens.length <= 6) {
+    topic = headlineTokens.slice(0, 6).join(' ');
+  } else {
+    // Otherwise use top 5 most common tokens
+    const topTokens = Array.from(tokenCounts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([token]) => token);
+    topic = topTokens.join(' ');
+  }
 
   // Examples = top 3 headlines
   const examples = cluster
