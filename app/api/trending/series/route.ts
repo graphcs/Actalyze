@@ -30,9 +30,9 @@ export async function GET(request: NextRequest) {
 
     console.log(`📊 Fetching series data for topic: "${topic}"`);
 
-    // Try Google Trends first
+    // Try Google Trends first (accept any number of points)
     const trendsData = await fetchTrendsSeries(topic);
-    if (trendsData && trendsData.length >= 5) {
+    if (trendsData && trendsData.length > 0) {
       console.log(`✅ Using Trends series (${trendsData.length} points)`);
       return NextResponse.json({
         source: 'trends',

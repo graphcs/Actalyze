@@ -5,32 +5,24 @@
 
 const SERPAPI_BASE = 'https://serpapi.com/search';
 
+// Caching disabled per user request
 // Simple in-memory cache with TTL
-interface CacheEntry<T> {
-  data: T;
-  expires: number;
+// interface CacheEntry<T> {
+//   data: T;
+//   expires: number;
+// }
+
+// const cache = new Map<string, CacheEntry<unknown>>();
+// const CACHE_TTL = 45 * 60 * 1000; // 45 minutes
+
+function getCached<T>(_key: string): T | null {
+  // Caching disabled
+  return null;
 }
 
-const cache = new Map<string, CacheEntry<unknown>>();
-const CACHE_TTL = 45 * 60 * 1000; // 45 minutes
-
-function getCached<T>(key: string): T | null {
-  const entry = cache.get(key) as CacheEntry<T> | undefined;
-  if (!entry) return null;
-
-  if (Date.now() > entry.expires) {
-    cache.delete(key);
-    return null;
-  }
-
-  return entry.data;
-}
-
-function setCache<T>(key: string, data: T): void {
-  cache.set(key, {
-    data,
-    expires: Date.now() + CACHE_TTL,
-  });
+function setCache<T>(_key: string, _data: T): void {
+  // Caching disabled
+  return;
 }
 
 export interface TimeSeriesPoint {
@@ -68,7 +60,8 @@ export async function fetchTrendsSeries(topic: string): Promise<TimeSeriesPoint[
     const data = await response.json();
     const timelineData = data.interest_over_time?.timeline_data || [];
 
-    if (timelineData.length < 5) return null; // Too sparse
+    // Accept any number of points (removed threshold check per user request)
+    if (timelineData.length === 0) return null;
 
     const points: TimeSeriesPoint[] = timelineData
       .map((item: { date?: string; timestamp?: string; values?: Array<{ value?: string | number; extracted_value?: number }> }) => {
