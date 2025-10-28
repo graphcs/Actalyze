@@ -134,11 +134,6 @@ Return ONLY this JSON format with no markdown: {"summary": "...", "talkingPoints
     // Extract citations from Perplexity response (OpenRouter provides them)
     const citations = useOpenRouter && data.citations ? data.citations : undefined;
 
-    // Debug logging
-    if (useOpenRouter) {
-      console.log(`📚 Citations for ${party}:`, citations ? citations.length : 'none', citations);
-    }
-
     return {
       summary: parsed.summary || `No perspective available for ${party}.`,
       talkingPoints: parsed.talkingPoints || [],
