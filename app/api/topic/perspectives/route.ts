@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export interface PartyPerspective {
-  democrats: string;
-  republicans: string;
+  democrats: {
+    summary: string;
+    talkingPoints: string[];
+  };
+  republicans: {
+    summary: string;
+    talkingPoints: string[];
+  };
 }
 
 /**
@@ -58,7 +64,7 @@ async function generatePerspective(
   topic: string,
   party: string,
   apiKey: string
-): Promise<string> {
+): Promise<{ summary: string; talkingPoints: string[] }> {
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -71,34 +77,52 @@ async function generatePerspective(
         messages: [
           {
             role: 'system',
-            content: 'You are a political analyst summarizing party positions. Provide concise, factual, neutral summaries of what each party is saying about topics. Keep responses to 2-3 sentences maximum.',
+            content: 'You are a political analyst summarizing party positions. Provide concise, factual, neutral summaries. Respond in JSON format with "summary" (2-3 sentences) and "talkingPoints" (array of 3-4 bullet points).',
           },
           {
             role: 'user',
-            content: `What are ${party} saying about "${topic}"? Provide a brief, factual summary of their public position or commentary.`,
+            content: `What are ${party} saying about "${topic}"? Provide:
+1. A brief summary (2-3 sentences) of their public position
+2. 3-4 key talking points they're emphasizing
+
+Return as JSON: {"summary": "...", "talkingPoints": ["...", "...", "..."]}`,
           },
         ],
         temperature: 0.7,
-        max_tokens: 150,
+        max_tokens: 300,
+        response_format: { type: "json_object" },
       }),
       signal: AbortSignal.timeout(10000),
     });
 
     if (!response.ok) {
       console.error(`OpenAI API error: ${response.status}`);
-      return `Unable to determine ${party} position at this time.`;
+      return {
+        summary: `Unable to determine ${party} position at this time.`,
+        talkingPoints: [],
+      };
     }
 
     const data = await response.json();
     const message = data.choices?.[0]?.message?.content;
 
     if (!message) {
-      return `No perspective available for ${party}.`;
+      return {
+        summary: `No perspective available for ${party}.`,
+        talkingPoints: [],
+      };
     }
 
-    return message.trim();
+    const parsed = JSON.parse(message);
+    return {
+      summary: parsed.summary || `No perspective available for ${party}.`,
+      talkingPoints: parsed.talkingPoints || [],
+    };
   } catch (error) {
     console.error(`Error generating ${party} perspective:`, error);
-    return `Unable to determine ${party} position at this time.`;
+    return {
+      summary: `Unable to determine ${party} position at this time.`,
+      talkingPoints: [],
+    };
   }
 }

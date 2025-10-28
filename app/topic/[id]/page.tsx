@@ -29,8 +29,14 @@ interface Topic {
 }
 
 interface PartyPerspectives {
-  democrats: string;
-  republicans: string;
+  democrats: {
+    summary: string;
+    talkingPoints: string[];
+  };
+  republicans: {
+    summary: string;
+    talkingPoints: string[];
+  };
 }
 
 interface Tweet {
@@ -82,8 +88,14 @@ export default function TopicPage() {
             .catch((error) => {
               console.error("Error fetching perspectives:", error);
               setPerspectives({
-                democrats: "Unable to load perspective.",
-                republicans: "Unable to load perspective.",
+                democrats: {
+                  summary: "Unable to load perspective.",
+                  talkingPoints: [],
+                },
+                republicans: {
+                  summary: "Unable to load perspective.",
+                  talkingPoints: [],
+                },
               });
             });
 
@@ -326,28 +338,58 @@ export default function TopicPage() {
               <div className="grid md:grid-cols-2 gap-4">
                 {/* Democrats */}
                 <div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900">
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-center gap-2 mb-3">
                     <span className="text-2xl">🫏</span>
                     <div className="font-semibold text-blue-900 dark:text-blue-100">
                       Democrats are saying
                     </div>
                   </div>
-                  <div className="text-sm text-blue-800 dark:text-blue-200">
-                    {perspectives?.democrats || "Loading perspective..."}
+                  <div className="text-sm text-blue-800 dark:text-blue-200 mb-3">
+                    {perspectives?.democrats?.summary || "Loading perspective..."}
                   </div>
+                  {perspectives?.democrats?.talkingPoints && perspectives.democrats.talkingPoints.length > 0 && (
+                    <div className="space-y-1.5">
+                      <div className="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wide">
+                        Key Talking Points
+                      </div>
+                      <ul className="space-y-1 text-sm text-blue-800 dark:text-blue-200">
+                        {perspectives.democrats.talkingPoints.map((point, i) => (
+                          <li key={i} className="flex items-start gap-2">
+                            <span className="text-blue-500 dark:text-blue-400 mt-0.5">•</span>
+                            <span>{point}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
 
                 {/* Republicans */}
                 <div className="p-4 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900">
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-center gap-2 mb-3">
                     <span className="text-2xl">🐘</span>
                     <div className="font-semibold text-red-900 dark:text-red-100">
                       Republicans are saying
                     </div>
                   </div>
-                  <div className="text-sm text-red-800 dark:text-red-200">
-                    {perspectives?.republicans || "Loading perspective..."}
+                  <div className="text-sm text-red-800 dark:text-red-200 mb-3">
+                    {perspectives?.republicans?.summary || "Loading perspective..."}
                   </div>
+                  {perspectives?.republicans?.talkingPoints && perspectives.republicans.talkingPoints.length > 0 && (
+                    <div className="space-y-1.5">
+                      <div className="text-xs font-semibold text-red-700 dark:text-red-300 uppercase tracking-wide">
+                        Key Talking Points
+                      </div>
+                      <ul className="space-y-1 text-sm text-red-800 dark:text-red-200">
+                        {perspectives.republicans.talkingPoints.map((point, i) => (
+                          <li key={i} className="flex items-start gap-2">
+                            <span className="text-red-500 dark:text-red-400 mt-0.5">•</span>
+                            <span>{point}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               </div>
             </CardContent>
