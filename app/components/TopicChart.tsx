@@ -125,8 +125,8 @@ export default function TopicChart({ topic }: TopicChartProps) {
 function Sparkline({ points }: { points: Array<{ t: string; v: number }> }) {
   if (points.length === 0) return null;
 
-  // Take only the last 7-10 data points (most recent weeks)
-  const recentPoints = points.slice(-10);
+  // Take only the last 7 data points (most recent 7 weeks/days)
+  const recentPoints = points.slice(-7);
 
   if (recentPoints.length === 0) return null;
 
