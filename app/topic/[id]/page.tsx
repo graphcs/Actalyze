@@ -229,7 +229,7 @@ export default function TopicPage() {
                 <Twitter className="w-4 h-4" />
                 Top Tweets
               </div>
-              <Badge className="bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-200">
+              <Badge className="bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100">
                 Social Media
               </Badge>
             </CardHeader>
@@ -278,7 +278,7 @@ export default function TopicPage() {
                 <Newspaper className="w-4 h-4" />
                 Top Headlines
               </div>
-              <Badge className="bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-200">
+              <Badge className="bg-green-100 text-green-900 dark:bg-green-900 dark:text-green-100">
                 News
               </Badge>
             </CardHeader>
