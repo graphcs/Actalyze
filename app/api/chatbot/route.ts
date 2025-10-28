@@ -207,9 +207,12 @@ ${historyText ? `CONVERSATION HISTORY:\n${historyText}\n` : ''}
 
 Please provide a helpful, accurate response to the user's question, incorporating relevant information from the legal documents using numbered citations [1], [2], etc.`
 
-        // Step 6: Generate AI response with streaming
+        // Step 6: Generate AI response
         // Using Perplexity's online model for web access (or GPT-4 as fallback)
-        const stream = await openai.chat.completions.create({
+        // Note: OpenRouter/Perplexity with streaming doesn't include citations, so we use non-streaming for OpenRouter
+        const useStreaming = !process.env.OPENROUTER_API_KEY
+
+        const response = await openai.chat.completions.create({
             model: process.env.OPENROUTER_API_KEY ? 'perplexity/sonar' : 'gpt-4',
             messages: [
                 {
@@ -223,22 +226,43 @@ Please provide a helpful, accurate response to the user's question, incorporatin
             ],
             max_tokens: 2000,
             temperature: 0.7,
-            stream: true
+            stream: useStreaming
         })
 
         // Create a readable stream for the client
         const encoder = new TextEncoder()
         let fullResponse = ''
+        let webCitations: string[] = []
 
         const readableStream = new ReadableStream({
             async start(controller) {
                 try {
-                    for await (const chunk of stream) {
-                        const content = chunk.choices[0]?.delta?.content || ''
-                        if (content) {
-                            fullResponse += content
-                            // Send chunk to client
-                            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`))
+                    if (useStreaming) {
+                        // Handle streaming response (GPT-4)
+                        // @ts-expect-error - response is a stream when useStreaming is true
+                        for await (const chunk of response) {
+                            const content = chunk.choices[0]?.delta?.content || ''
+                            if (content) {
+                                fullResponse += content
+                                // Send chunk to client
+                                controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`))
+                            }
+                        }
+                    } else {
+                        // Handle non-streaming response (Perplexity) and simulate streaming
+                        const completionResponse = response as unknown as { choices: Array<{ message?: { content?: string } }>; citations?: string[] }
+                        fullResponse = completionResponse.choices[0]?.message?.content || ''
+                        webCitations = completionResponse.citations || []
+
+                        console.log('📚 Perplexity citations:', webCitations.length, webCitations)
+
+                        // Simulate streaming by sending the response in chunks
+                        const chunkSize = 50
+                        for (let i = 0; i < fullResponse.length; i += chunkSize) {
+                            const chunk = fullResponse.slice(i, i + chunkSize)
+                            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: chunk })}\n\n`))
+                            // Small delay to simulate streaming
+                            await new Promise(resolve => setTimeout(resolve, 20))
                         }
                     }
 
@@ -248,16 +272,37 @@ Please provide a helpful, accurate response to the user's question, incorporatin
                         chartData = extractFinancialData(fullResponse, message)
                     }
 
-                    // Add references section if we have documents
-                    if (relevantChunks && relevantChunks.length > 0 && (relevantChunks as DocumentChunksWithList).documentList) {
-                        const documentList = (relevantChunks as DocumentChunksWithList).documentList as string[]
+                    // Add references section if we have documents or web citations
+                    const hasDocuments = relevantChunks && relevantChunks.length > 0 && (relevantChunks as DocumentChunksWithList).documentList
+                    const hasWebCitations = webCitations.length > 0
 
+                    if (hasDocuments || hasWebCitations) {
                         // Check if AI already added a References section (case insensitive)
                         const hasReferencesSection = /references?\s*:/i.test(fullResponse)
 
                         if (!hasReferencesSection) {
-                            const referencesSection = '\n\n**References:**\n' +
-                                documentList.map((title, index) => `[${index + 1}] ${title}`).join('\n')
+                            let referencesSection = '\n\n**References:**\n'
+
+                            // Add document references first
+                            if (hasDocuments) {
+                                const documentList = (relevantChunks as DocumentChunksWithList).documentList as string[]
+                                referencesSection += documentList.map((title, index) => `[${index + 1}] ${title}`).join('\n')
+                            }
+
+                            // Add web citations from Perplexity
+                            if (hasWebCitations) {
+                                if (hasDocuments) referencesSection += '\n'
+                                referencesSection += webCitations.map((url, index) => {
+                                    try {
+                                        const hostname = new URL(url).hostname
+                                        const displayIndex = hasDocuments ? (relevantChunks as DocumentChunksWithList).documentList!.length + index + 1 : index + 1
+                                        return `[${displayIndex}] [${hostname}](${url})`
+                                    } catch {
+                                        return ''
+                                    }
+                                }).filter(ref => ref).join('\n')
+                            }
+
                             fullResponse += referencesSection
 
                             // Send references as a separate chunk
