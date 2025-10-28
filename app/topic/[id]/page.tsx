@@ -51,6 +51,7 @@ interface Headline {
   url: string;
   source: string;
   date?: string;
+  thumbnail?: string;
 }
 
 function numberFmt(n: number): string {
@@ -307,14 +308,26 @@ export default function TopicPage() {
                       href={headline.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="block p-3 rounded-lg bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900/60 transition"
+                      className="flex gap-3 p-3 rounded-lg bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900/60 transition"
                     >
-                      <div className="text-sm text-zinc-900 dark:text-zinc-100 font-medium mb-1">
-                        {headline.title}
-                      </div>
-                      <div className="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
-                        <span>{headline.source}</span>
-                        <ExternalLink className="w-3 h-3" />
+                      {headline.thumbnail && (
+                        <img
+                          src={headline.thumbnail}
+                          alt={headline.title}
+                          className="w-20 h-20 object-cover rounded flex-shrink-0"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm text-zinc-900 dark:text-zinc-100 font-medium mb-1 line-clamp-2">
+                          {headline.title}
+                        </div>
+                        <div className="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
+                          <span>{headline.source}</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </div>
                       </div>
                     </a>
                   ))}

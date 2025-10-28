@@ -5,6 +5,7 @@ export interface Headline {
   url: string;
   source: string;
   date?: string;
+  thumbnail?: string;
 }
 
 /**
@@ -65,11 +66,14 @@ export async function GET(request: NextRequest) {
         link?: string;
         source?: { name?: string };
         date?: string;
+        thumbnail?: string;
+        image?: string;
       }) => ({
         title: article.title || 'Untitled',
         url: article.link || '#',
         source: article.source?.name || 'Unknown',
         date: article.date,
+        thumbnail: article.thumbnail || article.image,
       }))
       .filter((h: Headline) => h.title !== 'Untitled');
 

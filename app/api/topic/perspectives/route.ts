@@ -27,20 +27,22 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const apiKey = process.env.OPENROUTER_API_KEY;
+    const apiKey = process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
-        { error: 'OpenRouter API key not configured' },
+        { error: 'AI API key not configured' },
         { status: 500 }
       );
     }
+
+    const useOpenRouter = !!process.env.OPENROUTER_API_KEY;
 
     console.log(`🤖 Generating party perspectives for: "${topic}"`);
 
     // Generate both perspectives in parallel
     const [democratResponse, republicanResponse] = await Promise.all([
-      generatePerspective(topic, "Democrats", apiKey),
-      generatePerspective(topic, "Republicans", apiKey),
+      generatePerspective(topic, "Democrats", apiKey, useOpenRouter),
+      generatePerspective(topic, "Republicans", apiKey, useOpenRouter),
     ]);
 
     return NextResponse.json({
@@ -63,19 +65,26 @@ export async function GET(request: NextRequest) {
 async function generatePerspective(
   topic: string,
   party: string,
-  apiKey: string
+  apiKey: string,
+  useOpenRouter: boolean
 ): Promise<{ summary: string; talkingPoints: string[] }> {
   try {
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    const baseURL = useOpenRouter ? 'https://openrouter.ai/api/v1/chat/completions' : 'https://api.openai.com/v1/chat/completions';
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    };
+
+    if (useOpenRouter) {
+      headers['HTTP-Referer'] = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000';
+      headers['X-Title'] = 'Actalyze';
+    }
+
+    const response = await fetch(baseURL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-        'HTTP-Referer': process.env.NEXT_PUBLIC_URL || 'http://localhost:3000',
-        'X-Title': 'Actalyze',
-      },
+      headers,
       body: JSON.stringify({
-        model: 'perplexity/llama-3.1-sonar-large-128k-online',
+        model: useOpenRouter ? 'perplexity/llama-3.1-sonar-large-128k-online' : 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
