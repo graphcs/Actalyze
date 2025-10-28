@@ -94,6 +94,27 @@ async function tryFetchTrends(query: string, apiKey: string): Promise<TimeSeries
 
         // Normalize timestamp to ISO format and validate
         try {
+          // Handle date range format like "Oct 27 – Nov 2, 2024"
+          // Extract the end date (second date in the range)
+          if (timestamp.includes('–') || timestamp.includes('-')) {
+            const parts = timestamp.split(/\s*[–-]\s*/);
+            if (parts.length === 2) {
+              // Second part might be "Nov 2, 2024" or just "Nov 2" or "2, 2024"
+              let endDate = parts[1].trim();
+
+              // If it's missing the month, prepend from the range start
+              if (/^\d+,?\s*\d{4}/.test(endDate)) {
+                // Format is "2, 2024" - need to get month from start
+                const monthMatch = parts[0].match(/[A-Za-z]+/);
+                if (monthMatch) {
+                  endDate = `${monthMatch[0]} ${endDate}`;
+                }
+              }
+
+              timestamp = endDate;
+            }
+          }
+
           const date = new Date(timestamp);
           if (isNaN(date.getTime())) {
             console.warn(`Invalid timestamp from Google Trends: ${timestamp}`);
