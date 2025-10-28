@@ -55,7 +55,8 @@ export async function fetchTrendsSeries(topic: string): Promise<TimeSeriesPoint[
     url.searchParams.set('data_type', 'TIMESERIES');
     url.searchParams.set('q', topic);
     url.searchParams.set('geo', 'US');
-    url.searchParams.set('date', 'today 7-d');
+    // Don't set date - defaults to 'today 12-m' which works
+    // Or use 'now 7-d' format, but 12 months provides better data
     url.searchParams.set('api_key', apiKey);
 
     const response = await fetch(url.toString(), {

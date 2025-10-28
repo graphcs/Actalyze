@@ -69,7 +69,7 @@ export default function TopicChart({ topic }: TopicChartProps) {
 
       {/* Render sparkline for trends or news */}
       {(data.source === 'trends' || data.source === 'news') && data.points && data.points.length > 0 && (
-        <Sparkline points={data.points} />
+        <Sparkline points={data.points} source={data.source} />
       )}
 
       {/* Render related queries list */}
@@ -95,9 +95,9 @@ export default function TopicChart({ topic }: TopicChartProps) {
 }
 
 /**
- * Simple SVG sparkline component
+ * Simple SVG sparkline component with axis labels
  */
-function Sparkline({ points }: { points: Array<{ t: string; v: number }> }) {
+function Sparkline({ points, source }: { points: Array<{ t: string; v: number }>; source: 'trends' | 'news' }) {
   if (points.length === 0) return null;
 
   const width = 200;
@@ -119,31 +119,58 @@ function Sparkline({ points }: { points: Array<{ t: string; v: number }> }) {
 
   const pathD = `M ${pathPoints.join(' L ')}`;
 
+  // Get date range for x-axis label
+  const firstDate = new Date(points[0].t);
+  const lastDate = new Date(points[points.length - 1].t);
+  const formatDate = (d: Date) => {
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+
+  // Y-axis label based on source
+  const yAxisLabel = source === 'trends' ? 'Search Interest (0-100)' : 'Articles per Hour';
+
   return (
-    <svg
-      width={width}
-      height={height}
-      viewBox={`0 0 ${width} ${height}`}
-      className="w-full h-14"
-      preserveAspectRatio="none"
-    >
-      {/* Area fill */}
-      <path
-        d={`${pathD} L ${width - padding},${height} L ${padding},${height} Z`}
-        fill="currentColor"
-        className="text-blue-100 dark:text-blue-900/30"
-        opacity="0.3"
-      />
-      {/* Line */}
-      <path
-        d={pathD}
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="text-blue-500 dark:text-blue-400"
-      />
-    </svg>
+    <div className="space-y-1">
+      {/* Y-axis label */}
+      <div className="text-[10px] text-zinc-500 dark:text-zinc-400">
+        {yAxisLabel}
+      </div>
+
+      {/* SVG Chart */}
+      <svg
+        width={width}
+        height={height}
+        viewBox={`0 0 ${width} ${height}`}
+        className="w-full h-14"
+        preserveAspectRatio="none"
+      >
+        {/* Area fill */}
+        <path
+          d={`${pathD} L ${width - padding},${height} L ${padding},${height} Z`}
+          fill="currentColor"
+          className="text-blue-100 dark:text-blue-900/30"
+          opacity="0.3"
+        />
+        {/* Line */}
+        <path
+          d={pathD}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="text-blue-500 dark:text-blue-400"
+        />
+      </svg>
+
+      {/* X-axis labels and value range */}
+      <div className="flex justify-between text-[10px] text-zinc-500 dark:text-zinc-400">
+        <span>{formatDate(firstDate)}</span>
+        <span className="text-zinc-400 dark:text-zinc-500">
+          {minValue === maxValue ? maxValue : `${Math.round(minValue)}-${Math.round(maxValue)}`}
+        </span>
+        <span>{formatDate(lastDate)}</span>
+      </div>
+    </div>
   );
 }
