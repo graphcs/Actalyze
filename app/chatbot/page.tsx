@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import dynamic from "next/dynamic";
 import Nav from "../components/Nav";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 // Dynamically import chart components to avoid SSR issues
 const BudgetBreakdownChart = dynamic(
@@ -39,8 +39,10 @@ interface ChatMessage {
   }>;
 }
 
-export default function ChatbotPage() {
+function ChatbotContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const topic = searchParams.get('topic');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -199,69 +201,137 @@ export default function ChatbotPage() {
           {messages.length === 0 && (
             <div className="text-center py-12">
               <h2 className="text-3xl font-bold text-slate-800 mb-4">
-                Welcome to Actalyze
+                Let&apos;s discuss
               </h2>
               <p className="text-slate-600 mb-8">
-                Ask me anything about US legislation, regulations, case law, or
-                legal documents.
+                {topic
+                  ? `Explore different perspectives and insights on ${topic}`
+                  : "Ask me anything about trending political topics, news, and current events."}
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
-                <button
-                  onClick={() =>
-                    setInputMessage(
-                      "Show me the budget breakdown for the Infrastructure Investment and Jobs Act"
-                    )
-                  }
-                  className="p-4 bg-white border border-slate-200 rounded-lg hover:border-blue-500 hover:shadow-md transition-all text-left"
-                >
-                  <div className="font-medium text-slate-800 mb-1">
-                    📊 Bill Financials
-                  </div>
-                  <div className="text-sm text-slate-600">
-                    Budget breakdown for Infrastructure Investment and Jobs Act
-                  </div>
-                </button>
-                <button
-                  onClick={() =>
-                    setInputMessage(
-                      "What are the funding allocations in the Inflation Reduction Act?"
-                    )
-                  }
-                  className="p-4 bg-white border border-slate-200 rounded-lg hover:border-blue-500 hover:shadow-md transition-all text-left"
-                >
-                  <div className="font-medium text-slate-800 mb-1">
-                    💰 Budget Analysis
-                  </div>
-                  <div className="text-sm text-slate-600">
-                    Funding allocations in the Inflation Reduction Act
-                  </div>
-                </button>
-                <button
-                  onClick={() =>
-                    setInputMessage(
-                      "Compare federal spending across defense, education, and healthcare in 2024"
-                    )
-                  }
-                  className="p-4 bg-white border border-slate-200 rounded-lg hover:border-blue-500 hover:shadow-md transition-all text-left"
-                >
-                  <div className="font-medium text-slate-800 mb-1">
-                    📈 Spending Comparison
-                  </div>
-                  <div className="text-sm text-slate-600">
-                    Compare defense, education & healthcare spending
-                  </div>
-                </button>
-                <button
-                  onClick={() =>
-                    setInputMessage("Summarize recent changes to tax law")
-                  }
-                  className="p-4 bg-white border border-slate-200 rounded-lg hover:border-blue-500 hover:shadow-md transition-all text-left"
-                >
-                  <div className="font-medium text-slate-800 mb-1">Tax Law</div>
-                  <div className="text-sm text-slate-600">
-                    Recent changes to tax law
-                  </div>
-                </button>
+                {topic ? (
+                  <>
+                    <button
+                      onClick={() =>
+                        setInputMessage(
+                          `What are Democrats saying about ${topic}?`
+                        )
+                      }
+                      className="p-4 bg-white border border-slate-200 rounded-lg hover:border-blue-500 hover:shadow-md transition-all text-left"
+                    >
+                      <div className="font-medium text-slate-800 mb-1">
+                        🫏 Ask the Democrats
+                      </div>
+                      <div className="text-sm text-slate-600">
+                        Democratic perspective on this topic
+                      </div>
+                    </button>
+                    <button
+                      onClick={() =>
+                        setInputMessage(
+                          `What are Republicans saying about ${topic}?`
+                        )
+                      }
+                      className="p-4 bg-white border border-slate-200 rounded-lg hover:border-blue-500 hover:shadow-md transition-all text-left"
+                    >
+                      <div className="font-medium text-slate-800 mb-1">
+                        🐘 Ask the Republicans
+                      </div>
+                      <div className="text-sm text-slate-600">
+                        Republican perspective on this topic
+                      </div>
+                    </button>
+                    <button
+                      onClick={() =>
+                        setInputMessage(
+                          `Research ${topic} and give me a comprehensive overview`
+                        )
+                      }
+                      className="p-4 bg-white border border-slate-200 rounded-lg hover:border-blue-500 hover:shadow-md transition-all text-left"
+                    >
+                      <div className="font-medium text-slate-800 mb-1">
+                        🔍 Research the Issue
+                      </div>
+                      <div className="text-sm text-slate-600">
+                        In-depth analysis and background
+                      </div>
+                    </button>
+                    <button
+                      onClick={() =>
+                        setInputMessage(
+                          `Run the numbers on ${topic} - show me data, statistics, and key metrics`
+                        )
+                      }
+                      className="p-4 bg-white border border-slate-200 rounded-lg hover:border-blue-500 hover:shadow-md transition-all text-left"
+                    >
+                      <div className="font-medium text-slate-800 mb-1">
+                        📊 Run the Numbers
+                      </div>
+                      <div className="text-sm text-slate-600">
+                        Data and statistics analysis
+                      </div>
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() =>
+                        setInputMessage(
+                          "What are the latest trending political topics?"
+                        )
+                      }
+                      className="p-4 bg-white border border-slate-200 rounded-lg hover:border-blue-500 hover:shadow-md transition-all text-left"
+                    >
+                      <div className="font-medium text-slate-800 mb-1">
+                        🔥 Trending Topics
+                      </div>
+                      <div className="text-sm text-slate-600">
+                        Current hot topics in politics
+                      </div>
+                    </button>
+                    <button
+                      onClick={() =>
+                        setInputMessage(
+                          "Summarize today's major political news"
+                        )
+                      }
+                      className="p-4 bg-white border border-slate-200 rounded-lg hover:border-blue-500 hover:shadow-md transition-all text-left"
+                    >
+                      <div className="font-medium text-slate-800 mb-1">
+                        📰 News Summary
+                      </div>
+                      <div className="text-sm text-slate-600">
+                        Today&apos;s major political headlines
+                      </div>
+                    </button>
+                    <button
+                      onClick={() =>
+                        setInputMessage(
+                          "What are Democrats and Republicans debating right now?"
+                        )
+                      }
+                      className="p-4 bg-white border border-slate-200 rounded-lg hover:border-blue-500 hover:shadow-md transition-all text-left"
+                    >
+                      <div className="font-medium text-slate-800 mb-1">
+                        ⚖️ Party Positions
+                      </div>
+                      <div className="text-sm text-slate-600">
+                        Current partisan debates
+                      </div>
+                    </button>
+                    <button
+                      onClick={() =>
+                        setInputMessage("Show me polling data on key issues")
+                      }
+                      className="p-4 bg-white border border-slate-200 rounded-lg hover:border-blue-500 hover:shadow-md transition-all text-left"
+                    >
+                      <div className="font-medium text-slate-800 mb-1">📊 Polling Data</div>
+                      <div className="text-sm text-slate-600">
+                        Public opinion on key issues
+                      </div>
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           )}
@@ -389,5 +459,13 @@ export default function ChatbotPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ChatbotPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+      <ChatbotContent />
+    </Suspense>
   );
 }

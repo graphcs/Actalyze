@@ -119,7 +119,11 @@ export default function TopicPage() {
   };
 
   const handleChat = () => {
-    router.push("/chatbot");
+    if (topic) {
+      router.push(`/chatbot?topic=${encodeURIComponent(topic.title)}`);
+    } else {
+      router.push("/chatbot");
+    }
   };
 
   const handleShare = () => {
@@ -211,7 +215,7 @@ export default function TopicPage() {
             </Button>
             <Button variant="ghost" onClick={handleSourceData}>
               <ExternalLink className="w-4 h-4" />
-              Source Data
+              View on X
             </Button>
           </div>
         </div>
@@ -230,9 +234,21 @@ export default function TopicPage() {
               </Badge>
             </CardHeader>
             <CardContent>
-              {tweets.length === 0 ? (
+              {loading ? (
                 <div className="text-sm text-zinc-500 dark:text-zinc-400 py-8 text-center">
-                  No tweets available for this topic
+                  Loading tweets...
+                </div>
+              ) : tweets.length === 0 ? (
+                <div className="text-sm text-zinc-500 dark:text-zinc-400 py-8 text-center">
+                  <div className="mb-2">Twitter data currently unavailable</div>
+                  <a
+                    href={`https://twitter.com/search?q=${encodeURIComponent(topic?.title || '')}&f=live`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 dark:text-blue-400 hover:underline text-xs"
+                  >
+                    View on X →
+                  </a>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -302,7 +318,7 @@ export default function TopicPage() {
                 <Scale className="w-4 h-4" />
                 Political Context
               </div>
-              <Badge className="bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-200">
+              <Badge className="bg-purple-100 text-purple-900 dark:bg-purple-900 dark:text-purple-100">
                 Party Perspectives
               </Badge>
             </CardHeader>
