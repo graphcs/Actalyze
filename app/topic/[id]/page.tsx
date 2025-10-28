@@ -87,7 +87,12 @@ export default function TopicPage() {
           // Fetch party perspectives
           fetch(`/api/topic/perspectives?topic=${encodeURIComponent(topicTitle)}`)
             .then((res) => res.json())
-            .then((data) => setPerspectives(data))
+            .then((data) => {
+              console.log('📚 Perspectives data:', data);
+              console.log('📚 Democrat citations:', data.democrats?.citations);
+              console.log('📚 Republican citations:', data.republicans?.citations);
+              setPerspectives(data);
+            })
             .catch((error) => {
               console.error("Error fetching perspectives:", error);
               setPerspectives({
@@ -385,24 +390,31 @@ export default function TopicPage() {
                       </ul>
                     </div>
                   )}
-                  {perspectives?.democrats?.citations && perspectives.democrats.citations.length > 0 && (
+                  {perspectives?.democrats?.citations && Array.isArray(perspectives.democrats.citations) && perspectives.democrats.citations.length > 0 && (
                     <div className="space-y-1 pt-2 border-t border-blue-200 dark:border-blue-800">
                       <div className="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wide mb-1">
                         Sources
                       </div>
                       <div className="space-y-0.5">
-                        {perspectives.democrats.citations.map((url, i) => (
-                          <div key={i} className="text-xs text-blue-600 dark:text-blue-400">
-                            <a
-                              href={url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="hover:underline break-all"
-                            >
-                              [{i + 1}] {new URL(url).hostname}
-                            </a>
-                          </div>
-                        ))}
+                        {perspectives.democrats.citations.map((url, i) => {
+                          try {
+                            const hostname = new URL(url).hostname;
+                            return (
+                              <div key={i} className="text-xs text-blue-600 dark:text-blue-400">
+                                <a
+                                  href={url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="hover:underline break-all"
+                                >
+                                  [{i + 1}] {hostname}
+                                </a>
+                              </div>
+                            );
+                          } catch (e) {
+                            return null;
+                          }
+                        })}
                       </div>
                     </div>
                   )}
@@ -434,24 +446,31 @@ export default function TopicPage() {
                       </ul>
                     </div>
                   )}
-                  {perspectives?.republicans?.citations && perspectives.republicans.citations.length > 0 && (
+                  {perspectives?.republicans?.citations && Array.isArray(perspectives.republicans.citations) && perspectives.republicans.citations.length > 0 && (
                     <div className="space-y-1 pt-2 border-t border-red-200 dark:border-red-800">
                       <div className="text-xs font-semibold text-red-700 dark:text-red-300 uppercase tracking-wide mb-1">
                         Sources
                       </div>
                       <div className="space-y-0.5">
-                        {perspectives.republicans.citations.map((url, i) => (
-                          <div key={i} className="text-xs text-red-600 dark:text-red-400">
-                            <a
-                              href={url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="hover:underline break-all"
-                            >
-                              [{i + 1}] {new URL(url).hostname}
-                            </a>
-                          </div>
-                        ))}
+                        {perspectives.republicans.citations.map((url, i) => {
+                          try {
+                            const hostname = new URL(url).hostname;
+                            return (
+                              <div key={i} className="text-xs text-red-600 dark:text-red-400">
+                                <a
+                                  href={url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="hover:underline break-all"
+                                >
+                                  [{i + 1}] {hostname}
+                                </a>
+                              </div>
+                            );
+                          } catch (e) {
+                            return null;
+                          }
+                        })}
                       </div>
                     </div>
                   )}

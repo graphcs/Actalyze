@@ -102,10 +102,10 @@ Return ONLY this JSON format with no markdown: {"summary": "...", "talkingPoints
           },
         ],
         temperature: 0.7,
-        max_tokens: 300,
+        max_tokens: 800,
         ...(useOpenRouter ? {} : { response_format: { type: "json_object" } }),
       }),
-      signal: AbortSignal.timeout(10000),
+      signal: AbortSignal.timeout(20000),
     });
 
     if (!response.ok) {
@@ -133,6 +133,11 @@ Return ONLY this JSON format with no markdown: {"summary": "...", "talkingPoints
 
     // Extract citations from Perplexity response (OpenRouter provides them)
     const citations = useOpenRouter && data.citations ? data.citations : undefined;
+
+    // Debug logging
+    if (useOpenRouter) {
+      console.log(`📚 Citations for ${party}:`, citations ? citations.length : 'none', citations);
+    }
 
     return {
       summary: parsed.summary || `No perspective available for ${party}.`,
