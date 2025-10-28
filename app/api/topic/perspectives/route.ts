@@ -27,10 +27,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const apiKey = process.env.OPENAI_API_KEY;
+    const apiKey = process.env.OPENROUTER_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
-        { error: 'OpenAI API key not configured' },
+        { error: 'OpenRouter API key not configured' },
         { status: 500 }
       );
     }
@@ -66,14 +66,16 @@ async function generatePerspective(
   apiKey: string
 ): Promise<{ summary: string; talkingPoints: string[] }> {
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`,
+        'HTTP-Referer': process.env.NEXT_PUBLIC_URL || 'http://localhost:3000',
+        'X-Title': 'Actalyze',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'perplexity/llama-3.1-sonar-large-128k-online',
         messages: [
           {
             role: 'system',

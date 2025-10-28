@@ -76,12 +76,16 @@ export default function TopicChart({ topic }: TopicChartProps) {
       </div>
 
       {/* Render sparkline for trends */}
-      {data.source === 'trends' && data.points && data.points.length > 0 && (
+      {data.source === 'trends' && data.points && data.points.length > 0 ? (
         <Sparkline points={data.points} />
-      )}
+      ) : data.source === 'trends' ? (
+        <div className="h-16 flex items-center justify-center text-xs text-zinc-400 dark:text-zinc-500">
+          No trend data available
+        </div>
+      ) : null}
 
       {/* Render tweets */}
-      {data.source === 'tweets' && data.tweets && data.tweets.length > 0 && (
+      {data.source === 'tweets' && data.tweets && data.tweets.length > 0 ? (
         <div className="space-y-2 text-xs">
           {data.tweets.slice(0, 3).map((tweet, i) => (
             <div key={i} className="p-2 rounded bg-zinc-50 dark:bg-zinc-800/50 space-y-1">
@@ -95,7 +99,11 @@ export default function TopicChart({ topic }: TopicChartProps) {
             </div>
           ))}
         </div>
-      )}
+      ) : data.source === 'tweets' ? (
+        <div className="h-16 flex items-center justify-center text-xs text-zinc-400 dark:text-zinc-500">
+          No tweets available
+        </div>
+      ) : null}
 
       {/* Render related queries list */}
       {data.source === 'queries' && data.queries && data.queries.length > 0 && (

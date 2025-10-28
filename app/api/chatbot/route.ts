@@ -2,8 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { searchDocuments } from '@/lib/document-processor'
 
+// Use OpenRouter for AI with web access
 const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY!
+    apiKey: process.env.OPENROUTER_API_KEY!,
+    baseURL: 'https://openrouter.ai/api/v1',
+    defaultHeaders: {
+        'HTTP-Referer': process.env.NEXT_PUBLIC_URL || 'http://localhost:3000',
+        'X-Title': 'Actalyze',
+    }
 })
 
 interface ChatMessage {
@@ -202,8 +208,9 @@ ${historyText ? `CONVERSATION HISTORY:\n${historyText}\n` : ''}
 Please provide a helpful, accurate response to the user's question, incorporating relevant information from the legal documents using numbered citations [1], [2], etc.`
 
         // Step 6: Generate AI response with streaming
+        // Using Perplexity's online model for web access and current information
         const stream = await openai.chat.completions.create({
-            model: 'gpt-4',
+            model: 'perplexity/llama-3.1-sonar-large-128k-online',
             messages: [
                 {
                     role: 'system',
