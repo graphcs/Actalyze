@@ -3,7 +3,7 @@
 import { TrendingUp } from "lucide-react";
 import { Card, CardHeader, CardContent } from "./ui/Card";
 import { Badge } from "./ui/Badge";
-import Sparkline, { generateSparkData } from "./Sparkline";
+import TopicChart from "./TopicChart";
 
 interface Topic {
   id: string;
@@ -28,11 +28,6 @@ function numberFmt(n: number): string {
 }
 
 export default function TopicCard({ topic, rank, onOpen }: TopicCardProps) {
-  // Convert mentionsOverTime to sparkline format, or use fallback
-  const sparkData = topic.mentionsOverTime
-    ? topic.mentionsOverTime.map(m => ({ d: m.day, v: m.count }))
-    : generateSparkData();
-
   return (
     <Card
       className="hover:shadow-md transition cursor-pointer"
@@ -53,6 +48,12 @@ export default function TopicCard({ topic, rank, onOpen }: TopicCardProps) {
         </div>
       </CardHeader>
       <CardContent>
+        {/* Chart with SERPAPI data */}
+        <div className="mb-3">
+          <TopicChart topic={topic.title} />
+        </div>
+
+        {/* Tags */}
         <div className="flex flex-wrap gap-1">
           {topic.tags.map((tag) => (
             <span
