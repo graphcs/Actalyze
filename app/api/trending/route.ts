@@ -10,6 +10,130 @@ interface TrendingTopic {
   cost: number;
   color: string;
   mentionsOverTime?: Array<{ day: number; count: number }>;
+  thumbnails?: string[];
+}
+
+/**
+ * Fetch 1-2 thumbnails for a topic from SERPAPI Google News
+ */
+async function fetchTopicThumbnails(topic: string): Promise<string[]> {
+  try {
+    const apiKey = process.env.SERPAPI_KEY;
+    if (!apiKey) {
+      return [];
+    }
+
+    const url = new URL('https://serpapi.com/search');
+    url.searchParams.set('engine', 'google_news');
+    url.searchParams.set('q', topic);
+    url.searchParams.set('gl', 'us');
+    url.searchParams.set('hl', 'en');
+    url.searchParams.set('num', '3');
+    url.searchParams.set('api_key', apiKey);
+
+    const response = await fetch(url.toString(), {
+      signal: AbortSignal.timeout(5000),
+    });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const data = await response.json();
+    const newsResults = data.news_results || [];
+
+    // Extract thumbnails from first 2 articles that have them
+    const thumbnails = newsResults
+      .slice(0, 3)
+      .map((article: { thumbnail?: string; image?: string }) =>
+        article.thumbnail || article.image
+      )
+      .filter((url: string | undefined) => url)
+      .slice(0, 2);
+
+    return thumbnails;
+  } catch (error) {
+    console.error(`Error fetching thumbnails for "${topic}":`, error);
+    return [];
+  }
+}
+
+/**
+ * Use Gemini Flash via OpenRouter to convert cryptic topic names into clear, human-readable titles
+ */
+async function convertTopicTitle(rawTopic: string, examples: string[]): Promise<string> {
+  try {
+    const apiKey = process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      console.warn('⚠️ OpenRouter API key not set, using simple title case');
+      return rawTopic
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+    }
+
+    const useOpenRouter = !!process.env.OPENROUTER_API_KEY;
+    const baseURL = useOpenRouter
+      ? 'https://openrouter.ai/api/v1/chat/completions'
+      : 'https://api.openai.com/v1/chat/completions';
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    };
+
+    if (useOpenRouter) {
+      headers['HTTP-Referer'] = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000';
+      headers['X-Title'] = 'Actalyze';
+    }
+
+    const contextHeadlines = examples.slice(0, 2).join('\n');
+
+    const response = await fetch(baseURL, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        model: useOpenRouter ? 'google/gemini-flash-1.5' : 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'user',
+            content: `Convert this cryptic trending topic name into a clear, concise, human-readable title (max 5-7 words).
+
+Raw topic: "${rawTopic}"
+
+Context from recent headlines:
+${contextHeadlines}
+
+Return ONLY the cleaned up title, nothing else. Make it clear what the topic is about.`,
+          },
+        ],
+        temperature: 0.3,
+        max_tokens: 50,
+      }),
+      signal: AbortSignal.timeout(8000),
+    });
+
+    if (!response.ok) {
+      console.error(`AI API error: ${response.status}`);
+      return rawTopic
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+    }
+
+    const data = await response.json();
+    const cleanedTitle = data.choices?.[0]?.message?.content?.trim().replace(/['"]/g, '') || rawTopic;
+
+    console.log(`✨ AI: "${rawTopic}" → "${cleanedTitle}"`);
+    return cleanedTitle;
+  } catch (error) {
+    console.error('Error converting topic title:', error);
+    // Fallback to simple title case
+    return rawTopic
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  }
 }
 
 export async function GET() {
@@ -30,14 +154,16 @@ export async function GET() {
       return NextResponse.json(getMockTrendingTopics());
     }
 
-    // Transform SERPAPI topics to our frontend format
-    const trendingTopicsArray: TrendingTopic[] = topics.map((topic) => {
-      // Clean up topic name
+    // Transform SERPAPI topics to our frontend format (with parallel Gemini calls and thumbnail fetching)
+    const trendingTopicsArray: TrendingTopic[] = await Promise.all(topics.map(async (topic) => {
+      // Clean up topic name with Gemini
       const cleanTopicName = topic.topic.trim();
-      const displayTitle = cleanTopicName
-        .split(' ')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-        .join(' ');
+
+      // Fetch both title and thumbnails in parallel
+      const [displayTitle, thumbnails] = await Promise.all([
+        convertTopicTitle(cleanTopicName, topic.examples),
+        fetchTopicThumbnails(cleanTopicName),
+      ]);
 
       // Extract tags from examples or topic
       const tags = topic.examples
@@ -71,6 +197,7 @@ export async function GET() {
         cost: Math.floor(Math.random() * 1000) + 50,
         color: getColorForTopic(cleanTopicName.toLowerCase()),
         mentionsOverTime,
+        thumbnails: thumbnails.length > 0 ? thumbnails : undefined,
       };
     });
 

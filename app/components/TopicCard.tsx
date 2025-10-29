@@ -14,6 +14,7 @@ interface Topic {
   cost: number;
   color: string;
   mentionsOverTime?: Array<{ day: number; count: number }>;
+  thumbnails?: string[];
 }
 
 interface TopicCardProps {
@@ -52,6 +53,23 @@ export default function TopicCard({ topic, rank, onOpen }: TopicCardProps) {
         <div className="mb-3">
           <TopicChart topic={topic.title} />
         </div>
+
+        {/* Thumbnails */}
+        {topic.thumbnails && topic.thumbnails.length > 0 && (
+          <div className="flex gap-2 mb-3">
+            {topic.thumbnails.slice(0, 2).map((thumbnail, idx) => (
+              <img
+                key={idx}
+                src={thumbnail}
+                alt={`${topic.title} thumbnail ${idx + 1}`}
+                className="w-16 h-16 object-cover rounded flex-shrink-0 border border-zinc-200 dark:border-zinc-700"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Tags */}
         <div className="flex flex-wrap gap-1">
