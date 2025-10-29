@@ -16,7 +16,6 @@ export default function Nav({ onChatClick, onUploadClick }: NavProps) {
 
   const tabs = [
     { id: "home", label: "Home", icon: Globe2, path: "/" },
-    { id: "topic", label: "Topics", icon: BookOpen, path: "/topics" },
   ];
 
   const handleNavigation = (path: string) => {
@@ -31,8 +30,8 @@ export default function Nav({ onChatClick, onUploadClick }: NavProps) {
           <div className="font-extrabold tracking-tight text-xl cursor-pointer" onClick={() => router.push("/")}>
             Actalyze
           </div>
-          <Badge className="ml-2 bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-200">
-            MVP
+          <Badge className="ml-2 bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100">
+            Platform
           </Badge>
         </div>
         <div className="flex items-center gap-2">
