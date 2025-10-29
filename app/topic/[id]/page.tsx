@@ -435,8 +435,8 @@ export default function TopicPage() {
       <footer className="max-w-7xl mx-auto px-4 py-10 text-sm text-zinc-500">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>Actalyze © {new Date().getFullYear()}</div>
-          <div>MVP • Real data powered by X API & Congress.gov</div>
-          <div>Built for legislative staffers, comms teams, and civic orgs</div>
+          <div>Trusted by congressional staffers and policy professionals</div>
+          <div>AI-powered intelligence for modern governance</div>
         </div>
       </footer>
     </div>

@@ -97,13 +97,18 @@ async function deduplicateTopics(topics: TrendingTopic[]): Promise<TrendingTopic
         messages: [
           {
             role: 'user',
-            content: `You are analyzing trending political topics to remove duplicates. Below is a numbered list of topics.
+            content: `You are analyzing trending political topics to remove ONLY obvious duplicates. Below is a numbered list of topics.
 
 ${topicList}
 
-Identify which topics are duplicates or very similar (covering the same story/event). When duplicates exist, keep ONLY the one that appears first in the list.
+ONLY mark topics as duplicates if they are about THE EXACT SAME story/event with very similar wording. For example:
+- "Senate Rejects Trump Brazil Tariffs" and "Senate Blocks Trump Brazil Tariffs" = DUPLICATES (same story)
+- "Senate Debate on Healthcare" and "Senate Healthcare Vote" = DIFFERENT (different aspects/events)
+- "Trump Administration Policy" and "Trump Speech on Economy" = DIFFERENT (different topics)
 
-Return ONLY a JSON array of numbers representing the topics to KEEP (not remove). For example: [1,2,4,5,7] means keep topics 1,2,4,5,7 and remove 3,6,8,9.
+Be conservative - when in doubt, keep both topics. We want to remove obvious duplicates only.
+
+Return ONLY a JSON array of numbers representing the topics to KEEP (not remove). For example: [1,2,4,5,7,8,9] means keep most topics and only remove 3,6.
 
 Return ONLY the JSON array, nothing else.`,
           },
@@ -224,8 +229,9 @@ export async function GET() {
     console.log("🚀 Trending API called at", new Date().toISOString());
 
     // Fetch trending political topics from SERPAPI
+    // Request 12 topics so after deduplication we have ~9
     const topics = await getTrendingPoliticsUS({
-      maxItems: 9,
+      maxItems: 12,
       minScore: 10,
       useFallback: true,
     });
@@ -295,7 +301,10 @@ export async function GET() {
     // Deduplicate similar topics using AI
     const dedupedTopics = await deduplicateTopics(trendingTopicsArray);
 
-    return NextResponse.json(dedupedTopics);
+    // Ensure we always return exactly 9 topics
+    const finalTopics = dedupedTopics.slice(0, 9);
+
+    return NextResponse.json(finalTopics);
 
   } catch (error) {
     console.error("❌ Error fetching trending topics:", error);
