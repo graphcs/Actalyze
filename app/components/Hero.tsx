@@ -7,8 +7,8 @@ import { Badge } from "./ui/Badge";
 import { Card, CardHeader, CardContent } from "./ui/Card";
 
 // Dynamically import the map to avoid SSR issues
-const CongressionalDistrictMap = dynamic(
-  () => import("./CongressionalDistrictMap"),
+const StateHeatMap = dynamic(
+  () => import("./StateHeatMap"),
   {
     ssr: false,
     loading: () => (
@@ -18,6 +18,8 @@ const CongressionalDistrictMap = dynamic(
     )
   }
 );
+
+import DistrictSearch from "./DistrictSearch";
 
 interface HeroProps {
   onExplore: () => void;
@@ -60,17 +62,18 @@ export default function Hero({ onExplore, onUpload, onChat }: HeroProps) {
         <Card className="relative">
           <CardHeader className="flex flex-row items-center justify-between">
             <div className="font-semibold text-zinc-900 dark:text-white">
-              Congressional Districts
+              Political Landscape
             </div>
-            <Badge className="bg-zinc-900 text-white dark:bg-white dark:text-zinc-900">
+            <Badge className="bg-purple-100 text-purple-900 dark:bg-purple-900 dark:text-purple-100">
               <MapPinned className="w-3 h-3" />
-              435 Districts
+              50 States
             </Badge>
           </CardHeader>
           <CardContent>
-            <div className="h-[360px] w-full rounded-xl overflow-hidden">
-              <CongressionalDistrictMap />
+            <div className="h-[360px] w-full rounded-xl overflow-hidden mb-4">
+              <StateHeatMap />
             </div>
+            <DistrictSearch />
           </CardContent>
         </Card>
       </div>
