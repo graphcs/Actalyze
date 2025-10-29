@@ -66,11 +66,12 @@ export default function TopicCard({ topic, rank, onOpen }: TopicCardProps) {
         </div>
         <div
           className={`flex items-center gap-1 px-2 py-1 rounded-full border text-xs font-semibold whitespace-nowrap ${heatColors.bg} ${heatColors.text} ${heatColors.border}`}
+          title="Heat score"
         >
           {isOnFire && (
             <Flame className="w-3 h-3 animate-pulse" />
           )}
-          <span>{topic.momentum}° Heat</span>
+          <span>{topic.momentum}</span>
         </div>
       </CardHeader>
       <CardContent>

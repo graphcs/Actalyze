@@ -222,11 +222,12 @@ export default function TopicPage() {
             </h1>
             <div
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border font-semibold text-sm ${getHeatColor(topic.momentum)}`}
+              title="Heat score"
             >
               {topic.momentum >= 90 && (
                 <Flame className="w-4 h-4 animate-pulse" />
               )}
-              <span>{topic.momentum}° Heat</span>
+              <span>{topic.momentum}</span>
             </div>
           </div>
           <div className="mt-4 flex flex-wrap gap-3">
