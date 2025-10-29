@@ -41,36 +41,6 @@ export default function DistrictMap({ districtCode }: DistrictMapProps) {
   const [targetBounds, setTargetBounds] = useState<L.LatLngBounds | null>(null);
   const [boundsKey, setBoundsKey] = useState(0);
 
-  useEffect(() => {
-    // Using US Census Bureau TIGERweb ArcGIS service for 119th Congress districts
-    // Query all features as GeoJSON
-    const url = 'https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/tigerWMS_Current/MapServer/54/query?where=1%3D1&outFields=*&outSR=4326&f=geojson';
-
-    console.log('🗺️  Fetching district boundaries from US Census Bureau TIGERweb...');
-
-    fetch(url)
-      .then((res) => {
-        console.log('📦 Census Bureau response status:', res.status);
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}`);
-        }
-        return res.json();
-      })
-      .then((data) => {
-        console.log('✅ GeoJSON loaded from Census Bureau!');
-        console.log('📊 Total features:', data.features?.length);
-        if (data.features && data.features.length > 0) {
-          console.log('📋 Sample feature properties:', data.features[0].properties);
-        }
-        setGeoData(data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error("❌ Error loading congressional districts from Census Bureau:", error);
-        setLoading(false);
-      });
-  }, []);
-
   // Parse the target district code
   const parseDistrictCode = (code: string): { state: string; fips: string; district: string } | null => {
     const match = code.match(/^([A-Z]{2})(\d{2})$/i);
@@ -88,6 +58,41 @@ export default function DistrictMap({ districtCode }: DistrictMapProps) {
   const targetInfo = parseDistrictCode(districtCode);
 
   useEffect(() => {
+    if (!targetInfo) {
+      setLoading(false);
+      return;
+    }
+
+    // Load state-specific GeoJSON file from unitedstates/districts repo
+    // This loads only the districts for the specific state, which is much faster
+    const url = `https://raw.githubusercontent.com/unitedstates/districts/gh-pages/states/${targetInfo.state}/shape.geojson`;
+
+    console.log(`🗺️  Fetching ${targetInfo.state} district boundaries from GitHub...`);
+
+    fetch(url)
+      .then((res) => {
+        console.log('📦 Response status:', res.status);
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        console.log('✅ GeoJSON loaded!');
+        console.log('📊 Total features:', data.features?.length);
+        if (data.features && data.features.length > 0) {
+          console.log('📋 Sample feature properties:', data.features[0].properties);
+        }
+        setGeoData(data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("❌ Error loading congressional districts:", error);
+        setLoading(false);
+      });
+  }, [districtCode, targetInfo]);
+
+  useEffect(() => {
     if (targetInfo) {
       console.log('🎯 Looking for district:', {
         code: districtCode,
@@ -102,32 +107,39 @@ export default function DistrictMap({ districtCode }: DistrictMapProps) {
     const properties = feature.properties as Record<string, string | number | undefined> | null;
     if (!properties || !targetInfo) return;
 
-    // Census Bureau TIGERweb format properties:
-    // STATEFP: "51" (FIPS code)
-    // BASENAME: "1" or "01" (district number)
-    // CD119FP: "01" (119th Congress district)
-    // GEOID: "5101" (state FIPS + district)
+    // unitedstates/districts GeoJSON format properties:
+    // GEOID: "5101" (state FIPS + district number)
+    // STATEFP: "51" (state FIPS code)
+    // CD116FP or DISTRICT: "01" (district number)
 
+    const geoid = String(properties.GEOID || '');
     const featureStateFP = String(properties.STATEFP || properties.STATE || '');
-    const featureDistrictNum = String(properties.CD119FP || properties.CD118FP || properties.BASENAME || properties.DISTRICT || '');
-    const geoidValue = typeof properties.GEOID === 'string' ? properties.GEOID.slice(-2) : undefined;
+    const featureDistrictNum = String(properties.CD118FP || properties.CD116FP || properties.DISTRICT || properties.BASENAME || '');
+
+    // Extract district from GEOID if available (last 2 digits)
+    const geoidDistrict = geoid.length >= 4 ? geoid.slice(-2) : undefined;
 
     // Normalize district number (ensure 2 digits)
-    const normalizedDistrict = featureDistrictNum ? String(featureDistrictNum).padStart(2, '0') : geoidValue;
+    const normalizedDistrict = featureDistrictNum ? String(featureDistrictNum).padStart(2, '0') : geoidDistrict;
 
-    // Match by FIPS code
-    const isTargetDistrict = featureStateFP === targetInfo.fips && normalizedDistrict === targetInfo.district;
+    // Match by FIPS code and district, or by GEOID
+    const matchesByParts = featureStateFP === targetInfo.fips && normalizedDistrict === targetInfo.district;
+    const matchesByGEOID = geoid === (targetInfo.fips + targetInfo.district);
+
+    const isTargetDistrict = matchesByParts || matchesByGEOID;
 
     // Debug logging for first match
     if (isTargetDistrict) {
       console.log('✅ Found target district!', {
         targetCode: districtCode,
-        target: { state: targetInfo.state, fips: targetInfo.fips, district: targetInfo.district },
+        target: { state: targetInfo.state, fips: targetInfo.fips, district: targetInfo.district, fullGEOID: targetInfo.fips + targetInfo.district },
         feature: {
+          geoid,
           stateFP: featureStateFP,
           districtRaw: featureDistrictNum,
           districtNormalized: normalizedDistrict
         },
+        matchType: matchesByGEOID ? 'GEOID' : 'Parts',
         allProperties: properties
       });
     }
