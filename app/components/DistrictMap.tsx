@@ -43,14 +43,29 @@ export default function DistrictMap({ districtCode }: DistrictMapProps) {
 
   useEffect(() => {
     // Fetch congressional district boundaries
-    fetch("https://raw.githubusercontent.com/unitedstates/districts/gh-pages/cds/2022/national-overview.geojson")
-      .then((res) => res.json())
+    // Using Eric Celeste's 118th Congress districts GeoJSON (reliable source)
+    const url = 'https://raw.githubusercontent.com/ericceleste/us-congress-districts-geojson/main/districts-118.geojson';
+
+    console.log('🗺️  Fetching district boundaries from:', url);
+
+    fetch(url)
+      .then((res) => {
+        console.log('📦 GeoJSON response status:', res.status);
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+        return res.json();
+      })
       .then((data) => {
+        console.log('✅ GeoJSON loaded, features:', data.features?.length);
+        if (data.features && data.features.length > 0) {
+          console.log('📋 Sample feature properties:', data.features[0].properties);
+        }
         setGeoData(data);
         setLoading(false);
       })
       .catch((error) => {
-        console.error("Error loading congressional districts:", error);
+        console.error("❌ Error loading congressional districts:", error);
         setLoading(false);
       });
   }, []);
@@ -86,29 +101,34 @@ export default function DistrictMap({ districtCode }: DistrictMapProps) {
     const properties = feature.properties as Record<string, string | number | undefined> | null;
     if (!properties || !targetInfo) return;
 
-    // The GeoJSON uses STATEFP and CD118FP (or similar) properties
-    const featureStateFP = properties.STATEFP || properties.STATEFP20 || properties.STATE;
+    // Try multiple property name variations
+    // Eric Celeste format: { STATECODE: "VA", DISTRICT: "01" }
+    // Census format: { STATEFP: "51", CD118FP: "01" }
+    const featureStateCode = properties.STATECODE || properties.STATE;
+    const featureStateFP = properties.STATEFP || properties.STATEFP20;
+    const featureDistrictNum = properties.DISTRICT || properties.CD118FP || properties.CD116FP;
     const geoidValue = typeof properties.GEOID === 'string' ? properties.GEOID.slice(-2) : undefined;
-    const featureDistrictFP = properties.CD118FP || properties.CD116FP || properties.DISTRICT || geoidValue;
 
-    // Convert to string for consistent comparison
-    const featureState = String(featureStateFP);
-    const featureDistrict = String(featureDistrictFP);
+    // Check both state code (VA) and FIPS (51) formats
+    const matchByCode = featureStateCode === targetInfo.state &&
+                        String(featureDistrictNum).padStart(2, '0') === targetInfo.district;
+    const matchByFIPS = String(featureStateFP) === targetInfo.fips &&
+                        String(featureDistrictNum || geoidValue).padStart(2, '0') === targetInfo.district;
 
-    // Check if this is the target district
-    const isTargetDistrict =
-      featureState === targetInfo.fips &&
-      featureDistrict === targetInfo.district;
+    const isTargetDistrict = matchByCode || matchByFIPS;
 
     // Debug logging for first match
     if (isTargetDistrict) {
       console.log('✅ Found target district!', {
         targetCode: districtCode,
-        targetFIPS: targetInfo.fips,
-        targetDistrict: targetInfo.district,
-        featureState,
-        featureDistrict,
-        properties
+        target: { state: targetInfo.state, fips: targetInfo.fips, district: targetInfo.district },
+        feature: {
+          stateCode: featureStateCode,
+          stateFP: featureStateFP,
+          district: featureDistrictNum
+        },
+        matchedBy: matchByCode ? 'CODE' : 'FIPS',
+        allProperties: properties
       });
     }
 
