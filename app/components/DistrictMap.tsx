@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import L from "leaflet";
+import { useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 
 // Dynamically import Leaflet components to avoid SSR issues
@@ -23,11 +24,21 @@ interface DistrictMapProps {
   districtCode: string; // e.g., "VA05", "NY01"
 }
 
+// State FIPS code mapping
+const STATE_FIPS: Record<string, string> = {
+  "AL": "01", "AK": "02", "AZ": "04", "AR": "05", "CA": "06", "CO": "08", "CT": "09", "DE": "10",
+  "FL": "12", "GA": "13", "HI": "15", "ID": "16", "IL": "17", "IN": "18", "IA": "19", "KS": "20",
+  "KY": "21", "LA": "22", "ME": "23", "MD": "24", "MA": "25", "MI": "26", "MN": "27", "MS": "28",
+  "MO": "29", "MT": "30", "NE": "31", "NV": "32", "NH": "33", "NJ": "34", "NM": "35", "NY": "36",
+  "NC": "37", "ND": "38", "OH": "39", "OK": "40", "OR": "41", "PA": "42", "RI": "44", "SC": "45",
+  "SD": "46", "TN": "47", "TX": "48", "UT": "49", "VT": "50", "VA": "51", "WA": "53", "WV": "54",
+  "WI": "55", "WY": "56"
+};
+
 export default function DistrictMap({ districtCode }: DistrictMapProps) {
   const [geoData, setGeoData] = useState<GeoJSON.FeatureCollection | null>(null);
   const [loading, setLoading] = useState(true);
-  const [mapCenter, setMapCenter] = useState<[number, number]>([39.8283, -98.5795]);
-  const [mapZoom, setMapZoom] = useState(6);
+  const [targetBounds, setTargetBounds] = useState<L.LatLngBounds | null>(null);
 
   useEffect(() => {
     // Fetch congressional district boundaries
@@ -43,18 +54,35 @@ export default function DistrictMap({ districtCode }: DistrictMapProps) {
       });
   }, []);
 
-  const onEachDistrict = (feature: GeoJSON.Feature, layer: L.Layer) => {
-    const properties = feature.properties as Record<string, string> | null;
-    const state = properties?.STATEFP || properties?.STATE || "";
-    const district = properties?.CD118FP || properties?.DISTRICT || "";
+  // Parse the target district code
+  const parseDistrictCode = (code: string): { state: string; fips: string; district: string } | null => {
+    const match = code.match(/^([A-Z]{2})(\d{2})$/i);
+    if (!match) return null;
 
-    // Create district code from properties (e.g., "VA05")
-    const featureDistrictCode = `${state}${district}`.toUpperCase();
-    const targetDistrictCode = districtCode.toUpperCase();
+    const state = match[1].toUpperCase();
+    const district = match[2];
+    const fips = STATE_FIPS[state];
+
+    if (!fips) return null;
+
+    return { state, fips, district };
+  };
+
+  const targetInfo = parseDistrictCode(districtCode);
+
+  const onEachDistrict = (feature: GeoJSON.Feature, layer: L.Layer) => {
+    const properties = feature.properties as Record<string, string | number | undefined> | null;
+    if (!properties || !targetInfo) return;
+
+    // The GeoJSON uses STATEFP and CD118FP (or similar) properties
+    const featureStateFP = properties.STATEFP || properties.STATEFP20 || properties.STATE;
+    const geoidValue = typeof properties.GEOID === 'string' ? properties.GEOID.slice(-2) : undefined;
+    const featureDistrictFP = properties.CD118FP || properties.CD116FP || properties.DISTRICT || geoidValue;
 
     // Check if this is the target district
-    const isTargetDistrict = featureDistrictCode === targetDistrictCode ||
-      featureDistrictCode === targetDistrictCode.replace(/^([A-Z]{2})0?(\d+)$/, '$1$2');
+    const isTargetDistrict =
+      featureStateFP === targetInfo.fips &&
+      featureDistrictFP === targetInfo.district;
 
     // Style districts
     if ('setStyle' in layer && typeof layer.setStyle === 'function') {
@@ -62,23 +90,22 @@ export default function DistrictMap({ districtCode }: DistrictMapProps) {
         // Highlight the target district
         layer.setStyle({
           fillColor: "#A855F7",
-          fillOpacity: 0.6,
+          fillOpacity: 0.7,
           color: "#7C3AED",
           weight: 3,
         });
 
-        // Center map on this district
+        // Store bounds for centering
         if ('getBounds' in layer && typeof layer.getBounds === 'function') {
           const bounds = layer.getBounds();
-          setMapCenter([bounds.getCenter().lat, bounds.getCenter().lng]);
-          setMapZoom(8);
+          setTargetBounds(bounds);
         }
       } else {
         // Show other districts faintly
         layer.setStyle({
-          fillColor: "#9CA3AF",
-          fillOpacity: 0.1,
-          color: "#6B7280",
+          fillColor: "#D4D4D8",
+          fillOpacity: 0.15,
+          color: "#A1A1AA",
           weight: 0.5,
         });
       }
@@ -86,15 +113,32 @@ export default function DistrictMap({ districtCode }: DistrictMapProps) {
 
     // Add tooltip for target district
     if (isTargetDistrict && 'bindTooltip' in layer && typeof layer.bindTooltip === 'function') {
-      const districtName = properties?.NAME || `District ${district}`;
+      const districtLabel = `${targetInfo.state}-${targetInfo.district}`;
       layer.bindTooltip(
-        `<div style="font-size: 12px; font-weight: 600;">
-          ${districtName}
+        `<div style="font-size: 13px; font-weight: 600; color: #7C3AED;">
+          District ${districtLabel}
         </div>`,
         { permanent: true, direction: 'center', className: 'district-label' }
       );
     }
   };
+
+  // Component to handle map flyTo
+  function MapController() {
+    const map = useMap();
+
+    useEffect(() => {
+      if (targetBounds && map) {
+        map.flyToBounds(targetBounds, {
+          padding: [50, 50],
+          maxZoom: 10,
+          duration: 1.5
+        });
+      }
+    }, [targetBounds, map]);
+
+    return null;
+  }
 
   if (loading) {
     return (
@@ -113,9 +157,9 @@ export default function DistrictMap({ districtCode }: DistrictMapProps) {
 
   return (
     <MapContainer
-      center={mapCenter}
-      zoom={mapZoom}
-      minZoom={5}
+      center={[39.8283, -98.5795]}
+      zoom={4}
+      minZoom={4}
       maxZoom={12}
       scrollWheelZoom={true}
       style={{ height: "100%", width: "100%" }}
@@ -132,6 +176,7 @@ export default function DistrictMap({ districtCode }: DistrictMapProps) {
           key={districtCode} // Re-render when district changes
         />
       )}
+      <MapController />
     </MapContainer>
   );
 }

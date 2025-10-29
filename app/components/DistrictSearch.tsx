@@ -114,6 +114,20 @@ export default function DistrictSearch() {
       const filtered = ALL_DISTRICTS.filter(district =>
         district.startsWith(cleaned)
       ).slice(0, 10);
+
+      // If no district matches and query looks like an address, add address search option
+      if (filtered.length === 0 && query.length >= 5) {
+        // Check if query looks like an address (has numbers or common address words)
+        const looksLikeAddress = /\d/.test(query) ||
+          /street|st|avenue|ave|road|rd|drive|dr|boulevard|blvd|lane|ln|way|court|ct|place|pl|circle|cir/i.test(query);
+
+        if (looksLikeAddress) {
+          setSuggestions(['__ADDRESS__']);
+          setShowSuggestions(true);
+          return;
+        }
+      }
+
       setSuggestions(filtered);
       setShowSuggestions(filtered.length > 0);
     } else {
@@ -135,9 +149,15 @@ export default function DistrictSearch() {
   }, []);
 
   const handleSuggestionClick = (district: string) => {
-    setQuery(district);
-    setShowSuggestions(false);
-    router.push(`/district/${district.toLowerCase()}`);
+    if (district === '__ADDRESS__') {
+      // Trigger address search
+      setShowSuggestions(false);
+      handleSearch();
+    } else {
+      setQuery(district);
+      setShowSuggestions(false);
+      router.push(`/district/${district.toLowerCase()}`);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -176,21 +196,43 @@ export default function DistrictSearch() {
           {/* Autocomplete suggestions */}
           {showSuggestions && suggestions.length > 0 && (
             <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-lg shadow-lg max-h-60 overflow-y-auto z-50">
-              {suggestions.map((district) => (
-                <button
-                  key={district}
-                  onClick={() => handleSuggestionClick(district)}
-                  className="w-full px-4 py-2 text-left text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex items-center gap-2"
-                >
-                  <MapPin className="w-3 h-3 text-purple-500" />
-                  <span className="font-medium text-zinc-900 dark:text-zinc-100">
-                    {formatDistrictLabel(district)}
-                  </span>
-                  <span className="text-xs text-zinc-500 dark:text-zinc-400">
-                    Congressional District
-                  </span>
-                </button>
-              ))}
+              {suggestions.map((district) => {
+                if (district === '__ADDRESS__') {
+                  return (
+                    <button
+                      key={district}
+                      onClick={() => handleSuggestionClick(district)}
+                      className="w-full px-4 py-3 text-left text-sm hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors flex items-center gap-3 border-l-4 border-purple-500"
+                    >
+                      <Search className="w-4 h-4 text-purple-500" />
+                      <div>
+                        <div className="font-medium text-zinc-900 dark:text-zinc-100">
+                          Search for district at this address
+                        </div>
+                        <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                          &quot;{query}&quot;
+                        </div>
+                      </div>
+                    </button>
+                  );
+                }
+
+                return (
+                  <button
+                    key={district}
+                    onClick={() => handleSuggestionClick(district)}
+                    className="w-full px-4 py-2 text-left text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex items-center gap-2"
+                  >
+                    <MapPin className="w-3 h-3 text-purple-500" />
+                    <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                      {formatDistrictLabel(district)}
+                    </span>
+                    <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                      Congressional District
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
