@@ -81,6 +81,14 @@ export default function StateHeatMap() {
     return "#1E3A8A"; // Deep blue
   };
 
+  const getColorLabel = (margin: number): string => {
+    if (margin >= 20) return "Deep Red (Strong Republican)";
+    if (margin >= 10) return "Light Red (Lean Republican)";
+    if (margin >= -9.99) return "Purple (Competitive)";
+    if (margin >= -20) return "Light Blue (Lean Democratic)";
+    return "Deep Blue (Strong Democratic)";
+  };
+
   const fetchStateIssues = async (stateCode: string) => {
     try {
       const response = await fetch(`/api/map/state-news?state=${stateCode}`);
@@ -89,6 +97,17 @@ export default function StateHeatMap() {
     } catch (error) {
       console.error("Error fetching state issues:", error);
       return [];
+    }
+  };
+
+  const fetchPollingData = async (stateCode: string) => {
+    try {
+      const response = await fetch(`/api/state/polling?state=${stateCode}`);
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error fetching polling data:", error);
+      return { trend: null, description: "Polling data unavailable" };
     }
   };
 
@@ -117,10 +136,12 @@ export default function StateHeatMap() {
     }
 
     // Create popup content
-    const createPopupContent = (issues?: string[]) => {
+    const createPopupContent = (issues?: string[], pollingData?: { trend: string | null; description: string }) => {
       const marginText = margin > 0
         ? `R+${margin.toFixed(1)}`
         : `D+${Math.abs(margin).toFixed(1)}`;
+
+      const colorLabel = getColorLabel(margin);
 
       let issuesHtml = '';
       if (issues && issues.length > 0) {
@@ -129,17 +150,41 @@ export default function StateHeatMap() {
         issuesHtml = '<li class="text-xs text-zinc-500">Loading issues...</li>';
       }
 
+      let pollingHtml = '';
+      if (pollingData && pollingData.trend) {
+        pollingHtml = `
+          <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #E4E4E7;">
+            <div style="font-size: 12px; font-weight: 500; margin-bottom: 4px; color: #52525B;">
+              Recent Polling:
+            </div>
+            <div style="font-size: 12px; color: #71717A; margin-bottom: 4px;">
+              <strong>${pollingData.trend}</strong> - ${pollingData.description}
+            </div>
+          </div>
+        `;
+      }
+
       return `
-        <div style="font-size: 14px; min-width: 200px;">
-          <div style="font-weight: 600; margin-bottom: 8px; color: ${winner === 'R' ? '#DC2626' : '#2563EB'};">
-            ${stateName} (${marginText})
+        <div style="font-size: 14px; min-width: 250px; max-width: 350px;">
+          <div style="font-weight: 600; margin-bottom: 4px; color: ${winner === 'R' ? '#DC2626' : '#2563EB'};">
+            ${stateName}
+          </div>
+          <div style="font-size: 11px; color: #71717A; margin-bottom: 8px;">
+            2024: ${marginText} • ${colorLabel}
           </div>
           <div style="font-size: 12px; font-weight: 500; margin-bottom: 4px; color: #52525B;">
             Top Issues:
           </div>
-          <ul style="list-style: disc; padding-left: 16px; margin: 0;">
+          <ul style="list-style: disc; padding-left: 16px; margin: 0 0 8px 0;">
             ${issuesHtml}
           </ul>
+          ${pollingHtml}
+          <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #E4E4E7;">
+            <a href="/state/${stateCode.toLowerCase()}"
+               style="display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: #7C3AED; text-decoration: none; font-weight: 500;">
+              View ${stateName} Details →
+            </a>
+          </div>
         </div>
       `;
     };
@@ -163,18 +208,23 @@ export default function StateHeatMap() {
           });
         }
 
-        // Fetch state issues if not already loaded
+        // Fetch state issues and polling data if not already loaded
         if (!hoveredState || hoveredState.state !== stateCode) {
           setHoveredState({ state: stateCode, issues: [], loading: true });
 
-          const issues = await fetchStateIssues(stateCode);
+          // Fetch both issues and polling data in parallel
+          const [issues, pollingData] = await Promise.all([
+            fetchStateIssues(stateCode),
+            fetchPollingData(stateCode)
+          ]);
+
           setHoveredState({ state: stateCode, issues, loading: false });
 
-          // Update popup with fetched issues
+          // Update popup with fetched data
           if ('getPopup' in target && typeof target.getPopup === 'function') {
             const popup = target.getPopup();
             if (popup) {
-              popup.setContent(createPopupContent(issues));
+              popup.setContent(createPopupContent(issues, pollingData));
             }
           }
         }
