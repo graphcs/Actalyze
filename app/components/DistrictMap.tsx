@@ -39,6 +39,7 @@ export default function DistrictMap({ districtCode }: DistrictMapProps) {
   const [geoData, setGeoData] = useState<GeoJSON.FeatureCollection | null>(null);
   const [loading, setLoading] = useState(true);
   const [targetBounds, setTargetBounds] = useState<L.LatLngBounds | null>(null);
+  const [boundsKey, setBoundsKey] = useState(0);
 
   useEffect(() => {
     // Fetch congressional district boundaries
@@ -70,6 +71,17 @@ export default function DistrictMap({ districtCode }: DistrictMapProps) {
 
   const targetInfo = parseDistrictCode(districtCode);
 
+  useEffect(() => {
+    if (targetInfo) {
+      console.log('🎯 Looking for district:', {
+        code: districtCode,
+        state: targetInfo.state,
+        fips: targetInfo.fips,
+        district: targetInfo.district
+      });
+    }
+  }, [districtCode, targetInfo]);
+
   const onEachDistrict = (feature: GeoJSON.Feature, layer: L.Layer) => {
     const properties = feature.properties as Record<string, string | number | undefined> | null;
     if (!properties || !targetInfo) return;
@@ -79,10 +91,26 @@ export default function DistrictMap({ districtCode }: DistrictMapProps) {
     const geoidValue = typeof properties.GEOID === 'string' ? properties.GEOID.slice(-2) : undefined;
     const featureDistrictFP = properties.CD118FP || properties.CD116FP || properties.DISTRICT || geoidValue;
 
+    // Convert to string for consistent comparison
+    const featureState = String(featureStateFP);
+    const featureDistrict = String(featureDistrictFP);
+
     // Check if this is the target district
     const isTargetDistrict =
-      featureStateFP === targetInfo.fips &&
-      featureDistrictFP === targetInfo.district;
+      featureState === targetInfo.fips &&
+      featureDistrict === targetInfo.district;
+
+    // Debug logging for first match
+    if (isTargetDistrict) {
+      console.log('✅ Found target district!', {
+        targetCode: districtCode,
+        targetFIPS: targetInfo.fips,
+        targetDistrict: targetInfo.district,
+        featureState,
+        featureDistrict,
+        properties
+      });
+    }
 
     // Style districts
     if ('setStyle' in layer && typeof layer.setStyle === 'function') {
@@ -99,6 +127,8 @@ export default function DistrictMap({ districtCode }: DistrictMapProps) {
         if ('getBounds' in layer && typeof layer.getBounds === 'function') {
           const bounds = layer.getBounds();
           setTargetBounds(bounds);
+          setBoundsKey(prev => prev + 1);
+          console.log('🗺️  District bounds set, will fly to:', bounds);
         }
       } else {
         // Show other districts faintly
@@ -129,13 +159,17 @@ export default function DistrictMap({ districtCode }: DistrictMapProps) {
 
     useEffect(() => {
       if (targetBounds && map) {
-        map.flyToBounds(targetBounds, {
-          padding: [50, 50],
-          maxZoom: 10,
-          duration: 1.5
-        });
+        console.log('📍 Flying to district bounds:', targetBounds);
+        setTimeout(() => {
+          map.flyToBounds(targetBounds, {
+            padding: [50, 50],
+            maxZoom: 10,
+            duration: 1.5
+          });
+        }, 200);
       }
-    }, [targetBounds, map]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [map, boundsKey]);
 
     return null;
   }
