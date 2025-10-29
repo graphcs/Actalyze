@@ -3,17 +3,32 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
 import {
   ChevronLeft,
   MapPin,
   Newspaper,
   Scale,
   TrendingUp,
+  ExternalLink,
 } from "lucide-react";
 import Nav from "../../components/Nav";
 import { Button } from "../../components/ui/Button";
 import { Badge } from "../../components/ui/Badge";
 import { Card, CardHeader, CardContent } from "../../components/ui/Card";
+
+// Dynamically import map to avoid SSR issues
+const StateViewMap = dynamic(
+  () => import("../../components/StateViewMap"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-full flex items-center justify-center bg-zinc-50 dark:bg-zinc-900/40">
+        <div className="text-sm text-zinc-600">Loading map...</div>
+      </div>
+    )
+  }
+);
 
 const STATE_NAMES: Record<string, string> = {
   "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas", "CA": "California",
@@ -28,6 +43,14 @@ const STATE_NAMES: Record<string, string> = {
   "VA": "Virginia", "WA": "Washington", "WV": "West Virginia", "WI": "Wisconsin", "WY": "Wyoming",
   "DC": "District of Columbia"
 };
+
+interface Headline {
+  title: string;
+  url: string;
+  source: string;
+  date?: string;
+  thumbnail?: string;
+}
 
 interface PartyPerspectives {
   democrats: {
@@ -47,6 +70,7 @@ export default function StatePage() {
   const stateName = STATE_NAMES[stateCode];
 
   const [issues, setIssues] = useState<string[]>([]);
+  const [headlines, setHeadlines] = useState<Headline[]>([]);
   const [pollingData, setPollingData] = useState<{ trend: string | null; description: string } | null>(null);
   const [perspectives, setPerspectives] = useState<PartyPerspectives | null>(null);
   const [loading, setLoading] = useState(true);
@@ -57,11 +81,13 @@ export default function StatePage() {
     // Fetch state data in parallel
     Promise.all([
       fetch(`/api/map/state-news?state=${stateCode}`).then(res => res.json()),
+      fetch(`/api/state/news?state=${stateCode}`).then(res => res.json()),
       fetch(`/api/state/polling?state=${stateCode}`).then(res => res.json()),
       fetch(`/api/topic/perspectives?topic=${stateName} politics`).then(res => res.json()),
     ])
-      .then(([newsData, polling, perspectivesData]) => {
-        setIssues(newsData.issues || []);
+      .then(([issuesData, headlinesData, polling, perspectivesData]) => {
+        setIssues(issuesData.issues || []);
+        setHeadlines(headlinesData.headlines || []);
         setPollingData(polling);
         setPerspectives(perspectivesData);
         setLoading(false);
@@ -120,7 +146,94 @@ export default function StatePage() {
           </div>
         </div>
 
-        {/* Content Grid */}
+        {/* Map and News Grid */}
+        <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-5 pb-8">
+          {/* State Map */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div className="font-semibold flex items-center gap-2">
+                <MapPin className="w-4 h-4" />
+                State Map
+              </div>
+              <Badge className="bg-purple-100 text-purple-900 dark:bg-purple-900 dark:text-purple-100">
+                {stateCode}
+              </Badge>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="w-full h-[400px]">
+                <StateViewMap
+                  stateCode={stateCode}
+                  pollingTrend={pollingData?.trend}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Local News Headlines */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div className="font-semibold flex items-center gap-2">
+                <Newspaper className="w-4 h-4" />
+                Local News
+              </div>
+              <Badge className="bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100">
+                Headlines
+              </Badge>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="text-sm text-zinc-500 dark:text-zinc-400 py-8 text-center">
+                  Loading news...
+                </div>
+              ) : headlines.length === 0 ? (
+                <div className="text-sm text-zinc-500 dark:text-zinc-400 py-8 text-center">
+                  No headlines available
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {headlines.map((headline, i) => (
+                    <a
+                      key={i}
+                      href={headline.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block group"
+                    >
+                      <div className="flex gap-3">
+                        {headline.thumbnail && (
+                          <div className="flex-shrink-0">
+                            <img
+                              src={headline.thumbnail}
+                              alt=""
+                              className="w-16 h-16 rounded-lg object-cover"
+                            />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium text-zinc-900 dark:text-zinc-100 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors line-clamp-2 mb-1">
+                            {headline.title}
+                          </div>
+                          <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+                            <span>{headline.source}</span>
+                            {headline.date && (
+                              <>
+                                <span>•</span>
+                                <span>{headline.date}</span>
+                              </>
+                            )}
+                            <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </div>
+                        </div>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Issues and Polling Grid */}
         <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-5 pb-8">
           {/* Top Issues */}
           <Card>
