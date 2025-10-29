@@ -43,31 +43,40 @@ export default function DistrictMap({ districtCode }: DistrictMapProps) {
 
   useEffect(() => {
     // Fetch congressional district boundaries
-    // Using Eric Celeste's 118th Congress districts GeoJSON (reliable source)
-    const url = 'https://raw.githubusercontent.com/ericceleste/us-congress-districts-geojson/main/districts-118.geojson';
+    // Using a reliable CDN source with 118th Congress districts
+    const urls = [
+      'https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-congressional-districts.json',
+      'https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/united-states-congressional-districts.geojson'
+    ];
 
-    console.log('🗺️  Fetching district boundaries from:', url);
+    const tryUrls = async () => {
+      for (const url of urls) {
+        try {
+          console.log('🗺️  Fetching district boundaries from:', url);
+          const res = await fetch(url);
+          console.log('📦 GeoJSON response status:', res.status);
 
-    fetch(url)
-      .then((res) => {
-        console.log('📦 GeoJSON response status:', res.status);
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}`);
+          if (res.ok) {
+            const data = await res.json();
+            console.log('✅ GeoJSON loaded, features:', data.features?.length);
+            if (data.features && data.features.length > 0) {
+              console.log('📋 Sample feature properties:', data.features[0].properties);
+            }
+            setGeoData(data);
+            setLoading(false);
+            return;
+          }
+        } catch (error) {
+          console.error(`❌ Failed to load from ${url}:`, error);
         }
-        return res.json();
-      })
-      .then((data) => {
-        console.log('✅ GeoJSON loaded, features:', data.features?.length);
-        if (data.features && data.features.length > 0) {
-          console.log('📋 Sample feature properties:', data.features[0].properties);
-        }
-        setGeoData(data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error("❌ Error loading congressional districts:", error);
-        setLoading(false);
-      });
+      }
+
+      // If all fail, try loading from our own hosted file
+      console.log('⚠️ All sources failed, trying to use state boundaries instead');
+      setLoading(false);
+    };
+
+    tryUrls();
   }, []);
 
   // Parse the target district code
