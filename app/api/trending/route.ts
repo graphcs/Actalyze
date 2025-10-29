@@ -199,7 +199,7 @@ export async function GET() {
         mentionsOverTime,
         thumbnails: thumbnails.length > 0 ? thumbnails : undefined,
       };
-    });
+    }));
 
     return NextResponse.json(trendingTopicsArray);
 
