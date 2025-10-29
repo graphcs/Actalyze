@@ -59,6 +59,89 @@ async function fetchTopicThumbnails(topic: string): Promise<string[]> {
 }
 
 /**
+ * Use Gemini to identify and remove duplicate/similar topics
+ */
+async function deduplicateTopics(topics: TrendingTopic[]): Promise<TrendingTopic[]> {
+  try {
+    if (topics.length <= 1) return topics;
+
+    const apiKey = process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      console.warn('⚠️ API key not set, skipping deduplication');
+      return topics;
+    }
+
+    const useOpenRouter = !!process.env.OPENROUTER_API_KEY;
+    const baseURL = useOpenRouter
+      ? 'https://openrouter.ai/api/v1/chat/completions'
+      : 'https://api.openai.com/v1/chat/completions';
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    };
+
+    if (useOpenRouter) {
+      headers['HTTP-Referer'] = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000';
+      headers['X-Title'] = 'Actalyze';
+    }
+
+    // Create numbered list of topics
+    const topicList = topics.map((t, i) => `${i + 1}. ${t.title}`).join('\n');
+
+    const response = await fetch(baseURL, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        model: useOpenRouter ? 'google/gemini-2.5-flash' : 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'user',
+            content: `You are analyzing trending political topics to remove duplicates. Below is a numbered list of topics.
+
+${topicList}
+
+Identify which topics are duplicates or very similar (covering the same story/event). When duplicates exist, keep ONLY the one that appears first in the list.
+
+Return ONLY a JSON array of numbers representing the topics to KEEP (not remove). For example: [1,2,4,5,7] means keep topics 1,2,4,5,7 and remove 3,6,8,9.
+
+Return ONLY the JSON array, nothing else.`,
+          },
+        ],
+        temperature: 0.2,
+        max_tokens: 100,
+      }),
+      signal: AbortSignal.timeout(10000),
+    });
+
+    if (!response.ok) {
+      console.error(`Deduplication API error: ${response.status}`);
+      return topics;
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content?.trim();
+
+    if (!content) return topics;
+
+    // Parse the JSON array
+    const keepIndices = JSON.parse(content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim());
+
+    if (!Array.isArray(keepIndices)) return topics;
+
+    // Filter topics based on indices (convert 1-based to 0-based)
+    const deduped = topics.filter((_, i) => keepIndices.includes(i + 1));
+
+    console.log(`🔍 Deduplication: ${topics.length} → ${deduped.length} topics (removed ${topics.length - deduped.length} duplicates)`);
+
+    return deduped;
+  } catch (error) {
+    console.error('Error deduplicating topics:', error);
+    return topics; // Return original on error
+  }
+}
+
+/**
  * Use Gemini Flash via OpenRouter to convert cryptic topic names into clear, human-readable titles
  */
 async function convertTopicTitle(rawTopic: string, examples: string[]): Promise<string> {
@@ -178,12 +261,20 @@ export async function GET() {
         tags.push('Politics', 'Trending');
       }
 
-      // Generate realistic-looking sparkline data (trending upward)
-      const baseCount = 20 + Math.floor(Math.random() * 30);
-      const mentionsOverTime = Array.from({ length: 14 }, (_, i) => ({
-        day: i + 1,
-        count: Math.floor(baseCount + (i * 2.5) + (Math.random() * 8)),
-      }));
+      // Generate realistic-looking sparkline data with natural variation
+      const baseCount = 15 + Math.floor(Math.random() * 35);
+      const trendDirection = Math.random() > 0.3 ? 1 : -0.5; // Usually trending up
+      const volatility = 5 + Math.random() * 10; // Random daily variation
+
+      const mentionsOverTime = Array.from({ length: 7 }, (_, i) => {
+        const trend = i * 2.5 * trendDirection;
+        const noise = (Math.random() - 0.5) * volatility;
+        const weekendDip = (i % 7 === 5 || i % 7 === 6) ? -3 : 0; // Slight weekend dip
+        return {
+          day: i + 1,
+          count: Math.max(5, Math.floor(baseCount + trend + noise + weekendDip)),
+        };
+      });
 
       // Estimate mentions based on score
       const mentions = Math.floor((topic.score / 100) * 100000) + 10000;
@@ -201,7 +292,10 @@ export async function GET() {
       };
     }));
 
-    return NextResponse.json(trendingTopicsArray);
+    // Deduplicate similar topics using AI
+    const dedupedTopics = await deduplicateTopics(trendingTopicsArray);
+
+    return NextResponse.json(dedupedTopics);
 
   } catch (error) {
     console.error("❌ Error fetching trending topics:", error);
@@ -241,7 +335,7 @@ function getMockTrendingTopics(): TrendingTopic[] {
       momentum: 78,
       cost: 1100,
       color: "#111827",
-      mentionsOverTime: Array.from({ length: 14 }, (_, i) => ({
+      mentionsOverTime: Array.from({ length: 7 }, (_, i) => ({
         day: i + 1,
         count: Math.floor(30 + i * 3 + Math.random() * 10),
       })),
@@ -254,7 +348,7 @@ function getMockTrendingTopics(): TrendingTopic[] {
       momentum: 69,
       cost: 210,
       color: "#0ea5e9",
-      mentionsOverTime: Array.from({ length: 14 }, (_, i) => ({
+      mentionsOverTime: Array.from({ length: 7 }, (_, i) => ({
         day: i + 1,
         count: Math.floor(25 + i * 3 + Math.random() * 10),
       })),
@@ -267,7 +361,7 @@ function getMockTrendingTopics(): TrendingTopic[] {
       momentum: 61,
       cost: 95,
       color: "#16a34a",
-      mentionsOverTime: Array.from({ length: 14 }, (_, i) => ({
+      mentionsOverTime: Array.from({ length: 7 }, (_, i) => ({
         day: i + 1,
         count: Math.floor(22 + i * 3 + Math.random() * 10),
       })),
@@ -280,7 +374,7 @@ function getMockTrendingTopics(): TrendingTopic[] {
       momentum: 72,
       cost: 840,
       color: "#ef4444",
-      mentionsOverTime: Array.from({ length: 14 }, (_, i) => ({
+      mentionsOverTime: Array.from({ length: 7 }, (_, i) => ({
         day: i + 1,
         count: Math.floor(27 + i * 3 + Math.random() * 10),
       })),
