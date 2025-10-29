@@ -42,21 +42,23 @@ export default function DistrictMap({ districtCode }: DistrictMapProps) {
   const [boundsKey, setBoundsKey] = useState(0);
 
   useEffect(() => {
-    // Using Mapbox's maintained congressional districts dataset
-    const url = 'https://docs.mapbox.com/mapbox-gl-js/assets/us_congressional_districts.geojson';
+    // Using US Census Bureau TIGERweb ArcGIS service for 119th Congress districts
+    // Query all features as GeoJSON
+    const url = 'https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/tigerWMS_Current/MapServer/54/query?where=1%3D1&outFields=*&outSR=4326&f=geojson';
 
-    console.log('🗺️  Fetching district boundaries from:', url);
+    console.log('🗺️  Fetching district boundaries from US Census Bureau TIGERweb...');
 
     fetch(url)
       .then((res) => {
-        console.log('📦 GeoJSON response status:', res.status);
+        console.log('📦 Census Bureau response status:', res.status);
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}`);
         }
         return res.json();
       })
       .then((data) => {
-        console.log('✅ GeoJSON loaded, features:', data.features?.length);
+        console.log('✅ GeoJSON loaded from Census Bureau!');
+        console.log('📊 Total features:', data.features?.length);
         if (data.features && data.features.length > 0) {
           console.log('📋 Sample feature properties:', data.features[0].properties);
         }
@@ -64,7 +66,7 @@ export default function DistrictMap({ districtCode }: DistrictMapProps) {
         setLoading(false);
       })
       .catch((error) => {
-        console.error("❌ Error loading congressional districts:", error);
+        console.error("❌ Error loading congressional districts from Census Bureau:", error);
         setLoading(false);
       });
   }, []);
@@ -100,21 +102,21 @@ export default function DistrictMap({ districtCode }: DistrictMapProps) {
     const properties = feature.properties as Record<string, string | number | undefined> | null;
     if (!properties || !targetInfo) return;
 
-    // Try multiple property name variations
-    // Eric Celeste format: { STATECODE: "VA", DISTRICT: "01" }
-    // Census format: { STATEFP: "51", CD118FP: "01" }
-    const featureStateCode = properties.STATECODE || properties.STATE;
-    const featureStateFP = properties.STATEFP || properties.STATEFP20;
-    const featureDistrictNum = properties.DISTRICT || properties.CD118FP || properties.CD116FP;
+    // Census Bureau TIGERweb format properties:
+    // STATEFP: "51" (FIPS code)
+    // BASENAME: "1" or "01" (district number)
+    // CD119FP: "01" (119th Congress district)
+    // GEOID: "5101" (state FIPS + district)
+
+    const featureStateFP = String(properties.STATEFP || properties.STATE || '');
+    const featureDistrictNum = String(properties.CD119FP || properties.CD118FP || properties.BASENAME || properties.DISTRICT || '');
     const geoidValue = typeof properties.GEOID === 'string' ? properties.GEOID.slice(-2) : undefined;
 
-    // Check both state code (VA) and FIPS (51) formats
-    const matchByCode = featureStateCode === targetInfo.state &&
-                        String(featureDistrictNum).padStart(2, '0') === targetInfo.district;
-    const matchByFIPS = String(featureStateFP) === targetInfo.fips &&
-                        String(featureDistrictNum || geoidValue).padStart(2, '0') === targetInfo.district;
+    // Normalize district number (ensure 2 digits)
+    const normalizedDistrict = featureDistrictNum ? String(featureDistrictNum).padStart(2, '0') : geoidValue;
 
-    const isTargetDistrict = matchByCode || matchByFIPS;
+    // Match by FIPS code
+    const isTargetDistrict = featureStateFP === targetInfo.fips && normalizedDistrict === targetInfo.district;
 
     // Debug logging for first match
     if (isTargetDistrict) {
@@ -122,11 +124,10 @@ export default function DistrictMap({ districtCode }: DistrictMapProps) {
         targetCode: districtCode,
         target: { state: targetInfo.state, fips: targetInfo.fips, district: targetInfo.district },
         feature: {
-          stateCode: featureStateCode,
           stateFP: featureStateFP,
-          district: featureDistrictNum
+          districtRaw: featureDistrictNum,
+          districtNormalized: normalizedDistrict
         },
-        matchedBy: matchByCode ? 'CODE' : 'FIPS',
         allProperties: properties
       });
     }
