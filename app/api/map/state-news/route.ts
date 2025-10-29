@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { serverCache, generateCacheKey } from "@/src/lib/cache";
 
 // Map of state codes to full names
 const STATE_NAMES: Record<string, string> = {
@@ -18,6 +19,7 @@ const STATE_NAMES: Record<string, string> = {
 /**
  * GET /api/map/state-news?state=VA
  * Returns top political issues for a state using OpenRouter/Sonar
+ * Supports caching via x-use-cache header
  */
 export async function GET(request: NextRequest) {
   try {
@@ -32,6 +34,16 @@ export async function GET(request: NextRequest) {
     }
 
     const stateName = STATE_NAMES[stateCode];
+
+    // Check cache
+    const useCacheHeader = request.headers.get('x-use-cache');
+    const useCache = useCacheHeader !== 'false';
+    const cacheKey = generateCacheKey('state-news', { state: stateCode });
+    const cached = serverCache.get<{ issues: string[] }>(cacheKey, useCache);
+
+    if (cached) {
+      return NextResponse.json(cached);
+    }
 
     console.log(`📰 Fetching top issues for ${stateName} (${stateCode})`);
 
@@ -112,9 +124,14 @@ export async function GET(request: NextRequest) {
 
     console.log(`✅ Got ${issues.length} issues for ${stateName}`);
 
-    return NextResponse.json({
+    const result = {
       issues: issues.slice(0, 4)
-    });
+    };
+
+    // Save to cache
+    serverCache.set(cacheKey, result);
+
+    return NextResponse.json(result);
 
   } catch (error) {
     console.error('Error fetching state news:', error);

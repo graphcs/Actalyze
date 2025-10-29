@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { serverCache, generateCacheKey } from "@/src/lib/cache";
 
 /**
  * GET /api/district/polling?district=VA05

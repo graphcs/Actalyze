@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { serverCache, generateCacheKey } from "@/src/lib/cache";
 
 export interface PartyPerspective {
   democrats: {
@@ -16,6 +17,7 @@ export interface PartyPerspective {
 /**
  * GET /api/topic/perspectives?topic=...
  * Returns AI-generated summaries of Democrat and Republican perspectives
+ * Supports caching via x-use-cache header (default: true)
  */
 export async function GET(request: NextRequest) {
   try {
@@ -27,6 +29,18 @@ export async function GET(request: NextRequest) {
         { error: 'Missing topic parameter' },
         { status: 400 }
       );
+    }
+
+    // Check cache preference from header (default: true)
+    const useCacheHeader = request.headers.get('x-use-cache');
+    const useCache = useCacheHeader !== 'false';
+
+    // Try to get from cache
+    const cacheKey = generateCacheKey('perspectives', { topic });
+    const cached = serverCache.get<PartyPerspective>(cacheKey, useCache);
+
+    if (cached) {
+      return NextResponse.json(cached);
     }
 
     const apiKey = process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY;
@@ -47,10 +61,15 @@ export async function GET(request: NextRequest) {
       generatePerspective(topic, "Republicans", apiKey, useOpenRouter),
     ]);
 
-    return NextResponse.json({
+    const result: PartyPerspective = {
       democrats: democratResponse,
       republicans: republicanResponse,
-    } as PartyPerspective);
+    };
+
+    // Save to cache (always save, even if user has caching off)
+    serverCache.set(cacheKey, result);
+
+    return NextResponse.json(result);
 
   } catch (error) {
     console.error('❌ Error generating perspectives:', error);

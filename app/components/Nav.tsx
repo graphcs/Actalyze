@@ -4,6 +4,7 @@ import { Landmark, Globe2, BookOpen, MessageSquare, Upload } from "lucide-react"
 import { Button } from "./ui/Button";
 import { Badge } from "./ui/Badge";
 import { useRouter, usePathname } from "next/navigation";
+import CacheToggle from "./CacheToggle";
 
 interface NavProps {
   onChatClick?: () => void;
@@ -35,6 +36,7 @@ export default function Nav({ onChatClick, onUploadClick }: NavProps) {
           </Badge>
         </div>
         <div className="flex items-center gap-2">
+          <CacheToggle />
           {tabs.map((t) => (
             <Button
               key={t.id}
