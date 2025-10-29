@@ -14,7 +14,7 @@ interface TrendingTopic {
 }
 
 /**
- * Fetch 1-2 thumbnails for a topic from SERPAPI Google News
+ * Fetch 1 thumbnail for a topic from SERPAPI Google News
  */
 async function fetchTopicThumbnails(topic: string): Promise<string[]> {
   try {
@@ -42,14 +42,14 @@ async function fetchTopicThumbnails(topic: string): Promise<string[]> {
     const data = await response.json();
     const newsResults = data.news_results || [];
 
-    // Extract thumbnails from first 2 articles that have them
+    // Extract thumbnail from first article that has one
     const thumbnails = newsResults
       .slice(0, 3)
       .map((article: { thumbnail?: string; image?: string }) =>
         article.thumbnail || article.image
       )
       .filter((url: string | undefined) => url)
-      .slice(0, 2);
+      .slice(0, 1);
 
     return thumbnails;
   } catch (error) {
@@ -93,7 +93,7 @@ async function convertTopicTitle(rawTopic: string, examples: string[]): Promise<
       method: 'POST',
       headers,
       body: JSON.stringify({
-        model: useOpenRouter ? 'google/gemini-flash-1.5' : 'gpt-4o-mini',
+        model: useOpenRouter ? 'google/gemini-2.5-flash' : 'gpt-4o-mini',
         messages: [
           {
             role: 'user',

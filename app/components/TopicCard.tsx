@@ -49,27 +49,22 @@ export default function TopicCard({ topic, rank, onOpen }: TopicCardProps) {
         </div>
       </CardHeader>
       <CardContent>
-        {/* Chart with SERPAPI data */}
-        <div className="mb-3">
-          <TopicChart topic={topic.title} />
-        </div>
-
-        {/* Thumbnails */}
-        {topic.thumbnails && topic.thumbnails.length > 0 && (
-          <div className="flex gap-2 mb-3">
-            {topic.thumbnails.slice(0, 2).map((thumbnail, idx) => (
-              <img
-                key={idx}
-                src={thumbnail}
-                alt={`${topic.title} thumbnail ${idx + 1}`}
-                className="w-16 h-16 object-cover rounded flex-shrink-0 border border-zinc-200 dark:border-zinc-700"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
-            ))}
+        {/* Chart and Thumbnail side-by-side */}
+        <div className="mb-3 flex gap-3 items-center">
+          <div className="flex-1 min-w-0">
+            <TopicChart topic={topic.title} />
           </div>
-        )}
+          {topic.thumbnails && topic.thumbnails.length > 0 && (
+            <img
+              src={topic.thumbnails[0]}
+              alt={topic.title}
+              className="w-24 h-24 object-cover rounded border border-zinc-200 dark:border-zinc-700 flex-shrink-0"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
+            />
+          )}
+        </div>
 
         {/* Tags */}
         <div className="flex flex-wrap gap-1">
