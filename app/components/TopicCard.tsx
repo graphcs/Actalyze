@@ -1,6 +1,6 @@
 "use client";
 
-import { TrendingUp } from "lucide-react";
+import { TrendingUp, Flame } from "lucide-react";
 import { Card, CardHeader, CardContent } from "./ui/Card";
 import { Badge } from "./ui/Badge";
 import TopicChart from "./TopicChart";
@@ -23,12 +23,32 @@ interface TopicCardProps {
   onOpen: (topic: Topic) => void;
 }
 
-function numberFmt(n: number): string {
-  if (n >= 1000) return (n / 1000).toFixed(1) + "k";
-  return n.toString();
+function getHeatColor(score: number): { bg: string; text: string; border: string } {
+  if (score >= 90) {
+    return {
+      bg: "bg-red-100 dark:bg-red-950/30",
+      text: "text-red-700 dark:text-red-400",
+      border: "border-red-300 dark:border-red-800",
+    };
+  } else if (score >= 70) {
+    return {
+      bg: "bg-orange-100 dark:bg-orange-950/30",
+      text: "text-orange-700 dark:text-orange-400",
+      border: "border-orange-300 dark:border-orange-800",
+    };
+  } else {
+    return {
+      bg: "bg-yellow-100 dark:bg-yellow-950/30",
+      text: "text-yellow-700 dark:text-yellow-400",
+      border: "border-yellow-300 dark:border-yellow-800",
+    };
+  }
 }
 
 export default function TopicCard({ topic, rank, onOpen }: TopicCardProps) {
+  const heatColors = getHeatColor(topic.momentum);
+  const isOnFire = topic.momentum >= 90;
+
   return (
     <Card
       className="hover:shadow-md transition cursor-pointer"
@@ -44,8 +64,13 @@ export default function TopicCard({ topic, rank, onOpen }: TopicCardProps) {
             {topic.title}
           </div>
         </div>
-        <div className="text-xs text-zinc-500 whitespace-nowrap">
-          {numberFmt(topic.mentions)} mentions
+        <div
+          className={`flex items-center gap-1 px-2 py-1 rounded-full border text-xs font-semibold whitespace-nowrap ${heatColors.bg} ${heatColors.text} ${heatColors.border}`}
+        >
+          {isOnFire && (
+            <Flame className="w-3 h-3 animate-pulse" />
+          )}
+          <span>{topic.momentum}° Heat</span>
         </div>
       </CardHeader>
       <CardContent>

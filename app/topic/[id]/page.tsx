@@ -61,6 +61,16 @@ function numberFmt(n: number): string {
   return n.toString();
 }
 
+function getHeatColor(score: number): string {
+  if (score >= 90) {
+    return "bg-red-100 text-red-700 border-red-300 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800";
+  } else if (score >= 70) {
+    return "bg-orange-100 text-orange-700 border-orange-300 dark:bg-orange-950/30 dark:text-orange-400 dark:border-orange-800";
+  } else {
+    return "bg-yellow-100 text-yellow-700 border-yellow-300 dark:bg-yellow-950/30 dark:text-yellow-400 dark:border-yellow-800";
+  }
+}
+
 export default function TopicPage() {
   const params = useParams();
   const router = useRouter();
@@ -210,14 +220,14 @@ export default function TopicPage() {
             <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
               {topic.title}
             </h1>
-            <Badge>
-              <Flame className="w-3 h-3" />
-              Momentum {topic.momentum}
-            </Badge>
-            <Badge className="bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-200">
-              <MessageSquare className="w-3 h-3" />
-              {numberFmt(topic.mentions)} mentions
-            </Badge>
+            <div
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border font-semibold text-sm ${getHeatColor(topic.momentum)}`}
+            >
+              {topic.momentum >= 90 && (
+                <Flame className="w-4 h-4 animate-pulse" />
+              )}
+              <span>{topic.momentum}° Heat</span>
+            </div>
           </div>
           <div className="mt-4 flex flex-wrap gap-3">
             <Button onClick={handleChat}>
