@@ -10,6 +10,8 @@ import {
   Newspaper,
   Scale,
   ExternalLink,
+  TrendingUp,
+  FileText,
 } from "lucide-react";
 import Nav from "../../components/Nav";
 import DistrictSearch from "../../components/DistrictSearch";
@@ -56,6 +58,7 @@ export default function DistrictPage() {
 
   const [headlines, setHeadlines] = useState<Headline[]>([]);
   const [summary, setSummary] = useState<string>("");
+  const [pollingData, setPollingData] = useState<{ trend: string | null; description: string } | null>(null);
   const [perspectives, setPerspectives] = useState<PartyPerspectives | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -66,11 +69,13 @@ export default function DistrictPage() {
     Promise.all([
       fetch(`/api/district/news?district=${districtCode}`).then(res => res.json()),
       fetch(`/api/district/summary?district=${districtCode}`).then(res => res.json()),
+      fetch(`/api/district/polling?district=${districtCode}`).then(res => res.json()),
       fetch(`/api/topic/perspectives?topic=${districtCode} district`).then(res => res.json()),
     ])
-      .then(([newsData, summaryData, perspectivesData]) => {
+      .then(([newsData, summaryData, polling, perspectivesData]) => {
         setHeadlines(newsData.headlines || []);
         setSummary(summaryData.summary || "");
+        setPollingData(polling);
         setPerspectives(perspectivesData);
         setLoading(false);
       })
@@ -144,9 +149,12 @@ export default function DistrictPage() {
                 <MapPin className="w-4 h-4" />
                 District Map
               </div>
+              <Badge className="bg-purple-100 text-purple-900 dark:bg-purple-900 dark:text-purple-100">
+                {districtLabel}
+              </Badge>
             </CardHeader>
-            <CardContent>
-              <div className="h-[400px] w-full rounded-xl overflow-hidden">
+            <CardContent className="p-0">
+              <div className="h-[400px] w-full">
                 <DistrictMap districtCode={districtCode} />
               </div>
             </CardContent>
@@ -159,39 +167,54 @@ export default function DistrictPage() {
                 <Newspaper className="w-4 h-4" />
                 Local News
               </div>
-              <Badge className="bg-green-100 text-green-900 dark:bg-green-900 dark:text-green-100">
+              <Badge className="bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100">
                 Headlines
               </Badge>
             </CardHeader>
             <CardContent>
               {loading ? (
                 <div className="text-sm text-zinc-500 dark:text-zinc-400 py-8 text-center">
-                  Loading local news...
+                  Loading news...
                 </div>
               ) : headlines.length === 0 ? (
                 <div className="text-sm text-zinc-500 dark:text-zinc-400 py-8 text-center">
-                  No local news available
+                  No headlines available
                 </div>
               ) : (
-                <div className="space-y-3 max-h-[360px] overflow-y-auto">
+                <div className="space-y-4">
                   {headlines.map((headline, i) => (
                     <a
                       key={i}
                       href={headline.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="block p-3 rounded-lg bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900/60 transition"
+                      className="block group"
                     >
-                      <div className="flex items-start justify-between gap-2">
+                      <div className="flex gap-3">
+                        {headline.thumbnail && (
+                          <div className="flex-shrink-0">
+                            <img
+                              src={headline.thumbnail}
+                              alt=""
+                              className="w-16 h-16 rounded-lg object-cover"
+                            />
+                          </div>
+                        )}
                         <div className="flex-1 min-w-0">
-                          <div className="text-sm text-zinc-900 dark:text-zinc-100 font-medium mb-1 line-clamp-2">
+                          <div className="text-sm font-medium text-zinc-900 dark:text-zinc-100 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors line-clamp-2 mb-1">
                             {headline.title}
                           </div>
-                          <div className="text-xs text-zinc-500 dark:text-zinc-400">
-                            {headline.source}
+                          <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+                            <span>{headline.source}</span>
+                            {headline.date && (
+                              <>
+                                <span>•</span>
+                                <span>{headline.date}</span>
+                              </>
+                            )}
+                            <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                           </div>
                         </div>
-                        <ExternalLink className="w-3 h-3 text-zinc-400 flex-shrink-0 mt-1" />
                       </div>
                     </a>
                   ))}
@@ -201,23 +224,62 @@ export default function DistrictPage() {
           </Card>
         </div>
 
-        {/* District Summary */}
-        <div className="max-w-7xl mx-auto px-4 pb-8">
+        {/* Summary and Polling Grid */}
+        <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-5 pb-8">
+          {/* District Summary */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-              <div className="font-semibold">District News Summary</div>
+              <div className="font-semibold flex items-center gap-2">
+                <FileText className="w-4 h-4" />
+                District News Summary
+              </div>
               <Badge className="bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100">
                 This Week
               </Badge>
             </CardHeader>
             <CardContent>
               {loading ? (
-                <div className="text-sm text-zinc-500 dark:text-zinc-400 text-center py-4">
+                <div className="text-sm text-zinc-500 dark:text-zinc-400 py-8 text-center">
                   Generating summary...
                 </div>
               ) : (
-                <div className="text-zinc-700 dark:text-zinc-300 leading-relaxed">
-                  {summary}
+                <div className="prose prose-sm dark:prose-invert max-w-none">
+                  <p className="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed">
+                    {summary}
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Recent Polling */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div className="font-semibold flex items-center gap-2">
+                <TrendingUp className="w-4 h-4" />
+                Recent Polling
+              </div>
+              <Badge className="bg-green-100 text-green-900 dark:bg-green-900 dark:text-green-100">
+                Trends
+              </Badge>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="text-sm text-zinc-500 dark:text-zinc-400 py-8 text-center">
+                  Loading polling data...
+                </div>
+              ) : !pollingData || !pollingData.trend ? (
+                <div className="text-sm text-zinc-500 dark:text-zinc-400 py-8 text-center">
+                  Polling data unavailable
+                </div>
+              ) : (
+                <div>
+                  <div className="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-2">
+                    {pollingData.trend}
+                  </div>
+                  <div className="text-sm text-zinc-700 dark:text-zinc-300">
+                    {pollingData.description}
+                  </div>
                 </div>
               )}
             </CardContent>
