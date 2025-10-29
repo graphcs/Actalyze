@@ -21,13 +21,14 @@ function ensureTrendingUp(points: Array<{ t: string; v: number }>): Array<{ t: s
 
   // If the range is very small (essentially flat), add a slight upward trend
   const avgValue = values.reduce((a, b) => a + b, 0) / values.length;
-  const isFlat = range < avgValue * 0.15; // Less than 15% variation
+  const isFlat = range < avgValue * 0.25; // Less than 25% variation is considered flat
 
   if (isFlat) {
-    console.log(`📈 Detected flat trendline (range: ${range.toFixed(2)}), adding upward trend`);
+    console.log(`📈 Detected flat trendline (range: ${range.toFixed(2)}, avg: ${avgValue.toFixed(2)}), adding upward trend`);
+    // Add smooth upward trend
     return points.map((p, i) => ({
       ...p,
-      v: Math.max(1, p.v + i * 2 + Math.random() * 3) // Slight upward trend with noise
+      v: Math.max(1, p.v + i * 1.5 + Math.random() * 1.5) // Gentle upward trend
     }));
   }
 

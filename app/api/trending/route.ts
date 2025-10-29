@@ -14,6 +14,27 @@ interface TrendingTopic {
 }
 
 /**
+ * Generate a consistent seed from a string (for deterministic random)
+ */
+function hashCode(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return Math.abs(hash);
+}
+
+/**
+ * Seeded random number generator (0-1)
+ */
+function seededRandom(seed: number): number {
+  const x = Math.sin(seed++) * 10000;
+  return x - Math.floor(x);
+}
+
+/**
  * Fetch 1 thumbnail for a topic from SERPAPI Google News
  */
 async function fetchTopicThumbnails(topic: string): Promise<string[]> {
@@ -256,29 +277,33 @@ export async function GET() {
 
       // Extract tags from examples or topic
       const tags = topic.examples
-        .slice(0, 2)
+        .slice(0, 3)
         .map(ex => {
           const words = ex.split(' ').filter(w => w.length > 4);
           return words[0] || 'Politics';
         })
         .filter(Boolean);
 
-      if (tags.length === 0) {
-        tags.push('Politics', 'Trending');
+      // Remove duplicates from tags (case-insensitive)
+      const uniqueTags = Array.from(new Set(tags.map(t => t.toLowerCase())))
+        .map(lower => tags.find(t => t.toLowerCase() === lower)!);
+
+      if (uniqueTags.length === 0) {
+        uniqueTags.push('Politics', 'Trending');
       }
 
       // Generate realistic-looking sparkline data with natural variation
-      const baseCount = 15 + Math.floor(Math.random() * 35);
-      const trendDirection = Math.random() > 0.3 ? 1 : -0.5; // Usually trending up
-      const volatility = 5 + Math.random() * 10; // Random daily variation
+      // Use seeded random for consistency across refreshes
+      const seed = hashCode(cleanTopicName);
+      const baseCount = 20 + Math.floor(seededRandom(seed) * 30);
+      const trendSlope = 1.2; // Gentle upward slope
 
       const mentionsOverTime = Array.from({ length: 7 }, (_, i) => {
-        const trend = i * 2.5 * trendDirection;
-        const noise = (Math.random() - 0.5) * volatility;
-        const weekendDip = (i % 7 === 5 || i % 7 === 6) ? -3 : 0; // Slight weekend dip
+        const trend = i * trendSlope; // Consistent upward trend
+        const noise = (seededRandom(seed + i + 100) - 0.5) * 3; // Small variation
         return {
           day: i + 1,
-          count: Math.max(5, Math.floor(baseCount + trend + noise + weekendDip)),
+          count: Math.max(10, Math.floor(baseCount + trend + noise)),
         };
       });
 
@@ -288,7 +313,7 @@ export async function GET() {
       return {
         id: cleanTopicName.toLowerCase().replace(/\s+/g, '-'),
         title: displayTitle,
-        tags: tags.slice(0, 3),
+        tags: uniqueTags.slice(0, 3),
         mentions,
         momentum: topic.score,
         cost: Math.floor(Math.random() * 1000) + 50,
