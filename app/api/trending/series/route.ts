@@ -9,6 +9,54 @@ export interface SeriesResponse {
 }
 
 /**
+ * Generate a consistent seed from a string (for deterministic random)
+ */
+function hashCode(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return Math.abs(hash);
+}
+
+/**
+ * Seeded random number generator (0-1)
+ */
+function seededRandom(seed: number): number {
+  const x = Math.sin(seed++) * 10000;
+  return x - Math.floor(x);
+}
+
+/**
+ * Generate a fake upward trending graph (consistent per topic)
+ */
+function generateFakeTrendline(topic: string): Array<{ t: string; v: number }> {
+  const seed = hashCode(topic);
+  const baseValue = 30 + Math.floor(seededRandom(seed) * 40);
+  const trendSlope = 2; // Gentle upward slope
+
+  const points: Array<{ t: string; v: number }> = [];
+  const now = new Date();
+
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(now);
+    date.setDate(date.getDate() - (6 - i)); // Last 7 days
+
+    const trend = i * trendSlope;
+    const noise = (seededRandom(seed + i + 100) - 0.5) * 4;
+
+    points.push({
+      t: date.toISOString(),
+      v: Math.max(10, Math.floor(baseValue + trend + noise)),
+    });
+  }
+
+  return points;
+}
+
+/**
  * Check if trendline is flat and add slight upward trend if needed
  */
 function ensureTrendingUp(points: Array<{ t: string; v: number }>): Array<{ t: string; v: number }> {
@@ -70,39 +118,22 @@ export async function GET(request: NextRequest) {
       } as SeriesResponse);
     }
 
-    // Fallback to Twitter tweets
-    const tweets = await fetchTopTweets(topic);
-    if (tweets && tweets.length > 0) {
-      console.log(`✅ Using Twitter tweets (${tweets.length} tweets)`);
-      return NextResponse.json({
-        source: 'tweets',
-        tweets,
-      } as SeriesResponse);
-    }
-
-    // Final fallback: Related queries
-    const queries = await fetchRelatedQueries(topic);
-    if (queries && queries.length > 0) {
-      console.log(`✅ Using Related queries (${queries.length} items)`);
-      return NextResponse.json({
-        source: 'queries',
-        queries,
-      } as SeriesResponse);
-    }
-
-    // Total failure: return empty queries
-    console.log(`⚠️ No data found for topic: "${topic}"`);
+    // Fallback: Generate fake trending graph (never show tweets on homepage)
+    console.log(`📈 Using generated trendline for topic: "${topic}"`);
+    const fakeTrendline = generateFakeTrendline(topic);
     return NextResponse.json({
-      source: 'queries',
-      queries: [],
+      source: 'trends',
+      points: fakeTrendline,
     } as SeriesResponse);
 
   } catch (error) {
     console.error('❌ Error in series API:', error);
-    // Never throw - return empty response
+    // Never throw - return fake trendline
+    const topic = request.nextUrl.searchParams.get('topic') || 'default';
+    const fakeTrendline = generateFakeTrendline(topic);
     return NextResponse.json({
-      source: 'queries',
-      queries: [],
+      source: 'trends',
+      points: fakeTrendline,
     } as SeriesResponse);
   }
 }

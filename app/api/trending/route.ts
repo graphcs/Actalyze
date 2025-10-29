@@ -168,6 +168,77 @@ Return ONLY the JSON array, nothing else.`,
 }
 
 /**
+ * Use Gemini Flash to generate relevant tags for a topic
+ */
+async function generateTags(topic: string, examples: string[]): Promise<string[]> {
+  try {
+    const apiKey = process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      return ['Politics', 'Trending'];
+    }
+
+    const useOpenRouter = !!process.env.OPENROUTER_API_KEY;
+    const baseURL = useOpenRouter
+      ? 'https://openrouter.ai/api/v1/chat/completions'
+      : 'https://api.openai.com/v1/chat/completions';
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    };
+
+    if (useOpenRouter) {
+      headers['HTTP-Referer'] = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000';
+      headers['X-Title'] = 'Actalyze';
+    }
+
+    const contextHeadlines = examples.slice(0, 2).join('\n');
+
+    const response = await fetch(baseURL, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        model: useOpenRouter ? 'google/gemini-2.5-flash' : 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'user',
+            content: `Generate 2-4 concise, relevant tags for this political topic. Tags should be 1-2 words each.
+
+Topic: "${topic}"
+
+Context from headlines:
+${contextHeadlines}
+
+Return ONLY a JSON array of strings. Example: ["Senate", "Healthcare", "Budget"]`,
+          },
+        ],
+        temperature: 0.3,
+        max_tokens: 50,
+      }),
+      signal: AbortSignal.timeout(8000),
+    });
+
+    if (!response.ok) {
+      return ['Politics', 'Trending'];
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content?.trim();
+
+    if (!content) return ['Politics', 'Trending'];
+
+    const tags = JSON.parse(content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim());
+
+    if (!Array.isArray(tags)) return ['Politics', 'Trending'];
+
+    return tags.slice(0, 4);
+  } catch (error) {
+    console.error('Error generating tags:', error);
+    return ['Politics', 'Trending'];
+  }
+}
+
+/**
  * Use Gemini Flash via OpenRouter to convert cryptic topic names into clear, human-readable titles
  */
 async function convertTopicTitle(rawTopic: string, examples: string[]): Promise<string> {
@@ -269,28 +340,15 @@ export async function GET() {
       // Clean up topic name with Gemini
       const cleanTopicName = topic.topic.trim();
 
-      // Fetch both title and thumbnails in parallel
-      const [displayTitle, thumbnails] = await Promise.all([
+      // Fetch title, tags, and thumbnails in parallel
+      const [displayTitle, aiTags, thumbnails] = await Promise.all([
         convertTopicTitle(cleanTopicName, topic.examples),
+        generateTags(cleanTopicName, topic.examples),
         fetchTopicThumbnails(cleanTopicName),
       ]);
 
-      // Extract tags from examples or topic
-      const tags = topic.examples
-        .slice(0, 3)
-        .map(ex => {
-          const words = ex.split(' ').filter(w => w.length > 4);
-          return words[0] || 'Politics';
-        })
-        .filter(Boolean);
-
-      // Remove duplicates from tags (case-insensitive)
-      const uniqueTags = Array.from(new Set(tags.map(t => t.toLowerCase())))
-        .map(lower => tags.find(t => t.toLowerCase() === lower)!);
-
-      if (uniqueTags.length === 0) {
-        uniqueTags.push('Politics', 'Trending');
-      }
+      // Use AI-generated tags (already unique and relevant)
+      const uniqueTags = aiTags;
 
       // Generate realistic-looking sparkline data with natural variation
       // Use seeded random for consistency across refreshes
