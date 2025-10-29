@@ -16,6 +16,7 @@ import Nav from "../../components/Nav";
 import { Button } from "../../components/ui/Button";
 import { Badge } from "../../components/ui/Badge";
 import { Card, CardHeader, CardContent } from "../../components/ui/Card";
+import { fetchWithCache } from "@/src/lib/fetchWithCache";
 
 // Dynamically import map to avoid SSR issues
 const StateViewMap = dynamic(
@@ -80,10 +81,10 @@ export default function StatePage() {
 
     // Fetch state data in parallel
     Promise.all([
-      fetch(`/api/map/state-news?state=${stateCode}`).then(res => res.json()),
-      fetch(`/api/state/news?state=${stateCode}`).then(res => res.json()),
-      fetch(`/api/state/polling?state=${stateCode}`).then(res => res.json()),
-      fetch(`/api/topic/perspectives?topic=${stateName} politics`).then(res => res.json()),
+      fetchWithCache(`/api/map/state-news?state=${stateCode}`).then(res => res.json()),
+      fetchWithCache(`/api/state/news?state=${stateCode}`).then(res => res.json()),
+      fetchWithCache(`/api/state/polling?state=${stateCode}`).then(res => res.json()),
+      fetchWithCache(`/api/topic/perspectives?topic=${stateName} politics`).then(res => res.json()),
     ])
       .then(([issuesData, headlinesData, polling, perspectivesData]) => {
         setIssues(issuesData.issues || []);

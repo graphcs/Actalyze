@@ -29,6 +29,16 @@ export async function GET(request: NextRequest) {
     const [, stateCode, districtNum] = match;
     const districtLabel = `${stateCode}-${districtNum}`;
 
+    // Check cache
+    const useCacheHeader = request.headers.get('x-use-cache');
+    const useCache = useCacheHeader !== 'false';
+    const cacheKey = generateCacheKey('district-polling', { district: districtCode });
+    const cached = serverCache.get<{ trend: string | null; description: string }>(cacheKey, useCache);
+
+    if (cached) {
+      return NextResponse.json(cached);
+    }
+
     const apiKey = process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY;
     if (!apiKey) {
       return NextResponse.json({
@@ -88,10 +98,15 @@ export async function GET(request: NextRequest) {
 
     const pollingData = JSON.parse(content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim());
 
-    return NextResponse.json({
+    const result = {
       trend: pollingData.trend || null,
       description: pollingData.description || "Recent polling data unavailable"
-    });
+    };
+
+    // Save to cache
+    serverCache.set(cacheKey, result);
+
+    return NextResponse.json(result);
 
   } catch (error) {
     console.error('Error fetching district polling data:', error);

@@ -18,6 +18,7 @@ import DistrictSearch from "../../components/DistrictSearch";
 import { Button } from "../../components/ui/Button";
 import { Badge } from "../../components/ui/Badge";
 import { Card, CardHeader, CardContent } from "../../components/ui/Card";
+import { fetchWithCache } from "@/src/lib/fetchWithCache";
 
 // Dynamically import map to avoid SSR issues
 const DistrictMap = dynamic(
@@ -67,10 +68,10 @@ export default function DistrictPage() {
 
     // Fetch district data in parallel
     Promise.all([
-      fetch(`/api/district/news?district=${districtCode}`).then(res => res.json()),
-      fetch(`/api/district/summary?district=${districtCode}`).then(res => res.json()),
-      fetch(`/api/district/polling?district=${districtCode}`).then(res => res.json()),
-      fetch(`/api/topic/perspectives?topic=${districtCode} district`).then(res => res.json()),
+      fetchWithCache(`/api/district/news?district=${districtCode}`).then(res => res.json()),
+      fetchWithCache(`/api/district/summary?district=${districtCode}`).then(res => res.json()),
+      fetchWithCache(`/api/district/polling?district=${districtCode}`).then(res => res.json()),
+      fetchWithCache(`/api/topic/perspectives?topic=${districtCode} district`).then(res => res.json()),
     ])
       .then(([newsData, summaryData, polling, perspectivesData]) => {
         setHeadlines(newsData.headlines || []);

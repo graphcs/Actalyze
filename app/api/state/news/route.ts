@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { serverCache, generateCacheKey } from "@/src/lib/cache";
 
 const STATE_NAMES: Record<string, string> = {
   "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas", "CA": "California",
@@ -39,6 +40,16 @@ export async function GET(request: NextRequest) {
     }
 
     const stateName = STATE_NAMES[stateCode];
+
+    // Check cache
+    const useCacheHeader = request.headers.get('x-use-cache');
+    const useCache = useCacheHeader !== 'false';
+    const cacheKey = generateCacheKey('state-news', { state: stateCode });
+    const cached = serverCache.get<{ headlines: Headline[] }>(cacheKey, useCache);
+
+    if (cached) {
+      return NextResponse.json(cached);
+    }
 
     console.log(`📰 Fetching local news for ${stateName}`);
 
@@ -105,7 +116,7 @@ export async function GET(request: NextRequest) {
 
     console.log(`✅ Got ${headlines.length} headlines for ${stateName}`);
 
-    return NextResponse.json({
+    const result = {
       headlines: headlines.length > 0 ? headlines : [
         {
           title: `Local updates for ${stateName}`,
@@ -113,7 +124,12 @@ export async function GET(request: NextRequest) {
           source: "State News",
         },
       ],
-    });
+    };
+
+    // Save to cache
+    serverCache.set(cacheKey, result);
+
+    return NextResponse.json(result);
 
   } catch (error) {
     console.error('Error fetching state news:', error);

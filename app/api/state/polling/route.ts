@@ -18,6 +18,7 @@ const STATE_NAMES: Record<string, string> = {
 /**
  * GET /api/state/polling?state=VA
  * Returns recent polling data for a state using Sonar
+ * Supports caching via x-use-cache header
  */
 export async function GET(request: NextRequest) {
   try {
@@ -32,6 +33,16 @@ export async function GET(request: NextRequest) {
     }
 
     const stateName = STATE_NAMES[stateCode];
+
+    // Check cache
+    const useCacheHeader = request.headers.get('x-use-cache');
+    const useCache = useCacheHeader !== 'false';
+    const cacheKey = generateCacheKey('state-polling', { state: stateCode });
+    const cached = serverCache.get<{ trend: string | null; description: string }>(cacheKey, useCache);
+
+    if (cached) {
+      return NextResponse.json(cached);
+    }
 
     const apiKey = process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY;
     if (!apiKey) {
@@ -92,10 +103,15 @@ export async function GET(request: NextRequest) {
 
     const pollingData = JSON.parse(content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim());
 
-    return NextResponse.json({
+    const result = {
       trend: pollingData.trend || null,
       description: pollingData.description || "Recent polling data unavailable"
-    });
+    };
+
+    // Save to cache
+    serverCache.set(cacheKey, result);
+
+    return NextResponse.json(result);
 
   } catch (error) {
     console.error('Error fetching polling data:', error);

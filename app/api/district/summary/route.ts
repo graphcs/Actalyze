@@ -31,6 +31,16 @@ export async function GET(request: NextRequest) {
 
     console.log(`🔍 Fetching hyperlocal summary for district ${districtLabel}`);
 
+    // Check cache
+    const useCacheHeader = request.headers.get('x-use-cache');
+    const useCache = useCacheHeader !== 'false';
+    const cacheKey = generateCacheKey('district-summary', { district: districtCode });
+    const cached = serverCache.get<{ summary: string }>(cacheKey, useCache);
+
+    if (cached) {
+      return NextResponse.json(cached);
+    }
+
     const apiKey = process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY;
     if (!apiKey) {
       console.warn('⚠️ API key not set, returning placeholder');
@@ -89,9 +99,12 @@ export async function GET(request: NextRequest) {
 
     console.log(`✅ Generated summary for ${districtLabel}`);
 
-    return NextResponse.json({
-      summary
-    });
+    const result = { summary };
+
+    // Save to cache
+    serverCache.set(cacheKey, result);
+
+    return NextResponse.json(result);
 
   } catch (error) {
     console.error('Error generating district summary:', error);

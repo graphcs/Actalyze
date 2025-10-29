@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { serverCache, generateCacheKey } from "@/src/lib/cache";
 
 interface Headline {
   title: string;
@@ -34,6 +35,16 @@ export async function GET(request: NextRequest) {
     }
 
     const [, stateCode, districtNum] = match;
+
+    // Check cache
+    const useCacheHeader = request.headers.get('x-use-cache');
+    const useCache = useCacheHeader !== 'false';
+    const cacheKey = generateCacheKey('district-news', { district: districtCode });
+    const cached = serverCache.get<{ headlines: Headline[] }>(cacheKey, useCache);
+
+    if (cached) {
+      return NextResponse.json(cached);
+    }
 
     console.log(`📰 Fetching local news for district ${stateCode}-${districtNum}`);
 
@@ -105,7 +116,7 @@ export async function GET(request: NextRequest) {
 
     console.log(`✅ Got ${headlines.length} headlines for ${districtCode}`);
 
-    return NextResponse.json({
+    const result = {
       headlines: headlines.length > 0 ? headlines : [
         {
           title: `Local updates for ${districtCode}`,
@@ -113,7 +124,12 @@ export async function GET(request: NextRequest) {
           source: "District News",
         },
       ],
-    });
+    };
+
+    // Save to cache
+    serverCache.set(cacheKey, result);
+
+    return NextResponse.json(result);
 
   } catch (error) {
     console.error('Error fetching district news:', error);
