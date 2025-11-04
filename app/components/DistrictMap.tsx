@@ -64,7 +64,8 @@ export default function DistrictMap({ districtCode }: DistrictMapProps) {
 
     // Fetch district-specific GeoJSON from US Census Bureau TIGERweb API
     // This loads ONLY the target district from the 119th Congress (current)
-    const districtNum = parseInt(targetInfo.district, 10).toString(); // Remove leading zero
+    // Note: CD119 field requires leading zero (e.g., '01', '02', '10')
+    const districtNum = targetInfo.district; // Keep leading zero
     const url = `https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/Legislative/MapServer/0/query?where=STATE='${targetInfo.fips}'+AND+CD119='${districtNum}'&outFields=*&f=geojson`;
 
     console.log(`🗺️  Fetching ${targetInfo.state}-${targetInfo.district} from US Census Bureau TIGERweb (119th Congress)...`);
