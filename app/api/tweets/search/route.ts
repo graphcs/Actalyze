@@ -17,6 +17,10 @@ interface Tweet {
   created_at: string;
 }
 
+interface TweetWithMetrics extends Tweet {
+  engagement_score: number;
+}
+
 /**
  * GET /api/tweets/search?query=...&limit=4
  * Searches Twitter for recent tweets and returns tweet IDs for embedding
@@ -64,12 +68,12 @@ export async function GET(request: NextRequest) {
     const appOnlyClient = await client.appLogin();
 
     // Search for tweets
-    // Add filters: -is:retweet (no retweets), lang:en (English only)
-    const searchQuery = `${query} -is:retweet lang:en`;
+    // Add filters: -is:retweet (no retweets), -is:reply (no replies), lang:en (English only)
+    const searchQuery = `${query} -is:retweet -is:reply lang:en`;
 
     const result = await appOnlyClient.v2.search(searchQuery, {
-      max_results: Math.max(10, Math.min(limit, 100)), // Twitter API requires minimum 10
-      'tweet.fields': ['created_at', 'author_id'],
+      max_results: Math.max(10, Math.min(limit * 3, 100)), // Fetch more to sort by engagement
+      'tweet.fields': ['created_at', 'author_id', 'public_metrics'],
       expansions: ['author_id'],
     });
 
@@ -90,10 +94,17 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Format tweets
-    const tweets: Tweet[] = result.data.data.map((tweet) => {
+    // Format tweets with engagement metrics
+    const tweetsWithMetrics: TweetWithMetrics[] = result.data.data.map((tweet) => {
       const user = users.get(tweet.author_id || '');
       const username = user?.username || 'unknown';
+
+      // Calculate engagement score: likes + retweets*2 + replies
+      const metrics = tweet.public_metrics || { like_count: 0, retweet_count: 0, reply_count: 0 };
+      const engagementScore =
+        (metrics.like_count || 0) +
+        (metrics.retweet_count || 0) * 2 +
+        (metrics.reply_count || 0);
 
       return {
         id: tweet.id,
@@ -102,8 +113,15 @@ export async function GET(request: NextRequest) {
         username: username,
         url: `https://twitter.com/${username}/status/${tweet.id}`,
         created_at: tweet.created_at || '',
+        engagement_score: engagementScore,
       };
-    }).slice(0, limit);
+    });
+
+    // Sort by engagement score (highest first) and take top results
+    const tweets: Tweet[] = tweetsWithMetrics
+      .sort((a, b) => b.engagement_score - a.engagement_score)
+      .slice(0, limit)
+      .map(({ engagement_score, ...tweet }) => tweet); // Remove engagement_score from final output
 
     console.log(`✅ Found ${tweets.length} tweets`);
 
