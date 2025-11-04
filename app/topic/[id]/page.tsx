@@ -3,7 +3,9 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
 import {
+  ChevronLeft,
   Flame,
   MessageSquare,
   Share2,
@@ -11,11 +13,18 @@ import {
   Scale,
   Twitter,
   Newspaper,
+  TrendingUp,
 } from "lucide-react";
 import Nav from "../../components/Nav";
 import { Button } from "../../components/ui/Button";
 import { Badge } from "../../components/ui/Badge";
 import { Card, CardHeader, CardContent } from "../../components/ui/Card";
+
+// Dynamically import TweetEmbed to avoid SSR issues
+const TweetEmbed = dynamic(
+  () => import("../../components/TweetEmbed"),
+  { ssr: false }
+);
 
 interface Topic {
   id: string;
@@ -40,11 +49,19 @@ interface PartyPerspectives {
   };
 }
 
-interface Tweet {
+interface TweetOld {
   text: string;
   author: string;
   engagement: number;
   url?: string;
+}
+
+interface Tweet {
+  id: string;
+  text: string;
+  author: string;
+  username: string;
+  url: string;
 }
 
 interface Headline {
@@ -76,6 +93,7 @@ export default function TopicPage() {
   const [topic, setTopic] = useState<Topic | null>(null);
   const [perspectives, setPerspectives] = useState<PartyPerspectives | null>(null);
   const [tweets, setTweets] = useState<Tweet[]>([]);
+  const [oldTweets, setOldTweets] = useState<TweetOld[]>([]);
   const [headlines, setHeadlines] = useState<Headline[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -111,12 +129,21 @@ export default function TopicPage() {
               });
             });
 
-          // Fetch tweets
+          // Fetch old tweets (AI-generated)
           fetch(`/api/topic/tweets?topic=${encodeURIComponent(topicTitle)}`)
+            .then((res) => res.json())
+            .then((data) => setOldTweets(data.tweets || []))
+            .catch((error) => {
+              console.error("Error fetching tweets:", error);
+              setOldTweets([]);
+            });
+
+          // Fetch real tweets from Twitter
+          fetch(`/api/tweets/search?query=${encodeURIComponent(topicTitle)} politics&limit=4`)
             .then((res) => res.json())
             .then((data) => setTweets(data.tweets || []))
             .catch((error) => {
-              console.error("Error fetching tweets:", error);
+              console.error("Error fetching Twitter tweets:", error);
               setTweets([]);
             });
 
@@ -137,6 +164,10 @@ export default function TopicPage() {
         setLoading(false);
       });
   }, [params.id]);
+
+  const handleBack = () => {
+    router.push("/");
+  };
 
   const handleChat = () => {
     if (topic) {
@@ -203,6 +234,14 @@ export default function TopicPage() {
       >
         {/* Header */}
         <div className="max-w-7xl mx-auto px-4 pt-8 pb-4">
+          <div className="flex items-center gap-3 text-sm text-zinc-500 mb-3">
+            <Button variant="ghost" onClick={handleBack}>
+              <ChevronLeft className="w-4 h-4" />
+              Back
+            </Button>
+            <span>/</span>
+            <span>Topic</span>
+          </div>
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
               {topic.title}
@@ -251,7 +290,7 @@ export default function TopicPage() {
                 <div className="text-sm text-zinc-500 dark:text-zinc-400 py-8 text-center">
                   Loading tweets...
                 </div>
-              ) : tweets.length === 0 ? (
+              ) : oldTweets.length === 0 ? (
                 <div className="text-sm text-zinc-500 dark:text-zinc-400 py-8 text-center">
                   <div className="mb-2">Twitter data currently unavailable</div>
                   <a
@@ -265,7 +304,7 @@ export default function TopicPage() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {tweets.slice(0, 3).map((tweet, i) => (
+                  {oldTweets.slice(0, 3).map((tweet, i) => (
                     <div
                       key={i}
                       className="p-3 rounded-lg bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800"
@@ -417,8 +456,46 @@ export default function TopicPage() {
           </Card>
         </div>
 
+        {/* Top Tweets */}
+        <div className="max-w-7xl mx-auto px-4 pb-16">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div className="font-semibold flex items-center gap-2">
+                <TrendingUp className="w-4 h-4" />
+                Top Tweets
+              </div>
+              <Badge className="bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100">
+                Social Media
+              </Badge>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="text-sm text-zinc-500 dark:text-zinc-400 py-8 text-center">
+                  Loading tweets...
+                </div>
+              ) : tweets.length > 0 ? (
+                <div className="grid md:grid-cols-2 gap-4">
+                  {tweets.map((tweet) => (
+                    <div key={tweet.id}>
+                      <TweetEmbed tweetId={tweet.id} username={tweet.username} />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-sm text-zinc-500 dark:text-zinc-400 py-8 text-center">
+                  No tweets found for this topic
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Bottom Actions */}
-        <div className="max-w-7xl mx-auto px-4 pb-16 flex items-center justify-end">
+        <div className="max-w-7xl mx-auto px-4 pb-16 flex items-center justify-between">
+          <Button variant="outline" onClick={handleBack}>
+            <ChevronLeft className="w-4 h-4" />
+            Back to Home
+          </Button>
           <Button onClick={handleChat}>
             <MessageSquare className="w-4 h-4" />
             Open Chat

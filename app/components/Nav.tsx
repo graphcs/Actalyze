@@ -1,9 +1,9 @@
 "use client";
 
-import { Landmark, Globe2, BookOpen, MessageSquare, Upload } from "lucide-react";
+import { Landmark, MessageSquare, Upload } from "lucide-react";
 import { Button } from "./ui/Button";
 import { Badge } from "./ui/Badge";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import CacheToggle from "./CacheToggle";
 
 interface NavProps {
@@ -13,15 +13,6 @@ interface NavProps {
 
 export default function Nav({ onChatClick, onUploadClick }: NavProps) {
   const router = useRouter();
-  const pathname = usePathname();
-
-  const tabs = [
-    { id: "home", label: "Home", icon: Globe2, path: "/" },
-  ];
-
-  const handleNavigation = (path: string) => {
-    router.push(path);
-  };
 
   return (
     <div className="sticky top-0 z-50 backdrop-blur supports-[backdrop-filter]:bg-white/50 dark:supports-[backdrop-filter]:bg-zinc-900/40 border-b border-zinc-200 dark:border-zinc-800">
@@ -37,16 +28,6 @@ export default function Nav({ onChatClick, onUploadClick }: NavProps) {
         </div>
         <div className="flex items-center gap-2">
           <CacheToggle />
-          {tabs.map((t) => (
-            <Button
-              key={t.id}
-              variant={pathname === t.path ? "default" : "ghost"}
-              onClick={() => handleNavigation(t.path)}
-            >
-              <t.icon className="w-4 h-4" />
-              {t.label}
-            </Button>
-          ))}
           <Button variant="ghost" onClick={onChatClick}>
             <MessageSquare className="w-4 h-4" />
             Chat

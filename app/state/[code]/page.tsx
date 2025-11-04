@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import {
+  ChevronLeft,
   MapPin,
   Newspaper,
   Scale,
@@ -12,6 +13,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import Nav from "../../components/Nav";
+import { Button } from "../../components/ui/Button";
 import { Badge } from "../../components/ui/Badge";
 import { Card, CardHeader, CardContent } from "../../components/ui/Card";
 import { fetchWithCache } from "@/src/lib/fetchWithCache";
@@ -27,6 +29,12 @@ const StateViewMap = dynamic(
       </div>
     )
   }
+);
+
+// Dynamically import TweetEmbed to avoid SSR issues
+const TweetEmbed = dynamic(
+  () => import("../../components/TweetEmbed"),
+  { ssr: false }
 );
 
 const STATE_NAMES: Record<string, string> = {
@@ -62,6 +70,14 @@ interface PartyPerspectives {
   };
 }
 
+interface Tweet {
+  id: string;
+  text: string;
+  author: string;
+  username: string;
+  url: string;
+}
+
 export default function StatePage() {
   const params = useParams();
   const router = useRouter();
@@ -72,6 +88,7 @@ export default function StatePage() {
   const [headlines, setHeadlines] = useState<Headline[]>([]);
   const [pollingData, setPollingData] = useState<{ trend: string | null; description: string } | null>(null);
   const [perspectives, setPerspectives] = useState<PartyPerspectives | null>(null);
+  const [tweets, setTweets] = useState<Tweet[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -83,12 +100,14 @@ export default function StatePage() {
       fetchWithCache(`/api/state/news?state=${stateCode}`).then(res => res.json()),
       fetchWithCache(`/api/state/polling?state=${stateCode}`).then(res => res.json()),
       fetchWithCache(`/api/topic/perspectives?topic=${stateName} politics`).then(res => res.json()),
+      fetchWithCache(`/api/tweets/search?query=${stateName} politics&limit=4`).then(res => res.json()),
     ])
-      .then(([issuesData, headlinesData, polling, perspectivesData]) => {
+      .then(([issuesData, headlinesData, polling, perspectivesData, tweetsData]) => {
         setIssues(issuesData.issues || []);
         setHeadlines(headlinesData.headlines || []);
         setPollingData(polling);
         setPerspectives(perspectivesData);
+        setTweets(tweetsData.tweets || []);
         setLoading(false);
       })
       .catch((error) => {
@@ -96,6 +115,10 @@ export default function StatePage() {
         setLoading(false);
       });
   }, [stateCode, stateName]);
+
+  const handleBack = () => {
+    router.push("/");
+  };
 
   const handleChat = () => {
     router.push(`/chatbot?topic=${stateName}`);
@@ -122,6 +145,14 @@ export default function StatePage() {
       >
         {/* Header */}
         <div className="max-w-7xl mx-auto px-4 pt-8 pb-4">
+          <div className="flex items-center gap-3 text-sm text-zinc-500 mb-3">
+            <Button variant="ghost" onClick={handleBack}>
+              <ChevronLeft className="w-4 h-4" />
+              Back
+            </Button>
+            <span>/</span>
+            <span>State</span>
+          </div>
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
               {stateName}
@@ -363,6 +394,47 @@ export default function StatePage() {
           </Card>
         </div>
 
+        {/* Top Tweets */}
+        <div className="max-w-7xl mx-auto px-4 pb-16">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div className="font-semibold flex items-center gap-2">
+                <TrendingUp className="w-4 h-4" />
+                Top Tweets
+              </div>
+              <Badge className="bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100">
+                Social Media
+              </Badge>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="text-sm text-zinc-500 dark:text-zinc-400 py-8 text-center">
+                  Loading tweets...
+                </div>
+              ) : tweets.length > 0 ? (
+                <div className="grid md:grid-cols-2 gap-4">
+                  {tweets.map((tweet) => (
+                    <div key={tweet.id}>
+                      <TweetEmbed tweetId={tweet.id} username={tweet.username} />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-sm text-zinc-500 dark:text-zinc-400 py-8 text-center">
+                  No tweets found for {stateName}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Bottom Actions */}
+        <div className="max-w-7xl mx-auto px-4 pb-16 flex items-center justify-between">
+          <Button variant="outline" onClick={handleBack}>
+            <ChevronLeft className="w-4 h-4" />
+            Back to Home
+          </Button>
+        </div>
       </motion.div>
 
       <footer className="max-w-7xl mx-auto px-4 py-10 text-sm text-zinc-500">
