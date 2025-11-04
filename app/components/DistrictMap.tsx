@@ -62,12 +62,12 @@ export default function DistrictMap({ districtCode }: DistrictMapProps) {
       return;
     }
 
-    // Fetch district-specific GeoJSON from USDOT ArcGIS REST API
-    // This loads ONLY the target district, not the entire state
+    // Fetch district-specific GeoJSON from US Census Bureau TIGERweb API
+    // This loads ONLY the target district from the 119th Congress (current)
     const districtNum = parseInt(targetInfo.district, 10).toString(); // Remove leading zero
-    const url = `https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/USA_Congressional_Districts/FeatureServer/0/query?where=STATE_ABBR='${targetInfo.state}'+AND+CD113FIPS='${districtNum}'&outFields=*&f=geojson`;
+    const url = `https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/Legislative/MapServer/0/query?where=STATE='${targetInfo.fips}'+AND+CD119='${districtNum}'&outFields=*&f=geojson`;
 
-    console.log(`🗺️  Fetching ${targetInfo.state}-${targetInfo.district} from USDOT ArcGIS...`);
+    console.log(`🗺️  Fetching ${targetInfo.state}-${targetInfo.district} from US Census Bureau TIGERweb (119th Congress)...`);
 
     fetch(url)
       .then((res) => {
