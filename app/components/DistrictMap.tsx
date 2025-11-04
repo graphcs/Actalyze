@@ -63,11 +63,12 @@ export default function DistrictMap({ districtCode }: DistrictMapProps) {
       return;
     }
 
-    // Load state-specific GeoJSON file from unitedstates/districts repo
-    // This loads only the districts for the specific state, which is much faster
-    const url = `https://raw.githubusercontent.com/unitedstates/districts/gh-pages/states/${targetInfo.state}/shape.geojson`;
+    // Fetch district-specific GeoJSON from USDOT ArcGIS REST API
+    // This loads ONLY the target district, not the entire state
+    const districtNum = parseInt(targetInfo.district, 10).toString(); // Remove leading zero
+    const url = `https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/USA_Congressional_Districts/FeatureServer/0/query?where=STATE_ABBR='${targetInfo.state}'+AND+CD113FIPS='${districtNum}'&outFields=*&f=geojson`;
 
-    console.log(`🗺️  Fetching ${targetInfo.state} district boundaries from GitHub...`);
+    console.log(`🗺️  Fetching ${targetInfo.state}-${targetInfo.district} from USDOT ArcGIS...`);
 
     fetch(url)
       .then((res) => {
@@ -87,7 +88,7 @@ export default function DistrictMap({ districtCode }: DistrictMapProps) {
         setLoading(false);
       })
       .catch((error) => {
-        console.error("❌ Error loading congressional districts:", error);
+        console.error("❌ Error loading congressional district:", error);
         setLoading(false);
       });
   }, [districtCode, targetInfo]);
@@ -107,74 +108,31 @@ export default function DistrictMap({ districtCode }: DistrictMapProps) {
     const properties = feature.properties as Record<string, string | number | undefined> | null;
     if (!properties || !targetInfo) return;
 
-    // unitedstates/districts GeoJSON format properties:
-    // GEOID: "5101" (state FIPS + district number)
-    // STATEFP: "51" (state FIPS code)
-    // CD116FP or DISTRICT: "01" (district number)
+    console.log('✅ Loaded district feature:', {
+      targetCode: districtCode,
+      properties: properties
+    });
 
-    const geoid = String(properties.GEOID || '');
-    const featureStateFP = String(properties.STATEFP || properties.STATE || '');
-    const featureDistrictNum = String(properties.CD118FP || properties.CD116FP || properties.DISTRICT || properties.BASENAME || '');
-
-    // Extract district from GEOID if available (last 2 digits)
-    const geoidDistrict = geoid.length >= 4 ? geoid.slice(-2) : undefined;
-
-    // Normalize district number (ensure 2 digits)
-    const normalizedDistrict = featureDistrictNum ? String(featureDistrictNum).padStart(2, '0') : geoidDistrict;
-
-    // Match by FIPS code and district, or by GEOID
-    const matchesByParts = featureStateFP === targetInfo.fips && normalizedDistrict === targetInfo.district;
-    const matchesByGEOID = geoid === (targetInfo.fips + targetInfo.district);
-
-    const isTargetDistrict = matchesByParts || matchesByGEOID;
-
-    // Debug logging for first match
-    if (isTargetDistrict) {
-      console.log('✅ Found target district!', {
-        targetCode: districtCode,
-        target: { state: targetInfo.state, fips: targetInfo.fips, district: targetInfo.district, fullGEOID: targetInfo.fips + targetInfo.district },
-        feature: {
-          geoid,
-          stateFP: featureStateFP,
-          districtRaw: featureDistrictNum,
-          districtNormalized: normalizedDistrict
-        },
-        matchType: matchesByGEOID ? 'GEOID' : 'Parts',
-        allProperties: properties
-      });
-    }
-
-    // Style districts
+    // Style the district (there's only one since we query specifically)
     if ('setStyle' in layer && typeof layer.setStyle === 'function') {
-      if (isTargetDistrict) {
-        // Highlight the target district
-        layer.setStyle({
-          fillColor: "#A855F7",
-          fillOpacity: 0.7,
-          color: "#7C3AED",
-          weight: 3,
-        });
+      layer.setStyle({
+        fillColor: "#A855F7",
+        fillOpacity: 0.7,
+        color: "#7C3AED",
+        weight: 3,
+      });
 
-        // Store bounds for centering
-        if ('getBounds' in layer && typeof layer.getBounds === 'function') {
-          const bounds = layer.getBounds();
-          setTargetBounds(bounds);
-          setBoundsKey(prev => prev + 1);
-          console.log('🗺️  District bounds set, will fly to:', bounds);
-        }
-      } else {
-        // Show other districts faintly
-        layer.setStyle({
-          fillColor: "#D4D4D8",
-          fillOpacity: 0.15,
-          color: "#A1A1AA",
-          weight: 0.5,
-        });
+      // Store bounds for centering
+      if ('getBounds' in layer && typeof layer.getBounds === 'function') {
+        const bounds = layer.getBounds();
+        setTargetBounds(bounds);
+        setBoundsKey(prev => prev + 1);
+        console.log('🗺️  District bounds set, will fly to:', bounds);
       }
     }
 
-    // Add tooltip for target district
-    if (isTargetDistrict && 'bindTooltip' in layer && typeof layer.bindTooltip === 'function') {
+    // Add tooltip
+    if ('bindTooltip' in layer && typeof layer.bindTooltip === 'function') {
       const districtLabel = `${targetInfo.state}-${targetInfo.district}`;
       layer.bindTooltip(
         `<div style="font-size: 13px; font-weight: 600; color: #7C3AED;">
@@ -194,8 +152,8 @@ export default function DistrictMap({ districtCode }: DistrictMapProps) {
         console.log('📍 Flying to district bounds:', targetBounds);
         setTimeout(() => {
           map.flyToBounds(targetBounds, {
-            padding: [50, 50],
-            maxZoom: 10,
+            padding: [80, 80],
+            maxZoom: 11,
             duration: 1.5
           });
         }, 200);
