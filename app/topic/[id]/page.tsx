@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
-  ChevronLeft,
   Flame,
   MessageSquare,
   Share2,
@@ -139,10 +138,6 @@ export default function TopicPage() {
       });
   }, [params.id]);
 
-  const handleBack = () => {
-    router.push("/");
-  };
-
   const handleChat = () => {
     if (topic) {
       router.push(`/chatbot?topic=${encodeURIComponent(topic.title)}`);
@@ -208,14 +203,6 @@ export default function TopicPage() {
       >
         {/* Header */}
         <div className="max-w-7xl mx-auto px-4 pt-8 pb-4">
-          <div className="flex items-center gap-3 text-sm text-zinc-500 mb-3">
-            <Button variant="ghost" onClick={handleBack}>
-              <ChevronLeft className="w-4 h-4" />
-              Back
-            </Button>
-            <span>/</span>
-            <span>Topic</span>
-          </div>
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
               {topic.title}
@@ -431,11 +418,7 @@ export default function TopicPage() {
         </div>
 
         {/* Bottom Actions */}
-        <div className="max-w-7xl mx-auto px-4 pb-16 flex items-center justify-between">
-          <Button variant="outline" onClick={handleBack}>
-            <ChevronLeft className="w-4 h-4" />
-            Back to Home
-          </Button>
+        <div className="max-w-7xl mx-auto px-4 pb-16 flex items-center justify-end">
           <Button onClick={handleChat}>
             <MessageSquare className="w-4 h-4" />
             Open Chat

@@ -5,7 +5,6 @@ import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import {
-  ChevronLeft,
   MapPin,
   Newspaper,
   Scale,
@@ -15,7 +14,6 @@ import {
 } from "lucide-react";
 import Nav from "../../components/Nav";
 import DistrictSearch from "../../components/DistrictSearch";
-import { Button } from "../../components/ui/Button";
 import { Badge } from "../../components/ui/Badge";
 import { Card, CardHeader, CardContent } from "../../components/ui/Card";
 import { fetchWithCache } from "@/src/lib/fetchWithCache";
@@ -86,10 +84,6 @@ export default function DistrictPage() {
       });
   }, [districtCode]);
 
-  const handleBack = () => {
-    router.push("/");
-  };
-
   const handleChat = () => {
     router.push(`/chatbot?topic=District ${districtCode}`);
   };
@@ -117,14 +111,6 @@ export default function DistrictPage() {
       >
         {/* Header */}
         <div className="max-w-7xl mx-auto px-4 pt-8 pb-4">
-          <div className="flex items-center gap-3 text-sm text-zinc-500 mb-3">
-            <Button variant="ghost" onClick={handleBack}>
-              <ChevronLeft className="w-4 h-4" />
-              Back
-            </Button>
-            <span>/</span>
-            <span>District</span>
-          </div>
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
               Congressional District {districtLabel}
@@ -361,13 +347,6 @@ export default function DistrictPage() {
           </Card>
         </div>
 
-        {/* Bottom Actions */}
-        <div className="max-w-7xl mx-auto px-4 pb-16 flex items-center justify-between">
-          <Button variant="outline" onClick={handleBack}>
-            <ChevronLeft className="w-4 h-4" />
-            Back to Home
-          </Button>
-        </div>
       </motion.div>
 
       <footer className="max-w-7xl mx-auto px-4 py-10 text-sm text-zinc-500">
