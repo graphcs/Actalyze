@@ -143,20 +143,18 @@ export default function DistrictMap({ districtCode }: DistrictMapProps) {
     }
   };
 
-  // Component to handle map flyTo
+  // Component to handle map bounds
   function MapController() {
     const map = useMap();
 
     useEffect(() => {
       if (targetBounds && map) {
-        console.log('📍 Flying to district bounds:', targetBounds);
-        setTimeout(() => {
-          map.flyToBounds(targetBounds, {
-            padding: [80, 80],
-            maxZoom: 11,
-            duration: 1.5
-          });
-        }, 200);
+        console.log('📍 Setting district bounds:', targetBounds);
+        map.fitBounds(targetBounds, {
+          padding: [80, 80],
+          maxZoom: 11,
+          animate: false
+        });
       }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [map, boundsKey]);
