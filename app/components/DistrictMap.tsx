@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import L from "leaflet";
-import { useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 
 // Dynamically import Leaflet components to avoid SSR issues
@@ -38,8 +37,8 @@ const STATE_FIPS: Record<string, string> = {
 export default function DistrictMap({ districtCode }: DistrictMapProps) {
   const [geoData, setGeoData] = useState<GeoJSON.FeatureCollection | null>(null);
   const [loading, setLoading] = useState(true);
-  const [targetBounds, setTargetBounds] = useState<L.LatLngBounds | null>(null);
-  const [boundsKey, setBoundsKey] = useState(0);
+  const [mapCenter, setMapCenter] = useState<[number, number]>([39.8283, -98.5795]);
+  const [mapZoom, setMapZoom] = useState<number>(4);
 
   // Parse the target district code
   const parseDistrictCode = (code: string): { state: string; fips: string; district: string } | null => {
@@ -83,6 +82,29 @@ export default function DistrictMap({ districtCode }: DistrictMapProps) {
         console.log('📊 Total features:', data.features?.length);
         if (data.features && data.features.length > 0) {
           console.log('📋 Sample feature properties:', data.features[0].properties);
+
+          // Calculate bounds from the GeoJSON geometry
+          const feature = data.features[0];
+          if (feature.geometry) {
+            const bounds = L.geoJSON(feature).getBounds();
+            const center = bounds.getCenter();
+
+            // Calculate appropriate zoom level based on bounds
+            // This is a rough approximation - adjust as needed
+            const latDiff = bounds.getNorth() - bounds.getSouth();
+            const lngDiff = bounds.getEast() - bounds.getWest();
+            const maxDiff = Math.max(latDiff, lngDiff);
+
+            let zoom = 9;
+            if (maxDiff < 0.5) zoom = 10;
+            else if (maxDiff < 1) zoom = 9;
+            else if (maxDiff < 2) zoom = 8;
+            else zoom = 7;
+
+            console.log('📍 Calculated center:', center, 'zoom:', zoom);
+            setMapCenter([center.lat, center.lng]);
+            setMapZoom(zoom);
+          }
         }
         setGeoData(data);
         setLoading(false);
@@ -105,15 +127,9 @@ export default function DistrictMap({ districtCode }: DistrictMapProps) {
   }, [districtCode, targetInfo]);
 
   const onEachDistrict = (feature: GeoJSON.Feature, layer: L.Layer) => {
-    const properties = feature.properties as Record<string, string | number | undefined> | null;
-    if (!properties || !targetInfo) return;
+    if (!targetInfo) return;
 
-    console.log('✅ Loaded district feature:', {
-      targetCode: districtCode,
-      properties: properties
-    });
-
-    // Style the district (there's only one since we query specifically)
+    // Style the district
     if ('setStyle' in layer && typeof layer.setStyle === 'function') {
       layer.setStyle({
         fillColor: "#A855F7",
@@ -121,19 +137,11 @@ export default function DistrictMap({ districtCode }: DistrictMapProps) {
         color: "#7C3AED",
         weight: 3,
       });
-
-      // Store bounds for centering
-      if ('getBounds' in layer && typeof layer.getBounds === 'function') {
-        const bounds = layer.getBounds();
-        setTargetBounds(bounds);
-        setBoundsKey(prev => prev + 1);
-        console.log('🗺️  District bounds set, will fly to:', bounds);
-      }
     }
 
-    // Add tooltip
+    // Add permanent label
     if ('bindTooltip' in layer && typeof layer.bindTooltip === 'function') {
-      const districtLabel = `${targetInfo.state}-${targetInfo.district}`;
+      const districtLabel = `${targetInfo.state}-${parseInt(targetInfo.district, 10)}`;
       layer.bindTooltip(
         `<div style="font-size: 13px; font-weight: 600; color: #7C3AED;">
           District ${districtLabel}
@@ -142,25 +150,6 @@ export default function DistrictMap({ districtCode }: DistrictMapProps) {
       );
     }
   };
-
-  // Component to handle map bounds
-  function MapController() {
-    const map = useMap();
-
-    useEffect(() => {
-      if (targetBounds && map) {
-        console.log('📍 Setting district bounds:', targetBounds);
-        map.fitBounds(targetBounds, {
-          padding: [80, 80],
-          maxZoom: 11,
-          animate: false
-        });
-      }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [map, boundsKey]);
-
-    return null;
-  }
 
   if (loading) {
     return (
@@ -179,26 +168,29 @@ export default function DistrictMap({ districtCode }: DistrictMapProps) {
 
   return (
     <MapContainer
-      center={[39.8283, -98.5795]}
-      zoom={4}
-      minZoom={4}
-      maxZoom={12}
-      scrollWheelZoom={true}
+      center={mapCenter}
+      zoom={mapZoom}
+      zoomControl={false}
+      dragging={false}
+      touchZoom={false}
+      doubleClickZoom={false}
+      scrollWheelZoom={false}
+      boxZoom={false}
+      keyboard={false}
+      attributionControl={false}
       style={{ height: "100%", width: "100%" }}
       className="rounded-xl"
     >
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       {geoData && (
         <GeoJSON
           data={geoData}
           onEachFeature={onEachDistrict}
-          key={districtCode} // Re-render when district changes
+          key={districtCode}
         />
       )}
-      <MapController />
     </MapContainer>
   );
 }
