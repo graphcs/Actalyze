@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { brandFont } from "./fonts";
+import Providers from "./components/Providers";
 import "./globals.css";
 
 const inter = Inter({
@@ -9,9 +10,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Actalyze - US Legislation Document Intelligence",
+  title: "Actalyze - AI-Powered Political Intelligence",
   description:
-    "AI-powered assistant for US federal and state legislation, regulations, case law, and legal documents.",
+    "Real-time political intelligence for congressional staffers and policy professionals. Track trends, analyze districts, and stay ahead of the conversation.",
   icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon.ico",
@@ -27,7 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${brandFont.variable} antialiased`}>
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
