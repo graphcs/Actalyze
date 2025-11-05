@@ -10,6 +10,9 @@ const AUTHORIZED_EMAILS = [
 ];
 
 const authOptions: NextAuthOptions = {
+  session: {
+    strategy: "jwt", // Use JWT for session management (required for serverless)
+  },
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -39,20 +42,8 @@ const authOptions: NextAuthOptions = {
       }
       return session;
     },
-    async redirect({ url, baseUrl }) {
-      // After successful sign-in, redirect to dashboard
-      if (url === baseUrl || url === `${baseUrl}/`) {
-        return `${baseUrl}/dashboard`;
-      }
-      // Allows relative callback URLs
-      if (url.startsWith("/")) return `${baseUrl}${url}`;
-      // Allows callback URLs on the same origin
-      if (new URL(url).origin === baseUrl) return url;
-      return baseUrl;
-    },
   },
   pages: {
-    signIn: '/',
     error: '/waitlist', // Unauthorized users redirected here
   },
   secret: process.env.NEXTAUTH_SECRET,

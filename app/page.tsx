@@ -21,16 +21,7 @@ export default function LandingPage() {
   useEffect(() => {
     // Redirect to dashboard if already logged in
     if (status === "authenticated") {
-      // Check if there's a callbackUrl parameter
-      const searchParams = new URLSearchParams(window.location.search);
-      const callbackUrl = searchParams.get('callbackUrl');
-
-      if (callbackUrl) {
-        // Use the callback URL if present
-        window.location.href = callbackUrl;
-      } else {
-        router.push("/dashboard");
-      }
+      router.push("/dashboard");
     }
   }, [status, router]);
 

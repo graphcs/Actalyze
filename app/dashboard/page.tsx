@@ -25,11 +25,8 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/");
-      return;
-    }
-
+    // Let middleware handle authentication redirects
+    // Only fetch data if authenticated
     if (status === "authenticated") {
       // Fetch trending topics
       fetch("/api/trending")
@@ -43,7 +40,7 @@ export default function Dashboard() {
         setLoading(false);
       });
     }
-  }, [status, router]);
+  }, [status]);
 
   const handleExplore = () => {
     window.scrollTo({ top: window.innerHeight, behavior: "smooth" });
