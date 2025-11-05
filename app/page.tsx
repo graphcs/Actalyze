@@ -21,7 +21,16 @@ export default function LandingPage() {
   useEffect(() => {
     // Redirect to dashboard if already logged in
     if (status === "authenticated") {
-      router.push("/dashboard");
+      // Check if there's a callbackUrl parameter
+      const searchParams = new URLSearchParams(window.location.search);
+      const callbackUrl = searchParams.get('callbackUrl');
+
+      if (callbackUrl) {
+        // Use the callback URL if present
+        window.location.href = callbackUrl;
+      } else {
+        router.push("/dashboard");
+      }
     }
   }, [status, router]);
 
@@ -54,7 +63,7 @@ export default function LandingPage() {
             </span>
           </div>
           <button
-            onClick={() => signIn("google")}
+            onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
             className="px-6 py-2 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-lg hover:border-purple-400 dark:hover:border-purple-600 transition-colors text-sm font-medium"
           >
             Sign In
@@ -93,7 +102,7 @@ export default function LandingPage() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
-              onClick={() => signIn("google")}
+              onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
               className="group px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl font-semibold text-lg shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 transition-all duration-200 flex items-center gap-3"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
@@ -203,7 +212,7 @@ export default function LandingPage() {
             Join congressional staffers and policy professionals using Actalyze
           </p>
           <button
-            onClick={() => signIn("google")}
+            onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
             className="px-8 py-4 bg-white text-purple-600 hover:bg-zinc-100 rounded-xl font-semibold text-lg shadow-lg transition-colors"
           >
             Sign In with Google
