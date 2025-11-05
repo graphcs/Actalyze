@@ -42,6 +42,22 @@ const authOptions: NextAuthOptions = {
       }
       return session;
     },
+    async redirect({ url, baseUrl }) {
+      // If redirecting back to base URL after auth, send to dashboard
+      if (url === baseUrl || url.startsWith(baseUrl + '/api/auth')) {
+        return `${baseUrl}/dashboard`;
+      }
+      // Allow callback URLs on same origin
+      if (url.startsWith(baseUrl)) {
+        return url;
+      }
+      // Allow relative paths
+      if (url.startsWith('/')) {
+        return `${baseUrl}${url}`;
+      }
+      // Default to dashboard
+      return `${baseUrl}/dashboard`;
+    },
   },
   pages: {
     error: '/waitlist', // Unauthorized users redirected here
