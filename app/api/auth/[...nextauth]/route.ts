@@ -23,8 +23,8 @@ const authOptions: NextAuthOptions = {
         return true;
       }
 
-      // Redirect unauthorized users to waitlist
-      return '/waitlist';
+      // Block unauthorized users - they'll be redirected via the error page
+      return false;
     },
     async jwt({ token, user }) {
       if (user) {
@@ -42,7 +42,7 @@ const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: '/',
-    error: '/waitlist',
+    error: '/waitlist', // Unauthorized users redirected here
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
