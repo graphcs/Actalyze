@@ -175,7 +175,7 @@ export default function AdminPage() {
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Shield className="w-8 h-8 text-purple-600" />
+              <Shield className="w-8 h-8 text-zinc-700 dark:text-zinc-300" />
               <div>
                 <h1 className="text-2xl font-bold">Admin Panel</h1>
                 <p className="text-sm text-zinc-600 dark:text-zinc-400">
@@ -211,7 +211,7 @@ export default function AdminPage() {
           {/* Authentication Mode */}
           <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6">
             <div className="flex items-center gap-3 mb-4">
-              <Settings className="w-6 h-6 text-purple-600" />
+              <Settings className="w-6 h-6 text-zinc-700 dark:text-zinc-300" />
               <h2 className="text-xl font-bold">Authentication Mode</h2>
             </div>
 
@@ -278,7 +278,7 @@ export default function AdminPage() {
           {/* Authorized Users */}
           <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6">
             <div className="flex items-center gap-3 mb-4">
-              <Users className="w-6 h-6 text-blue-600" />
+              <Users className="w-6 h-6 text-zinc-700 dark:text-zinc-300" />
               <h2 className="text-xl font-bold">Authorized Users</h2>
               <span className="text-sm text-zinc-500">
                 ({settings.authorizedEmails.length} users)
@@ -292,11 +292,11 @@ export default function AdminPage() {
                 onChange={(e) => setNewEmail(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && addAuthorizedEmail()}
                 placeholder="email@example.com"
-                className="flex-1 px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 focus:ring-2 focus:ring-purple-500 outline-none"
+                className="flex-1 px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 focus:ring-2 focus:ring-zinc-500 outline-none"
               />
               <button
                 onClick={addAuthorizedEmail}
-                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg flex items-center gap-2"
+                className="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-white rounded-lg flex items-center gap-2"
               >
                 <Plus className="w-4 h-4" />
                 Add
@@ -312,12 +312,12 @@ export default function AdminPage() {
                   <div className="flex items-center gap-2">
                     <span className="text-sm">{email}</span>
                     {settings.adminEmails.includes(email) && (
-                      <span className="px-2 py-0.5 text-xs bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 rounded">
+                      <span className="px-2 py-0.5 text-xs bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200 rounded">
                         Admin
                       </span>
                     )}
                     {email === session?.user?.email && (
-                      <span className="px-2 py-0.5 text-xs bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 rounded">
+                      <span className="px-2 py-0.5 text-xs bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200 rounded">
                         You
                       </span>
                     )}
@@ -337,14 +337,14 @@ export default function AdminPage() {
           {/* Admin Users */}
           <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6">
             <div className="flex items-center gap-3 mb-4">
-              <Shield className="w-6 h-6 text-red-600" />
+              <Shield className="w-6 h-6 text-zinc-700 dark:text-zinc-300" />
               <h2 className="text-xl font-bold">Admin Users</h2>
               <span className="text-sm text-zinc-500">
                 ({settings.adminEmails.length} admins)
               </span>
             </div>
 
-            <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-900 rounded-lg text-sm text-yellow-900 dark:text-yellow-300">
+            <div className="mb-4 p-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm text-zinc-700 dark:text-zinc-300">
               <strong>Note:</strong> Admin users have access to this panel and
               can manage all settings.
             </div>
@@ -356,11 +356,11 @@ export default function AdminPage() {
                 onChange={(e) => setNewAdminEmail(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && addAdminEmail()}
                 placeholder="admin@example.com"
-                className="flex-1 px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 focus:ring-2 focus:ring-red-500 outline-none"
+                className="flex-1 px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 focus:ring-2 focus:ring-zinc-500 outline-none"
               />
               <button
                 onClick={addAdminEmail}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center gap-2"
+                className="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-white rounded-lg flex items-center gap-2"
               >
                 <Plus className="w-4 h-4" />
                 Add
@@ -374,10 +374,10 @@ export default function AdminPage() {
                   className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-800 rounded-lg"
                 >
                   <div className="flex items-center gap-2">
-                    <Shield className="w-4 h-4 text-red-600" />
+                    <Shield className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
                     <span className="text-sm">{email}</span>
                     {email === session?.user?.email && (
-                      <span className="px-2 py-0.5 text-xs bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 rounded">
+                      <span className="px-2 py-0.5 text-xs bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200 rounded">
                         You
                       </span>
                     )}
@@ -398,7 +398,7 @@ export default function AdminPage() {
           <button
             onClick={saveSettings}
             disabled={saving}
-            className="w-full py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 disabled:from-purple-400 disabled:to-blue-400 text-white rounded-xl font-semibold text-lg flex items-center justify-center gap-2"
+            className="w-full py-4 bg-zinc-900 hover:bg-zinc-800 disabled:bg-zinc-600 dark:bg-zinc-700 dark:hover:bg-zinc-600 dark:disabled:bg-zinc-800 text-white rounded-xl font-semibold text-lg flex items-center justify-center gap-2"
           >
             <Save className="w-5 h-5" />
             {saving ? "Saving..." : "Save All Changes"}

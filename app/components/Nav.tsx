@@ -50,7 +50,7 @@ export default function Nav({ onChatClick, onUploadClick }: NavProps) {
                 <Button
                   variant="outline"
                   onClick={() => router.push("/admin")}
-                  className="border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300"
+                  className="border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
                 >
                   <Landmark className="w-4 h-4" />
                   Admin

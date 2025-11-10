@@ -2,7 +2,7 @@
 
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   TrendingUp,
@@ -17,6 +17,20 @@ import {
 export default function LandingPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [guestMode, setGuestMode] = useState(false);
+
+  useEffect(() => {
+    // Check if guest mode is enabled
+    const settings = localStorage.getItem("actalyze_auth_settings");
+    if (settings) {
+      try {
+        const parsed = JSON.parse(settings);
+        setGuestMode(parsed.mode === "guest");
+      } catch {
+        // Ignore errors
+      }
+    }
+  }, []);
 
   useEffect(() => {
     // Redirect to dashboard if already logged in
@@ -25,14 +39,18 @@ export default function LandingPage() {
     }
   }, [status, router]);
 
+  const handleGuestAccess = () => {
+    router.push("/dashboard");
+  };
+
   if (status === "loading") {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-white to-zinc-50 dark:from-zinc-950 dark:to-zinc-900">
         <div className="text-center">
           <div className="inline-flex items-center space-x-2 mb-4">
-            <div className="w-3 h-3 bg-purple-600 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
-            <div className="w-3 h-3 bg-purple-600 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
-            <div className="w-3 h-3 bg-purple-600 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
+            <div className="w-3 h-3 bg-zinc-700 dark:bg-zinc-300 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
+            <div className="w-3 h-3 bg-zinc-700 dark:bg-zinc-300 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
+            <div className="w-3 h-3 bg-zinc-700 dark:bg-zinc-300 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
           </div>
           <p className="text-zinc-600 dark:text-zinc-300">Loading...</p>
         </div>
@@ -46,16 +64,16 @@ export default function LandingPage() {
       <nav className="border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-zinc-700 to-zinc-900 dark:from-zinc-600 dark:to-zinc-800 flex items-center justify-center">
               <TrendingUp className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+            <span className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
               Actalyze
             </span>
           </div>
           <button
             onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-            className="px-6 py-2 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-lg hover:border-purple-400 dark:hover:border-purple-600 transition-colors text-sm font-medium"
+            className="px-6 py-2 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-lg hover:border-zinc-500 dark:hover:border-zinc-500 transition-colors text-sm font-medium"
           >
             Sign In
           </button>
@@ -74,13 +92,13 @@ export default function LandingPage() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-100 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-900 text-purple-700 dark:text-purple-300 text-sm font-medium mb-6"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 text-sm font-medium mb-6"
           >
             <Zap className="w-4 h-4" />
             AI-Powered Political Intelligence
           </motion.div>
 
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 bg-gradient-to-r from-zinc-900 via-purple-900 to-zinc-900 dark:from-zinc-100 dark:via-purple-400 dark:to-zinc-100 bg-clip-text text-transparent">
+          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 text-zinc-900 dark:text-zinc-100">
             Navigate Politics
             <br />
             with Confidence
@@ -94,7 +112,7 @@ export default function LandingPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
               onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-              className="group px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl font-semibold text-lg shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 transition-all duration-200 flex items-center gap-3"
+              className="group px-8 py-4 bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-zinc-200 text-white dark:text-zinc-900 rounded-xl font-semibold text-lg shadow-lg transition-all duration-200 flex items-center gap-3"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -104,6 +122,15 @@ export default function LandingPage() {
               </svg>
               Continue with Google
             </button>
+
+            {guestMode && (
+              <button
+                onClick={handleGuestAccess}
+                className="px-8 py-4 bg-white dark:bg-zinc-900 border-2 border-zinc-300 dark:border-zinc-700 hover:border-zinc-900 dark:hover:border-zinc-300 text-zinc-900 dark:text-zinc-100 rounded-xl font-semibold text-lg transition-all duration-200"
+              >
+                Continue as Guest
+              </button>
+            )}
           </div>
 
           <p className="mt-6 text-sm text-zinc-500 dark:text-zinc-400">
@@ -121,8 +148,8 @@ export default function LandingPage() {
       >
         <div className="grid md:grid-cols-3 gap-8">
           {/* Feature 1 */}
-          <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-purple-300 dark:hover:border-purple-700 transition-colors">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center mb-4">
+          <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 transition-colors">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-zinc-700 to-zinc-900 dark:from-zinc-600 dark:to-zinc-800 flex items-center justify-center mb-4">
               <TrendingUp className="w-6 h-6 text-white" />
             </div>
             <h3 className="text-xl font-bold mb-2">Trending Topics</h3>
@@ -132,8 +159,8 @@ export default function LandingPage() {
           </div>
 
           {/* Feature 2 */}
-          <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-purple-300 dark:hover:border-purple-700 transition-colors">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mb-4">
+          <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 transition-colors">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-zinc-700 to-zinc-900 dark:from-zinc-600 dark:to-zinc-800 flex items-center justify-center mb-4">
               <MapPin className="w-6 h-6 text-white" />
             </div>
             <h3 className="text-xl font-bold mb-2">District Intelligence</h3>
@@ -143,8 +170,8 @@ export default function LandingPage() {
           </div>
 
           {/* Feature 3 */}
-          <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-purple-300 dark:hover:border-purple-700 transition-colors">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center mb-4">
+          <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 transition-colors">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-zinc-700 to-zinc-900 dark:from-zinc-600 dark:to-zinc-800 flex items-center justify-center mb-4">
               <MessageSquare className="w-6 h-6 text-white" />
             </div>
             <h3 className="text-xl font-bold mb-2">AI Chat Assistant</h3>
@@ -154,8 +181,8 @@ export default function LandingPage() {
           </div>
 
           {/* Feature 4 */}
-          <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-purple-300 dark:hover:border-purple-700 transition-colors">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-500 to-green-500 flex items-center justify-center mb-4">
+          <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 transition-colors">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-zinc-700 to-zinc-900 dark:from-zinc-600 dark:to-zinc-800 flex items-center justify-center mb-4">
               <BarChart3 className="w-6 h-6 text-white" />
             </div>
             <h3 className="text-xl font-bold mb-2">Polling & Trends</h3>
@@ -165,8 +192,8 @@ export default function LandingPage() {
           </div>
 
           {/* Feature 5 */}
-          <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-purple-300 dark:hover:border-purple-700 transition-colors">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center mb-4">
+          <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 transition-colors">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-zinc-700 to-zinc-900 dark:from-zinc-600 dark:to-zinc-800 flex items-center justify-center mb-4">
               <Shield className="w-6 h-6 text-white" />
             </div>
             <h3 className="text-xl font-bold mb-2">Secure & Private</h3>
@@ -176,8 +203,8 @@ export default function LandingPage() {
           </div>
 
           {/* Feature 6 */}
-          <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-purple-300 dark:hover:border-purple-700 transition-colors">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-lime-500 flex items-center justify-center mb-4">
+          <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 transition-colors">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-zinc-700 to-zinc-900 dark:from-zinc-600 dark:to-zinc-800 flex items-center justify-center mb-4">
               <Users className="w-6 h-6 text-white" />
             </div>
             <h3 className="text-xl font-bold mb-2">Team Collaboration</h3>
@@ -195,19 +222,29 @@ export default function LandingPage() {
         transition={{ duration: 0.6, delay: 0.6 }}
         className="max-w-7xl mx-auto px-4 py-20"
       >
-        <div className="rounded-3xl bg-gradient-to-r from-purple-600 to-blue-600 p-12 text-center text-white">
+        <div className="rounded-3xl bg-gradient-to-br from-zinc-900 to-zinc-800 dark:from-zinc-800 dark:to-zinc-900 p-12 text-center text-white border border-zinc-700 dark:border-zinc-800">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Ready to get started?
           </h2>
-          <p className="text-xl mb-8 text-purple-100">
+          <p className="text-xl mb-8 text-zinc-300">
             Join congressional staffers and policy professionals using Actalyze
           </p>
-          <button
-            onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-            className="px-8 py-4 bg-white text-purple-600 hover:bg-zinc-100 rounded-xl font-semibold text-lg shadow-lg transition-colors"
-          >
-            Sign In with Google
-          </button>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button
+              onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+              className="px-8 py-4 bg-white text-zinc-900 hover:bg-zinc-100 rounded-xl font-semibold text-lg shadow-lg transition-colors"
+            >
+              Sign In with Google
+            </button>
+            {guestMode && (
+              <button
+                onClick={handleGuestAccess}
+                className="px-8 py-4 bg-zinc-800 border-2 border-zinc-600 hover:border-zinc-400 text-white rounded-xl font-semibold text-lg transition-colors"
+              >
+                Continue as Guest
+              </button>
+            )}
+          </div>
         </div>
       </motion.div>
 
