@@ -23,11 +23,22 @@ export default function Dashboard() {
   const { data: session, status } = useSession();
   const [topics, setTopics] = useState<Topic[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isGuestMode, setIsGuestMode] = useState(false);
 
   useEffect(() => {
-    // Let middleware handle authentication redirects
-    // Only fetch data if authenticated
-    if (status === "authenticated") {
+    // Check if this is a guest session
+    const urlParams = new URLSearchParams(window.location.search);
+    const guestParam = urlParams.get("guest");
+    const hasGuestCookie = document.cookie.includes("guest_mode_enabled=true");
+
+    if (guestParam === "true" || hasGuestCookie) {
+      setIsGuestMode(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    // Fetch data if authenticated OR in guest mode
+    if (status === "authenticated" || isGuestMode) {
       // Fetch trending topics
       fetch("/api/trending")
       .then((res) => res.json())
@@ -39,8 +50,14 @@ export default function Dashboard() {
         console.error("Error fetching trending topics:", error);
         setLoading(false);
       });
+    } else if (status === "loading") {
+      // Still loading auth state
+      return;
+    } else {
+      // Not authenticated and not guest mode
+      setLoading(false);
     }
-  }, [status]);
+  }, [status, isGuestMode]);
 
   const handleExplore = () => {
     window.scrollTo({ top: window.innerHeight, behavior: "smooth" });

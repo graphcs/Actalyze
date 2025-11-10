@@ -40,7 +40,8 @@ export default function LandingPage() {
   }, [status, router]);
 
   const handleGuestAccess = () => {
-    router.push("/dashboard");
+    // Pass guest parameter to tell middleware to allow access
+    router.push("/dashboard?guest=true");
   };
 
   if (status === "loading") {
