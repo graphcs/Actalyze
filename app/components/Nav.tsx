@@ -1,9 +1,10 @@
 "use client";
 
-import { Landmark, MessageSquare, Upload } from "lucide-react";
+import { Landmark, MessageSquare, Upload, LogOut, User } from "lucide-react";
 import { Button } from "./ui/Button";
 import { Badge } from "./ui/Badge";
 import { useRouter } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
 import CacheToggle from "./CacheToggle";
 
 interface NavProps {
@@ -13,6 +14,7 @@ interface NavProps {
 
 export default function Nav({ onChatClick, onUploadClick }: NavProps) {
   const router = useRouter();
+  const { data: session } = useSession();
 
   return (
     <div className="sticky top-0 z-50 backdrop-blur supports-[backdrop-filter]:bg-white/50 dark:supports-[backdrop-filter]:bg-zinc-900/40 border-b border-zinc-200 dark:border-zinc-800">
@@ -39,6 +41,26 @@ export default function Nav({ onChatClick, onUploadClick }: NavProps) {
             <Upload className="w-4 h-4" />
             Upload Bill
           </Button>
+
+          {/* User info and logout */}
+          {session?.user && (
+            <>
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700">
+                <User className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
+                <span className="text-sm text-zinc-700 dark:text-zinc-300">
+                  {session.user.email?.split('@')[0]}
+                </span>
+              </div>
+              <Button
+                variant="ghost"
+                onClick={() => signOut({ callbackUrl: '/' })}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950"
+              >
+                <LogOut className="w-4 h-4" />
+                Logout
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </div>
