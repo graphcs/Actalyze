@@ -1,0 +1,410 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { Shield, Users, Settings, Plus, Trash2, Save } from "lucide-react";
+
+interface AuthSettings {
+  mode: "restricted" | "public" | "guest";
+  authorizedEmails: string[];
+  adminEmails: string[];
+}
+
+export default function AdminPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [settings, setSettings] = useState<AuthSettings>({
+    mode: "restricted",
+    authorizedEmails: [
+      "johnmahan7@gmail.com",
+      "dan@datasyinc.com",
+      "johnmaheswaran@datasyinc.com",
+    ],
+    adminEmails: ["johnmahan7@gmail.com"],
+  });
+  const [newEmail, setNewEmail] = useState("");
+  const [newAdminEmail, setNewAdminEmail] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
+
+  // Check if current user is admin
+  const isAdmin = session?.user?.email === "johnmahan7@gmail.com";
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/");
+    } else if (status === "authenticated" && !isAdmin) {
+      router.push("/dashboard");
+    }
+  }, [status, isAdmin, router]);
+
+  useEffect(() => {
+    // Load settings from localStorage (in production, this would be from API/database)
+    const saved = localStorage.getItem("actalyze_auth_settings");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setSettings(parsed);
+      } catch (e) {
+        console.error("Failed to parse settings:", e);
+      }
+    }
+  }, []);
+
+  const saveSettings = async () => {
+    setSaving(true);
+    setMessage("");
+
+    try {
+      // Save to localStorage (in production, this would be API call to database)
+      localStorage.setItem("actalyze_auth_settings", JSON.stringify(settings));
+
+      // In production, you would call an API:
+      // await fetch("/api/admin/settings", {
+      //   method: "POST",
+      //   body: JSON.stringify(settings),
+      // });
+
+      setMessage("Settings saved successfully!");
+      setTimeout(() => setMessage(""), 3000);
+    } catch {
+      setMessage("Failed to save settings");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const addAuthorizedEmail = () => {
+    if (!newEmail.trim() || !newEmail.includes("@")) {
+      setMessage("Please enter a valid email address");
+      return;
+    }
+
+    if (settings.authorizedEmails.includes(newEmail.toLowerCase())) {
+      setMessage("Email already in authorized list");
+      return;
+    }
+
+    setSettings({
+      ...settings,
+      authorizedEmails: [...settings.authorizedEmails, newEmail.toLowerCase()],
+    });
+    setNewEmail("");
+    setMessage("Email added to authorized list (don't forget to save!)");
+  };
+
+  const removeAuthorizedEmail = (email: string) => {
+    // Prevent removing yourself
+    if (email === session?.user?.email) {
+      setMessage("You cannot remove your own email from authorized users");
+      return;
+    }
+
+    setSettings({
+      ...settings,
+      authorizedEmails: settings.authorizedEmails.filter((e) => e !== email),
+    });
+    setMessage("Email removed from authorized list (don't forget to save!)");
+  };
+
+  const addAdminEmail = () => {
+    if (!newAdminEmail.trim() || !newAdminEmail.includes("@")) {
+      setMessage("Please enter a valid email address");
+      return;
+    }
+
+    if (settings.adminEmails.includes(newAdminEmail.toLowerCase())) {
+      setMessage("Email already in admin list");
+      return;
+    }
+
+    // Auto-add to authorized emails if not already there
+    const updatedAuthorized = settings.authorizedEmails.includes(
+      newAdminEmail.toLowerCase()
+    )
+      ? settings.authorizedEmails
+      : [...settings.authorizedEmails, newAdminEmail.toLowerCase()];
+
+    setSettings({
+      ...settings,
+      authorizedEmails: updatedAuthorized,
+      adminEmails: [...settings.adminEmails, newAdminEmail.toLowerCase()],
+    });
+    setNewAdminEmail("");
+    setMessage("Email added to admin list (don't forget to save!)");
+  };
+
+  const removeAdminEmail = (email: string) => {
+    // Prevent removing yourself
+    if (email === session?.user?.email) {
+      setMessage("You cannot remove yourself from admin users");
+      return;
+    }
+
+    setSettings({
+      ...settings,
+      adminEmails: settings.adminEmails.filter((e) => e !== email),
+    });
+    setMessage("Email removed from admin list (don't forget to save!)");
+  };
+
+  if (status === "loading") {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="inline-flex items-center space-x-2 mb-4">
+            <div className="w-3 h-3 bg-purple-600 rounded-full animate-bounce"></div>
+            <div className="w-3 h-3 bg-purple-600 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
+            <div className="w-3 h-3 bg-purple-600 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
+          </div>
+          <p className="text-zinc-600 dark:text-zinc-300">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return null;
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-white to-zinc-50 dark:from-zinc-950 dark:to-zinc-900">
+      {/* Header */}
+      <div className="border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Shield className="w-8 h-8 text-purple-600" />
+              <div>
+                <h1 className="text-2xl font-bold">Admin Panel</h1>
+                <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                  Manage authentication and user access
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => router.push("/dashboard")}
+              className="px-4 py-2 text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+            >
+              Back to Dashboard
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Status Message */}
+        {message && (
+          <div
+            className={`mb-6 p-4 rounded-lg ${
+              message.includes("success") || message.includes("added")
+                ? "bg-green-100 dark:bg-green-950/30 text-green-900 dark:text-green-300 border border-green-200 dark:border-green-900"
+                : "bg-yellow-100 dark:bg-yellow-950/30 text-yellow-900 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-900"
+            }`}
+          >
+            {message}
+          </div>
+        )}
+
+        <div className="grid gap-6">
+          {/* Authentication Mode */}
+          <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <Settings className="w-6 h-6 text-purple-600" />
+              <h2 className="text-xl font-bold">Authentication Mode</h2>
+            </div>
+
+            <div className="space-y-3">
+              <label className="flex items-start gap-3 p-4 border-2 rounded-lg cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+                <input
+                  type="radio"
+                  name="mode"
+                  value="restricted"
+                  checked={settings.mode === "restricted"}
+                  onChange={(e) =>
+                    setSettings({ ...settings, mode: e.target.value as "restricted" | "public" | "guest" })
+                  }
+                  className="mt-1"
+                />
+                <div>
+                  <div className="font-semibold">Restricted Access</div>
+                  <div className="text-sm text-zinc-600 dark:text-zinc-400">
+                    Only authorized emails can access the application
+                  </div>
+                </div>
+              </label>
+
+              <label className="flex items-start gap-3 p-4 border-2 rounded-lg cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+                <input
+                  type="radio"
+                  name="mode"
+                  value="public"
+                  checked={settings.mode === "public"}
+                  onChange={(e) =>
+                    setSettings({ ...settings, mode: e.target.value as "restricted" | "public" | "guest" })
+                  }
+                  className="mt-1"
+                />
+                <div>
+                  <div className="font-semibold">Public Access</div>
+                  <div className="text-sm text-zinc-600 dark:text-zinc-400">
+                    Anyone with a Google account can sign in
+                  </div>
+                </div>
+              </label>
+
+              <label className="flex items-start gap-3 p-4 border-2 rounded-lg cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+                <input
+                  type="radio"
+                  name="mode"
+                  value="guest"
+                  checked={settings.mode === "guest"}
+                  onChange={(e) =>
+                    setSettings({ ...settings, mode: e.target.value as "restricted" | "public" | "guest" })
+                  }
+                  className="mt-1"
+                />
+                <div>
+                  <div className="font-semibold">Guest Mode</div>
+                  <div className="text-sm text-zinc-600 dark:text-zinc-400">
+                    Allow access without authentication (Continue as Guest)
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          {/* Authorized Users */}
+          <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <Users className="w-6 h-6 text-blue-600" />
+              <h2 className="text-xl font-bold">Authorized Users</h2>
+              <span className="text-sm text-zinc-500">
+                ({settings.authorizedEmails.length} users)
+              </span>
+            </div>
+
+            <div className="mb-4 flex gap-2">
+              <input
+                type="email"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && addAuthorizedEmail()}
+                placeholder="email@example.com"
+                className="flex-1 px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 focus:ring-2 focus:ring-purple-500 outline-none"
+              />
+              <button
+                onClick={addAuthorizedEmail}
+                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Add
+              </button>
+            </div>
+
+            <div className="space-y-2 max-h-96 overflow-y-auto">
+              {settings.authorizedEmails.map((email) => (
+                <div
+                  key={email}
+                  className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-800 rounded-lg"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm">{email}</span>
+                    {settings.adminEmails.includes(email) && (
+                      <span className="px-2 py-0.5 text-xs bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 rounded">
+                        Admin
+                      </span>
+                    )}
+                    {email === session?.user?.email && (
+                      <span className="px-2 py-0.5 text-xs bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 rounded">
+                        You
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => removeAuthorizedEmail(email)}
+                    disabled={email === session?.user?.email}
+                    className="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-950 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Admin Users */}
+          <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <Shield className="w-6 h-6 text-red-600" />
+              <h2 className="text-xl font-bold">Admin Users</h2>
+              <span className="text-sm text-zinc-500">
+                ({settings.adminEmails.length} admins)
+              </span>
+            </div>
+
+            <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-900 rounded-lg text-sm text-yellow-900 dark:text-yellow-300">
+              <strong>Note:</strong> Admin users have access to this panel and
+              can manage all settings.
+            </div>
+
+            <div className="mb-4 flex gap-2">
+              <input
+                type="email"
+                value={newAdminEmail}
+                onChange={(e) => setNewAdminEmail(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && addAdminEmail()}
+                placeholder="admin@example.com"
+                className="flex-1 px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 focus:ring-2 focus:ring-red-500 outline-none"
+              />
+              <button
+                onClick={addAdminEmail}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Add
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              {settings.adminEmails.map((email) => (
+                <div
+                  key={email}
+                  className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-800 rounded-lg"
+                >
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-4 h-4 text-red-600" />
+                    <span className="text-sm">{email}</span>
+                    {email === session?.user?.email && (
+                      <span className="px-2 py-0.5 text-xs bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 rounded">
+                        You
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => removeAdminEmail(email)}
+                    disabled={email === session?.user?.email}
+                    className="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-950 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Save Button */}
+          <button
+            onClick={saveSettings}
+            disabled={saving}
+            className="w-full py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 disabled:from-purple-400 disabled:to-blue-400 text-white rounded-xl font-semibold text-lg flex items-center justify-center gap-2"
+          >
+            <Save className="w-5 h-5" />
+            {saving ? "Saving..." : "Save All Changes"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

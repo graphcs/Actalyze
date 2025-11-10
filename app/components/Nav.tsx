@@ -45,6 +45,18 @@ export default function Nav({ onChatClick, onUploadClick }: NavProps) {
           {/* User info and logout */}
           {session?.user && (
             <>
+              {/* Admin link - only for johnmahan7@gmail.com */}
+              {session.user.email === "johnmahan7@gmail.com" && (
+                <Button
+                  variant="outline"
+                  onClick={() => router.push("/admin")}
+                  className="border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300"
+                >
+                  <Landmark className="w-4 h-4" />
+                  Admin
+                </Button>
+              )}
+
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700">
                 <User className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
                 <span className="text-sm text-zinc-700 dark:text-zinc-300">
