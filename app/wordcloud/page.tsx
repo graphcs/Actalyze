@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Cloud, Download, TrendingUp, Info } from "lucide-react";
@@ -15,7 +15,7 @@ import WordCloudFiltersComponent from "../components/WordCloudFilters";
 import { Button } from "../components/ui/Button";
 import type { WordCloudData, WordCloudFilters } from "@/types/wordcloud";
 
-export default function WordCloudPage() {
+function WordCloudPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -301,5 +301,24 @@ export default function WordCloudPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function WordCloudPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gradient-to-b from-white to-zinc-50 dark:from-zinc-950 dark:to-zinc-900 flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-zinc-600 dark:text-zinc-400">
+              Loading Word Cloud...
+            </p>
+          </div>
+        </div>
+      }
+    >
+      <WordCloudPageContent />
+    </Suspense>
   );
 }

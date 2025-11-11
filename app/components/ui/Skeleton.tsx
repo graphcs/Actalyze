@@ -44,8 +44,7 @@ export function SkeletonText({ lines = 3 }: { lines?: number }) {
       {Array.from({ length: lines }).map((_, i) => (
         <Skeleton
           key={i}
-          className="h-4"
-          style={{ width: i === lines - 1 ? "80%" : "100%" }}
+          className={cn("h-4", i === lines - 1 ? "w-4/5" : "w-full")}
         />
       ))}
     </div>
