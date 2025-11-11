@@ -13,6 +13,7 @@ export async function middleware(request: NextRequest) {
     "/topic",
     "/state",
     "/district",
+    "/wordcloud",
   ];
 
   const isProtectedRoute = protectedRoutes.some((route) =>
@@ -71,5 +72,6 @@ export const config = {
     "/topic/:path*",
     "/state/:path*",
     "/district/:path*",
+    "/wordcloud/:path*",
   ],
 };
