@@ -25,6 +25,12 @@ const TweetEmbed = dynamic(
   { ssr: false }
 );
 
+// Dynamically import RedditEmbed to avoid SSR issues
+const RedditEmbed = dynamic(
+  () => import("../../components/RedditEmbed"),
+  { ssr: false }
+);
+
 interface Topic {
   id: string;
   title: string;
@@ -56,6 +62,18 @@ interface Tweet {
   url: string;
 }
 
+interface RedditPost {
+  id: string;
+  title: string;
+  permalink: string;
+  author: string;
+  subreddit: string;
+  score: number;
+  num_comments: number;
+  created_utc: number;
+  url: string;
+}
+
 interface Headline {
   title: string;
   url: string;
@@ -80,6 +98,7 @@ export default function TopicPage() {
   const [topic, setTopic] = useState<Topic | null>(null);
   const [perspectives, setPerspectives] = useState<PartyPerspectives | null>(null);
   const [tweets, setTweets] = useState<Tweet[]>([]);
+  const [redditPosts, setRedditPosts] = useState<RedditPost[]>([]);
   const [headlines, setHeadlines] = useState<Headline[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -122,6 +141,15 @@ export default function TopicPage() {
             .catch((error) => {
               console.error("Error fetching Twitter tweets:", error);
               setTweets([]);
+            });
+
+          // Fetch Reddit posts
+          fetch(`/api/reddit/search?query=${encodeURIComponent(topicTitle)}&limit=4`)
+            .then((res) => res.json())
+            .then((data) => setRedditPosts(data.posts || []))
+            .catch((error) => {
+              console.error("Error fetching Reddit posts:", error);
+              setRedditPosts([]);
             });
 
           // Fetch headlines
@@ -250,7 +278,7 @@ export default function TopicPage() {
         </div>
 
         {/* Content Sections */}
-        <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-5 pb-16">
+        <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-2 lg:grid-cols-3 gap-5 pb-16">
           {/* Top Tweets */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
@@ -343,8 +371,40 @@ export default function TopicPage() {
             </CardContent>
           </Card>
 
+          {/* Top Reddit Discussions */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div className="font-semibold flex items-center gap-2">
+                <MessageSquare className="w-4 h-4" />
+                Top Discussions
+              </div>
+              <Badge className="bg-orange-100 text-orange-900 dark:bg-orange-900 dark:text-orange-100">
+                Reddit
+              </Badge>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="text-sm text-zinc-500 dark:text-zinc-400 py-8 text-center">
+                  Loading discussions...
+                </div>
+              ) : redditPosts.length > 0 ? (
+                <div className="max-h-[600px] overflow-y-auto space-y-4 pr-2">
+                  {redditPosts.map((post) => (
+                    <div key={post.id}>
+                      <RedditEmbed url={`https://www.reddit.com${post.permalink}`} />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-sm text-zinc-500 dark:text-zinc-400 py-8 text-center">
+                  No discussions found for this topic
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Political Context */}
-          <Card className="md:col-span-2">
+          <Card className="md:col-span-2 lg:col-span-3">
             <CardHeader className="flex flex-row items-center justify-between">
               <div className="font-semibold flex items-center gap-2">
                 <Scale className="w-4 h-4" />

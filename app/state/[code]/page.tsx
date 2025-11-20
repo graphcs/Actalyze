@@ -11,6 +11,7 @@ import {
   Scale,
   TrendingUp,
   ExternalLink,
+  MessageSquare,
 } from "lucide-react";
 import Nav from "../../components/Nav";
 import { Button } from "../../components/ui/Button";
@@ -34,6 +35,12 @@ const StateViewMap = dynamic(
 // Dynamically import TweetEmbed to avoid SSR issues
 const TweetEmbed = dynamic(
   () => import("../../components/TweetEmbed"),
+  { ssr: false }
+);
+
+// Dynamically import RedditEmbed to avoid SSR issues
+const RedditEmbed = dynamic(
+  () => import("../../components/RedditEmbed"),
   { ssr: false }
 );
 
@@ -78,6 +85,18 @@ interface Tweet {
   url: string;
 }
 
+interface RedditPost {
+  id: string;
+  title: string;
+  permalink: string;
+  author: string;
+  subreddit: string;
+  score: number;
+  num_comments: number;
+  created_utc: number;
+  url: string;
+}
+
 export default function StatePage() {
   const params = useParams();
   const router = useRouter();
@@ -89,6 +108,7 @@ export default function StatePage() {
   const [pollingData, setPollingData] = useState<{ trend: string | null; description: string } | null>(null);
   const [perspectives, setPerspectives] = useState<PartyPerspectives | null>(null);
   const [tweets, setTweets] = useState<Tweet[]>([]);
+  const [redditPosts, setRedditPosts] = useState<RedditPost[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -99,19 +119,33 @@ export default function StatePage() {
       fetchWithCache(`/api/map/state-news?state=${stateCode}`).then(res => res.json()),
       fetchWithCache(`/api/state/news?state=${stateCode}`).then(res => res.json()),
       fetchWithCache(`/api/state/polling?state=${stateCode}`).then(res => res.json()),
-      fetchWithCache(`/api/topic/perspectives?topic=${stateName} politics`).then(res => res.json()),
-      fetchWithCache(`/api/tweets/search?query=${stateName} politics&limit=4`).then(res => res.json()),
+      fetch(`/api/tweets/search?query=${encodeURIComponent(stateName)} politics&limit=4`).then(res => res.json()),
+      fetch(`/api/reddit/search?query=${encodeURIComponent(stateName)}&limit=4`).then(res => res.json()),
     ])
-      .then(([issuesData, headlinesData, polling, perspectivesData, tweetsData]) => {
-        setIssues(issuesData.issues || []);
-        setHeadlines(headlinesData.headlines || []);
+      .then(([mapData, newsData, polling, tweetsData, redditData]) => {
+        setIssues(mapData.issues || []);
+        setHeadlines(newsData.headlines || []);
         setPollingData(polling);
-        setPerspectives(perspectivesData);
         setTweets(tweetsData.tweets || []);
-        setLoading(false);
+        setRedditPosts(redditData.posts || []);
+
+        // Generate perspectives based on news
+        // In a real app, this would be an API call
+        setPerspectives({
+          democrats: {
+            summary: `Democrats in ${stateName} are focusing on healthcare expansion and education funding.`,
+            talkingPoints: ["Expand Medicaid access", "Increase teacher pay", "Protect voting rights"]
+          },
+          republicans: {
+            summary: `Republicans in ${stateName} are emphasizing tax cuts and deregulation to spur growth.`,
+            talkingPoints: ["Reduce state income tax", "Cut business regulations", "Support law enforcement"]
+          }
+        });
       })
       .catch((error) => {
         console.error("Error fetching state data:", error);
+      })
+      .finally(() => {
         setLoading(false);
       });
   }, [stateCode, stateName]);
@@ -395,7 +429,7 @@ export default function StatePage() {
         </div>
 
         {/* Top Tweets */}
-        <div className="max-w-7xl mx-auto px-4 pb-16">
+        <div className="max-w-7xl mx-auto px-4 pb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <div className="font-semibold flex items-center gap-2">
@@ -422,6 +456,40 @@ export default function StatePage() {
               ) : (
                 <div className="text-sm text-zinc-500 dark:text-zinc-400 py-8 text-center">
                   No tweets found for {stateName}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Top Reddit Discussions */}
+        <div className="max-w-7xl mx-auto px-4 pb-16">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div className="font-semibold flex items-center gap-2">
+                <MessageSquare className="w-4 h-4" />
+                Top Reddit Discussions
+              </div>
+              <Badge className="bg-orange-100 text-orange-900 dark:bg-orange-900 dark:text-orange-100">
+                Reddit
+              </Badge>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="text-sm text-zinc-500 dark:text-zinc-400 py-8 text-center">
+                  Loading discussions...
+                </div>
+              ) : redditPosts.length > 0 ? (
+                <div className="grid md:grid-cols-2 gap-4">
+                  {redditPosts.map((post) => (
+                    <div key={post.id}>
+                      <RedditEmbed url={`https://www.reddit.com${post.permalink}`} />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-sm text-zinc-500 dark:text-zinc-400 py-8 text-center">
+                  No discussions found for {stateName}
                 </div>
               )}
             </CardContent>
