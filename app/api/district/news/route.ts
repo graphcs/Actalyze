@@ -9,6 +9,27 @@ interface Headline {
   thumbnail?: string;
 }
 
+function formatDate(dateString?: string): string | undefined {
+  if (!dateString) return undefined;
+
+  // If it's already relative (e.g. "2 hours ago"), keep it
+  if (dateString.includes('ago')) return dateString;
+
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString;
+
+    // Format: "Nov 14, 2025"
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    }).format(date);
+  } catch (e) {
+    return dateString;
+  }
+}
+
 /**
  * GET /api/district/news?district=VA05
  * Returns local news headlines for a congressional district
@@ -68,7 +89,53 @@ export async function GET(request: NextRequest) {
     }
 
     // Construct search query for local news
-    const searchQuery = `${stateCode} congressional district ${parseInt(districtNum)} news politics`;
+    let searchQuery = `${stateCode} congressional district ${parseInt(districtNum)} news politics`;
+
+    // Try to get a better search query using AI if available
+    const openrouterKey = process.env.OPENROUTER_API_KEY;
+    if (openrouterKey) {
+      try {
+        const districtLabel = `${stateCode}-${districtNum}`;
+        const prompt = `Generate a Google News search query to find the most relevant recent political news for US Congressional District ${districtLabel}.
+Include the current representative's name and major cities/counties in the query string using OR operators.
+Return ONLY the raw query string. Do not use quotes around the whole string.
+Example output: "Tom Suozzi" OR "NY-03" OR "Nassau County politics"`;
+
+        const aiResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${openrouterKey}`,
+            'HTTP-Referer': process.env.NEXT_PUBLIC_URL!,
+            'X-Title': 'Actalyze',
+          },
+          body: JSON.stringify({
+            model: 'perplexity/sonar-pro',
+            messages: [
+              {
+                role: 'user',
+                content: prompt,
+              },
+            ],
+            temperature: 0.1,
+            max_tokens: 100,
+          }),
+          signal: AbortSignal.timeout(5000), // Short timeout
+        });
+
+        if (aiResponse.ok) {
+          const aiData = await aiResponse.json();
+          const generatedQuery = aiData.choices?.[0]?.message?.content?.trim();
+          if (generatedQuery) {
+            // Clean up query (remove quotes if wrapped in them, though prompt says not to)
+            searchQuery = generatedQuery.replace(/^"|"$/g, '');
+            console.log(`🤖 AI generated search query: ${searchQuery}`);
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to generate AI search query, falling back to default', e);
+      }
+    }
 
     const url = new URL('https://serpapi.com/search');
     url.searchParams.set('engine', 'google_news');
@@ -110,7 +177,7 @@ export async function GET(request: NextRequest) {
         title: article.title || "Untitled",
         url: article.link || "#",
         source: article.source?.name || "Unknown",
-        date: article.date,
+        date: formatDate(article.date),
         thumbnail: article.thumbnail,
       }));
 
