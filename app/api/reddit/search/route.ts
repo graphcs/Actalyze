@@ -52,7 +52,9 @@ export async function GET(request: NextRequest) {
 
         // Search Reddit
         // sort=relevance, t=week (posts from the last week)
-        const redditUrl = `https://www.reddit.com/search.json?q=${encodeURIComponent(query)}&sort=relevance&t=week&limit=${limit * 2}`; // Fetch more to filter if needed
+        // Append keywords to ensure political/news context and exclude common non-political topics
+        const enhancedQuery = `${query} (politics OR news OR government OR legislation) -subreddit:sports -subreddit:nfl -subreddit:nba -subreddit:cfb -subreddit:collegebasketball -subreddit:gaming -subreddit:leagueoflegends`;
+        const redditUrl = `https://www.reddit.com/search.json?q=${encodeURIComponent(enhancedQuery)}&sort=relevance&t=week&limit=${limit * 3}`; // Fetch more to filter if needed
 
         const response = await fetch(redditUrl, {
             headers: {
@@ -73,10 +75,70 @@ export async function GET(request: NextRequest) {
         }
 
         // Format posts
-        const posts: RedditPost[] = data.data.children
+        let posts: RedditPost[] = data.data.children
             .map((child) => child.data)
-            .filter((post) => !post.url.includes('v.redd.it')) // Filter out video posts if they cause embed issues (optional)
-            .slice(0, limit);
+            .filter((post) => !post.url.includes('v.redd.it')); // Filter out video posts if they cause embed issues (optional)
+
+        // AI Filtering to remove unrelated content (sports, gaming, etc.)
+        const apiKey = process.env.OPENROUTER_API_KEY;
+        if (posts.length > 0 && apiKey) {
+            try {
+                // Analyze top candidates (up to 10) to save tokens/time
+                const candidates = posts.slice(0, 10);
+                const postsForAnalysis = candidates.map(p => ({
+                    id: p.id,
+                    title: p.title,
+                    subreddit: p.subreddit
+                }));
+
+                const aiResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`,
+                        'HTTP-Referer': process.env.NEXT_PUBLIC_URL || 'http://localhost:3000',
+                        'X-Title': 'Actalyze',
+                    },
+                    body: JSON.stringify({
+                        model: 'openai/gpt-4o-mini',
+                        messages: [
+                            {
+                                role: 'system',
+                                content: 'You are a content filter. Return JSON with a "relevantIds" array containing IDs of posts that are strictly related to politics, news, government, or social issues. Exclude sports scores, game threads, video games, and entertainment.'
+                            },
+                            {
+                                role: 'user',
+                                content: `Query: "${query}"\n\nPosts:\n${JSON.stringify(postsForAnalysis)}`
+                            }
+                        ],
+                        response_format: { type: "json_object" }
+                    }),
+                    signal: AbortSignal.timeout(4000) // Short timeout
+                });
+
+                if (aiResponse.ok) {
+                    const aiData = await aiResponse.json();
+                    const content = aiData.choices?.[0]?.message?.content;
+                    if (content) {
+                        const parsed = JSON.parse(content);
+                        if (Array.isArray(parsed.relevantIds)) {
+                            const relevantIds = new Set(parsed.relevantIds);
+                            const filteredCandidates = candidates.filter(p => relevantIds.has(p.id));
+
+                            if (filteredCandidates.length > 0) {
+                                console.log(`🤖 AI filtered ${candidates.length - filteredCandidates.length} unrelated posts`);
+                                posts = filteredCandidates;
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('AI filtering failed, falling back to raw results:', error);
+            }
+        }
+
+        // Final slice
+        posts = posts.slice(0, limit);
 
         const result = { posts };
 
