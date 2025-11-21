@@ -6,6 +6,10 @@ interface RedditEmbedProps {
   url: string;
 }
 
+interface WindowWithReddit extends Window {
+  rembed?: unknown;
+}
+
 /**
  * Component to embed a Reddit post using Reddit's official widget
  * Loads Reddit's widgets.js script and renders the post
@@ -17,7 +21,7 @@ export default function RedditEmbed({ url }: RedditEmbedProps) {
   useEffect(() => {
     // Load Reddit widgets script if not already loaded
     // Reddit attaches to window.rembed
-    if (!(window as any).rembed && !loadedRef.current) {
+    if (!(window as WindowWithReddit).rembed && !loadedRef.current) {
       const script = document.createElement('script');
       script.src = 'https://embed.reddit.com/widgets.js';
       script.async = true;
@@ -30,7 +34,7 @@ export default function RedditEmbed({ url }: RedditEmbedProps) {
       // However, Reddit's widget.js doesn't expose a clear public API like Twitter's `twttr.widgets.load()`.
       // It usually relies on the script execution or DOM mutation observers.
       // Re-inserting the script is a common hack if it doesn't pick up new elements.
-      if ((window as any).rembed) {
+      if ((window as WindowWithReddit).rembed) {
          // Try to re-run the scan if available, otherwise re-injecting script might be needed
          // But usually just having the class 'reddit-card' is enough if the script is running.
          // If it fails to render on navigation, we might need to reload the script.

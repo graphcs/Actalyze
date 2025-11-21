@@ -56,9 +56,10 @@ export async function GET(request: NextRequest) {
         const enhancedQuery = `${query} (politics OR news OR government OR legislation) -subreddit:sports -subreddit:nfl -subreddit:nba -subreddit:cfb -subreddit:collegebasketball -subreddit:gaming -subreddit:leagueoflegends`;
         const redditUrl = `https://www.reddit.com/search.json?q=${encodeURIComponent(enhancedQuery)}&sort=relevance&t=week&limit=${limit * 3}`; // Fetch more to filter if needed
 
+        const domain = process.env.NEXT_PUBLIC_URL ? new URL(process.env.NEXT_PUBLIC_URL).hostname : 'actalyze.com';
         const response = await fetch(redditUrl, {
             headers: {
-                'User-Agent': 'Actalyze/1.0.0 (by /u/actalyze_bot)', // Required by Reddit API
+                'User-Agent': `web:Actalyze:v1.0.0 (by /u/actalyze_bot on ${domain})`, // Required by Reddit API
             },
         });
 
