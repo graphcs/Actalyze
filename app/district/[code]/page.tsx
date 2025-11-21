@@ -108,7 +108,7 @@ export default function DistrictPage() {
       fetchWithCache(`/api/district/polling?district=${districtCode}`).then(res => res.json()),
       fetchWithCache(`/api/topic/perspectives?topic=${districtCode} district`).then(res => res.json()),
       fetchWithCache(`/api/district/tweets?district=${districtCode}`).then(res => res.json()),
-      fetch(`/api/reddit/search?query=${encodeURIComponent(districtCode)}&limit=4`).then(res => res.json()),
+      fetchWithCache(`/api/district/reddit?district=${districtCode}`).then(res => res.json()),
     ])
       .then(([newsData, summaryData, polling, perspectivesData, tweetsData, redditData]) => {
         setHeadlines(newsData.headlines || []);
