@@ -6,6 +6,8 @@ interface UserData {
   id: string;
   name: string;
   username: string;
+  location?: string;
+  description?: string;
 }
 
 interface Tweet {
@@ -15,6 +17,8 @@ interface Tweet {
   username: string;
   url: string;
   created_at: string;
+  user_location?: string;
+  user_bio?: string;
 }
 
 interface TweetWithMetrics extends Tweet {
@@ -189,6 +193,7 @@ ONLY output the bulleted list of search terms with NO additional commentary, exp
         const result = await appOnlyClient.v2.search(searchQuery, {
           max_results: 20,
           'tweet.fields': ['created_at', 'author_id', 'public_metrics'],
+          'user.fields': ['location', 'description'],
           expansions: ['author_id'],
         });
 
@@ -205,6 +210,8 @@ ONLY output the bulleted list of search terms with NO additional commentary, exp
               id: user.id,
               name: user.name || 'Unknown',
               username: user.username || 'unknown',
+              location: user.location,
+              description: user.description,
             });
           }
         }
@@ -238,6 +245,8 @@ ONLY output the bulleted list of search terms with NO additional commentary, exp
             username: username,
             url: `https://twitter.com/${username}/status/${tweet.id}`,
             created_at: tweet.created_at || '',
+            user_location: user?.location,
+            user_bio: user?.description,
             engagement_score: engagementScore,
             age_days: ageDays,
           });

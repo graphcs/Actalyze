@@ -1,0 +1,443 @@
+// AI Political Intelligence Library
+// Based on concepts from "Artificially Intelligent Opinion Polling" (Cerina & Duch, 2023)
+
+export interface Tweet {
+  id: string;
+  text: string;
+  author: string;
+  username: string;
+  url: string;
+  created_at: string;
+  user_location?: string;
+  user_bio?: string;
+}
+
+export interface PostClassification {
+  location_confidence: number;
+  political_leaning: 'D' | 'R' | 'I' | 'unknown';
+  leaning_confidence: number;
+  topics: string[];
+  topic_sentiments: Record<string, number>;
+  key_insight: string;
+}
+
+export interface TopicSummary {
+  name: string;
+  post_count: number;
+  sentiment: number;
+  trending_direction: 'up' | 'down' | 'stable';
+}
+
+export interface AIIntelResponse {
+  district: string;
+  district_name: string;
+  timestamp: string;
+  sample_size: number;
+
+  polling: {
+    estimate: string;
+    margin: number;
+    confidence: number;
+    vs_traditional?: string;
+  };
+
+  topics: TopicSummary[];
+
+  election_outlook: {
+    rating: 'Safe D' | 'Likely D' | 'Lean D' | 'Toss-up' | 'Lean R' | 'Likely R' | 'Safe R';
+    confidence: number;
+    key_factors: string[];
+  };
+
+  insights: {
+    text: string;
+    type: 'pattern' | 'shift' | 'emerging';
+    timestamp: string;
+  }[];
+}
+
+// State names mapping
+export const STATE_NAMES: Record<string, string> = {
+  'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas', 'CA': 'California',
+  'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware', 'FL': 'Florida', 'GA': 'Georgia',
+  'HI': 'Hawaii', 'ID': 'Idaho', 'IL': 'Illinois', 'IN': 'Indiana', 'IA': 'Iowa',
+  'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiana', 'ME': 'Maine', 'MD': 'Maryland',
+  'MA': 'Massachusetts', 'MI': 'Michigan', 'MN': 'Minnesota', 'MS': 'Mississippi', 'MO': 'Missouri',
+  'MT': 'Montana', 'NE': 'Nebraska', 'NV': 'Nevada', 'NH': 'New Hampshire', 'NJ': 'New Jersey',
+  'NM': 'New Mexico', 'NY': 'New York', 'NC': 'North Carolina', 'ND': 'North Dakota', 'OH': 'Ohio',
+  'OK': 'Oklahoma', 'OR': 'Oregon', 'PA': 'Pennsylvania', 'RI': 'Rhode Island', 'SC': 'South Carolina',
+  'SD': 'South Dakota', 'TN': 'Tennessee', 'TX': 'Texas', 'UT': 'Utah', 'VT': 'Vermont',
+  'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming'
+};
+
+// Demographic weights to correct for Twitter's sampling bias
+// Twitter over-represents urban, young, and educated users
+// Note: These are placeholder weights for future demographic weighting implementation
+export const PLATFORM_BIAS_WEIGHTS = {
+  twitter: {
+    urban: 0.7,
+    suburban: 1.0,
+    rural: 1.5,
+  }
+};
+
+/**
+ * Build the prompt for classifying a social media post
+ */
+export function buildClassificationPrompt(
+  tweet: Tweet,
+  districtCode: string,
+  districtName: string
+): string {
+  return `Analyze this Twitter post for political intelligence about Congressional District ${districtCode} (${districtName}).
+
+User Bio: "${tweet.user_bio || 'Not provided'}"
+User Location: "${tweet.user_location || 'Not provided'}"
+Tweet: "${tweet.text}"
+
+Based on the content, return a JSON object with:
+1. location_confidence: 0.0-1.0 (how likely this user lives in or near ${districtCode})
+2. political_leaning: "D" (Democrat), "R" (Republican), "I" (Independent), or "unknown"
+3. leaning_confidence: 0.0-1.0 (confidence in political classification)
+4. topics: array of relevant political topics discussed (e.g., "economy", "immigration", "healthcare", "education", "crime", "housing", "environment", "taxes")
+5. topic_sentiments: object mapping each topic to sentiment from -1.0 (very negative) to 1.0 (very positive)
+6. key_insight: one sentence summarizing what this reveals about district sentiment
+
+Return ONLY valid JSON, no explanation:`;
+}
+
+/**
+ * Parse the LLM response into a PostClassification
+ */
+export function parseClassificationResponse(response: string): PostClassification | null {
+  try {
+    // Try to extract JSON from the response
+    const jsonMatch = response.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      console.error('No JSON found in response:', response);
+      return null;
+    }
+
+    const parsed = JSON.parse(jsonMatch[0]);
+
+    // Validate and normalize the response
+    return {
+      location_confidence: Math.max(0, Math.min(1, parsed.location_confidence || 0)),
+      political_leaning: ['D', 'R', 'I', 'unknown'].includes(parsed.political_leaning)
+        ? parsed.political_leaning
+        : 'unknown',
+      leaning_confidence: Math.max(0, Math.min(1, parsed.leaning_confidence || 0)),
+      topics: Array.isArray(parsed.topics) ? parsed.topics : [],
+      topic_sentiments: typeof parsed.topic_sentiments === 'object' ? parsed.topic_sentiments : {},
+      key_insight: parsed.key_insight || '',
+    };
+  } catch (error) {
+    console.error('Failed to parse classification response:', error);
+    return null;
+  }
+}
+
+/**
+ * Call the LLM to classify a batch of tweets
+ */
+export async function classifyTweets(
+  tweets: Tweet[],
+  districtCode: string,
+  districtName: string,
+  apiKey: string
+): Promise<PostClassification[]> {
+  const classifications: PostClassification[] = [];
+
+  // Process tweets in batches to avoid rate limits
+  const batchSize = 5;
+  for (let i = 0; i < tweets.length; i += batchSize) {
+    const batch = tweets.slice(i, i + batchSize);
+
+    // Process batch in parallel
+    const promises = batch.map(async (tweet) => {
+      const prompt = buildClassificationPrompt(tweet, districtCode, districtName);
+
+      try {
+        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`,
+            'HTTP-Referer': process.env.NEXT_PUBLIC_URL || 'http://localhost:3000',
+            'X-Title': 'Actalyze',
+          },
+          body: JSON.stringify({
+            model: 'openai/gpt-4o-mini',
+            messages: [
+              {
+                role: 'user',
+                content: prompt,
+              },
+            ],
+            temperature: 0.3,
+            max_tokens: 500,
+          }),
+          signal: AbortSignal.timeout(15000),
+        });
+
+        if (!response.ok) {
+          console.error(`LLM API error: ${response.status}`);
+          return null;
+        }
+
+        const data = await response.json();
+        const content = data.choices?.[0]?.message?.content?.trim();
+
+        if (!content) {
+          return null;
+        }
+
+        return parseClassificationResponse(content);
+      } catch (error) {
+        console.error('Error classifying tweet:', error);
+        return null;
+      }
+    });
+
+    const results = await Promise.all(promises);
+    classifications.push(...results.filter((r): r is PostClassification => r !== null));
+
+    // Small delay between batches to avoid rate limits
+    if (i + batchSize < tweets.length) {
+      await new Promise(resolve => setTimeout(resolve, 200));
+    }
+  }
+
+  return classifications;
+}
+
+/**
+ * Aggregate classifications into district-level intelligence
+ */
+export function aggregateClassifications(
+  classifications: PostClassification[],
+  districtCode: string,
+  districtName: string
+): AIIntelResponse {
+  const now = new Date().toISOString();
+
+  if (classifications.length === 0) {
+    return {
+      district: districtCode,
+      district_name: districtName,
+      timestamp: now,
+      sample_size: 0,
+      polling: {
+        estimate: 'Unknown',
+        margin: 0,
+        confidence: 0,
+      },
+      topics: [],
+      election_outlook: {
+        rating: 'Toss-up',
+        confidence: 0,
+        key_factors: ['Insufficient data'],
+      },
+      insights: [],
+    };
+  }
+
+  // Filter to users likely in the district
+  const localUsers = classifications.filter(c => c.location_confidence >= 0.3);
+  const sampleSize = localUsers.length;
+
+  // Calculate polling estimate
+  const { estimate, margin, confidence } = calculatePollingEstimate(localUsers);
+
+  // Aggregate topics
+  const topics = aggregateTopics(localUsers);
+
+  // Determine election outlook
+  const election_outlook = determineElectionOutlook(margin, confidence, topics);
+
+  // Extract key insights
+  const insights = extractInsights(localUsers);
+
+  return {
+    district: districtCode,
+    district_name: districtName,
+    timestamp: now,
+    sample_size: sampleSize,
+    polling: {
+      estimate,
+      margin,
+      confidence,
+    },
+    topics,
+    election_outlook,
+    insights,
+  };
+}
+
+/**
+ * Calculate weighted polling estimate from classifications
+ */
+function calculatePollingEstimate(
+  classifications: PostClassification[]
+): { estimate: string; margin: number; confidence: number } {
+  if (classifications.length === 0) {
+    return { estimate: 'Unknown', margin: 0, confidence: 0 };
+  }
+
+  let demWeight = 0;
+  let repWeight = 0;
+  let totalWeight = 0;
+
+  for (const c of classifications) {
+    if (c.political_leaning === 'unknown') continue;
+
+    // Weight by location confidence and leaning confidence
+    const weight = c.location_confidence * c.leaning_confidence;
+
+    if (c.political_leaning === 'D') {
+      demWeight += weight;
+    } else if (c.political_leaning === 'R') {
+      repWeight += weight;
+    }
+    // Independents don't count toward either side
+
+    totalWeight += weight;
+  }
+
+  if (totalWeight === 0) {
+    return { estimate: 'Unknown', margin: 0, confidence: 0 };
+  }
+
+  // Calculate margin: negative = D advantage, positive = R advantage
+  const demShare = demWeight / totalWeight;
+  const repShare = repWeight / totalWeight;
+  const margin = Math.round((repShare - demShare) * 100);
+
+  // Calculate confidence based on sample size and consistency
+  const confidence = Math.min(1, totalWeight / 10); // Scale to reasonable confidence
+
+  // Format estimate string
+  let estimate: string;
+  if (Math.abs(margin) < 2) {
+    estimate = 'Tied';
+  } else if (margin < 0) {
+    estimate = `D+${Math.abs(margin)}`;
+  } else {
+    estimate = `R+${margin}`;
+  }
+
+  return { estimate, margin, confidence };
+}
+
+/**
+ * Aggregate topic mentions and sentiments
+ */
+function aggregateTopics(classifications: PostClassification[]): TopicSummary[] {
+  const topicData: Record<string, { count: number; sentimentSum: number }> = {};
+
+  for (const c of classifications) {
+    for (const topic of c.topics) {
+      const normalizedTopic = topic.toLowerCase();
+      if (!topicData[normalizedTopic]) {
+        topicData[normalizedTopic] = { count: 0, sentimentSum: 0 };
+      }
+      topicData[normalizedTopic].count++;
+      topicData[normalizedTopic].sentimentSum += c.topic_sentiments[topic] || 0;
+    }
+  }
+
+  // Convert to array and sort by count
+  const topics: TopicSummary[] = Object.entries(topicData)
+    .map(([name, data]) => ({
+      name,
+      post_count: data.count,
+      sentiment: data.count > 0 ? data.sentimentSum / data.count : 0,
+      trending_direction: 'stable' as const, // Would need historical data to determine
+    }))
+    .sort((a, b) => b.post_count - a.post_count)
+    .slice(0, 5); // Top 5 topics
+
+  return topics;
+}
+
+/**
+ * Determine election outlook based on polling and topics
+ */
+function determineElectionOutlook(
+  margin: number,
+  confidence: number,
+  topics: TopicSummary[]
+): AIIntelResponse['election_outlook'] {
+  // Determine rating based on margin
+  let rating: AIIntelResponse['election_outlook']['rating'];
+
+  if (margin <= -10) {
+    rating = 'Safe D';
+  } else if (margin <= -5) {
+    rating = 'Likely D';
+  } else if (margin <= -2) {
+    rating = 'Lean D';
+  } else if (margin >= 10) {
+    rating = 'Safe R';
+  } else if (margin >= 5) {
+    rating = 'Likely R';
+  } else if (margin >= 2) {
+    rating = 'Lean R';
+  } else {
+    rating = 'Toss-up';
+  }
+
+  // Extract key factors from top topics
+  const key_factors: string[] = [];
+
+  for (const topic of topics.slice(0, 3)) {
+    if (topic.sentiment > 0.3) {
+      key_factors.push(`Positive sentiment on ${topic.name}`);
+    } else if (topic.sentiment < -0.3) {
+      key_factors.push(`Negative sentiment on ${topic.name}`);
+    } else {
+      key_factors.push(`${topic.name} is a key issue`);
+    }
+  }
+
+  if (key_factors.length === 0) {
+    key_factors.push('Limited data available');
+  }
+
+  return {
+    rating,
+    confidence: Math.min(0.95, confidence),
+    key_factors,
+  };
+}
+
+/**
+ * Extract notable insights from classifications
+ */
+function extractInsights(classifications: PostClassification[]): AIIntelResponse['insights'] {
+  const insights: AIIntelResponse['insights'] = [];
+  const now = new Date().toISOString();
+
+  // Collect unique insights
+  const uniqueInsights = new Set<string>();
+
+  for (const c of classifications) {
+    if (c.key_insight && c.key_insight.length > 10 && c.leaning_confidence > 0.5) {
+      uniqueInsights.add(c.key_insight);
+    }
+  }
+
+  // Take top 3 most interesting insights
+  let count = 0;
+  for (const text of uniqueInsights) {
+    if (count >= 3) break;
+    insights.push({
+      text,
+      type: 'pattern',
+      timestamp: now,
+    });
+    count++;
+  }
+
+  return insights;
+}

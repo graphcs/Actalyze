@@ -13,6 +13,7 @@ import {
   TrendingUp,
   FileText,
   MessageSquare,
+  Brain,
 } from "lucide-react";
 import Nav from "../../components/Nav";
 import DistrictSearch from "../../components/DistrictSearch";
@@ -20,6 +21,11 @@ import { Button } from "../../components/ui/Button";
 import { Badge } from "../../components/ui/Badge";
 import { Card, CardHeader, CardContent } from "../../components/ui/Card";
 import { fetchWithCache } from "@/src/lib/fetchWithCache";
+import AIPollingGauge from "../../components/AIPollingGauge";
+import TrendingTopicsPanel from "../../components/TrendingTopicsPanel";
+import ElectionOutlook from "../../components/ElectionOutlook";
+import KeyInsightsFeed from "../../components/KeyInsightsFeed";
+import type { AIIntelResponse } from "@/lib/ai-intel";
 
 // Dynamically import map to avoid SSR issues
 const DistrictMap = dynamic(
@@ -96,6 +102,8 @@ export default function DistrictPage() {
   const [perspectives, setPerspectives] = useState<PartyPerspectives | null>(null);
   const [tweets, setTweets] = useState<Tweet[]>([]);
   const [redditPosts, setRedditPosts] = useState<RedditPost[]>([]);
+  const [aiIntel, setAiIntel] = useState<AIIntelResponse | null>(null);
+  const [aiIntelLoading, setAiIntelLoading] = useState(true);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -122,6 +130,20 @@ export default function DistrictPage() {
       .catch((error) => {
         console.error("Error fetching district data:", error);
         setLoading(false);
+      });
+
+    // Fetch AI intel separately (it takes longer and is cached for 6 hours)
+    fetchWithCache(`/api/district/ai-intel?district=${districtCode}`)
+      .then(res => res.json())
+      .then(data => {
+        if (!data.error) {
+          setAiIntel(data);
+        }
+        setAiIntelLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching AI intel:", error);
+        setAiIntelLoading(false);
       });
   }, [districtCode]);
 
@@ -324,6 +346,67 @@ export default function DistrictPage() {
               )}
             </CardContent>
           </Card>
+        </div>
+
+        {/* AI Political Intelligence Section */}
+        <div className="max-w-7xl mx-auto px-4 pb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <Brain className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+            <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
+              AI Political Intelligence
+            </h2>
+            <Badge className="bg-purple-100 text-purple-900 dark:bg-purple-900 dark:text-purple-100">
+              Experimental
+            </Badge>
+          </div>
+
+          {aiIntelLoading ? (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <div className="animate-pulse">
+                  <Brain className="w-8 h-8 mx-auto mb-3 text-purple-400" />
+                  <div className="text-sm text-zinc-500 dark:text-zinc-400">
+                    Analyzing social media sentiment...
+                  </div>
+                  <div className="text-xs text-zinc-400 mt-1">
+                    This may take a moment
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ) : aiIntel ? (
+            <div className="grid md:grid-cols-2 gap-5">
+              {/* Left column: Polling and Election Outlook */}
+              <div className="space-y-5">
+                <AIPollingGauge
+                  estimate={aiIntel.polling.estimate}
+                  margin={aiIntel.polling.margin}
+                  confidence={aiIntel.polling.confidence}
+                  sampleSize={aiIntel.sample_size}
+                  vsTraditional={aiIntel.polling.vs_traditional}
+                />
+                <ElectionOutlook
+                  rating={aiIntel.election_outlook.rating}
+                  confidence={aiIntel.election_outlook.confidence}
+                  keyFactors={aiIntel.election_outlook.key_factors}
+                />
+              </div>
+
+              {/* Right column: Topics and Insights */}
+              <div className="space-y-5">
+                <TrendingTopicsPanel topics={aiIntel.topics} />
+                <KeyInsightsFeed insights={aiIntel.insights} />
+              </div>
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="py-8 text-center">
+                <div className="text-sm text-zinc-500 dark:text-zinc-400">
+                  AI intelligence unavailable for this district
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Political Context */}
