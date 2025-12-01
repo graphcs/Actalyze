@@ -90,18 +90,22 @@ export async function GET(request: NextRequest) {
     // Step 1: Get trending topics for the district using Perplexity
     console.log(`🔍 Finding trending topics for ${districtLabel}`);
 
-    const topicsPrompt = `You are a political research assistant with access to current news and web search. Research and identify the top 4-5 trending political topics, controversies, or local issues currently happening in ${districtName} (${districtLabel}) as of this week (November 2025).
+    const topicsPrompt = `You are a political research assistant with access to current news and web search. Research and identify 10 search terms for finding political discussions relevant to ${districtName} (${districtLabel}) in ${stateName} as of December 2025.
 
-Output ONLY a bulleted list of Twitter/X search terms in this exact format:
-- [concise search term or hashtag]
-- [concise search term or hashtag]
-- [concise search term or hashtag]
-- [concise search term or hashtag]
-- [concise search term or hashtag]
+Generate search terms across these categories:
+- 3 DISTRICT-SPECIFIC: Local politicians, district issues, local controversies
+- 3 STATE-LEVEL: ${stateName} governor, state legislature, statewide issues
+- 2 REGIONAL: Major cities in the district, regional concerns (economy, traffic, housing)
+- 2 NATIONAL ISSUES relevant to ${stateName}: Immigration, economy, healthcare debates with state context
 
-Each search term should be SHORT (1-4 words), use keywords or hashtags that people would actually tweet about, and focus on district-specific issues, local politicians, controversies, or policy debates. Do NOT include generic phrases.
+Output ONLY a bulleted list of Twitter/X search terms:
+- [search term]
+- [search term]
+...
 
-ONLY output the bulleted list of search terms with NO additional commentary.`;
+Each search term should be SHORT (1-4 words), use keywords people actually tweet about. Include a mix of specific local terms AND broader state/regional terms to ensure sufficient data.
+
+ONLY output the bulleted list with NO additional commentary.`;
 
     const topicsResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -165,14 +169,14 @@ ONLY output the bulleted list of search terms with NO additional commentary.`;
     const allTweetsWithMetrics: TweetWithMetrics[] = [];
     const seenTweetIds = new Set<string>();
 
-    for (const searchTerm of searchTerms.slice(0, 5)) {
+    for (const searchTerm of searchTerms.slice(0, 10)) {
       console.log(`🐦 Searching Twitter for: "${searchTerm}"`);
 
       const searchQuery = `${searchTerm} -is:retweet -is:reply lang:en`;
 
       try {
         const result = await appOnlyClient.v2.search(searchQuery, {
-          max_results: 30, // Get more tweets for better analysis
+          max_results: 100, // Increased from 30 for better sample size
           'tweet.fields': ['created_at', 'author_id', 'public_metrics'],
           'user.fields': ['location', 'description'],
           expansions: ['author_id'],
@@ -237,12 +241,87 @@ ONLY output the bulleted list of search terms with NO additional commentary.`;
 
     console.log(`📊 Total tweets collected: ${allTweetsWithMetrics.length}`);
 
-    // Filter to recent tweets (within 7 days)
-    const filteredTweets = allTweetsWithMetrics.filter(t => t.age_days <= 7);
+    // Fallback: if insufficient data, add state-level searches
+    if (allTweetsWithMetrics.length < 30) {
+      console.log(`⚠️ Only ${allTweetsWithMetrics.length} tweets found, adding state-level fallback searches`);
+
+      const fallbackTerms = [
+        `${stateName} politics`,
+        `${stateName} election`,
+        `${stateName} news`,
+      ];
+
+      for (const searchTerm of fallbackTerms) {
+        console.log(`🐦 Fallback search for: "${searchTerm}"`);
+        const searchQuery = `${searchTerm} -is:retweet -is:reply lang:en`;
+
+        try {
+          const result = await appOnlyClient.v2.search(searchQuery, {
+            max_results: 100,
+            'tweet.fields': ['created_at', 'author_id', 'public_metrics'],
+            'user.fields': ['location', 'description'],
+            expansions: ['author_id'],
+          });
+
+          if (result.data.data && result.data.data.length > 0) {
+            const users = new Map<string, UserData>();
+            if (result.data.includes?.users) {
+              for (const user of result.data.includes.users) {
+                users.set(user.id, {
+                  id: user.id,
+                  name: user.name || 'Unknown',
+                  username: user.username || 'unknown',
+                  location: user.location,
+                  description: user.description,
+                });
+              }
+            }
+
+            for (const tweet of result.data.data) {
+              if (seenTweetIds.has(tweet.id)) continue;
+              seenTweetIds.add(tweet.id);
+
+              const user = users.get(tweet.author_id || '');
+              const username = user?.username || 'unknown';
+              const createdAt = tweet.created_at ? new Date(tweet.created_at) : now;
+              const ageDays = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24);
+              const metrics = tweet.public_metrics || { like_count: 0, retweet_count: 0, reply_count: 0 };
+              const engagementScore = (metrics.like_count || 0) + (metrics.retweet_count || 0) * 2 + (metrics.reply_count || 0);
+
+              allTweetsWithMetrics.push({
+                id: tweet.id,
+                text: tweet.text || '',
+                author: user?.name || 'Unknown',
+                username: username,
+                url: `https://twitter.com/${username}/status/${tweet.id}`,
+                created_at: tweet.created_at || '',
+                user_location: user?.location,
+                user_bio: user?.description,
+                engagement_score: engagementScore,
+                age_days: ageDays,
+              });
+            }
+            console.log(`✅ Fallback found ${result.data.data.length} tweets for "${searchTerm}"`);
+          }
+        } catch (error) {
+          console.error(`❌ Fallback search error for "${searchTerm}":`, error);
+        }
+      }
+      console.log(`📊 Total tweets after fallback: ${allTweetsWithMetrics.length}`);
+    }
+
+    // Filter to recent tweets (within 14 days, expanded from 7)
+    let filteredTweets = allTweetsWithMetrics.filter(t => t.age_days <= 14);
+
+    // Fallback: if insufficient data, expand to 30 days
+    if (filteredTweets.length < 30) {
+      console.log(`⚠️ Only ${filteredTweets.length} tweets in 14 days, expanding to 30 days`);
+      filteredTweets = allTweetsWithMetrics.filter(t => t.age_days <= 30);
+    }
 
     // Sort by engagement and take top tweets for analysis
     filteredTweets.sort((a, b) => b.engagement_score - a.engagement_score);
-    const tweetsToAnalyze = filteredTweets.slice(0, 20); // Analyze top 20 tweets
+    const tweetsToAnalyze = filteredTweets.slice(0, 50); // Analyze top 50 tweets (up from 20)
 
     console.log(`🔬 Analyzing ${tweetsToAnalyze.length} tweets with AI`);
 

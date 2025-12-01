@@ -313,8 +313,15 @@ function calculatePollingEstimate(
   const repShare = repWeight / totalWeight;
   const margin = Math.round((repShare - demShare) * 100);
 
-  // Calculate confidence based on sample size and consistency
-  const confidence = Math.min(1, totalWeight / 10); // Scale to reasonable confidence
+  // Calculate confidence based on sample size
+  // Use logarithmic scale: need ~30 weighted samples for 70% confidence, ~50 for 80%
+  const sampleConfidence = Math.min(0.9, Math.log10(totalWeight + 1) / Math.log10(50));
+
+  // Also factor in consistency (how polarized vs mixed the results are)
+  const polarization = Math.abs(demShare - repShare); // 0 = perfectly split, 1 = all one side
+  const consistencyBonus = polarization * 0.1; // Up to 10% bonus for consistent results
+
+  const confidence = Math.min(0.95, sampleConfidence + consistencyBonus);
 
   // Format estimate string
   let estimate: string;
