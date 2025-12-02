@@ -2,7 +2,7 @@
 
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   TrendingUp,
@@ -17,20 +17,6 @@ import {
 export default function LandingPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [guestMode, setGuestMode] = useState(false);
-
-  useEffect(() => {
-    // Check if guest mode is enabled
-    const settings = localStorage.getItem("actalyze_auth_settings");
-    if (settings) {
-      try {
-        const parsed = JSON.parse(settings);
-        setGuestMode(parsed.mode === "guest");
-      } catch {
-        // Ignore errors
-      }
-    }
-  }, []);
 
   useEffect(() => {
     // Redirect to dashboard if already logged in
@@ -124,14 +110,12 @@ export default function LandingPage() {
               Continue with Google
             </button>
 
-            {guestMode && (
-              <button
-                onClick={handleGuestAccess}
-                className="px-8 py-4 bg-white dark:bg-zinc-900 border-2 border-zinc-300 dark:border-zinc-700 hover:border-zinc-900 dark:hover:border-zinc-300 text-zinc-900 dark:text-zinc-100 rounded-xl font-semibold text-lg transition-all duration-200"
-              >
-                Continue as Guest
-              </button>
-            )}
+            <button
+              onClick={handleGuestAccess}
+              className="px-8 py-4 bg-white dark:bg-zinc-900 border-2 border-zinc-300 dark:border-zinc-700 hover:border-zinc-900 dark:hover:border-zinc-300 text-zinc-900 dark:text-zinc-100 rounded-xl font-semibold text-lg transition-all duration-200"
+            >
+              Continue as Guest
+            </button>
           </div>
 
           <p className="mt-6 text-sm text-zinc-500 dark:text-zinc-400">
@@ -237,14 +221,12 @@ export default function LandingPage() {
             >
               Sign In with Google
             </button>
-            {guestMode && (
-              <button
-                onClick={handleGuestAccess}
-                className="px-8 py-4 bg-zinc-800 border-2 border-zinc-600 hover:border-zinc-400 text-white rounded-xl font-semibold text-lg transition-colors"
-              >
-                Continue as Guest
-              </button>
-            )}
+            <button
+              onClick={handleGuestAccess}
+              className="px-8 py-4 bg-zinc-800 border-2 border-zinc-600 hover:border-zinc-400 text-white rounded-xl font-semibold text-lg transition-colors"
+            >
+              Continue as Guest
+            </button>
           </div>
         </div>
       </motion.div>
