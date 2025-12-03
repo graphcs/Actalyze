@@ -2,21 +2,30 @@ import { NextRequest, NextResponse } from "next/server";
 
 /**
  * GET /api/district/geocode?address=123 Main St, Washington DC
- * Returns congressional district for an address
+ * GET /api/district/geocode?lat=38.9072&lng=-77.0369
+ * Returns congressional district for an address or coordinates
  */
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const address = searchParams.get('address');
+    const lat = searchParams.get('lat');
+    const lng = searchParams.get('lng');
 
-    if (!address) {
+    // Support both address and coordinates
+    let locationQuery: string;
+    if (lat && lng) {
+      locationQuery = `coordinates ${lat}, ${lng}`;
+      console.log(`🗺️  Looking up district for coordinates: ${lat}, ${lng}`);
+    } else if (address) {
+      locationQuery = `address: "${address}"`;
+      console.log(`🗺️  Looking up district for address: ${address}`);
+    } else {
       return NextResponse.json(
-        { error: 'Missing address parameter' },
+        { error: 'Missing address or lat/lng parameters' },
         { status: 400 }
       );
     }
-
-    console.log(`🗺️  Looking up district for address: ${address}`);
 
     // Use OpenRouter/Sonar to find the congressional district
     const apiKey = process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY;
@@ -50,7 +59,7 @@ export async function GET(request: NextRequest) {
         messages: [
           {
             role: 'user',
-            content: `What is the U.S. Congressional District for this address: "${address}"? Return ONLY a JSON object with "district" (in format like "VA05" or "NY01" with 2-digit district number) and "state" (2-letter code). If you cannot determine the district, return null for district. Example: {"district": "VA05", "state": "VA"}`,
+            content: `What is the U.S. Congressional District for this ${locationQuery}? Return ONLY a JSON object with "district" (in format like "VA05" or "NY01" with 2-digit district number) and "state" (2-letter code). If you cannot determine the district, return null for district. Example: {"district": "VA05", "state": "VA"}`,
           },
         ],
         temperature: 0.1,

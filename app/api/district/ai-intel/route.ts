@@ -169,7 +169,8 @@ ONLY output the bulleted list with NO additional commentary.`;
     const allTweetsWithMetrics: TweetWithMetrics[] = [];
     const seenTweetIds = new Set<string>();
 
-    for (const searchTerm of searchTerms.slice(0, 10)) {
+    // Reduced from 10 to 5 to save API calls
+    for (const searchTerm of searchTerms.slice(0, 5)) {
       console.log(`🐦 Searching Twitter for: "${searchTerm}"`);
 
       const searchQuery = `${searchTerm} -is:retweet -is:reply lang:en`;
@@ -241,14 +242,12 @@ ONLY output the bulleted list with NO additional commentary.`;
 
     console.log(`📊 Total tweets collected: ${allTweetsWithMetrics.length}`);
 
-    // Fallback: if insufficient data, add state-level searches
-    if (allTweetsWithMetrics.length < 30) {
-      console.log(`⚠️ Only ${allTweetsWithMetrics.length} tweets found, adding state-level fallback searches`);
+    // Fallback: if insufficient data, add ONE state-level search (reduced from 3 to save API calls)
+    if (allTweetsWithMetrics.length < 20) {
+      console.log(`⚠️ Only ${allTweetsWithMetrics.length} tweets found, adding fallback search`);
 
       const fallbackTerms = [
         `${stateName} politics`,
-        `${stateName} election`,
-        `${stateName} news`,
       ];
 
       for (const searchTerm of fallbackTerms) {
@@ -341,10 +340,28 @@ ONLY output the bulleted list with NO additional commentary.`;
 
     console.log(`✅ Classified ${classifications.length} tweets`);
 
-    // Step 4: Aggregate into district-level intelligence
-    const aiIntel = aggregateClassifications(classifications, districtCode, districtName);
+    // Step 4: Fetch traditional polling data to blend with AI estimates
+    let traditionalPollingTrend: string | null = null;
+    try {
+      const pollingUrl = new URL('/api/district/polling', process.env.NEXT_PUBLIC_URL || 'http://localhost:3000');
+      pollingUrl.searchParams.set('district', districtCode);
+      const pollingResponse = await fetch(pollingUrl.toString(), {
+        headers: { 'x-use-cache': 'true' },
+        signal: AbortSignal.timeout(10000),
+      });
+      if (pollingResponse.ok) {
+        const pollingData = await pollingResponse.json();
+        traditionalPollingTrend = pollingData.trend;
+        console.log(`📊 Traditional polling: ${traditionalPollingTrend}`);
+      }
+    } catch (error) {
+      console.log('⚠️ Could not fetch traditional polling, using AI-only estimate');
+    }
 
-    console.log(`🎯 Generated AI intel: ${aiIntel.polling.estimate} (${aiIntel.election_outlook.rating})`);
+    // Step 5: Aggregate into district-level intelligence (blending with traditional polling)
+    const aiIntel = aggregateClassifications(classifications, districtCode, districtName, traditionalPollingTrend);
+
+    console.log(`🎯 Generated AI intel: ${aiIntel.polling.estimate} (${aiIntel.election_outlook.rating})${traditionalPollingTrend ? ` [blended with ${traditionalPollingTrend}]` : ''}`);
 
     // Cache for 6 hours (expensive operation)
     serverCache.set(cacheKey, aiIntel, 6 * 60 * 60);
