@@ -12,7 +12,6 @@ import {
   ExternalLink,
   TrendingUp,
   FileText,
-  MessageSquare,
   Brain,
 } from "lucide-react";
 import Nav from "../../components/Nav";
@@ -46,12 +45,6 @@ const TweetEmbed = dynamic(
   { ssr: false }
 );
 
-// Dynamically import RedditEmbed to avoid SSR issues
-const RedditEmbed = dynamic(
-  () => import("../../components/RedditEmbed"),
-  { ssr: false }
-);
-
 interface Headline {
   title: string;
   url: string;
@@ -79,18 +72,6 @@ interface Tweet {
   url: string;
 }
 
-interface RedditPost {
-  id: string;
-  title: string;
-  permalink: string;
-  author: string;
-  subreddit: string;
-  score: number;
-  num_comments: number;
-  created_utc: number;
-  url: string;
-}
-
 export default function DistrictPage() {
   const params = useParams();
   const router = useRouter();
@@ -101,7 +82,6 @@ export default function DistrictPage() {
   const [pollingData, setPollingData] = useState<{ trend: string | null; description: string } | null>(null);
   const [perspectives, setPerspectives] = useState<PartyPerspectives | null>(null);
   const [tweets, setTweets] = useState<Tweet[]>([]);
-  const [redditPosts, setRedditPosts] = useState<RedditPost[]>([]);
   const [aiIntel, setAiIntel] = useState<AIIntelResponse | null>(null);
   const [aiIntelLoading, setAiIntelLoading] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -116,15 +96,13 @@ export default function DistrictPage() {
       fetchWithCache(`/api/district/polling?district=${districtCode}`).then(res => res.json()),
       fetchWithCache(`/api/topic/perspectives?topic=${districtCode} district`).then(res => res.json()),
       fetchWithCache(`/api/district/tweets?district=${districtCode}`).then(res => res.json()),
-      fetchWithCache(`/api/district/reddit?district=${districtCode}`).then(res => res.json()),
     ])
-      .then(([newsData, summaryData, polling, perspectivesData, tweetsData, redditData]) => {
+      .then(([newsData, summaryData, polling, perspectivesData, tweetsData]) => {
         setHeadlines(newsData.headlines || []);
         setSummary(summaryData.summary || "");
         setPollingData(polling);
         setPerspectives(perspectivesData);
         setTweets(tweetsData.tweets || []);
-        setRedditPosts(redditData.posts || []);
         setLoading(false);
       })
       .catch((error) => {
@@ -511,40 +489,6 @@ export default function DistrictPage() {
               ) : (
                 <div className="text-sm text-zinc-500 dark:text-zinc-400 py-8 text-center">
                   No tweets found for this district
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Top Reddit Discussions */}
-        <div className="max-w-7xl mx-auto px-4 pb-16">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div className="font-semibold flex items-center gap-2">
-                <MessageSquare className="w-4 h-4" />
-                Top Reddit Discussions
-              </div>
-              <Badge className="bg-orange-100 text-orange-900 dark:bg-orange-900 dark:text-orange-100">
-                Reddit
-              </Badge>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <div className="text-sm text-zinc-500 dark:text-zinc-400 py-8 text-center">
-                  Loading discussions...
-                </div>
-              ) : redditPosts.length > 0 ? (
-                <div className="grid md:grid-cols-2 gap-4">
-                  {redditPosts.map((post) => (
-                    <div key={post.id}>
-                      <RedditEmbed url={`https://www.reddit.com${post.permalink}`} />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-sm text-zinc-500 dark:text-zinc-400 py-8 text-center">
-                  No discussions found for this district
                 </div>
               )}
             </CardContent>
