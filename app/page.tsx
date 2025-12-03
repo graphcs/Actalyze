@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useCallback } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -10,8 +9,6 @@ import {
   BarChart3,
   Globe,
   Zap,
-  Navigation,
-  Loader2,
   MessageSquare,
   Shield,
   Users,
@@ -35,55 +32,10 @@ const STATE_NAMES: Record<string, string> = {
 export default function HomePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [locatingDistrict, setLocatingDistrict] = useState(false);
-  const [locationError, setLocationError] = useState<string | null>(null);
 
   const handleGuestAccess = () => {
     router.push("/dashboard?guest=true");
   };
-
-  const findMyDistrict = useCallback(async () => {
-    setLocatingDistrict(true);
-    setLocationError(null);
-
-    if (!navigator.geolocation) {
-      setLocationError("Geolocation is not supported by your browser");
-      setLocatingDistrict(false);
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const { latitude, longitude } = position.coords;
-          const response = await fetch(
-            `/api/district/geocode?lat=${latitude}&lng=${longitude}`
-          );
-          const data = await response.json();
-
-          if (data.district) {
-            router.push(`/district/${data.district.toLowerCase()}`);
-          } else {
-            setLocationError("Could not determine your congressional district");
-          }
-        } catch (error) {
-          console.error("Error finding district:", error);
-          setLocationError("Error finding your district. Please try searching instead.");
-        }
-        setLocatingDistrict(false);
-      },
-      (error) => {
-        console.error("Geolocation error:", error);
-        if (error.code === error.PERMISSION_DENIED) {
-          setLocationError("Location access denied. Please search for your district instead.");
-        } else {
-          setLocationError("Could not get your location. Please try searching instead.");
-        }
-        setLocatingDistrict(false);
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
-    );
-  }, [router]);
 
   // Popular/swing districts to feature
   const featuredDistricts = [
@@ -189,35 +141,6 @@ export default function HomePage() {
           {/* District Search Section */}
           <div className="max-w-xl mx-auto mb-8">
             <DistrictSearch />
-          </div>
-
-          {/* Find My District Button */}
-          <div className="flex flex-col items-center gap-3 mb-8">
-            <div className="flex items-center gap-2 text-zinc-400">
-              <div className="w-8 h-px bg-zinc-300 dark:bg-zinc-700"></div>
-              <span className="text-sm">or</span>
-              <div className="w-8 h-px bg-zinc-300 dark:bg-zinc-700"></div>
-            </div>
-            <button
-              onClick={findMyDistrict}
-              disabled={locatingDistrict}
-              className="group px-6 py-3 bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-zinc-200 text-white dark:text-zinc-900 rounded-xl font-semibold shadow-lg transition-all duration-200 flex items-center gap-3 disabled:opacity-70"
-            >
-              {locatingDistrict ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Locating...
-                </>
-              ) : (
-                <>
-                  <Navigation className="w-5 h-5" />
-                  Find My District
-                </>
-              )}
-            </button>
-            {locationError && (
-              <p className="text-sm text-red-500 dark:text-red-400">{locationError}</p>
-            )}
           </div>
         </div>
       </motion.div>

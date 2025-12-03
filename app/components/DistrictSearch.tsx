@@ -44,89 +44,51 @@ const ALL_DISTRICTS = generateDistrictSuggestions();
 
 export default function DistrictSearch() {
   const [query, setQuery] = useState("");
-  const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
   const parseDistrictCode = (input: string): string | null => {
-    const cleaned = input.trim().toUpperCase().replace(/\s+/g, '');
+    const cleaned = input.trim().toUpperCase().replace(/\s+/g, '').replace(/-/g, '');
 
-    // Match patterns like: VA05, NY-01, NY01, VA-5
-    const districtPattern = /^([A-Z]{2})-?(\d{1,2})$/;
+    // Match patterns like: VA05, NY01, VA5
+    const districtPattern = /^([A-Z]{2})(\d{1,2})$/;
     const match = cleaned.match(districtPattern);
 
     if (match) {
       const state = match[1];
-      const district = match[2].padStart(2, '0'); // Ensure 2-digit format
-      return `${state}${district}`;
-    }
+      const district = match[2].padStart(2, '0');
+      const fullCode = `${state}${district}`;
 
-    // Also support full state names like "Virginia 5th" or "New York 1"
-    const fullNamePattern = /^([A-Z\s]+)\s+(\d{1,2})(ST|ND|RD|TH)?$/i;
-    const fullMatch = cleaned.match(fullNamePattern);
-
-    if (fullMatch) {
-      // This would require a state name to code mapping
-      // For now, return null and we can add this feature later
-      return null;
+      // Validate it's a real district
+      if (ALL_DISTRICTS.includes(fullCode)) {
+        return fullCode;
+      }
     }
 
     return null;
   };
 
-  const handleSearch = async () => {
+  const handleSearch = () => {
     if (!query.trim()) return;
 
-    setLoading(true);
-
-    // Try to parse as district code first
     const districtCode = parseDistrictCode(query);
 
     if (districtCode) {
-      // Navigate to district page
       router.push(`/district/${districtCode.toLowerCase()}`);
     } else {
-      // Try geocoding for address
-      try {
-        const response = await fetch(`/api/district/geocode?address=${encodeURIComponent(query)}`);
-        const data = await response.json();
-
-        if (data.district) {
-          router.push(`/district/${data.district.toLowerCase()}`);
-        } else {
-          alert("Could not find district for that address. Please try a district code like 'VA05' or 'NY-01'.");
-        }
-      } catch (error) {
-        console.error("Geocoding error:", error);
-        alert("Error finding district. Please try a district code like 'VA05' or 'NY-01'.");
-      }
+      alert("Please enter a valid district code like 'NY-01' or 'VA05'");
     }
-
-    setLoading(false);
   };
 
   // Update suggestions when query changes
   useEffect(() => {
-    if (query.trim().length >= 2) {
+    if (query.trim().length >= 1) {
       const cleaned = query.trim().toUpperCase().replace(/\s+/g, '').replace(/-/g, '');
       const filtered = ALL_DISTRICTS.filter(district =>
         district.startsWith(cleaned)
       ).slice(0, 10);
-
-      // If no district matches and query looks like an address, add address search option
-      if (filtered.length === 0 && query.length >= 5) {
-        // Check if query looks like an address (has numbers or common address words)
-        const looksLikeAddress = /\d/.test(query) ||
-          /street|st|avenue|ave|road|rd|drive|dr|boulevard|blvd|lane|ln|way|court|ct|place|pl|circle|cir/i.test(query);
-
-        if (looksLikeAddress) {
-          setSuggestions(['__ADDRESS__']);
-          setShowSuggestions(true);
-          return;
-        }
-      }
 
       setSuggestions(filtered);
       setShowSuggestions(filtered.length > 0);
@@ -149,15 +111,9 @@ export default function DistrictSearch() {
   }, []);
 
   const handleSuggestionClick = (district: string) => {
-    if (district === '__ADDRESS__') {
-      // Trigger address search
-      setShowSuggestions(false);
-      handleSearch();
-    } else {
-      setQuery(district);
-      setShowSuggestions(false);
-      router.push(`/district/${district.toLowerCase()}`);
-    }
+    setQuery(district);
+    setShowSuggestions(false);
+    router.push(`/district/${district.toLowerCase()}`);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -184,78 +140,46 @@ export default function DistrictSearch() {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyPress}
             onFocus={() => {
               if (suggestions.length > 0) setShowSuggestions(true);
             }}
-            placeholder="Search district (e.g., VA05, NY-01) or address..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
-            disabled={loading}
+            placeholder="Enter district (e.g., NY-01, VA05, CA12)"
+            className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:border-transparent text-sm"
           />
 
           {/* Autocomplete suggestions */}
           {showSuggestions && suggestions.length > 0 && (
             <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-lg shadow-lg max-h-60 overflow-y-auto z-50">
-              {suggestions.map((district) => {
-                if (district === '__ADDRESS__') {
-                  return (
-                    <button
-                      key={district}
-                      onClick={() => handleSuggestionClick(district)}
-                      className="w-full px-4 py-3 text-left text-sm hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors flex items-center gap-3 border-l-4 border-purple-500"
-                    >
-                      <Search className="w-4 h-4 text-purple-500" />
-                      <div>
-                        <div className="font-medium text-zinc-900 dark:text-zinc-100">
-                          Search for district at this address
-                        </div>
-                        <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-                          &quot;{query}&quot;
-                        </div>
-                      </div>
-                    </button>
-                  );
-                }
-
-                return (
-                  <button
-                    key={district}
-                    onClick={() => handleSuggestionClick(district)}
-                    className="w-full px-4 py-2 text-left text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex items-center gap-2"
-                  >
-                    <MapPin className="w-3 h-3 text-purple-500" />
-                    <span className="font-medium text-zinc-900 dark:text-zinc-100">
-                      {formatDistrictLabel(district)}
-                    </span>
-                    <span className="text-xs text-zinc-500 dark:text-zinc-400">
-                      Congressional District
-                    </span>
-                  </button>
-                );
-              })}
+              {suggestions.map((district) => (
+                <button
+                  key={district}
+                  onClick={() => handleSuggestionClick(district)}
+                  className="w-full px-4 py-2 text-left text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex items-center gap-2"
+                >
+                  <MapPin className="w-3 h-3 text-zinc-500" />
+                  <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                    {formatDistrictLabel(district)}
+                  </span>
+                  <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                    Congressional District
+                  </span>
+                </button>
+              ))}
             </div>
           )}
         </div>
         <Button
           onClick={handleSearch}
-          disabled={loading || !query.trim()}
+          disabled={!query.trim()}
           className="whitespace-nowrap"
         >
-          {loading ? (
-            <>
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              Searching...
-            </>
-          ) : (
-            <>
-              <Search className="w-4 h-4" />
-              Search
-            </>
-          )}
+          <Search className="w-4 h-4" />
+          Search
         </Button>
       </div>
       <div className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
-        Try: &quot;VA05&quot;, &quot;NY-01&quot;, or enter an address
+        Examples: NY-01, VA05, CA-12, TX38
       </div>
     </div>
   );
