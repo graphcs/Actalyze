@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import dynamic from "next/dynamic";
 import {
   ChevronLeft,
   Flame,
@@ -19,11 +18,7 @@ import { Button } from "../../components/ui/Button";
 import { Badge } from "../../components/ui/Badge";
 import { Card, CardHeader, CardContent } from "../../components/ui/Card";
 
-// Dynamically import TweetEmbed to avoid SSR issues
-const TweetEmbed = dynamic(
-  () => import("../../components/TweetEmbed"),
-  { ssr: false }
-);
+import CompactTweet from "../../components/CompactTweet";
 
 interface Topic {
   id: string;
@@ -54,6 +49,10 @@ interface Tweet {
   author: string;
   username: string;
   url: string;
+  likes?: number;
+  retweets?: number;
+  replies?: number;
+  created_at?: string;
 }
 
 interface Headline {
@@ -268,11 +267,19 @@ export default function TopicPage() {
                   Loading tweets...
                 </div>
               ) : tweets.length > 0 ? (
-                <div className="max-h-[600px] overflow-y-auto space-y-4 pr-2">
+                <div className="space-y-3">
                   {tweets.map((tweet) => (
-                    <div key={tweet.id}>
-                      <TweetEmbed tweetId={tweet.id} username={tweet.username} />
-                    </div>
+                    <CompactTweet
+                      key={tweet.id}
+                      id={tweet.id}
+                      text={tweet.text}
+                      author={tweet.author}
+                      username={tweet.username}
+                      likes={tweet.likes}
+                      retweets={tweet.retweets}
+                      replies={tweet.replies}
+                      created_at={tweet.created_at}
+                    />
                   ))}
                 </div>
               ) : (

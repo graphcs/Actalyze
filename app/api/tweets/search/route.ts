@@ -15,6 +15,9 @@ interface Tweet {
   username: string;
   url: string;
   created_at: string;
+  likes: number;
+  retweets: number;
+  replies: number;
 }
 
 interface TweetWithMetrics extends Tweet {
@@ -113,15 +116,19 @@ export async function GET(request: NextRequest) {
         username: username,
         url: `https://twitter.com/${username}/status/${tweet.id}`,
         created_at: tweet.created_at || '',
+        likes: metrics.like_count || 0,
+        retweets: metrics.retweet_count || 0,
+        replies: metrics.reply_count || 0,
         engagement_score: engagementScore,
       };
     });
 
     // Sort by engagement score (highest first) and take top results
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const tweets: Tweet[] = tweetsWithMetrics
       .sort((a, b) => b.engagement_score - a.engagement_score)
       .slice(0, limit)
-      .map(({ engagement_score, ...tweet }) => tweet); // Remove engagement_score from final output
+      .map(({ engagement_score, ...tweet }) => tweet); // Remove only engagement_score, keep likes/retweets/replies
 
     console.log(`✅ Found ${tweets.length} tweets`);
 

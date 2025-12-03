@@ -31,11 +31,7 @@ const StateViewMap = dynamic(
   }
 );
 
-// Dynamically import TweetEmbed to avoid SSR issues
-const TweetEmbed = dynamic(
-  () => import("../../components/TweetEmbed"),
-  { ssr: false }
-);
+import CompactTweet from "../../components/CompactTweet";
 
 const STATE_NAMES: Record<string, string> = {
   "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas", "CA": "California",
@@ -76,6 +72,10 @@ interface Tweet {
   author: string;
   username: string;
   url: string;
+  likes?: number;
+  retweets?: number;
+  replies?: number;
+  created_at?: string;
 }
 
 export default function StatePage() {
@@ -424,11 +424,19 @@ export default function StatePage() {
                   Loading tweets...
                 </div>
               ) : tweets.length > 0 ? (
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid md:grid-cols-2 gap-3">
                   {tweets.map((tweet) => (
-                    <div key={tweet.id}>
-                      <TweetEmbed tweetId={tweet.id} username={tweet.username} />
-                    </div>
+                    <CompactTweet
+                      key={tweet.id}
+                      id={tweet.id}
+                      text={tweet.text}
+                      author={tweet.author}
+                      username={tweet.username}
+                      likes={tweet.likes}
+                      retweets={tweet.retweets}
+                      replies={tweet.replies}
+                      created_at={tweet.created_at}
+                    />
                   ))}
                 </div>
               ) : (

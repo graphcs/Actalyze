@@ -15,11 +15,13 @@ const SERPAPI_BASE = 'https://serpapi.com/search';
 // const cache = new Map<string, CacheEntry<unknown>>();
 // const CACHE_TTL = 45 * 60 * 1000; // 45 minutes
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function getCached<T>(_key: string): T | null {
   // Caching disabled
   return null;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function setCache<T>(_key: string, _data: T): void {
   // Caching disabled
   return;
@@ -121,7 +123,7 @@ async function tryFetchTrends(query: string, apiKey: string): Promise<TimeSeries
             return null;
           }
           timestamp = date.toISOString();
-        } catch (e) {
+        } catch {
           console.warn(`Failed to parse timestamp: ${timestamp}`);
           return null;
         }
@@ -249,7 +251,7 @@ export async function fetchNewsVelocity(topic: string, hours = 36): Promise<Time
         // Round down to hour
         const hourKey = Math.floor(articleTime / (60 * 60 * 1000));
         hourlyBuckets.set(hourKey, (hourlyBuckets.get(hourKey) || 0) + 1);
-      } catch (e) {
+      } catch {
         // Invalid date, skip
       }
     });

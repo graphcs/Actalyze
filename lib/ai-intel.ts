@@ -340,9 +340,9 @@ export function aggregateClassifications(
         topics: [],
         election_outlook: outlook,
         insights: [{
-          type: 'observation' as const,
-          content: 'AI analysis unavailable due to insufficient social media data. Estimate based on traditional polling only.',
-          confidence: 0.6,
+          type: 'pattern' as const,
+          text: 'AI analysis unavailable due to insufficient social media data. Estimate based on traditional polling only.',
+          timestamp: now,
         }],
       };
     }
