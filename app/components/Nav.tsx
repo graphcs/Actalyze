@@ -7,6 +7,8 @@ import {
   LogOut,
   User,
   Cloud,
+  Globe,
+  MapPin,
 } from "lucide-react";
 import { Button } from "./ui/Button";
 import { Badge } from "./ui/Badge";
@@ -40,6 +42,14 @@ export default function Nav({ onChatClick, onUploadClick }: NavProps) {
         </div>
         <div className="flex items-center gap-2">
           <CacheToggle />
+          <Button variant="ghost" onClick={() => router.push("/")}>
+            <MapPin className="w-4 h-4" />
+            Districts
+          </Button>
+          <Button variant="ghost" onClick={() => router.push("/nationwide")}>
+            <Globe className="w-4 h-4" />
+            Nationwide
+          </Button>
           <Button variant="ghost" onClick={() => router.push("/wordcloud")}>
             <Cloud className="w-4 h-4" />
             Word Cloud
