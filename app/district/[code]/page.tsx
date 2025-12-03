@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
+import CompactTweet from "../../components/CompactTweet";
 import {
   ChevronLeft,
   MapPin,
@@ -39,12 +40,6 @@ const DistrictMap = dynamic(
   }
 );
 
-// Dynamically import TweetEmbed to avoid SSR issues
-const TweetEmbed = dynamic(
-  () => import("../../components/TweetEmbed"),
-  { ssr: false }
-);
-
 interface Headline {
   title: string;
   url: string;
@@ -70,6 +65,10 @@ interface Tweet {
   author: string;
   username: string;
   url: string;
+  created_at?: string;
+  likes?: number;
+  retweets?: number;
+  replies?: number;
 }
 
 export default function DistrictPage() {
@@ -362,6 +361,10 @@ export default function DistrictPage() {
                   confidence={aiIntel.polling.confidence}
                   sampleSize={aiIntel.sample_size}
                   vsTraditional={aiIntel.polling.vs_traditional}
+                  aiOnlyEstimate={aiIntel.polling.ai_only_estimate}
+                  aiOnlyMargin={aiIntel.polling.ai_only_margin}
+                  traditionalMargin={aiIntel.polling.traditional_margin}
+                  blendWeight={aiIntel.polling.blend_weight}
                 />
                 <ElectionOutlook
                   rating={aiIntel.election_outlook.rating}
@@ -479,11 +482,19 @@ export default function DistrictPage() {
                   Loading tweets...
                 </div>
               ) : tweets.length > 0 ? (
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3">
                   {tweets.map((tweet) => (
-                    <div key={tweet.id}>
-                      <TweetEmbed tweetId={tweet.id} username={tweet.username} />
-                    </div>
+                    <CompactTweet
+                      key={tweet.id}
+                      id={tweet.id}
+                      text={tweet.text}
+                      author={tweet.author}
+                      username={tweet.username}
+                      likes={tweet.likes}
+                      retweets={tweet.retweets}
+                      replies={tweet.replies}
+                      created_at={tweet.created_at}
+                    />
                   ))}
                 </div>
               ) : (

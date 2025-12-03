@@ -9,6 +9,10 @@ interface AIPollingGaugeProps {
   confidence: number;
   sampleSize: number;
   vsTraditional?: string;
+  aiOnlyEstimate?: string;
+  aiOnlyMargin?: number;
+  traditionalMargin?: number;
+  blendWeight?: number;
 }
 
 export const AIPollingGauge: React.FC<AIPollingGaugeProps> = ({
@@ -17,10 +21,16 @@ export const AIPollingGauge: React.FC<AIPollingGaugeProps> = ({
   confidence,
   sampleSize,
   vsTraditional,
+  aiOnlyEstimate,
+  traditionalMargin,
+  blendWeight,
 }) => {
   // Convert margin to position on gauge (-15 to +15 range)
   const clampedMargin = Math.max(-15, Math.min(15, margin));
   const gaugePosition = ((clampedMargin + 15) / 30) * 100;
+
+  // Is this a blended estimate?
+  const isBlended = traditionalMargin !== undefined && blendWeight !== undefined && blendWeight > 0;
 
   // Determine color based on margin
   const getMarginColor = () => {
@@ -39,11 +49,16 @@ export const AIPollingGauge: React.FC<AIPollingGaugeProps> = ({
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
-              AI Polling Estimate
+              {isBlended ? 'Combined Polling Estimate' : 'AI Polling Estimate'}
             </h3>
             <p className={`text-3xl font-bold mt-1 ${getMarginColor()}`}>
               {estimate}
             </p>
+            {isBlended && (
+              <p className="text-xs text-zinc-400 mt-0.5">
+                {Math.round((blendWeight || 0) * 100)}% traditional + {Math.round((1 - (blendWeight || 0)) * 100)}% AI
+              </p>
+            )}
           </div>
           <div className="text-right">
             <div className="text-xs text-zinc-400">
@@ -72,8 +87,28 @@ export const AIPollingGauge: React.FC<AIPollingGaugeProps> = ({
           <span>R+15</span>
         </div>
 
-        {/* Comparison to traditional polling */}
-        {vsTraditional && (
+        {/* Source breakdown for blended estimates */}
+        {isBlended && (
+          <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800 space-y-1.5">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-zinc-400">Traditional Polls:</span>
+              <span className="font-medium text-zinc-600 dark:text-zinc-300">
+                {vsTraditional?.replace('Traditional polls: ', '') || 'N/A'}
+              </span>
+            </div>
+            {aiOnlyEstimate && (
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-zinc-400">AI Analysis (Twitter):</span>
+                <span className="font-medium text-zinc-600 dark:text-zinc-300">
+                  {aiOnlyEstimate}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Non-blended: show vs Traditional if available */}
+        {!isBlended && vsTraditional && (
           <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800">
             <div className="flex items-center gap-2 text-xs">
               <span className="text-zinc-400">vs Traditional Polls:</span>
@@ -87,8 +122,9 @@ export const AIPollingGauge: React.FC<AIPollingGaugeProps> = ({
         {/* Methodology note */}
         <div className="mt-3 pt-3 border-t border-zinc-100 dark:border-zinc-800">
           <p className="text-[10px] text-zinc-400 leading-relaxed">
-            Based on AI analysis of Twitter discussions. Methodology inspired by
-            &quot;Artificially Intelligent Opinion Polling&quot; (Cerina &amp; Duch, 2023).
+            {isBlended
+              ? 'Blended estimate combining traditional polling with AI analysis of Twitter sentiment. Traditional polls weighted more heavily for reliability.'
+              : 'Based on AI analysis of Twitter discussions. Methodology inspired by "Artificially Intelligent Opinion Polling" (Cerina & Duch, 2023).'}
           </p>
         </div>
       </CardContent>

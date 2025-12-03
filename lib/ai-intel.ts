@@ -39,6 +39,10 @@ export interface AIIntelResponse {
     margin: number;
     confidence: number;
     vs_traditional?: string;
+    ai_only_estimate?: string;
+    ai_only_margin?: number;
+    traditional_margin?: number;
+    blend_weight?: number;
   };
 
   topics: TopicSummary[];
@@ -212,16 +216,137 @@ export async function classifyTweets(
 }
 
 /**
+ * Parse a polling trend string (e.g., "R+55.52%", "D+5", "Tied") into a numeric margin
+ * Positive = R advantage, Negative = D advantage
+ */
+export function parsePollingTrend(trend: string | null): number | null {
+  if (!trend) return null;
+
+  const cleanTrend = trend.trim().toUpperCase();
+
+  // Handle "Tied", "Even", "Toss-up"
+  if (cleanTrend.includes('TIED') || cleanTrend.includes('EVEN') || cleanTrend.includes('TOSS')) {
+    return 0;
+  }
+
+  // Match patterns like "R+55.52%", "D+5", "R+10", "D+3.5"
+  const match = cleanTrend.match(/([DR])\+?(\d+(?:\.\d+)?)/);
+  if (match) {
+    const party = match[1];
+    const margin = parseFloat(match[2]);
+    return party === 'R' ? margin : -margin;
+  }
+
+  // Handle "Likely R", "Likely D", "Lean R", "Lean D", "Safe R", "Safe D"
+  if (cleanTrend.includes('SAFE R')) return 15;
+  if (cleanTrend.includes('LIKELY R')) return 8;
+  if (cleanTrend.includes('LEAN R')) return 3;
+  if (cleanTrend.includes('SAFE D')) return -15;
+  if (cleanTrend.includes('LIKELY D')) return -8;
+  if (cleanTrend.includes('LEAN D')) return -3;
+
+  return null;
+}
+
+/**
+ * Blend AI polling estimate with traditional polling
+ * Traditional polls are weighted more heavily as they're more reliable
+ */
+export function blendPollingEstimates(
+  aiMargin: number,
+  aiConfidence: number,
+  traditionalMargin: number | null,
+  aiSampleSize: number
+): { margin: number; confidence: number; blendWeight: number } {
+  // If no traditional polling, use AI only
+  if (traditionalMargin === null) {
+    return { margin: aiMargin, confidence: aiConfidence, blendWeight: 0 };
+  }
+
+  // Weight traditional polling more heavily (70-90% depending on AI sample size)
+  // More AI samples = slightly more AI weight, but traditional still dominates
+  const aiWeight = Math.min(0.3, 0.1 + (aiSampleSize / 200) * 0.2);
+  const traditionalWeight = 1 - aiWeight;
+
+  const blendedMargin = Math.round(
+    traditionalMargin * traditionalWeight + aiMargin * aiWeight
+  );
+
+  // Confidence is higher when AI and traditional agree
+  const agreement = 1 - Math.abs(aiMargin - traditionalMargin) / 30;
+  const blendedConfidence = Math.min(0.95, aiConfidence * 0.3 + 0.5 + agreement * 0.2);
+
+  return {
+    margin: blendedMargin,
+    confidence: blendedConfidence,
+    blendWeight: traditionalWeight,
+  };
+}
+
+/**
  * Aggregate classifications into district-level intelligence
  */
 export function aggregateClassifications(
   classifications: PostClassification[],
   districtCode: string,
-  districtName: string
+  districtName: string,
+  traditionalPollingTrend?: string | null
 ): AIIntelResponse {
   const now = new Date().toISOString();
 
   if (classifications.length === 0) {
+    // Even with no tweet data, we can still use traditional polling if available
+    const traditionalMargin = traditionalPollingTrend
+      ? parsePollingTrend(traditionalPollingTrend)
+      : null;
+
+    if (traditionalMargin !== null) {
+      // Use traditional polling as the estimate
+      let estimate: string;
+      if (Math.abs(traditionalMargin) < 2) {
+        estimate = 'Tied';
+      } else if (traditionalMargin < 0) {
+        estimate = `D+${Math.abs(Math.round(traditionalMargin))}`;
+      } else {
+        estimate = `R+${Math.round(traditionalMargin)}`;
+      }
+
+      let vsTraditional: string;
+      if (traditionalMargin === 0) {
+        vsTraditional = 'Traditional polls: Tied';
+      } else if (traditionalMargin < 0) {
+        vsTraditional = `Traditional polls: D+${Math.abs(Math.round(traditionalMargin))}`;
+      } else {
+        vsTraditional = `Traditional polls: R+${Math.round(traditionalMargin)}`;
+      }
+
+      const outlook = determineElectionOutlook(traditionalMargin, 0.6, []);
+
+      return {
+        district: districtCode,
+        district_name: districtName,
+        timestamp: now,
+        sample_size: 0,
+        polling: {
+          estimate,
+          margin: Math.round(traditionalMargin),
+          confidence: 0.6,
+          vs_traditional: vsTraditional,
+          ai_only_estimate: 'No data',
+          ai_only_margin: 0,
+          traditional_margin: traditionalMargin,
+          blend_weight: 1.0,
+        },
+        topics: [],
+        election_outlook: outlook,
+        insights: [{
+          type: 'observation' as const,
+          content: 'AI analysis unavailable due to insufficient social media data. Estimate based on traditional polling only.',
+          confidence: 0.6,
+        }],
+      };
+    }
+
     return {
       district: districtCode,
       district_name: districtName,
@@ -246,17 +371,52 @@ export function aggregateClassifications(
   const localUsers = classifications.filter(c => c.location_confidence >= 0.3);
   const sampleSize = localUsers.length;
 
-  // Calculate polling estimate
-  const { estimate, margin, confidence } = calculatePollingEstimate(localUsers);
+  // Calculate AI-only polling estimate
+  const aiPolling = calculatePollingEstimate(localUsers);
+
+  // Parse traditional polling if provided
+  const traditionalMargin = traditionalPollingTrend
+    ? parsePollingTrend(traditionalPollingTrend)
+    : null;
+
+  // Blend AI and traditional polling estimates
+  const blended = blendPollingEstimates(
+    aiPolling.margin,
+    aiPolling.confidence,
+    traditionalMargin,
+    sampleSize
+  );
+
+  // Format the final estimate string
+  let estimate: string;
+  if (Math.abs(blended.margin) < 2) {
+    estimate = 'Tied';
+  } else if (blended.margin < 0) {
+    estimate = `D+${Math.abs(blended.margin)}`;
+  } else {
+    estimate = `R+${blended.margin}`;
+  }
 
   // Aggregate topics
   const topics = aggregateTopics(localUsers);
 
-  // Determine election outlook
-  const election_outlook = determineElectionOutlook(margin, confidence, topics);
+  // Determine election outlook based on blended margin
+  const election_outlook = determineElectionOutlook(blended.margin, blended.confidence, topics);
 
   // Extract key insights
   const insights = extractInsights(localUsers);
+
+  // Format traditional polling comparison
+  let vsTraditional: string | undefined;
+  if (traditionalMargin !== null) {
+    if (traditionalMargin === 0) {
+      vsTraditional = 'Traditional polls: Tied';
+    } else if (traditionalMargin < 0) {
+      vsTraditional = `Traditional polls: D+${Math.abs(Math.round(traditionalMargin))}`;
+    } else {
+      vsTraditional = `Traditional polls: R+${Math.round(traditionalMargin)}`;
+    }
+  }
 
   return {
     district: districtCode,
@@ -265,8 +425,13 @@ export function aggregateClassifications(
     sample_size: sampleSize,
     polling: {
       estimate,
-      margin,
-      confidence,
+      margin: blended.margin,
+      confidence: blended.confidence,
+      vs_traditional: vsTraditional,
+      ai_only_estimate: aiPolling.estimate,
+      ai_only_margin: aiPolling.margin,
+      traditional_margin: traditionalMargin ?? undefined,
+      blend_weight: blended.blendWeight,
     },
     topics,
     election_outlook,

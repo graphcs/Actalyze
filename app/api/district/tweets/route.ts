@@ -19,6 +19,9 @@ interface Tweet {
   created_at: string;
   user_location?: string;
   user_bio?: string;
+  likes?: number;
+  retweets?: number;
+  replies?: number;
 }
 
 interface TweetWithMetrics extends Tweet {
@@ -91,18 +94,25 @@ export async function GET(request: NextRequest) {
     const stateName = stateNames[stateCode] || stateCode;
     const districtName = `${stateName}'s ${parseInt(districtNum)} Congressional District (${districtLabel})`;
 
-    const claudePrompt = `You are a political research assistant with access to current news and web search. Research and identify the top 4-5 trending political topics, controversies, or local issues currently happening in ${districtName} as of this week (November 2025).
+    const claudePrompt = `Generate 5 Twitter search terms to find political tweets relevant to ${districtName} in ${stateName}.
 
-Output ONLY a bulleted list of Twitter/X search terms in this exact format:
-- [concise search term or hashtag]
-- [concise search term or hashtag]
-- [concise search term or hashtag]
-- [concise search term or hashtag]
-- [concise search term or hashtag]
+Use a MIX of regional and state terms that will actually return results:
+- 2 terms with REGIONAL geography (counties, major cities in the district) + politics
+- 2 terms with state governor or major state politicians
+- 1 term with the current US Representative's name (if known)
 
-Each search term should be SHORT (1-4 words), use keywords or hashtags that people would actually tweet about, and focus on district-specific issues, local politicians, controversies, or policy debates. Do NOT include generic phrases. Examples of good terms: "VA-10 election", "Suhas Subramanyam", "Loudoun schools", "#VA10politics".
+Good examples for Long Island NY districts:
+- "Long Island politics"
+- "Suffolk County news"
+- "Hochul Long Island"
+- "New York governor economy"
 
-ONLY output the bulleted list of search terms with NO additional commentary, explanations, or disclaimers.`;
+Good examples for California districts:
+- "Bay Area politics" or "Orange County politics"
+- "Newsom California"
+- "California congress"
+
+Output ONLY a bulleted list of 5 search terms. NO explanations.`;
 
     const claudeResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -184,7 +194,8 @@ ONLY output the bulleted list of search terms with NO additional commentary, exp
     const allTweetsWithMetrics: TweetWithMetrics[] = [];
     const seenTweetIds = new Set<string>();
 
-    for (const searchTerm of searchTerms.slice(0, 5)) {
+    // Reduced from 5 to 3 to save API calls
+    for (const searchTerm of searchTerms.slice(0, 3)) {
       console.log(`🐦 Searching Twitter for: "${searchTerm}"`);
 
       const searchQuery = `${searchTerm} -is:retweet -is:reply lang:en`;
@@ -247,6 +258,9 @@ ONLY output the bulleted list of search terms with NO additional commentary, exp
             created_at: tweet.created_at || '',
             user_location: user?.location,
             user_bio: user?.description,
+            likes: metrics.like_count || 0,
+            retweets: metrics.retweet_count || 0,
+            replies: metrics.reply_count || 0,
             engagement_score: engagementScore,
             age_days: ageDays,
           });
@@ -279,7 +293,7 @@ ONLY output the bulleted list of search terms with NO additional commentary, exp
 
     console.log(`✅ Returning ${topTweets.length} top tweets for ${districtLabel}`);
 
-    // Remove engagement_score and age_days from final output
+    // Remove internal metrics from final output but keep likes/retweets/replies
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const tweets: Tweet[] = topTweets.map(({ engagement_score, age_days, ...tweet }) => tweet);
 
