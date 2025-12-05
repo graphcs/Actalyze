@@ -26,6 +26,41 @@ interface TweetData {
 }
 
 /**
+ * Sleep utility for rate limit handling
+ */
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * Get Twitter client - prefers Bearer Token, falls back to App-only auth
+ */
+async function getTwitterClient(): Promise<TwitterApi> {
+  // Prefer Bearer Token if available (Basic/Pro tier)
+  const bearerToken = process.env.TWITTER_BEARER_TOKEN;
+  if (bearerToken) {
+    console.log('🔑 Using Bearer Token authentication');
+    return new TwitterApi(bearerToken);
+  }
+
+  // Fall back to App-only auth with API Key/Secret
+  const apiKey = process.env.TWITTER_API_KEY;
+  const apiSecret = process.env.TWITTER_API_SECRET;
+
+  if (!apiKey || !apiSecret) {
+    throw new Error('Twitter API credentials not found');
+  }
+
+  console.log('🔑 Using App-only authentication (API Key/Secret)');
+  const client = new TwitterApi({
+    appKey: apiKey,
+    appSecret: apiSecret,
+  });
+
+  return await client.appLogin();
+}
+
+/**
  * Calculate time range in hours
  */
 function getTimeRangeHours(timeRange: string): number {
@@ -104,11 +139,11 @@ export async function GET(request: NextRequest) {
 
     console.log(`🌥️ Generating word cloud for: "${filters.topic}"`);
 
-    // Get Twitter API credentials
-    const apiKey = process.env.TWITTER_API_KEY;
-    const apiSecret = process.env.TWITTER_API_SECRET;
-
-    if (!apiKey || !apiSecret) {
+    // Get Twitter client (Bearer Token or App-only auth)
+    let twitterClient: TwitterApi;
+    try {
+      twitterClient = await getTwitterClient();
+    } catch (authError) {
       console.error('❌ Twitter API credentials not found');
       return NextResponse.json(
         { error: 'Twitter API not configured' },
@@ -116,67 +151,103 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Authenticate with Twitter API
-    const client = new TwitterApi({
-      appKey: apiKey,
-      appSecret: apiSecret,
-    });
-
-    const appOnlyClient = await client.appLogin();
-
     // Build search query
     const searchQuery = `${filters.topic} -is:retweet -is:reply lang:en`;
-    
+
     // Note: Location filtering via Twitter API requires different approach
     // The 'place:' operator is not supported in basic search
     // We'll filter client-side or use Twitter's geo features in a future update
 
-    // Calculate date range (for reference, though Free tier limits to 7 days)
+    // Calculate date range
     const hoursAgo = getTimeRangeHours(filters.timeRange);
 
     console.log(`📊 Searching Twitter: "${searchQuery}"`);
-    console.log(`📅 Time range: Last ${hoursAgo} hours (Twitter Free tier: last 7 days max)`);
+    console.log(`📅 Time range: Last ${hoursAgo} hours`);
     console.log(`🎯 Target: ${maxTweets} tweets`);
 
-    // Fetch multiple pages of tweets to reach maxTweets
+    // Fetch tweets with retry logic for rate limits
     const allTweets: TweetData[] = [];
     let nextToken: string | undefined = undefined;
     const tweetsPerPage = 100; // Twitter API max per request
     const maxPages = Math.ceil(maxTweets / tweetsPerPage);
+    const maxRetries = 3;
 
-    try {
-      for (let page = 0; page < maxPages; page++) {
-        console.log(`📥 Fetching page ${page + 1}/${maxPages}...`);
-        
-        const searchParams: Record<string, unknown> = {
-          max_results: tweetsPerPage,
-          'tweet.fields': ['created_at', 'author_id', 'public_metrics'],
-          expansions: ['author_id'],
-        };
+    for (let page = 0; page < maxPages; page++) {
+      console.log(`📥 Fetching page ${page + 1}/${maxPages}...`);
 
-        if (nextToken) {
-          searchParams.next_token = nextToken;
-        }
+      const searchParams: Record<string, unknown> = {
+        max_results: tweetsPerPage,
+        'tweet.fields': ['created_at', 'author_id', 'public_metrics'],
+        expansions: ['author_id'],
+      };
 
-        const result = await appOnlyClient.v2.search(searchQuery, searchParams);
+      if (nextToken) {
+        searchParams.next_token = nextToken;
+      }
 
-        if (result.data.data && result.data.data.length > 0) {
-          allTweets.push(...(result.data.data as TweetData[]));
-          console.log(`   ✓ Got ${result.data.data.length} tweets (total: ${allTweets.length})`);
-        }
+      // Retry logic with exponential backoff for rate limits
+      let lastError: unknown = null;
+      for (let retry = 0; retry < maxRetries; retry++) {
+        try {
+          const result = await twitterClient.v2.search(searchQuery, searchParams);
 
-        // Check if there's a next page
-        if (result.data.meta?.next_token && allTweets.length < maxTweets) {
-          nextToken = result.data.meta.next_token;
-          // Add a small delay to respect rate limits
-          await new Promise(resolve => setTimeout(resolve, 300));
-        } else {
-          break;
+          if (result.data.data && result.data.data.length > 0) {
+            allTweets.push(...(result.data.data as TweetData[]));
+            console.log(`   ✓ Got ${result.data.data.length} tweets (total: ${allTweets.length})`);
+          }
+
+          // Check if there's a next page
+          if (result.data.meta?.next_token && allTweets.length < maxTweets) {
+            nextToken = result.data.meta.next_token;
+            // Add delay between pages to respect rate limits
+            await sleep(500);
+          } else {
+            nextToken = undefined;
+          }
+
+          lastError = null;
+          break; // Success, exit retry loop
+
+        } catch (error: unknown) {
+          lastError = error;
+          const err = error as { code?: number; rateLimit?: { reset?: number } };
+
+          if (err.code === 429) {
+            // Rate limited - check reset time or use exponential backoff
+            const resetTime = err.rateLimit?.reset;
+            let waitTime: number;
+
+            if (resetTime) {
+              // Wait until rate limit resets (plus buffer)
+              waitTime = Math.max((resetTime * 1000) - Date.now() + 1000, 1000);
+              console.log(`⏳ Rate limited. Reset in ${Math.ceil(waitTime / 1000)}s. Waiting...`);
+            } else {
+              // Exponential backoff: 5s, 15s, 45s
+              waitTime = Math.pow(3, retry) * 5000;
+              console.log(`⏳ Rate limited. Retry ${retry + 1}/${maxRetries} in ${waitTime / 1000}s...`);
+            }
+
+            // Cap wait time at 60 seconds
+            waitTime = Math.min(waitTime, 60000);
+            await sleep(waitTime);
+          } else {
+            // Non-rate-limit error, don't retry
+            console.warn('⚠️ Twitter API error:', error);
+            break;
+          }
         }
       }
-    } catch (paginationError: unknown) {
-      console.warn('⚠️ Pagination stopped early:', paginationError);
-      // Continue with tweets we have so far
+
+      // If we still have an error after retries, stop pagination
+      if (lastError) {
+        console.warn('⚠️ Pagination stopped after retries. Continuing with tweets collected so far.');
+        break;
+      }
+
+      // No more pages
+      if (!nextToken) {
+        break;
+      }
     }
 
     if (allTweets.length === 0) {
