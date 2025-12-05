@@ -6,7 +6,6 @@ import { useSession, signOut } from "next-auth/react";
 import {
   Landmark,
   MapPin,
-  Globe,
   Cloud,
   MessageSquare,
   Upload,
@@ -16,34 +15,81 @@ import {
   ChevronDown,
   User,
   LogOut,
+  LogIn,
   Settings,
   Home,
+  FileText,
+  CheckSquare,
 } from "lucide-react";
+import { signIn } from "next-auth/react";
 
 interface SidebarProps {
   onChatClick?: () => void;
   onUploadClick?: () => void;
 }
 
-interface NavSection {
-  title: string;
-  items: NavItem[];
-}
-
-interface NavItem {
-  label: string;
-  icon: React.ReactNode;
-  href?: string;
-  onClick?: () => void;
-  active?: boolean;
-}
+// State data with district counts
+const STATES_DATA: { code: string; name: string; districts: number }[] = [
+  { code: "AL", name: "Alabama", districts: 7 },
+  { code: "AK", name: "Alaska", districts: 1 },
+  { code: "AZ", name: "Arizona", districts: 9 },
+  { code: "AR", name: "Arkansas", districts: 4 },
+  { code: "CA", name: "California", districts: 52 },
+  { code: "CO", name: "Colorado", districts: 8 },
+  { code: "CT", name: "Connecticut", districts: 5 },
+  { code: "DE", name: "Delaware", districts: 1 },
+  { code: "FL", name: "Florida", districts: 28 },
+  { code: "GA", name: "Georgia", districts: 14 },
+  { code: "HI", name: "Hawaii", districts: 2 },
+  { code: "ID", name: "Idaho", districts: 2 },
+  { code: "IL", name: "Illinois", districts: 17 },
+  { code: "IN", name: "Indiana", districts: 9 },
+  { code: "IA", name: "Iowa", districts: 4 },
+  { code: "KS", name: "Kansas", districts: 4 },
+  { code: "KY", name: "Kentucky", districts: 6 },
+  { code: "LA", name: "Louisiana", districts: 6 },
+  { code: "ME", name: "Maine", districts: 2 },
+  { code: "MD", name: "Maryland", districts: 8 },
+  { code: "MA", name: "Massachusetts", districts: 9 },
+  { code: "MI", name: "Michigan", districts: 13 },
+  { code: "MN", name: "Minnesota", districts: 8 },
+  { code: "MS", name: "Mississippi", districts: 4 },
+  { code: "MO", name: "Missouri", districts: 8 },
+  { code: "MT", name: "Montana", districts: 2 },
+  { code: "NE", name: "Nebraska", districts: 3 },
+  { code: "NV", name: "Nevada", districts: 4 },
+  { code: "NH", name: "New Hampshire", districts: 2 },
+  { code: "NJ", name: "New Jersey", districts: 12 },
+  { code: "NM", name: "New Mexico", districts: 3 },
+  { code: "NY", name: "New York", districts: 26 },
+  { code: "NC", name: "North Carolina", districts: 14 },
+  { code: "ND", name: "North Dakota", districts: 1 },
+  { code: "OH", name: "Ohio", districts: 15 },
+  { code: "OK", name: "Oklahoma", districts: 5 },
+  { code: "OR", name: "Oregon", districts: 6 },
+  { code: "PA", name: "Pennsylvania", districts: 17 },
+  { code: "RI", name: "Rhode Island", districts: 2 },
+  { code: "SC", name: "South Carolina", districts: 7 },
+  { code: "SD", name: "South Dakota", districts: 1 },
+  { code: "TN", name: "Tennessee", districts: 9 },
+  { code: "TX", name: "Texas", districts: 38 },
+  { code: "UT", name: "Utah", districts: 4 },
+  { code: "VT", name: "Vermont", districts: 1 },
+  { code: "VA", name: "Virginia", districts: 11 },
+  { code: "WA", name: "Washington", districts: 10 },
+  { code: "WV", name: "West Virginia", districts: 2 },
+  { code: "WI", name: "Wisconsin", districts: 8 },
+  { code: "WY", name: "Wyoming", districts: 1 },
+];
 
 export default function Sidebar({ onChatClick, onUploadClick }: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { data: session } = useSession();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [expandedSections, setExpandedSections] = useState<string[]>(["Navigation", "Tools"]);
+  const [isDistrictsExpanded, setIsDistrictsExpanded] = useState(false);
+  const [expandedState, setExpandedState] = useState<string | null>(null);
+  const [isToolsExpanded, setIsToolsExpanded] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
@@ -68,83 +114,44 @@ export default function Sidebar({ onChatClick, onUploadClick }: SidebarProps) {
     checkAdminStatus();
   }, [session?.user?.email]);
 
-  const toggleSection = (title: string) => {
-    setExpandedSections((prev) =>
-      prev.includes(title)
-        ? prev.filter((s) => s !== title)
-        : [...prev, title]
-    );
+  // Auto-expand districts and state based on current path
+  useEffect(() => {
+    if (pathname?.startsWith("/district/")) {
+      // Extract state code from district path (e.g., /district/ca01 -> CA)
+      const districtCode = pathname.split("/")[2]?.toUpperCase();
+      if (districtCode && districtCode.length >= 2) {
+        const stateCode = districtCode.substring(0, 2);
+        setIsDistrictsExpanded(true);
+        setExpandedState(stateCode);
+      }
+    } else if (pathname?.startsWith("/state/")) {
+      // Extract state code from state path (e.g., /state/ca -> CA)
+      const stateCode = pathname.split("/")[2]?.toUpperCase();
+      if (stateCode) {
+        setIsDistrictsExpanded(true);
+        setExpandedState(stateCode);
+      }
+    }
+  }, [pathname]);
+
+  const handleNavigation = (href: string) => {
+    // Add guest=true parameter to allow access without sign-in
+    const url = new URL(href, window.location.origin);
+    url.searchParams.set("guest", "true");
+    router.push(url.pathname + url.search);
   };
 
-  const sections: NavSection[] = [
-    {
-      title: "Navigation",
-      items: [
-        {
-          label: "Home",
-          icon: <Home className="w-5 h-5" />,
-          href: "/",
-          active: pathname === "/",
-        },
-        {
-          label: "Districts",
-          icon: <MapPin className="w-5 h-5" />,
-          href: "/dashboard",
-          active: pathname === "/dashboard" || pathname?.startsWith("/district"),
-        },
-        {
-          label: "Nationwide",
-          icon: <Globe className="w-5 h-5" />,
-          href: "/nationwide",
-          active: pathname === "/nationwide" || pathname?.startsWith("/state"),
-        },
-        {
-          label: "Trending",
-          icon: <TrendingUp className="w-5 h-5" />,
-          href: "/dashboard",
-          active: pathname?.startsWith("/topic"),
-        },
-      ],
-    },
-    {
-      title: "Tools",
-      items: [
-        {
-          label: "Word Cloud",
-          icon: <Cloud className="w-5 h-5" />,
-          href: "/wordcloud",
-          active: pathname?.startsWith("/wordcloud"),
-        },
-        {
-          label: "Chat",
-          icon: <MessageSquare className="w-5 h-5" />,
-          onClick: onChatClick || (() => router.push("/chatbot")),
-          active: pathname === "/chatbot",
-        },
-        {
-          label: "Upload Bill",
-          icon: <Upload className="w-5 h-5" />,
-          onClick: onUploadClick || (() => router.push("/upload")),
-          active: pathname === "/upload",
-        },
-      ],
-    },
-  ];
+  const toggleState = (stateCode: string) => {
+    setExpandedState(expandedState === stateCode ? null : stateCode);
+  };
 
-  // Add admin section if user is admin
-  if (isAdmin) {
-    sections.push({
-      title: "Admin",
-      items: [
-        {
-          label: "Settings",
-          icon: <Settings className="w-5 h-5" />,
-          href: "/admin",
-          active: pathname === "/admin",
-        },
-      ],
+  // Generate district codes for a state
+  const getDistrictCodes = (stateCode: string, count: number) => {
+    return Array.from({ length: count }, (_, i) => {
+      const num = (i + 1).toString().padStart(2, "0");
+      return `${stateCode}${num}`;
     });
-  }
+  };
 
   return (
     <aside
@@ -164,61 +171,207 @@ export default function Sidebar({ onChatClick, onUploadClick }: SidebarProps) {
         </div>
       </div>
 
-      {/* Navigation Sections */}
+      {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-4">
-        {sections.map((section) => (
-          <div key={section.title} className="mb-2">
-            {/* Section Header */}
-            {!isCollapsed && (
-              <button
-                onClick={() => toggleSection(section.title)}
-                className="w-full flex items-center justify-between px-4 py-2 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider hover:text-zinc-700 dark:hover:text-zinc-300"
-              >
-                {section.title}
-                <ChevronDown
-                  className={`w-4 h-4 transition-transform ${
-                    expandedSections.includes(section.title) ? "" : "-rotate-90"
-                  }`}
-                />
-              </button>
-            )}
+        {/* Home */}
+        <div className="px-2 mb-1">
+          <button
+            onClick={() => router.push("/")}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+              pathname === "/"
+                ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-zinc-100"
+            }`}
+          >
+            <Home className="w-5 h-5" />
+            {!isCollapsed && <span className="text-sm font-medium">Home</span>}
+          </button>
+        </div>
 
-            {/* Section Items */}
-            {(isCollapsed || expandedSections.includes(section.title)) && (
-              <div className="space-y-1 px-2">
-                {section.items.map((item) => (
-                  <button
-                    key={item.label}
-                    onClick={() => {
-                      if (item.onClick) {
-                        item.onClick();
-                      } else if (item.href) {
-                        router.push(item.href);
-                      }
-                    }}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
-                      item.active
-                        ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
-                        : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-zinc-100"
-                    }`}
-                    title={isCollapsed ? item.label : undefined}
-                  >
-                    {item.icon}
-                    {!isCollapsed && (
-                      <span className="text-sm font-medium">{item.label}</span>
-                    )}
-                  </button>
-                ))}
-              </div>
+        {/* Districts - Expandable */}
+        <div className="px-2 mb-1">
+          <button
+            onClick={() => setIsDistrictsExpanded(!isDistrictsExpanded)}
+            className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+              pathname?.startsWith("/district") || pathname?.startsWith("/state")
+                ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-zinc-100"
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <MapPin className="w-5 h-5" />
+              {!isCollapsed && <span className="text-sm font-medium">Districts</span>}
+            </div>
+            {!isCollapsed && (
+              <ChevronDown
+                className={`w-4 h-4 transition-transform ${isDistrictsExpanded ? "" : "-rotate-90"}`}
+              />
             )}
+          </button>
+
+          {/* States List */}
+          {isDistrictsExpanded && !isCollapsed && (
+            <div className="mt-1 ml-4 max-h-80 overflow-y-auto border-l border-zinc-200 dark:border-zinc-700">
+              {STATES_DATA.map((state) => (
+                <div key={state.code}>
+                  <button
+                    onClick={() => toggleState(state.code)}
+                    className={`w-full flex items-center justify-between pl-4 pr-2 py-1.5 text-sm transition-colors ${
+                      pathname?.startsWith(`/state/${state.code.toLowerCase()}`) ||
+                      pathname?.startsWith(`/district/${state.code.toLowerCase()}`)
+                        ? "text-zinc-900 dark:text-zinc-100 font-medium"
+                        : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
+                    }`}
+                  >
+                    <span>{state.name}</span>
+                    <ChevronDown
+                      className={`w-3 h-3 transition-transform ${
+                        expandedState === state.code ? "" : "-rotate-90"
+                      }`}
+                    />
+                  </button>
+
+                  {/* Districts for this state */}
+                  {expandedState === state.code && (
+                    <div className="ml-4 border-l border-zinc-200 dark:border-zinc-700">
+                      {getDistrictCodes(state.code, state.districts).map((districtCode) => (
+                        <button
+                          key={districtCode}
+                          onClick={() => handleNavigation(`/district/${districtCode.toLowerCase()}`)}
+                          className={`w-full text-left pl-4 pr-2 py-1 text-xs transition-colors ${
+                            pathname === `/district/${districtCode.toLowerCase()}`
+                              ? "text-zinc-900 dark:text-zinc-100 font-medium bg-zinc-100 dark:bg-zinc-800"
+                              : "text-zinc-500 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
+                          }`}
+                        >
+                          {state.code}-{districtCode.slice(2)}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Trending */}
+        <div className="px-2 mb-1">
+          <button
+            onClick={() => handleNavigation("/nationwide")}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+              pathname === "/nationwide" || pathname?.startsWith("/topic")
+                ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-zinc-100"
+            }`}
+          >
+            <TrendingUp className="w-5 h-5" />
+            {!isCollapsed && <span className="text-sm font-medium">Trending</span>}
+          </button>
+        </div>
+
+        {/* Tools Section */}
+        {!isCollapsed && (
+          <div className="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+            <button
+              onClick={() => setIsToolsExpanded(!isToolsExpanded)}
+              className="w-full flex items-center justify-between px-4 py-2 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider hover:text-zinc-700 dark:hover:text-zinc-300"
+            >
+              Tools
+              <ChevronDown
+                className={`w-4 h-4 transition-transform ${isToolsExpanded ? "" : "-rotate-90"}`}
+              />
+            </button>
           </div>
-        ))}
+        )}
+
+        {(isCollapsed || isToolsExpanded) && (
+          <div className="px-2 space-y-1">
+            <button
+              onClick={() => handleNavigation("/wordcloud")}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                pathname?.startsWith("/wordcloud")
+                  ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                  : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-zinc-100"
+              }`}
+            >
+              <Cloud className="w-5 h-5" />
+              {!isCollapsed && <span className="text-sm font-medium">Word Cloud</span>}
+            </button>
+
+            <button
+              onClick={() => (onChatClick ? onChatClick() : handleNavigation("/chatbot"))}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                pathname === "/chatbot"
+                  ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                  : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-zinc-100"
+              }`}
+            >
+              <MessageSquare className="w-5 h-5" />
+              {!isCollapsed && <span className="text-sm font-medium">Chat</span>}
+            </button>
+
+            <button
+              onClick={() => (onUploadClick ? onUploadClick() : handleNavigation("/upload"))}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                pathname === "/upload"
+                  ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                  : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-zinc-100"
+              }`}
+            >
+              <Upload className="w-5 h-5" />
+              {!isCollapsed && <span className="text-sm font-medium">Upload Bill</span>}
+            </button>
+
+            <button
+              onClick={() => handleNavigation("/draft-memo")}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                pathname === "/draft-memo"
+                  ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                  : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-zinc-100"
+              }`}
+            >
+              <FileText className="w-5 h-5" />
+              {!isCollapsed && <span className="text-sm font-medium">Draft Memo</span>}
+            </button>
+
+            <button
+              onClick={() => handleNavigation("/standards-checker")}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                pathname === "/standards-checker"
+                  ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                  : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-zinc-100"
+              }`}
+            >
+              <CheckSquare className="w-5 h-5" />
+              {!isCollapsed && <span className="text-sm font-medium">Standards Checker</span>}
+            </button>
+          </div>
+        )}
+
+        {/* Admin Section */}
+        {isAdmin && (
+          <div className="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800 px-2">
+            <button
+              onClick={() => router.push("/admin")}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                pathname === "/admin"
+                  ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                  : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-zinc-100"
+              }`}
+            >
+              <Settings className="w-5 h-5" />
+              {!isCollapsed && <span className="text-sm font-medium">Admin</span>}
+            </button>
+          </div>
+        )}
       </nav>
 
       {/* User Section */}
-      {session?.user && (
-        <div className="border-t border-zinc-200 dark:border-zinc-800 p-3">
-          {!isCollapsed ? (
+      <div className="border-t border-zinc-200 dark:border-zinc-800 p-3">
+        {session?.user ? (
+          // Logged in user
+          !isCollapsed ? (
             <div className="space-y-2">
               <div className="flex items-center gap-2 px-2 py-1.5">
                 <User className="w-4 h-4 text-zinc-500" />
@@ -242,9 +395,28 @@ export default function Sidebar({ onChatClick, onUploadClick }: SidebarProps) {
             >
               <LogOut className="w-5 h-5" />
             </button>
-          )}
-        </div>
-      )}
+          )
+        ) : (
+          // Not logged in - show login button
+          !isCollapsed ? (
+            <button
+              onClick={() => signIn("google")}
+              className="w-full flex items-center gap-2 px-3 py-2.5 text-sm font-medium text-zinc-900 dark:text-zinc-100 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg transition-colors"
+            >
+              <LogIn className="w-4 h-4" />
+              Sign In
+            </button>
+          ) : (
+            <button
+              onClick={() => signIn("google")}
+              className="w-full flex items-center justify-center p-2 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
+              title="Sign In"
+            >
+              <LogIn className="w-5 h-5" />
+            </button>
+          )
+        )}
+      </div>
 
       {/* Collapse Toggle */}
       <button

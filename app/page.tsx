@@ -14,6 +14,7 @@ import {
   Users,
 } from "lucide-react";
 import DistrictSearch from "./components/DistrictSearch";
+import Sidebar from "./components/Sidebar";
 
 // State code to name mapping for display
 const STATE_NAMES: Record<string, string> = {
@@ -64,51 +65,41 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-zinc-50 to-white dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950">
-      {/* Navigation */}
-      <nav className="border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-zinc-700 to-zinc-900 dark:from-zinc-600 dark:to-zinc-800 flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
-              Actalyze
-            </span>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => router.push("/nationwide")}
-              className="px-4 py-2 text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors flex items-center gap-2"
-            >
-              <Globe className="w-4 h-4" />
-              Nationwide
-            </button>
-            {session?.user ? (
-              <button
-                onClick={() => router.push("/dashboard")}
-                className="px-6 py-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors text-sm font-medium"
-              >
-                Dashboard
-              </button>
-            ) : (
-              <>
+      {/* Sidebar */}
+      <Sidebar />
+
+      {/* Main Content with sidebar offset */}
+      <div className="ml-64 transition-all duration-300">
+        {/* Navigation */}
+        <nav className="border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-sm sticky top-0 z-30">
+          <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-end">
+            <div className="flex items-center gap-3">
+              {session?.user ? (
                 <button
-                  onClick={handleGuestAccess}
-                  className="px-4 py-2 text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
-                >
-                  Continue as Guest
-                </button>
-                <button
-                  onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+                  onClick={() => router.push("/dashboard")}
                   className="px-6 py-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors text-sm font-medium"
                 >
-                  Sign In
+                  Dashboard
                 </button>
-              </>
-            )}
+              ) : (
+                <>
+                  <button
+                    onClick={handleGuestAccess}
+                    className="px-4 py-2 text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+                  >
+                    Continue as Guest
+                  </button>
+                  <button
+                    onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+                    className="px-6 py-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors text-sm font-medium"
+                  >
+                    Sign In
+                  </button>
+                </>
+              )}
+            </div>
           </div>
-        </div>
-      </nav>
+        </nav>
 
       {/* Hero Section */}
       <motion.div
@@ -314,6 +305,7 @@ export default function HomePage() {
           <p>Actalyze &copy; {new Date().getFullYear()} - AI-powered intelligence for modern governance</p>
         </div>
       </footer>
+      </div>
     </div>
   );
 }
