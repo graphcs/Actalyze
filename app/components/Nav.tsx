@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
   Landmark,
   MessageSquare,
@@ -24,6 +25,29 @@ interface NavProps {
 export default function Nav({ onChatClick, onUploadClick }: NavProps) {
   const router = useRouter();
   const { data: session } = useSession();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (!session?.user?.email) {
+        setIsAdmin(false);
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/admin/settings");
+        if (response.ok) {
+          const settings = await response.json();
+          setIsAdmin(settings.adminEmails?.includes(session.user.email) || false);
+        }
+      } catch (error) {
+        console.error("Failed to check admin status:", error);
+        setIsAdmin(false);
+      }
+    };
+
+    checkAdminStatus();
+  }, [session?.user?.email]);
 
   return (
     <div className="sticky top-0 z-50 backdrop-blur supports-[backdrop-filter]:bg-white/50 dark:supports-[backdrop-filter]:bg-zinc-900/40 border-b border-zinc-200 dark:border-zinc-800">
@@ -69,8 +93,8 @@ export default function Nav({ onChatClick, onUploadClick }: NavProps) {
           {/* User info and logout */}
           {session?.user && (
             <>
-              {/* Admin link - only for johnmahan7@gmail.com */}
-              {session.user.email === "johnmahan7@gmail.com" && (
+              {/* Admin link - shown for users in adminEmails list */}
+              {isAdmin && (
                 <Button
                   variant="outline"
                   onClick={() => router.push("/admin")}

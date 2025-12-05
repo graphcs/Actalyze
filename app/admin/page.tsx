@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Shield, Users, Settings, Plus, Trash2, Save } from "lucide-react";
@@ -16,58 +16,64 @@ export default function AdminPage() {
   const router = useRouter();
   const [settings, setSettings] = useState<AuthSettings>({
     mode: "restricted",
-    authorizedEmails: [
-      "johnmahan7@gmail.com",
-      "dan@datasyinc.com",
-      "johnmaheswaran@datasyinc.com",
-    ],
-    adminEmails: ["johnmahan7@gmail.com"],
+    authorizedEmails: [],
+    adminEmails: [],
   });
   const [newEmail, setNewEmail] = useState("");
   const [newAdminEmail, setNewAdminEmail] = useState("");
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
-  // Check if current user is admin
-  const isAdmin = session?.user?.email === "johnmahan7@gmail.com";
+  // Check if current user is admin based on fetched settings
+  const isAdmin = settings.adminEmails.includes(session?.user?.email || "");
+
+  // Fetch settings from server
+  const fetchSettings = useCallback(async () => {
+    try {
+      const response = await fetch("/api/admin/settings");
+      if (response.ok) {
+        const data = await response.json();
+        setSettings(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch settings:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchSettings();
+  }, [fetchSettings]);
 
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/");
-    } else if (status === "authenticated" && !isAdmin) {
+    } else if (status === "authenticated" && !loading && !isAdmin) {
       router.push("/dashboard");
     }
-  }, [status, isAdmin, router]);
-
-  useEffect(() => {
-    // Load settings from localStorage (in production, this would be from API/database)
-    const saved = localStorage.getItem("actalyze_auth_settings");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setSettings(parsed);
-      } catch (e) {
-        console.error("Failed to parse settings:", e);
-      }
-    }
-  }, []);
+  }, [status, isAdmin, loading, router]);
 
   const saveSettings = async () => {
     setSaving(true);
     setMessage("");
 
     try {
-      // Save to localStorage (in production, this would be API call to database)
-      localStorage.setItem("actalyze_auth_settings", JSON.stringify(settings));
+      const response = await fetch("/api/admin/settings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(settings),
+      });
 
-      // In production, you would call an API:
-      // await fetch("/api/admin/settings", {
-      //   method: "POST",
-      //   body: JSON.stringify(settings),
-      // });
-
-      setMessage("Settings saved successfully!");
-      setTimeout(() => setMessage(""), 3000);
+      if (response.ok) {
+        setMessage("Settings saved successfully!");
+        setTimeout(() => setMessage(""), 3000);
+      } else {
+        setMessage("Failed to save settings");
+      }
     } catch {
       setMessage("Failed to save settings");
     } finally {
@@ -149,7 +155,7 @@ export default function AdminPage() {
     setMessage("Email removed from admin list (don't forget to save!)");
   };
 
-  if (status === "loading") {
+  if (status === "loading" || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
