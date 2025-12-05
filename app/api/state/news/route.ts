@@ -23,6 +23,25 @@ interface Headline {
   thumbnail?: string;
 }
 
+function isWithinLastWeek(dateString?: string): boolean {
+  if (!dateString) return true; // Include articles without dates
+
+  // Relative dates like "2 hours ago", "3 days ago" are always recent
+  if (dateString.includes('ago')) return true;
+
+  try {
+    const articleDate = new Date(dateString);
+    if (isNaN(articleDate.getTime())) return true; // Include if we can't parse
+
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+    return articleDate >= oneWeekAgo;
+  } catch {
+    return true; // Include on parse error
+  }
+}
+
 /**
  * GET /api/state/news?state=VA
  * Returns local news headlines for a state
@@ -75,7 +94,8 @@ export async function GET(request: NextRequest) {
     url.searchParams.set('q', searchQuery);
     url.searchParams.set('gl', 'us');
     url.searchParams.set('hl', 'en');
-    url.searchParams.set('num', '10');
+    url.searchParams.set('num', '15'); // Fetch more to account for filtering
+    url.searchParams.set('tbs', 'qdr:w'); // Limit to past week (qdr:w = query date range: week)
     url.searchParams.set('api_key', apiKey);
 
     const response = await fetch(url.toString(), {
@@ -99,6 +119,7 @@ export async function GET(request: NextRequest) {
     const newsResults = data.news_results || [];
 
     const headlines: Headline[] = newsResults
+      .filter((article: { date?: string }) => isWithinLastWeek(article.date))
       .slice(0, 5)
       .map((article: {
         title?: string;
