@@ -2,6 +2,24 @@ import { NextRequest, NextResponse } from "next/server";
 import { serverCache, generateCacheKey } from "@/src/lib/cache";
 
 /**
+ * Check if the AI response is unhelpful (e.g., "I cannot provide an answer")
+ */
+function isUnhelpfulResponse(text: string): boolean {
+  const unhelpfulPatterns = [
+    /cannot (provide|give|offer|find)/i,
+    /unable to (provide|give|find|locate)/i,
+    /don't have (enough |sufficient |any )?(information|data|access)/i,
+    /no (specific |relevant |recent )?(information|data|news)/i,
+    /couldn't find/i,
+    /not able to/i,
+    /i (don't|do not) have/i,
+    /i('m| am) (not able|unable)/i,
+    /unfortunately.*(cannot|unable|don't have)/i,
+  ];
+  return unhelpfulPatterns.some(pattern => pattern.test(text));
+}
+
+/**
  * GET /api/district/summary?district=VA05
  * Returns a Sonar-generated summary of top issues in a congressional district
  */
@@ -72,7 +90,7 @@ export async function GET(request: NextRequest) {
         messages: [
           {
             role: 'user',
-            content: `Summarize the top political news and issues in congressional district ${districtLabel} this week. Focus on: local political developments, community concerns, legislative actions affecting the district, and any newsworthy events. Write 2-3 concise sentences. Be specific and factual.`,
+            content: `Provide a brief summary of recent political news and issues relevant to congressional district ${districtLabel}. Include any of the following if available: local political developments, the current representative's activities, community concerns, or legislative actions. If specific recent news is limited, provide general context about the district's political landscape and key issues. Write 2-3 concise sentences. Be specific and factual.`,
           },
         ],
         temperature: 0.4,
@@ -91,9 +109,10 @@ export async function GET(request: NextRequest) {
     const data = await response.json();
     const summary = data.choices?.[0]?.message?.content?.trim();
 
-    if (!summary) {
+    if (!summary || isUnhelpfulResponse(summary)) {
+      console.log(`⚠️ Unhelpful or empty response for ${districtLabel}, using fallback`);
       return NextResponse.json({
-        summary: `District ${districtLabel} local news and political updates.`
+        summary: `Political news and developments for ${districtLabel}. This district's representative and local political landscape may have recent updates in local news sources.`
       });
     }
 
