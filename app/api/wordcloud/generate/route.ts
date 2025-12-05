@@ -75,6 +75,7 @@ export async function GET(request: NextRequest) {
     };
 
     const maxTweets = Math.min(parseInt(searchParams.get('maxTweets') || '500'), 1000);
+    const excludeKeyword = searchParams.get('excludeKeyword') === 'true';
 
     if (!filters.topic) {
       return NextResponse.json(
@@ -214,6 +215,15 @@ export async function GET(request: NextRequest) {
       filteredTweets,
       filters.minFrequency || 2
     );
+
+    // Exclude the main topic keyword(s) if requested to prevent them from dominating
+    if (excludeKeyword && filters.topic) {
+      const topicWords = filters.topic.toLowerCase().split(/\s+/);
+      for (const word of topicWords) {
+        wordFrequencies.delete(word);
+      }
+      console.log(`🚫 Excluded topic keywords: ${topicWords.join(', ')}`);
+    }
 
     console.log(`📊 Found ${wordFrequencies.size} unique words`);
 

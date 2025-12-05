@@ -12,9 +12,10 @@ interface Topic {
 
 interface TrendingTopicsPanelProps {
   topics: Topic[];
+  onTopicClick?: (topicName: string) => void;
 }
 
-export const TrendingTopicsPanel: React.FC<TrendingTopicsPanelProps> = ({ topics }) => {
+export const TrendingTopicsPanel: React.FC<TrendingTopicsPanelProps> = ({ topics, onTopicClick }) => {
   const getSentimentColor = (sentiment: number) => {
     if (sentiment > 0.3) return 'bg-green-500';
     if (sentiment < -0.3) return 'bg-red-500';
@@ -78,7 +79,14 @@ export const TrendingTopicsPanel: React.FC<TrendingTopicsPanelProps> = ({ topics
       <CardContent className="pt-2">
         <div className="space-y-3">
           {topics.map((topic, index) => (
-            <div key={topic.name} className="relative">
+            <button
+              key={topic.name}
+              onClick={() => onTopicClick?.(topic.name)}
+              className={`relative w-full text-left rounded-lg p-2 -m-2 transition-colors ${
+                onTopicClick ? 'hover:bg-zinc-50 dark:hover:bg-zinc-800/50 cursor-pointer' : ''
+              }`}
+              disabled={!onTopicClick}
+            >
               {/* Topic row */}
               <div className="flex items-center justify-between mb-1">
                 <div className="flex items-center gap-2">
@@ -92,6 +100,11 @@ export const TrendingTopicsPanel: React.FC<TrendingTopicsPanelProps> = ({ topics
                   <span className="text-xs text-zinc-400">
                     {topic.post_count} posts
                   </span>
+                  {onTopicClick && (
+                    <svg className="w-4 h-4 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  )}
                 </div>
               </div>
 
@@ -120,7 +133,7 @@ export const TrendingTopicsPanel: React.FC<TrendingTopicsPanelProps> = ({ topics
                   {getSentimentLabel(topic.sentiment)}
                 </span>
               </div>
-            </div>
+            </button>
           ))}
         </div>
 

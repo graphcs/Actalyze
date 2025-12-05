@@ -25,6 +25,9 @@ function WordCloudPageContent() {
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState<WordCloudFilters | null>(null);
 
+  // Check if we should exclude the main keyword from the cloud
+  const excludeKeyword = searchParams.get("excludeKeyword") === "true";
+
   // Load initial data from URL params if present
   useEffect(() => {
     const topicParam = searchParams.get("topic");
@@ -58,6 +61,12 @@ function WordCloudPageContent() {
         sentimentType: newFilters.sentimentType || "all",
         maxTweets: "500", // Fetch 500 tweets
       });
+
+      // Preserve excludeKeyword if set (from district page navigation)
+      if (excludeKeyword) {
+        params.set("excludeKeyword", "true");
+      }
+
       router.push(`/wordcloud?${params.toString()}`, { scroll: false });
 
       // Fetch word cloud data

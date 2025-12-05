@@ -132,6 +132,18 @@ export default function DistrictPage() {
     router.push(`/chatbot?topic=District ${districtCode}`);
   };
 
+  const handleTopicClick = (topicName: string) => {
+    const stateCode = districtCode.substring(0, 2); // Extract "VA" from "VA10"
+    const params = new URLSearchParams({
+      topic: topicName,
+      timeRange: '7d',
+      location: stateCode,
+      sentimentType: 'all',
+      excludeKeyword: 'true',
+    });
+    router.push(`/wordcloud?${params.toString()}`);
+  };
+
   if (!districtCode) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-white to-zinc-50 dark:from-zinc-950 dark:to-zinc-900">
@@ -374,7 +386,7 @@ export default function DistrictPage() {
 
               {/* Right column: Topics and Insights */}
               <div className="space-y-5">
-                <TrendingTopicsPanel topics={aiIntel.topics} />
+                <TrendingTopicsPanel topics={aiIntel.topics} onTopicClick={handleTopicClick} />
                 <KeyInsightsFeed insights={aiIntel.insights} />
               </div>
             </div>
