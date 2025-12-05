@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, Suspense } from "react";
 import dynamic from "next/dynamic";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import Nav from "../components/Nav";
+import AppLayout from "../components/AppLayout";
 import { useRouter, useSearchParams } from "next/navigation";
 
 // Dynamically import chart components to avoid SSR issues
@@ -193,9 +193,8 @@ function ChatbotContent() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-b from-white to-zinc-50 dark:from-zinc-950 dark:to-zinc-900">
-      {/* Navigation */}
-      <Nav onUploadClick={() => router.push("/upload")} />
+    <AppLayout onUploadClick={() => router.push("/upload")} showTopBar={false}>
+      <div className="flex flex-col h-[calc(100vh-0px)]">
 
       {/* Chat Area */}
       <div className="flex-1 overflow-y-auto px-4 py-6">
@@ -475,7 +474,8 @@ function ChatbotContent() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </AppLayout>
   );
 }
 

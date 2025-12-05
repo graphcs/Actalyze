@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
-import Nav from "../components/Nav";
+import AppLayout from "../components/AppLayout";
 import Hero from "../components/Hero";
 import TrendingGrid from "../components/TrendingGrid";
 
@@ -100,11 +100,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-zinc-50 dark:from-zinc-950 dark:to-zinc-900 text-zinc-900 dark:text-zinc-100">
-      <Nav
-        onChatClick={handleChat}
-        onUploadClick={handleUpload}
-      />
+    <AppLayout onChatClick={handleChat} onUploadClick={handleUpload}>
       <AnimatePresence mode="wait">
         <motion.div
           key="home"
@@ -127,6 +123,6 @@ export default function Dashboard() {
           <div>AI-powered intelligence for modern governance</div>
         </div>
       </footer>
-    </div>
+    </AppLayout>
   );
 }

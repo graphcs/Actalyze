@@ -9,7 +9,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Cloud, Download, TrendingUp, Info } from "lucide-react";
-import Nav from "../components/Nav";
+import AppLayout from "../components/AppLayout";
 import WordCloudVisualization from "../components/WordCloudVisualization";
 import WordCloudFiltersComponent from "../components/WordCloudFilters";
 import { Button } from "../components/ui/Button";
@@ -137,12 +137,10 @@ function WordCloudPageContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-zinc-50 dark:from-zinc-950 dark:to-zinc-900">
-      <Nav
-        onChatClick={() => router.push("/chatbot")}
-        onUploadClick={() => router.push("/upload")}
-      />
-
+    <AppLayout
+      onChatClick={() => router.push("/chatbot")}
+      onUploadClick={() => router.push("/upload")}
+    >
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <motion.div
@@ -300,7 +298,7 @@ function WordCloudPageContent() {
           </motion.div>
         </div>
       </div>
-    </div>
+    </AppLayout>
   );
 }
 

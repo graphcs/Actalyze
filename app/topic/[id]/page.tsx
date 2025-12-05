@@ -13,7 +13,7 @@ import {
   Newspaper,
   TrendingUp,
 } from "lucide-react";
-import Nav from "../../components/Nav";
+import AppLayout from "../../components/AppLayout";
 import { Button } from "../../components/ui/Button";
 import { Badge } from "../../components/ui/Badge";
 import { Card, CardHeader, CardContent } from "../../components/ui/Card";
@@ -200,8 +200,7 @@ export default function TopicPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-zinc-50 dark:from-zinc-950 dark:to-zinc-900 text-zinc-900 dark:text-zinc-100">
-      <Nav onChatClick={handleChat} />
+    <AppLayout onChatClick={handleChat}>
 
       <motion.div
         initial={{ opacity: 0, y: 8 }}
@@ -443,6 +442,6 @@ export default function TopicPage() {
           <div>AI-powered intelligence for modern governance</div>
         </div>
       </footer>
-    </div>
+    </AppLayout>
   );
 }

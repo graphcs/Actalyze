@@ -18,7 +18,7 @@ import {
   Users,
   Link2,
 } from "lucide-react";
-import Nav from "@/app/components/Nav";
+import AppLayout from "@/app/components/AppLayout";
 import { Button } from "@/app/components/ui/Button";
 import type { WordAnalytics } from "@/types/wordcloud";
 import { Skeleton } from "@/app/components/ui/Skeleton";
@@ -99,12 +99,10 @@ export default function WordAnalyticsPage({ params }: WordAnalyticsPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-zinc-50 dark:from-zinc-950 dark:to-zinc-900">
-      <Nav
-        onChatClick={() => router.push("/chatbot")}
-        onUploadClick={() => router.push("/upload")}
-      />
-
+    <AppLayout
+      onChatClick={() => router.push("/chatbot")}
+      onUploadClick={() => router.push("/upload")}
+    >
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <motion.div
@@ -499,6 +497,6 @@ export default function WordAnalyticsPage({ params }: WordAnalyticsPageProps) {
           </div>
         )}
       </div>
-    </div>
+    </AppLayout>
   );
 }
