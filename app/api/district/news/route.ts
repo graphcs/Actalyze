@@ -9,6 +9,20 @@ interface Headline {
   thumbnail?: string;
 }
 
+const STATE_NAMES: Record<string, string> = {
+  "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas", "CA": "California",
+  "CO": "Colorado", "CT": "Connecticut", "DE": "Delaware", "FL": "Florida", "GA": "Georgia",
+  "HI": "Hawaii", "ID": "Idaho", "IL": "Illinois", "IN": "Indiana", "IA": "Iowa",
+  "KS": "Kansas", "KY": "Kentucky", "LA": "Louisiana", "ME": "Maine", "MD": "Maryland",
+  "MA": "Massachusetts", "MI": "Michigan", "MN": "Minnesota", "MS": "Mississippi", "MO": "Missouri",
+  "MT": "Montana", "NE": "Nebraska", "NV": "Nevada", "NH": "New Hampshire", "NJ": "New Jersey",
+  "NM": "New Mexico", "NY": "New York", "NC": "North Carolina", "ND": "North Dakota", "OH": "Ohio",
+  "OK": "Oklahoma", "OR": "Oregon", "PA": "Pennsylvania", "RI": "Rhode Island", "SC": "South Carolina",
+  "SD": "South Dakota", "TN": "Tennessee", "TX": "Texas", "UT": "Utah", "VT": "Vermont",
+  "VA": "Virginia", "WA": "Washington", "WV": "West Virginia", "WI": "Wisconsin", "WY": "Wyoming",
+  "DC": "District of Columbia"
+};
+
 function formatDate(dateString?: string): string | undefined {
   if (!dateString) return undefined;
 
@@ -50,6 +64,99 @@ function isWithinLastWeek(dateString?: string): boolean {
 }
 
 /**
+ * Search SERPAPI for news articles matching a query
+ */
+async function searchSerpApi(query: string, apiKey: string): Promise<Headline[]> {
+  try {
+    const url = new URL('https://serpapi.com/search');
+    url.searchParams.set('engine', 'google_news');
+    url.searchParams.set('q', query);
+    url.searchParams.set('gl', 'us');
+    url.searchParams.set('hl', 'en');
+    url.searchParams.set('num', '15');
+    url.searchParams.set('tbs', 'qdr:w'); // Past week
+    url.searchParams.set('api_key', apiKey);
+
+    const response = await fetch(url.toString(), {
+      signal: AbortSignal.timeout(10000),
+    });
+
+    if (!response.ok) {
+      console.error(`SERPAPI error: ${response.status}`);
+      return [];
+    }
+
+    const data = await response.json();
+    const newsResults = data.news_results || [];
+
+    return newsResults
+      .filter((article: { date?: string }) => isWithinLastWeek(article.date))
+      .slice(0, 5)
+      .map((article: {
+        title?: string;
+        link?: string;
+        source?: { name?: string };
+        date?: string;
+        thumbnail?: string;
+      }) => ({
+        title: article.title || "Untitled",
+        url: article.link || "#",
+        source: article.source?.name || "Unknown",
+        date: formatDate(article.date),
+        thumbnail: article.thumbnail,
+      }));
+  } catch (error) {
+    console.error('SERPAPI search error:', error);
+    return [];
+  }
+}
+
+/**
+ * Get major towns/cities in a congressional district using AI
+ */
+async function getDistrictTowns(districtLabel: string, openrouterKey: string): Promise<string[]> {
+  try {
+    const prompt = `List 3-5 major cities or towns in US Congressional District ${districtLabel}.
+Return ONLY a comma-separated list of city/town names, nothing else.
+Example output: Newark, Edison, New Brunswick, Perth Amboy`;
+
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${openrouterKey}`,
+        'HTTP-Referer': process.env.NEXT_PUBLIC_URL || 'https://actalyze.com',
+        'X-Title': 'Actalyze',
+      },
+      body: JSON.stringify({
+        model: 'google/gemini-2.0-flash-001',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.1,
+        max_tokens: 100,
+      }),
+      signal: AbortSignal.timeout(5000),
+    });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content?.trim();
+
+    if (!content) return [];
+
+    // Parse comma-separated list
+    const towns = content.split(',').map((t: string) => t.trim()).filter((t: string) => t.length > 0);
+    console.log(`🏘️ Found towns for ${districtLabel}: ${towns.join(', ')}`);
+    return towns;
+  } catch (error) {
+    console.error('Error getting district towns:', error);
+    return [];
+  }
+}
+
+/**
  * GET /api/district/news?district=VA05
  * Returns local news headlines for a congressional district
  */
@@ -75,6 +182,8 @@ export async function GET(request: NextRequest) {
     }
 
     const [, stateCode, districtNum] = match;
+    const districtLabel = `${stateCode}-${districtNum}`;
+    const stateName = STATE_NAMES[stateCode] || stateCode;
 
     // Check cache
     const useCacheHeader = request.headers.get('x-use-cache');
@@ -86,7 +195,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(cached);
     }
 
-    console.log(`📰 Fetching local news for district ${stateCode}-${districtNum}`);
+    console.log(`📰 Fetching local news for district ${districtLabel}`);
 
     const apiKey = process.env.SERPAPI_KEY;
     if (!apiKey) {
@@ -107,14 +216,12 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Construct search query for local news
-    let searchQuery = `${stateCode} congressional district ${parseInt(districtNum)} news politics`;
-
-    // Try to get a better search query using AI if available
     const openrouterKey = process.env.OPENROUTER_API_KEY;
+    let headlines: Headline[] = [];
+
+    // ========== TIER 1: AI-enhanced district-specific search ==========
     if (openrouterKey) {
       try {
-        const districtLabel = `${stateCode}-${districtNum}`;
         const prompt = `Generate a Google News search query to find the most relevant recent political news for US Congressional District ${districtLabel}.
 Include the current representative's name and major cities/counties in the query string using OR operators.
 Return ONLY the raw query string. Do not use quotes around the whole string.
@@ -125,85 +232,72 @@ Example output: "Tom Suozzi" OR "NY-03" OR "Nassau County politics"`;
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${openrouterKey}`,
-            'HTTP-Referer': process.env.NEXT_PUBLIC_URL!,
+            'HTTP-Referer': process.env.NEXT_PUBLIC_URL || 'https://actalyze.com',
             'X-Title': 'Actalyze',
           },
           body: JSON.stringify({
             model: 'perplexity/sonar-pro',
-            messages: [
-              {
-                role: 'user',
-                content: prompt,
-              },
-            ],
+            messages: [{ role: 'user', content: prompt }],
             temperature: 0.1,
             max_tokens: 100,
           }),
-          signal: AbortSignal.timeout(5000), // Short timeout
+          signal: AbortSignal.timeout(5000),
         });
 
         if (aiResponse.ok) {
           const aiData = await aiResponse.json();
           const generatedQuery = aiData.choices?.[0]?.message?.content?.trim();
           if (generatedQuery) {
-            // Clean up query (remove quotes if wrapped in them, though prompt says not to)
-            searchQuery = generatedQuery.replace(/^"|"$/g, '');
-            console.log(`🤖 AI generated search query: ${searchQuery}`);
+            const searchQuery = generatedQuery.replace(/^"|"$/g, '');
+            console.log(`🤖 Tier 1: AI query for ${districtLabel}: ${searchQuery}`);
+            headlines = await searchSerpApi(searchQuery, apiKey);
           }
         }
       } catch (e) {
-        console.warn('Failed to generate AI search query, falling back to default', e);
+        console.warn('Tier 1 AI query failed:', e);
       }
     }
 
-    const url = new URL('https://serpapi.com/search');
-    url.searchParams.set('engine', 'google_news');
-    url.searchParams.set('q', searchQuery);
-    url.searchParams.set('gl', 'us');
-    url.searchParams.set('hl', 'en');
-    url.searchParams.set('num', '15'); // Fetch more to account for filtering
-    url.searchParams.set('tbs', 'qdr:w'); // Limit to past week (qdr:w = query date range: week)
-    url.searchParams.set('api_key', apiKey);
-
-    const response = await fetch(url.toString(), {
-      signal: AbortSignal.timeout(10000),
-    });
-
-    if (!response.ok) {
-      console.error(`SERPAPI error: ${response.status}`);
-      return NextResponse.json({
-        headlines: [
-          {
-            title: `News for ${districtCode} district`,
-            url: "#",
-            source: "Local News",
-          },
-        ]
-      });
+    // Fallback to default district query if AI didn't work
+    if (headlines.length === 0) {
+      const defaultQuery = `${stateCode} congressional district ${parseInt(districtNum)} news politics`;
+      console.log(`📍 Tier 1 fallback: default query: ${defaultQuery}`);
+      headlines = await searchSerpApi(defaultQuery, apiKey);
     }
 
-    const data = await response.json();
-    const newsResults = data.news_results || [];
+    if (headlines.length > 0) {
+      console.log(`✅ Tier 1 success: Got ${headlines.length} headlines for ${districtCode}`);
+    }
 
-    const headlines: Headline[] = newsResults
-      .filter((article: { date?: string }) => isWithinLastWeek(article.date))
-      .slice(0, 5)
-      .map((article: {
-        title?: string;
-        link?: string;
-        source?: { name?: string };
-        date?: string;
-        thumbnail?: string;
-      }) => ({
-        title: article.title || "Untitled",
-        url: article.link || "#",
-        source: article.source?.name || "Unknown",
-        date: formatDate(article.date),
-        thumbnail: article.thumbnail,
-      }));
+    // ========== TIER 2: Search by major towns/cities in district ==========
+    if (headlines.length === 0 && openrouterKey) {
+      console.log(`🏘️ Tier 2: Searching by towns for ${districtLabel}`);
 
-    console.log(`✅ Got ${headlines.length} headlines for ${districtCode}`);
+      const towns = await getDistrictTowns(districtLabel, openrouterKey);
+      if (towns.length > 0) {
+        // Build query with town names
+        const townQuery = towns.map(t => `"${t}"`).join(' OR ') + ` ${stateName} local news`;
+        console.log(`🏘️ Tier 2 query: ${townQuery}`);
+        headlines = await searchSerpApi(townQuery, apiKey);
 
+        if (headlines.length > 0) {
+          console.log(`✅ Tier 2 success: Got ${headlines.length} headlines from town search`);
+        }
+      }
+    }
+
+    // ========== TIER 3: Fall back to state-level political news ==========
+    if (headlines.length === 0) {
+      console.log(`🗺️ Tier 3: Falling back to state news for ${stateName}`);
+      const stateQuery = `"${stateName}" politics news local`;
+      headlines = await searchSerpApi(stateQuery, apiKey);
+
+      if (headlines.length > 0) {
+        console.log(`✅ Tier 3 success: Got ${headlines.length} headlines from state search`);
+      }
+    }
+
+    // ========== Final fallback: placeholder ==========
     const result = {
       headlines: headlines.length > 0 ? headlines : [
         {
@@ -213,6 +307,10 @@ Example output: "Tom Suozzi" OR "NY-03" OR "Nassau County politics"`;
         },
       ],
     };
+
+    if (headlines.length === 0) {
+      console.warn(`⚠️ No news found for ${districtCode} after all tiers`);
+    }
 
     // Save to cache
     serverCache.set(cacheKey, result);
