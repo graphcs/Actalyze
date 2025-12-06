@@ -23,7 +23,7 @@
     "lucide-react": "^0.546.0",
     "mammoth": "^1.10.0",
     "natural": "^8.1.0",
-    "next": "15.4.2",
+    "next": "^15.5.7",
     "next-auth": "^4.24.13",
     "nodemailer": "^7.0.5",
     "openai": "^5.10.2",
@@ -50,7 +50,7 @@
     "@types/react-dom": "^19",
     "@types/sentiment": "^5.0.4",
     "eslint": "^9",
-    "eslint-config-next": "15.4.2",
+    "eslint-config-next": "^15.5.7",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
