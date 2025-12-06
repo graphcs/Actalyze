@@ -7,7 +7,6 @@ import {
   TrendingUp,
   MapPin,
   BarChart3,
-  Globe,
   Zap,
   MessageSquare,
   Shield,
