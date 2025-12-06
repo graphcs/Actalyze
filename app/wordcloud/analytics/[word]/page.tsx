@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, use, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import {
@@ -17,6 +17,7 @@ import {
   Clock,
   Users,
   Link2,
+  Loader2,
 } from "lucide-react";
 import AppLayout from "@/app/components/AppLayout";
 import { Button } from "@/app/components/ui/Button";
@@ -29,7 +30,7 @@ interface WordAnalyticsPageProps {
   }>;
 }
 
-export default function WordAnalyticsPage({ params }: WordAnalyticsPageProps) {
+function WordAnalyticsContent({ params }: WordAnalyticsPageProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { word: encodedWord } = use(params);
@@ -498,5 +499,19 @@ export default function WordAnalyticsPage({ params }: WordAnalyticsPageProps) {
         )}
       </div>
     </AppLayout>
+  );
+}
+
+export default function WordAnalyticsPage({ params }: WordAnalyticsPageProps) {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-screen">
+          <Loader2 className="w-8 h-8 animate-spin text-zinc-400" />
+        </div>
+      }
+    >
+      <WordAnalyticsContent params={params} />
+    </Suspense>
   );
 }
