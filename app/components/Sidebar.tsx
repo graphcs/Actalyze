@@ -161,14 +161,17 @@ export default function Sidebar({ onChatClick, onUploadClick }: SidebarProps) {
     >
       {/* Logo / Brand */}
       <div className="p-4 border-b border-zinc-200 dark:border-zinc-800">
-        <div className="flex items-center gap-3">
+        <button
+          onClick={() => router.push("/")}
+          className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer"
+        >
           <Landmark className="w-7 h-7 text-zinc-900 dark:text-zinc-100 flex-shrink-0" />
           {!isCollapsed && (
             <span className="font-extrabold tracking-tight text-xl text-zinc-900 dark:text-zinc-100">
               Actalyze
             </span>
           )}
-        </div>
+        </button>
       </div>
 
       {/* Navigation */}
