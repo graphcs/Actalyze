@@ -179,23 +179,8 @@ function WordAnalyticsContent({ params }: WordAnalyticsPageProps) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+              className="grid grid-cols-1 md:grid-cols-2 gap-4"
             >
-              {/* Total Occurrences */}
-              <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
-                    <TrendingUp className="w-5 h-5 text-zinc-600 dark:text-zinc-400" />
-                  </div>
-                </div>
-                <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">
-                  Total Uses
-                </p>
-                <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-                  {analytics.totalOccurrences.toLocaleString()}
-                </p>
-              </div>
-
               {/* Average Sentiment */}
               <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5">
                 <div className="flex items-center justify-between mb-3">
@@ -222,21 +207,6 @@ function WordAnalyticsContent({ params }: WordAnalyticsPageProps) {
                 </p>
                 <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
                   {formatSentimentScore(analytics.sentiment.average)}%
-                </p>
-              </div>
-
-              {/* Total Tweets */}
-              <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
-                    <MessageSquare className="w-5 h-5 text-zinc-600 dark:text-zinc-400" />
-                  </div>
-                </div>
-                <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">
-                  Tweets
-                </p>
-                <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-                  {analytics.topTweets.length}
                 </p>
               </div>
 
@@ -272,79 +242,83 @@ function WordAnalyticsContent({ params }: WordAnalyticsPageProps) {
                 </h2>
               </div>
 
-              <div className="space-y-4">
-                {/* Positive */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
-                      Positive
-                    </span>
-                    <span className="text-sm font-bold text-green-600 dark:text-green-400">
-                      {analytics.sentiment.distribution.positive}
-                    </span>
-                  </div>
-                  <div className="h-3 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full transition-all duration-500"
-                      style={{
-                        width: `${
-                          (analytics.sentiment.distribution.positive /
-                            analytics.topTweets.length) *
-                          100
-                        }%`,
-                      }}
-                    />
-                  </div>
-                </div>
+              {(() => {
+                const maxSentiment = Math.max(
+                  analytics.sentiment.distribution.positive,
+                  analytics.sentiment.distribution.neutral,
+                  analytics.sentiment.distribution.negative,
+                  1
+                );
+                return (
+                  <div className="space-y-4">
+                    {/* Positive */}
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+                          Positive
+                        </span>
+                        <span className="text-sm font-bold text-green-600 dark:text-green-400">
+                          {analytics.sentiment.distribution.positive}
+                        </span>
+                      </div>
+                      <div className="h-3 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full transition-all duration-500"
+                          style={{
+                            width: `${
+                              (analytics.sentiment.distribution.positive / maxSentiment) * 100
+                            }%`,
+                          }}
+                        />
+                      </div>
+                    </div>
 
-                {/* Neutral */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
-                      Neutral
-                    </span>
-                    <span className="text-sm font-bold text-blue-600 dark:text-blue-400">
-                      {analytics.sentiment.distribution.neutral}
-                    </span>
-                  </div>
-                  <div className="h-3 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-500"
-                      style={{
-                        width: `${
-                          (analytics.sentiment.distribution.neutral /
-                            analytics.topTweets.length) *
-                          100
-                        }%`,
-                      }}
-                    />
-                  </div>
-                </div>
+                    {/* Neutral */}
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+                          Neutral
+                        </span>
+                        <span className="text-sm font-bold text-blue-600 dark:text-blue-400">
+                          {analytics.sentiment.distribution.neutral}
+                        </span>
+                      </div>
+                      <div className="h-3 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-500"
+                          style={{
+                            width: `${
+                              (analytics.sentiment.distribution.neutral / maxSentiment) * 100
+                            }%`,
+                          }}
+                        />
+                      </div>
+                    </div>
 
-                {/* Negative */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
-                      Negative
-                    </span>
-                    <span className="text-sm font-bold text-red-600 dark:text-red-400">
-                      {analytics.sentiment.distribution.negative}
-                    </span>
+                    {/* Negative */}
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+                          Negative
+                        </span>
+                        <span className="text-sm font-bold text-red-600 dark:text-red-400">
+                          {analytics.sentiment.distribution.negative}
+                        </span>
+                      </div>
+                      <div className="h-3 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-red-500 to-rose-500 rounded-full transition-all duration-500"
+                          style={{
+                            width: `${
+                              (analytics.sentiment.distribution.negative / maxSentiment) * 100
+                            }%`,
+                          }}
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <div className="h-3 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-red-500 to-rose-500 rounded-full transition-all duration-500"
-                      style={{
-                        width: `${
-                          (analytics.sentiment.distribution.negative /
-                            analytics.topTweets.length) *
-                          100
-                        }%`,
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
+                );
+              })()}
             </motion.div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
