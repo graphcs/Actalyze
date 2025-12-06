@@ -63,17 +63,52 @@ function isWithinLastWeek(dateString?: string): boolean {
   }
 }
 
+// List of other state names to filter out when they appear prominently in headlines
+const OTHER_STATE_KEYWORDS: Record<string, string[]> = {
+  "AL": ["Alabama"], "AK": ["Alaska"], "AZ": ["Arizona"], "AR": ["Arkansas"],
+  "CA": ["California"], "CO": ["Colorado"], "CT": ["Connecticut"], "DE": ["Delaware"],
+  "FL": ["Florida"], "GA": ["Georgia"], "HI": ["Hawaii"], "ID": ["Idaho"],
+  "IL": ["Illinois"], "IN": ["Indiana"], "IA": ["Iowa"], "KS": ["Kansas"],
+  "KY": ["Kentucky"], "LA": ["Louisiana"], "ME": ["Maine"], "MD": ["Maryland"],
+  "MA": ["Massachusetts"], "MI": ["Michigan"], "MN": ["Minnesota"], "MS": ["Mississippi"],
+  "MO": ["Missouri"], "MT": ["Montana"], "NE": ["Nebraska"], "NV": ["Nevada"],
+  "NH": ["New Hampshire"], "NJ": ["New Jersey"], "NM": ["New Mexico"], "NY": ["New York"],
+  "NC": ["North Carolina"], "ND": ["North Dakota"], "OH": ["Ohio"], "OK": ["Oklahoma"],
+  "OR": ["Oregon"], "PA": ["Pennsylvania"], "RI": ["Rhode Island"], "SC": ["South Carolina"],
+  "SD": ["South Dakota"], "TN": ["Tennessee"], "TX": ["Texas"], "UT": ["Utah"],
+  "VT": ["Vermont"], "VA": ["Virginia"], "WA": ["Washington State"], "WV": ["West Virginia"],
+  "WI": ["Wisconsin"], "WY": ["Wyoming"], "DC": ["District of Columbia", "Washington D.C."]
+};
+
+/**
+ * Check if an article title mentions a different state than the target
+ */
+function mentionsOtherState(title: string, targetStateCode: string): boolean {
+  const titleLower = title.toLowerCase();
+
+  for (const [stateCode, stateNames] of Object.entries(OTHER_STATE_KEYWORDS)) {
+    if (stateCode === targetStateCode) continue; // Skip the target state
+
+    for (const stateName of stateNames) {
+      if (titleLower.includes(stateName.toLowerCase())) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 /**
  * Search SERPAPI for news articles matching a query
  */
-async function searchSerpApi(query: string, apiKey: string): Promise<Headline[]> {
+async function searchSerpApi(query: string, apiKey: string, targetStateCode?: string): Promise<Headline[]> {
   try {
     const url = new URL('https://serpapi.com/search');
     url.searchParams.set('engine', 'google_news');
     url.searchParams.set('q', query);
     url.searchParams.set('gl', 'us');
     url.searchParams.set('hl', 'en');
-    url.searchParams.set('num', '15');
+    url.searchParams.set('num', '20'); // Fetch more to account for filtering
     url.searchParams.set('tbs', 'qdr:w'); // Past week
     url.searchParams.set('api_key', apiKey);
 
@@ -90,7 +125,18 @@ async function searchSerpApi(query: string, apiKey: string): Promise<Headline[]>
     const newsResults = data.news_results || [];
 
     return newsResults
-      .filter((article: { date?: string }) => isWithinLastWeek(article.date))
+      .filter((article: { date?: string; title?: string }) => {
+        // Filter by date
+        if (!isWithinLastWeek(article.date)) return false;
+
+        // Filter out articles that mention other states in the title
+        if (targetStateCode && article.title && mentionsOtherState(article.title, targetStateCode)) {
+          console.log(`🚫 Filtered out (wrong state): ${article.title}`);
+          return false;
+        }
+
+        return true;
+      })
       .slice(0, 5)
       .map((article: {
         title?: string;
@@ -250,7 +296,7 @@ Example output: "Tom Suozzi" OR "NY-03" OR "Nassau County politics"`;
           if (generatedQuery) {
             const searchQuery = generatedQuery.replace(/^"|"$/g, '');
             console.log(`🤖 Tier 1: AI query for ${districtLabel}: ${searchQuery}`);
-            headlines = await searchSerpApi(searchQuery, apiKey);
+            headlines = await searchSerpApi(searchQuery, apiKey, stateCode);
           }
         }
       } catch (e) {
@@ -262,7 +308,7 @@ Example output: "Tom Suozzi" OR "NY-03" OR "Nassau County politics"`;
     if (headlines.length === 0) {
       const defaultQuery = `${stateCode} congressional district ${parseInt(districtNum)} news politics`;
       console.log(`📍 Tier 1 fallback: default query: ${defaultQuery}`);
-      headlines = await searchSerpApi(defaultQuery, apiKey);
+      headlines = await searchSerpApi(defaultQuery, apiKey, stateCode);
     }
 
     if (headlines.length > 0) {
@@ -278,7 +324,7 @@ Example output: "Tom Suozzi" OR "NY-03" OR "Nassau County politics"`;
         // Build query with town names
         const townQuery = towns.map(t => `"${t}"`).join(' OR ') + ` ${stateName} local news`;
         console.log(`🏘️ Tier 2 query: ${townQuery}`);
-        headlines = await searchSerpApi(townQuery, apiKey);
+        headlines = await searchSerpApi(townQuery, apiKey, stateCode);
 
         if (headlines.length > 0) {
           console.log(`✅ Tier 2 success: Got ${headlines.length} headlines from town search`);
@@ -290,7 +336,7 @@ Example output: "Tom Suozzi" OR "NY-03" OR "Nassau County politics"`;
     if (headlines.length === 0) {
       console.log(`🗺️ Tier 3: Falling back to state news for ${stateName}`);
       const stateQuery = `"${stateName}" politics news local`;
-      headlines = await searchSerpApi(stateQuery, apiKey);
+      headlines = await searchSerpApi(stateQuery, apiKey, stateCode);
 
       if (headlines.length > 0) {
         console.log(`✅ Tier 3 success: Got ${headlines.length} headlines from state search`);
