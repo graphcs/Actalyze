@@ -8,12 +8,44 @@
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { Cloud, Download, TrendingUp, Info } from "lucide-react";
+import { Cloud, Download, TrendingUp, MessageSquare, Heart, Repeat2, ExternalLink } from "lucide-react";
 import AppLayout from "../components/AppLayout";
 import WordCloudVisualization from "../components/WordCloudVisualization";
 import WordCloudFiltersComponent from "../components/WordCloudFilters";
 import { Button } from "../components/ui/Button";
 import type { WordCloudData, WordCloudFilters } from "@/types/wordcloud";
+
+interface TopTweet {
+  id: string;
+  text: string;
+  author: string;
+  username: string;
+  engagement: number;
+  created_at: string;
+}
+
+interface WordCloudResponse extends WordCloudData {
+  topTweets?: TopTweet[];
+}
+
+const STATE_NAMES: Record<string, string> = {
+  "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas", "CA": "California",
+  "CO": "Colorado", "CT": "Connecticut", "DE": "Delaware", "FL": "Florida", "GA": "Georgia",
+  "HI": "Hawaii", "ID": "Idaho", "IL": "Illinois", "IN": "Indiana", "IA": "Iowa",
+  "KS": "Kansas", "KY": "Kentucky", "LA": "Louisiana", "ME": "Maine", "MD": "Maryland",
+  "MA": "Massachusetts", "MI": "Michigan", "MN": "Minnesota", "MS": "Mississippi", "MO": "Missouri",
+  "MT": "Montana", "NE": "Nebraska", "NV": "Nevada", "NH": "New Hampshire", "NJ": "New Jersey",
+  "NM": "New Mexico", "NY": "New York", "NC": "North Carolina", "ND": "North Dakota", "OH": "Ohio",
+  "OK": "Oklahoma", "OR": "Oregon", "PA": "Pennsylvania", "RI": "Rhode Island", "SC": "South Carolina",
+  "SD": "South Dakota", "TN": "Tennessee", "TX": "Texas", "UT": "Utah", "VT": "Vermont",
+  "VA": "Virginia", "WA": "Washington", "WV": "West Virginia", "WI": "Wisconsin", "WY": "Wyoming",
+  "DC": "Washington D.C."
+};
+
+function getLocationLabel(location: string): string {
+  if (!location || location === "national") return "National";
+  return STATE_NAMES[location.toUpperCase()] || location;
+}
 
 function WordCloudPageContent() {
   const router = useRouter();
@@ -22,6 +54,7 @@ function WordCloudPageContent() {
   const [wordCloudData, setWordCloudData] = useState<WordCloudData | null>(
     null
   );
+  const [topTweets, setTopTweets] = useState<TopTweet[]>([]);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState<WordCloudFilters | null>(null);
 
@@ -78,8 +111,9 @@ function WordCloudPageContent() {
         throw new Error("Failed to generate word cloud");
       }
 
-      const data: WordCloudData = await response.json();
+      const data: WordCloudResponse = await response.json();
       setWordCloudData(data);
+      setTopTweets(data.topTweets || []);
     } catch (error) {
       console.error("Error generating word cloud:", error);
       alert("Failed to generate word cloud. Please try again.");
@@ -90,6 +124,7 @@ function WordCloudPageContent() {
 
   const handleReset = () => {
     setWordCloudData(null);
+    setTopTweets([]);
     setFilters(null);
     router.push("/wordcloud", { scroll: false });
   };
@@ -159,39 +194,19 @@ function WordCloudPageContent() {
           className="mb-8"
         >
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-xl shadow-blue-500/30 dark:shadow-purple-500/30">
-              <Cloud className="w-8 h-8 text-white" />
+            <div className="w-14 h-14 rounded-xl bg-zinc-900 dark:bg-zinc-100 flex items-center justify-center">
+              <Cloud className="w-7 h-7 text-white dark:text-zinc-900" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
+              <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
                 Word Cloud Analytics
               </h1>
-              <p className="text-zinc-600 dark:text-zinc-400 text-lg">
-                Visualize and analyze trending words in political discourse
+              <p className="text-zinc-600 dark:text-zinc-400">
+                Visualize trending words in political discourse
               </p>
             </div>
           </div>
 
-          {/* Info Banner */}
-          <div className="mt-6 bg-gradient-to-br from-blue-50 via-purple-50/30 to-pink-50/20 dark:from-blue-950/30 dark:via-purple-950/20 dark:to-pink-950/10 border-2 border-blue-200 dark:border-blue-800/50 rounded-2xl p-5 shadow-lg">
-            <div className="flex gap-4">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0 shadow-md">
-                <Info className="w-5 h-5 text-white" />
-              </div>
-              <div className="text-sm text-blue-900 dark:text-blue-100">
-                <p className="font-bold mb-2 text-base text-blue-950 dark:text-blue-50">
-                  How it works:
-                </p>
-                <p className="text-blue-800 dark:text-blue-200 leading-relaxed">
-                  Enter a political topic to analyze the most frequently used
-                  words in recent Twitter discussions. Word size reflects
-                  frequency, color indicates sentiment (green = positive, red =
-                  negative, blue = neutral). Click any word for detailed
-                  analytics.
-                </p>
-              </div>
-            </div>
-          </div>
         </motion.div>
 
         {/* Main Content Grid */}
@@ -219,39 +234,42 @@ function WordCloudPageContent() {
           >
             {/* Stats Bar */}
             {wordCloudData && !loading && (
-              <div className="bg-gradient-to-br from-white via-zinc-50/50 to-blue-50/30 dark:from-zinc-900 dark:via-zinc-900/80 dark:to-blue-950/20 border-2 border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 shadow-xl">
+              <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5">
                 <div className="flex items-center justify-between flex-wrap gap-6">
-                  <div className="flex items-center gap-8">
-                    <div className="group">
-                      <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5">
+                  <div className="flex items-center gap-6">
+                    <div>
+                      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">
                         Topic
                       </p>
-                      <p className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
+                      <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
                         {wordCloudData.metadata.topic}
                       </p>
                     </div>
-                    <div className="h-14 w-px bg-gradient-to-b from-transparent via-zinc-300 dark:via-zinc-700 to-transparent"></div>
-                    <div className="group">
-                      <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5">
-                        Tweets Analyzed
+                    <div className="h-10 w-px bg-zinc-200 dark:bg-zinc-700"></div>
+                    <div>
+                      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">
+                        Location
                       </p>
-                      <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100 flex items-baseline gap-1">
-                        {wordCloudData.metadata.totalTweets.toLocaleString()}
-                        <span className="text-xs font-normal text-zinc-500 dark:text-zinc-400">
-                          tweets
-                        </span>
+                      <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                        {getLocationLabel(filters?.location || "national")}
                       </p>
                     </div>
-                    <div className="h-14 w-px bg-gradient-to-b from-transparent via-zinc-300 dark:via-zinc-700 to-transparent"></div>
-                    <div className="group">
-                      <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5">
+                    <div className="h-10 w-px bg-zinc-200 dark:bg-zinc-700"></div>
+                    <div>
+                      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">
+                        Tweets Analyzed
+                      </p>
+                      <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                        {wordCloudData.metadata.totalTweets.toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="h-10 w-px bg-zinc-200 dark:bg-zinc-700"></div>
+                    <div>
+                      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">
                         Unique Words
                       </p>
-                      <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100 flex items-baseline gap-1">
+                      <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
                         {wordCloudData.metadata.uniqueWords.toLocaleString()}
-                        <span className="text-xs font-normal text-zinc-500 dark:text-zinc-400">
-                          words
-                        </span>
                       </p>
                     </div>
                   </div>
@@ -259,7 +277,7 @@ function WordCloudPageContent() {
                   <Button
                     variant="outline"
                     onClick={handleExportCSV}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-green-500 dark:border-green-600 bg-white dark:bg-zinc-900 hover:bg-green-50 dark:hover:bg-green-950/30 text-green-700 dark:text-green-400 font-semibold shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.02]"
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium transition-colors"
                   >
                     <Download className="w-4 h-4" />
                     Export CSV
@@ -269,16 +287,16 @@ function WordCloudPageContent() {
             )}
 
             {/* Word Cloud */}
-            <div className="bg-gradient-to-br from-white via-zinc-50/30 to-zinc-100/20 dark:from-zinc-900 dark:via-zinc-900/50 dark:to-zinc-950 border-2 border-zinc-200 dark:border-zinc-800 rounded-2xl p-8 shadow-2xl">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6">
               {!wordCloudData && !loading && (
-                <div className="flex flex-col items-center justify-center py-24 text-center">
-                  <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 flex items-center justify-center mb-6 shadow-lg">
-                    <TrendingUp className="w-12 h-12 text-zinc-400 dark:text-zinc-500" />
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <div className="w-16 h-16 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-4">
+                    <TrendingUp className="w-8 h-8 text-zinc-400 dark:text-zinc-500" />
                   </div>
-                  <h3 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 mb-3">
+                  <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
                     Ready to analyze
                   </h3>
-                  <p className="text-zinc-600 dark:text-zinc-400 max-w-md text-lg leading-relaxed">
+                  <p className="text-zinc-600 dark:text-zinc-400 max-w-md">
                     Enter a political topic in the filters panel and click
                     &ldquo;Generate Word Cloud&rdquo; to begin
                   </p>
@@ -304,6 +322,53 @@ function WordCloudPageContent() {
                 </div>
               </div>
             )}
+
+            {/* Top Tweets Section */}
+            {wordCloudData && !loading && topTweets.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-9 h-9 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                    <MessageSquare className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
+                  </div>
+                  <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                    Top Tweets
+                  </h2>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {topTweets.map((tweet) => (
+                    <a
+                      key={tweet.id}
+                      href={`https://twitter.com/i/status/${tweet.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition group"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                          {new Date(tweet.created_at).toLocaleDateString()}
+                        </span>
+                        <ExternalLink className="w-3 h-3 text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                      <p className="text-sm text-zinc-700 dark:text-zinc-300 leading-snug mb-2 line-clamp-3">
+                        {tweet.text}
+                      </p>
+                      <div className="flex items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400">
+                        <div className="flex items-center gap-1">
+                          <Heart className="w-3.5 h-3.5" />
+                          <span>{tweet.engagement}</span>
+                        </div>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </motion.div>
+            )}
           </motion.div>
         </div>
       </div>
@@ -315,11 +380,11 @@ export default function WordCloudPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-gradient-to-b from-white to-zinc-50 dark:from-zinc-950 dark:to-zinc-900 flex items-center justify-center">
+        <div className="min-h-screen bg-white dark:bg-zinc-950 flex items-center justify-center">
           <div className="text-center">
-            <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <div className="w-12 h-12 border-2 border-zinc-300 dark:border-zinc-600 border-t-zinc-900 dark:border-t-zinc-100 rounded-full animate-spin mx-auto mb-4" />
             <p className="text-zinc-600 dark:text-zinc-400">
-              Loading Word Cloud...
+              Loading...
             </p>
           </div>
         </div>

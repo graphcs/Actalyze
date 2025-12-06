@@ -342,8 +342,40 @@ export async function GET(request: NextRequest) {
     // Sort by frequency and return all words (no limit)
     words.sort((a, b) => b.value - a.value);
 
-    const responseData: WordCloudData = {
+    // Extract top tweets by engagement (unique, sorted by engagement)
+    const seenTweetIds = new Set<string>();
+    const topTweets: Array<{
+      id: string;
+      text: string;
+      author: string;
+      username: string;
+      engagement: number;
+      created_at: string;
+    }> = [];
+
+    // Get top tweets from words, sorted by engagement
+    const tweetsWithEngagement = allTweets
+      .filter(t => t.text && t.id)
+      .map(t => ({
+        id: t.id,
+        text: t.text,
+        author: 'Unknown',
+        username: 'unknown',
+        engagement: calculateEngagement(t.public_metrics),
+        created_at: t.created_at || new Date().toISOString(),
+      }))
+      .sort((a, b) => b.engagement - a.engagement);
+
+    for (const tweet of tweetsWithEngagement) {
+      if (!seenTweetIds.has(tweet.id) && topTweets.length < 8) {
+        seenTweetIds.add(tweet.id);
+        topTweets.push(tweet);
+      }
+    }
+
+    const responseData = {
       words: words,
+      topTweets: topTweets,
       metadata: {
         topic: filters.topic,
         filters,

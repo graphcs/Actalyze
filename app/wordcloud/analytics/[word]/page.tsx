@@ -30,6 +30,25 @@ interface WordAnalyticsPageProps {
   }>;
 }
 
+const STATE_NAMES: Record<string, string> = {
+  "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas", "CA": "California",
+  "CO": "Colorado", "CT": "Connecticut", "DE": "Delaware", "FL": "Florida", "GA": "Georgia",
+  "HI": "Hawaii", "ID": "Idaho", "IL": "Illinois", "IN": "Indiana", "IA": "Iowa",
+  "KS": "Kansas", "KY": "Kentucky", "LA": "Louisiana", "ME": "Maine", "MD": "Maryland",
+  "MA": "Massachusetts", "MI": "Michigan", "MN": "Minnesota", "MS": "Mississippi", "MO": "Missouri",
+  "MT": "Montana", "NE": "Nebraska", "NV": "Nevada", "NH": "New Hampshire", "NJ": "New Jersey",
+  "NM": "New Mexico", "NY": "New York", "NC": "North Carolina", "ND": "North Dakota", "OH": "Ohio",
+  "OK": "Oklahoma", "OR": "Oregon", "PA": "Pennsylvania", "RI": "Rhode Island", "SC": "South Carolina",
+  "SD": "South Dakota", "TN": "Tennessee", "TX": "Texas", "UT": "Utah", "VT": "Vermont",
+  "VA": "Virginia", "WA": "Washington", "WV": "West Virginia", "WI": "Wisconsin", "WY": "Wyoming",
+  "DC": "Washington D.C."
+};
+
+function getLocationLabel(location: string): string {
+  if (!location || location === "national") return "National";
+  return STATE_NAMES[location.toUpperCase()] || location;
+}
+
 function WordAnalyticsContent({ params }: WordAnalyticsPageProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -87,14 +106,6 @@ function WordAnalyticsContent({ params }: WordAnalyticsPageProps) {
     fetchAnalytics();
   }, [word, topic, timeRange, location]);
 
-  const getSentimentColor = (score: number) => {
-    if (score > 0.1)
-      return "from-green-500 to-emerald-600 dark:from-green-400 dark:to-emerald-500";
-    if (score < -0.1)
-      return "from-red-500 to-rose-600 dark:from-red-400 dark:to-rose-500";
-    return "from-blue-500 to-indigo-600 dark:from-blue-400 dark:to-indigo-500";
-  };
-
   const formatSentimentScore = (score: number): string => {
     return (score * 100).toFixed(1);
   };
@@ -122,16 +133,19 @@ function WordAnalyticsContent({ params }: WordAnalyticsPageProps) {
           </Button>
 
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 flex items-center justify-center shadow-xl shadow-purple-500/30 dark:shadow-pink-500/30">
-              <BarChart3 className="w-8 h-8 text-white" />
+            <div className="w-14 h-14 rounded-xl bg-zinc-900 dark:bg-zinc-100 flex items-center justify-center">
+              <BarChart3 className="w-7 h-7 text-white dark:text-zinc-900" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold text-zinc-900 dark:text-zinc-100">
+              <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
                 &ldquo;{word}&rdquo;
               </h1>
-              <p className="text-zinc-600 dark:text-zinc-400 text-lg">
+              <p className="text-zinc-600 dark:text-zinc-400">
                 Word Analytics for{" "}
                 <span className="font-semibold">{topic}</span>
+                {location && location !== "national" && (
+                  <span className="ml-2 text-sm text-zinc-500">• {getLocationLabel(location)}</span>
+                )}
               </p>
             </div>
           </div>
@@ -168,65 +182,75 @@ function WordAnalyticsContent({ params }: WordAnalyticsPageProps) {
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
             >
               {/* Total Occurrences */}
-              <div className="bg-gradient-to-br from-white via-blue-50/30 to-blue-100/20 dark:from-zinc-900 dark:via-blue-950/20 dark:to-blue-950/10 border-2 border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 shadow-xl">
+              <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5">
                 <div className="flex items-center justify-between mb-3">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-                    <TrendingUp className="w-6 h-6 text-white" />
+                  <div className="w-10 h-10 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                    <TrendingUp className="w-5 h-5 text-zinc-600 dark:text-zinc-400" />
                   </div>
                 </div>
-                <p className="text-sm font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">
+                <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">
                   Total Uses
                 </p>
-                <p className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+                <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
                   {analytics.totalOccurrences.toLocaleString()}
                 </p>
               </div>
 
               {/* Average Sentiment */}
-              <div className="bg-gradient-to-br from-white via-purple-50/30 to-purple-100/20 dark:from-zinc-900 dark:via-purple-950/20 dark:to-purple-950/10 border-2 border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 shadow-xl">
+              <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5">
                 <div className="flex items-center justify-between mb-3">
                   <div
-                    className={`w-12 h-12 rounded-xl bg-gradient-to-br ${getSentimentColor(
-                      analytics.sentiment.average
-                    )} flex items-center justify-center`}
+                    className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                      analytics.sentiment.average > 0.1
+                        ? "bg-green-100 dark:bg-green-900/30"
+                        : analytics.sentiment.average < -0.1
+                        ? "bg-red-100 dark:bg-red-900/30"
+                        : "bg-blue-100 dark:bg-blue-900/30"
+                    }`}
                   >
-                    <Heart className="w-6 h-6 text-white" />
+                    <Heart className={`w-5 h-5 ${
+                      analytics.sentiment.average > 0.1
+                        ? "text-green-600 dark:text-green-400"
+                        : analytics.sentiment.average < -0.1
+                        ? "text-red-600 dark:text-red-400"
+                        : "text-blue-600 dark:text-blue-400"
+                    }`} />
                   </div>
                 </div>
-                <p className="text-sm font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">
+                <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">
                   Avg Sentiment
                 </p>
-                <p className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+                <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
                   {formatSentimentScore(analytics.sentiment.average)}%
                 </p>
               </div>
 
               {/* Total Tweets */}
-              <div className="bg-gradient-to-br from-white via-green-50/30 to-green-100/20 dark:from-zinc-900 dark:via-green-950/20 dark:to-green-950/10 border-2 border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 shadow-xl">
+              <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5">
                 <div className="flex items-center justify-between mb-3">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
-                    <MessageSquare className="w-6 h-6 text-white" />
+                  <div className="w-10 h-10 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                    <MessageSquare className="w-5 h-5 text-zinc-600 dark:text-zinc-400" />
                   </div>
                 </div>
-                <p className="text-sm font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">
+                <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">
                   Tweets
                 </p>
-                <p className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+                <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
                   {analytics.topTweets.length}
                 </p>
               </div>
 
               {/* Related Words */}
-              <div className="bg-gradient-to-br from-white via-pink-50/30 to-pink-100/20 dark:from-zinc-900 dark:via-pink-950/20 dark:to-pink-950/10 border-2 border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 shadow-xl">
+              <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5">
                 <div className="flex items-center justify-between mb-3">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-500 to-pink-600 flex items-center justify-center">
-                    <Users className="w-6 h-6 text-white" />
+                  <div className="w-10 h-10 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                    <Users className="w-5 h-5 text-zinc-600 dark:text-zinc-400" />
                   </div>
                 </div>
-                <p className="text-sm font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">
+                <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">
                   Related Words
                 </p>
-                <p className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+                <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
                   {analytics.relatedWords.length}
                 </p>
               </div>
@@ -237,13 +261,13 @@ function WordAnalyticsContent({ params }: WordAnalyticsPageProps) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="bg-gradient-to-br from-white via-zinc-50/50 to-zinc-100/20 dark:from-zinc-900 dark:via-zinc-900/80 dark:to-zinc-950 border-2 border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 shadow-2xl"
+              className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5"
             >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                  <Heart className="w-5 h-5 text-white" />
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-9 h-9 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                  <Heart className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
                 </div>
-                <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
+                <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
                   Sentiment Distribution
                 </h2>
               </div>
@@ -323,19 +347,19 @@ function WordAnalyticsContent({ params }: WordAnalyticsPageProps) {
               </div>
             </motion.div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {/* Time Series */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
-                className="bg-gradient-to-br from-white via-zinc-50/50 to-zinc-100/20 dark:from-zinc-900 dark:via-zinc-900/80 dark:to-zinc-950 border-2 border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 shadow-2xl"
+                className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5"
               >
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
-                    <Clock className="w-5 h-5 text-white" />
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-9 h-9 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                    <Clock className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
                   </div>
-                  <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
+                  <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
                     Usage Over Time
                   </h2>
                 </div>
@@ -344,16 +368,16 @@ function WordAnalyticsContent({ params }: WordAnalyticsPageProps) {
                   <div className="space-y-2">
                     {analytics.timeSeriesData.slice(0, 10).map((point, idx) => (
                       <div key={idx} className="flex items-center gap-3">
-                        <span className="text-xs text-zinc-500 dark:text-zinc-400 w-32">
+                        <span className="text-xs text-zinc-500 dark:text-zinc-400 w-28">
                           {new Date(point.timestamp).toLocaleString(undefined, {
                             month: "short",
                             day: "numeric",
                             hour: "2-digit",
                           })}
                         </span>
-                        <div className="flex-1 h-2 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                        <div className="flex-1 h-2 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
+                            className="h-full bg-zinc-600 dark:bg-zinc-400 rounded-full"
                             style={{
                               width: `${
                                 (point.count /
@@ -367,7 +391,7 @@ function WordAnalyticsContent({ params }: WordAnalyticsPageProps) {
                             }}
                           />
                         </div>
-                        <span className="text-sm font-bold text-zinc-700 dark:text-zinc-300 w-8 text-right">
+                        <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300 w-8 text-right">
                           {point.count}
                         </span>
                       </div>
@@ -385,13 +409,13 @@ function WordAnalyticsContent({ params }: WordAnalyticsPageProps) {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.4 }}
-                className="bg-gradient-to-br from-white via-zinc-50/50 to-zinc-100/20 dark:from-zinc-900 dark:via-zinc-900/80 dark:to-zinc-950 border-2 border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 shadow-2xl"
+                className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5"
               >
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-teal-500 flex items-center justify-center">
-                    <Users className="w-5 h-5 text-white" />
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-9 h-9 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                    <Users className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
                   </div>
-                  <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
+                  <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
                     Frequently Co-occurring Words
                   </h2>
                 </div>
@@ -401,10 +425,10 @@ function WordAnalyticsContent({ params }: WordAnalyticsPageProps) {
                     {analytics.relatedWords.slice(0, 20).map((related, idx) => (
                       <div
                         key={idx}
-                        className="px-3 py-1.5 bg-gradient-to-r from-green-100 to-teal-100 dark:from-green-900/30 dark:to-teal-900/30 border border-green-300 dark:border-green-700 rounded-lg text-sm font-medium text-green-900 dark:text-green-100"
+                        className="px-3 py-1.5 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm font-medium text-zinc-700 dark:text-zinc-300"
                       >
                         {related.word}
-                        <span className="ml-2 text-xs text-green-700 dark:text-green-400">
+                        <span className="ml-1.5 text-xs text-zinc-500 dark:text-zinc-400">
                           ({related.coOccurrence})
                         </span>
                       </div>
@@ -423,13 +447,13 @@ function WordAnalyticsContent({ params }: WordAnalyticsPageProps) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.5 }}
-              className="bg-gradient-to-br from-white via-zinc-50/50 to-zinc-100/20 dark:from-zinc-900 dark:via-zinc-900/80 dark:to-zinc-950 border-2 border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 shadow-2xl"
+              className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5"
             >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
-                  <MessageSquare className="w-5 h-5 text-white" />
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-9 h-9 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                  <MessageSquare className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
                 </div>
-                <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
+                <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
                   Top Tweets
                 </h2>
               </div>

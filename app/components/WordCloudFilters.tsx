@@ -63,23 +63,21 @@ export default function WordCloudFiltersComponent({
   };
 
   return (
-    <div className="bg-gradient-to-br from-white to-zinc-50 dark:from-zinc-900 dark:to-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-sm">
-      <div className="p-6 border-b border-zinc-200 dark:border-zinc-800">
-        <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
+    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl">
+      <div className="p-5 border-b border-zinc-200 dark:border-zinc-800">
+        <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">
           Configure Analysis
         </h3>
-        <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
           Set parameters for word cloud generation
         </p>
       </div>
 
-      <div className="p-6 space-y-6">
+      <div className="p-5 space-y-5">
         {/* Topic Input */}
         <div>
-          <label className="flex items-center gap-2 text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-3">
-            <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-              <Search className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-            </div>
+          <label className="flex items-center gap-2 text-sm font-medium text-zinc-900 dark:text-zinc-100 mb-2">
+            <Search className="w-4 h-4 text-zinc-500" />
             <span>Topic or Keyword</span>
           </label>
           <div className="relative">
@@ -90,20 +88,18 @@ export default function WordCloudFiltersComponent({
               onKeyPress={handleKeyPress}
               placeholder="e.g., healthcare, climate, immigration"
               disabled={loading}
-              className="w-full pl-4 pr-4 py-3 border-2 border-zinc-200 dark:border-zinc-700 rounded-xl bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="w-full px-3 py-2.5 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm"
             />
           </div>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2 ml-1">
-            💡 Enter any political topic to discover trending words
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1.5">
+            Enter any political topic to discover trending words
           </p>
         </div>
 
         {/* Time Range */}
         <div>
-          <label className="flex items-center gap-2 text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-3">
-            <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-              <Calendar className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-            </div>
+          <label className="flex items-center gap-2 text-sm font-medium text-zinc-900 dark:text-zinc-100 mb-2">
+            <Calendar className="w-4 h-4 text-zinc-500" />
             <span>Time Range</span>
           </label>
           <div className="grid grid-cols-3 gap-2">
@@ -112,20 +108,15 @@ export default function WordCloudFiltersComponent({
                 key={range}
                 onClick={() => setTimeRange(range)}
                 disabled={loading}
-                className={`px-4 py-3 rounded-xl text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group ${
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
                   timeRange === range
-                    ? "bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-md shadow-blue-500/20"
-                    : "bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700 border-2 border-zinc-200 dark:border-zinc-700"
+                    ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900"
+                    : "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700"
                 }`}
               >
-                <span className="relative z-10">
-                  {range === "24h" && "24 Hours"}
-                  {range === "7d" && "7 Days"}
-                  {range === "30d" && "30 Days"}
-                </span>
-                {timeRange === range && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
-                )}
+                {range === "24h" && "24 Hours"}
+                {range === "7d" && "7 Days"}
+                {range === "30d" && "30 Days"}
               </button>
             ))}
           </div>
@@ -133,17 +124,15 @@ export default function WordCloudFiltersComponent({
 
         {/* Location Filter */}
         <div>
-          <label className="flex items-center gap-2 text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-3">
-            <div className="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-              <MapPin className="w-4 h-4 text-green-600 dark:text-green-400" />
-            </div>
+          <label className="flex items-center gap-2 text-sm font-medium text-zinc-900 dark:text-zinc-100 mb-2">
+            <MapPin className="w-4 h-4 text-zinc-500" />
             <span>Location</span>
           </label>
           <select
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             disabled={loading}
-            className="w-full px-4 py-3 border-2 border-zinc-200 dark:border-zinc-700 rounded-xl bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all appearance-none cursor-pointer"
+            className="w-full px-3 py-2.5 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-400 dark:focus:ring-zinc-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed transition-all appearance-none cursor-pointer text-sm"
             style={{
               backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
               backgroundPosition: "right 0.5rem center",
@@ -212,42 +201,48 @@ export default function WordCloudFiltersComponent({
 
         {/* Sentiment Filter */}
         <div>
-          <label className="flex items-center gap-2 text-sm font-semibold text-zinc-800 dark:text-zinc-100 mb-3">
-            <div className="p-2 rounded-lg bg-pink-100 dark:bg-pink-900/30">
-              <Heart className="w-4 h-4 text-pink-600 dark:text-pink-400" />
-            </div>
+          <label className="flex items-center gap-2 text-sm font-medium text-zinc-900 dark:text-zinc-100 mb-2">
+            <Heart className="w-4 h-4 text-zinc-500" />
             Sentiment Type
           </label>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2">
             {(["all", "positive", "negative", "neutral"] as const).map(
-              (sentiment) => (
-                <button
-                  key={sentiment}
-                  onClick={() => setSentimentType(sentiment)}
-                  disabled={loading}
-                  className={`px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed border-2 ${
-                    sentimentType === sentiment
-                      ? "bg-gradient-to-br from-pink-500 to-purple-600 text-white border-pink-400 dark:border-purple-500 shadow-lg shadow-pink-500/30 dark:shadow-purple-500/30 scale-[1.02]"
-                      : "bg-white dark:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700 hover:border-pink-300 dark:hover:border-purple-600 hover:shadow-md hover:scale-[1.01]"
-                  }`}
-                >
-                  {sentiment.charAt(0).toUpperCase() + sentiment.slice(1)}
-                </button>
-              )
+              (sentiment) => {
+                const isSelected = sentimentType === sentiment;
+                const getSentimentStyle = () => {
+                  if (!isSelected) return "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700";
+                  switch (sentiment) {
+                    case "positive": return "bg-green-600 text-white";
+                    case "negative": return "bg-red-600 text-white";
+                    case "neutral": return "bg-blue-600 text-white";
+                    default: return "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900";
+                  }
+                };
+                return (
+                  <button
+                    key={sentiment}
+                    onClick={() => setSentimentType(sentiment)}
+                    disabled={loading}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed ${getSentimentStyle()}`}
+                  >
+                    {sentiment.charAt(0).toUpperCase() + sentiment.slice(1)}
+                  </button>
+                );
+              }
             )}
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-3 pt-6 border-t-2 border-zinc-200 dark:border-zinc-800">
+        <div className="flex gap-2 pt-4 border-t border-zinc-200 dark:border-zinc-800">
           <Button
             onClick={handleApply}
             disabled={loading || !topic.trim()}
-            className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 rounded-xl shadow-lg shadow-blue-500/30 dark:shadow-purple-500/30 transition-all duration-200 hover:scale-[1.02] disabled:hover:scale-100 disabled:opacity-50"
+            className="flex-1 bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-zinc-200 text-white dark:text-zinc-900 font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50"
           >
             {loading ? (
-              <span className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <span className="flex items-center justify-center gap-2">
+                <div className="w-4 h-4 border-2 border-white/30 dark:border-zinc-900/30 border-t-white dark:border-t-zinc-900 rounded-full animate-spin" />
                 Generating...
               </span>
             ) : (
@@ -258,7 +253,7 @@ export default function WordCloudFiltersComponent({
             variant="outline"
             onClick={handleReset}
             disabled={loading}
-            className="px-6 py-3 rounded-xl border-2 border-zinc-300 dark:border-zinc-600 hover:border-zinc-400 dark:hover:border-zinc-500 bg-white dark:bg-zinc-800/50 hover:bg-zinc-50 dark:hover:bg-zinc-800 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.02] disabled:hover:scale-100"
+            className="px-4 py-2.5 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors"
           >
             <RotateCcw className="w-4 h-4" />
           </Button>
