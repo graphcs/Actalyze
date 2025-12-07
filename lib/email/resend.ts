@@ -6,10 +6,22 @@
 import { Resend } from 'resend';
 import type { AlertType, AlertDetails } from '@/types/alerts';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy-load Resend client to avoid build-time errors
+let resendClient: Resend | null = null;
+
+function getResendClient(): Resend {
+  if (!resendClient) {
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      throw new Error('RESEND_API_KEY environment variable is not set');
+    }
+    resendClient = new Resend(apiKey);
+  }
+  return resendClient;
+}
 
 // Default from address (must be verified in Resend or use onboarding@resend.dev for testing)
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'alerts@actalyze.com';
+const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
 const FROM_NAME = 'Actalyze Alerts';
 
 interface SendAlertEmailParams {
@@ -192,6 +204,7 @@ export async function sendAlertEmail(params: SendAlertEmailParams): Promise<{ su
   const typeName = formatAlertType(alertType);
 
   try {
+    const resend = getResendClient();
     const result = await resend.emails.send({
       from: `${FROM_NAME} <${FROM_EMAIL}>`,
       to: [to],
