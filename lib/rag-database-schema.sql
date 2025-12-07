@@ -129,6 +129,66 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- ============================================
+-- ALERT SYSTEM TABLES
+-- ============================================
+
+-- Alert configurations (what to monitor)
+CREATE TABLE alert_configs (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_email TEXT NOT NULL,
+    alert_type TEXT NOT NULL CHECK (alert_type IN ('issue_surge', 'sentiment_shift', 'rep_mention')),
+    enabled BOOLEAN DEFAULT true,
+
+    -- Configuration varies by type
+    topic TEXT,                          -- For issue_surge, sentiment_shift
+    representative_name TEXT,            -- For rep_mention
+    district_code TEXT DEFAULT 'national', -- e.g., 'VA05', 'national'
+    threshold DECIMAL,                   -- Surge: score threshold (0-100), Sentiment: shift amount (0-1)
+
+    -- Notification settings
+    notify_email BOOLEAN DEFAULT true,
+
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Historical baselines (for surge/shift detection)
+CREATE TABLE alert_baselines (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    topic TEXT NOT NULL,
+    district_code TEXT DEFAULT 'national',
+    avg_score DECIMAL,                   -- Rolling average score (0-100)
+    avg_sentiment DECIMAL,               -- Rolling average sentiment (-1 to 1)
+    sample_count INTEGER DEFAULT 0,
+    last_updated TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(topic, district_code)
+);
+
+-- Alert history (sent notifications)
+CREATE TABLE alert_history (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    config_id UUID REFERENCES alert_configs(id) ON DELETE SET NULL,
+    alert_type TEXT NOT NULL,
+    message TEXT NOT NULL,
+    details JSONB DEFAULT '{}'::jsonb,   -- Topic, score, sentiment, etc.
+    sent_at TIMESTAMPTZ DEFAULT NOW(),
+    delivery_status TEXT DEFAULT 'sent'
+);
+
+-- Indexes for alert tables
+CREATE INDEX idx_alert_configs_user ON alert_configs(user_email);
+CREATE INDEX idx_alert_configs_type ON alert_configs(alert_type);
+CREATE INDEX idx_alert_configs_enabled ON alert_configs(enabled);
+CREATE INDEX idx_alert_baselines_topic ON alert_baselines(topic, district_code);
+CREATE INDEX idx_alert_history_config ON alert_history(config_id);
+CREATE INDEX idx_alert_history_sent ON alert_history(sent_at DESC);
+
+-- Trigger for alert_configs updated_at
+CREATE TRIGGER update_alert_configs_updated_at
+    BEFORE UPDATE ON alert_configs
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
 -- Notes:
 -- 1. No authentication required - all tables are publicly accessible
 -- 2. Remember to create storage bucket 'legislation-documents' with public read access
