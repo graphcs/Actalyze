@@ -242,12 +242,18 @@ export async function createAlertConfig(
     .single();
 
   if (error) {
-    console.error('Error creating alert config:', error);
+    console.error('Error creating alert config:', JSON.stringify(error, null, 2));
     // Check if it's a table doesn't exist error
     if (error.code === '42P01' || error.message?.includes('does not exist')) {
       return { data: null, error: 'Database tables not set up. Please run the SQL schema in Supabase.' };
     }
-    return { data: null, error: error.message || 'Failed to create alert' };
+    // Check for RLS/permission errors
+    if (error.code === '42501' || error.message?.includes('permission denied') || error.message?.includes('policy')) {
+      return { data: null, error: 'Permission denied. Please disable RLS or add policies for alert tables.' };
+    }
+    // Return full error details for debugging
+    const errorMsg = error.message || error.details || error.hint || JSON.stringify(error);
+    return { data: null, error: `Database error: ${errorMsg}` };
   }
 
   return { data };

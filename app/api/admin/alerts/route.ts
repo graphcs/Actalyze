@@ -105,8 +105,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ alert: result.data }, { status: 201 });
   } catch (error) {
     console.error('Error creating alert:', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: 'Failed to create alert' },
+      { error: `Failed to create alert: ${errorMessage}` },
       { status: 500 }
     );
   }
