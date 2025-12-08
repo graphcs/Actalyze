@@ -75,6 +75,40 @@ interface AlertFormData {
   notify_email: boolean;
 }
 
+// Recommended alert presets
+const RECOMMENDED_ALERTS: { label: string; description: string; config: Omit<CreateAlertRequest, 'notify_email'> }[] = [
+  {
+    label: "Immigration",
+    description: "Track immigration policy discussions",
+    config: { alert_type: "issue_surge", topic: "immigration", district_code: "national", threshold: 50 },
+  },
+  {
+    label: "Healthcare",
+    description: "Monitor healthcare debate trends",
+    config: { alert_type: "issue_surge", topic: "healthcare", district_code: "national", threshold: 50 },
+  },
+  {
+    label: "Economy",
+    description: "Track economic policy discussions",
+    config: { alert_type: "sentiment_shift", topic: "economy", district_code: "national", threshold: 30 },
+  },
+  {
+    label: "Gun Control",
+    description: "Monitor gun legislation sentiment",
+    config: { alert_type: "sentiment_shift", topic: "gun control", district_code: "national", threshold: 30 },
+  },
+  {
+    label: "Climate",
+    description: "Track climate policy trends",
+    config: { alert_type: "issue_surge", topic: "climate", district_code: "national", threshold: 50 },
+  },
+  {
+    label: "Taxes",
+    description: "Monitor tax policy discussions",
+    config: { alert_type: "issue_surge", topic: "taxes", district_code: "national", threshold: 50 },
+  },
+];
+
 function AlertForm({
   initialData,
   onSubmit,
@@ -451,15 +485,48 @@ export default function AlertsConfig({
         );
       })}
 
+      {/* Recommended Alerts - show when no alerts exist */}
       {alerts.length === 0 && !showForm && (
-        <div className="text-center py-12 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg border border-dashed border-zinc-200 dark:border-zinc-700">
-          <Bell className="w-12 h-12 mx-auto text-zinc-300 dark:text-zinc-600 mb-3" />
-          <p className="text-zinc-500 dark:text-zinc-400">
-            No alerts configured yet
-          </p>
-          <p className="text-sm text-zinc-400 dark:text-zinc-500 mt-1">
-            Click &ldquo;Add Alert&rdquo; to get started
-          </p>
+        <div className="space-y-4">
+          <div className="text-center py-6 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg border border-dashed border-zinc-200 dark:border-zinc-700">
+            <Bell className="w-10 h-10 mx-auto text-zinc-300 dark:text-zinc-600 mb-2" />
+            <p className="text-zinc-500 dark:text-zinc-400">
+              No alerts configured yet
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <h4 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              Recommended Alerts
+            </h4>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              Quick-add popular political topics to monitor
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              {RECOMMENDED_ALERTS.map((preset) => {
+                const info = ALERT_TYPE_INFO[preset.config.alert_type];
+                const Icon = info.icon;
+                return (
+                  <button
+                    key={preset.label}
+                    onClick={() => onCreateAlert({ ...preset.config, notify_email: true })}
+                    disabled={loading}
+                    className="flex items-start gap-2 p-3 text-left rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-all disabled:opacity-50"
+                  >
+                    <Icon className="w-4 h-4 mt-0.5 text-zinc-500 flex-shrink-0" />
+                    <div>
+                      <div className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                        {preset.label}
+                      </div>
+                      <div className="text-xs text-zinc-500 dark:text-zinc-400">
+                        {preset.description}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
       )}
     </div>

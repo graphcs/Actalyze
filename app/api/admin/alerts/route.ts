@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const alert = await createAlertConfig(session.user.email, {
+    const result = await createAlertConfig(session.user.email, {
       alert_type: body.alert_type,
       enabled: true,
       topic: body.topic,
@@ -95,14 +95,14 @@ export async function POST(request: NextRequest) {
       notify_email: body.notify_email ?? true,
     });
 
-    if (!alert) {
+    if (result.error || !result.data) {
       return NextResponse.json(
-        { error: 'Failed to create alert' },
+        { error: result.error || 'Failed to create alert' },
         { status: 500 }
       );
     }
 
-    return NextResponse.json({ alert }, { status: 201 });
+    return NextResponse.json({ alert: result.data }, { status: 201 });
   } catch (error) {
     console.error('Error creating alert:', error);
     return NextResponse.json(

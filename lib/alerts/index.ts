@@ -231,7 +231,7 @@ export async function getUserAlerts(userEmail: string): Promise<AlertConfig[]> {
 export async function createAlertConfig(
   userEmail: string,
   config: Omit<AlertConfig, 'id' | 'user_email' | 'created_at' | 'updated_at'>
-): Promise<AlertConfig | null> {
+): Promise<{ data: AlertConfig | null; error?: string }> {
   const { data, error } = await supabase
     .from('alert_configs')
     .insert({
@@ -243,10 +243,14 @@ export async function createAlertConfig(
 
   if (error) {
     console.error('Error creating alert config:', error);
-    return null;
+    // Check if it's a table doesn't exist error
+    if (error.code === '42P01' || error.message?.includes('does not exist')) {
+      return { data: null, error: 'Database tables not set up. Please run the SQL schema in Supabase.' };
+    }
+    return { data: null, error: error.message || 'Failed to create alert' };
   }
 
-  return data;
+  return { data };
 }
 
 /**
