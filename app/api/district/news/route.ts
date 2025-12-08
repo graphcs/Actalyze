@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { serverCache, generateCacheKey } from "@/src/lib/cache";
+import {
+  getFromDbCache,
+  setInDbCache,
+  generateDistrictCacheKey,
+} from "@/lib/db-cache";
 
 interface Headline {
   title: string;
@@ -231,14 +236,28 @@ export async function GET(request: NextRequest) {
     const districtLabel = `${stateCode}-${districtNum}`;
     const stateName = STATE_NAMES[stateCode] || stateCode;
 
-    // Check cache
+    // Check cache headers
     const useCacheHeader = request.headers.get('x-use-cache');
     const useCache = useCacheHeader !== 'false';
-    const cacheKey = generateCacheKey('district-news', { district: districtCode });
-    const cached = serverCache.get<{ headlines: Headline[] }>(cacheKey, useCache);
+    const cacheDurationSeconds = parseInt(request.headers.get('x-cache-duration-seconds') || '3600', 10);
 
-    if (cached) {
-      return NextResponse.json(cached);
+    // Generate cache keys
+    const memoryCacheKey = generateCacheKey('district-news', { district: districtCode });
+    const dbCacheKey = generateDistrictCacheKey('news', districtCode);
+
+    // Try database cache first
+    const dbCached = await getFromDbCache<{ headlines: Headline[] }>(dbCacheKey, useCache);
+    if (dbCached) {
+      console.log(`📦 Using DB cached news for ${districtCode}`);
+      serverCache.set(memoryCacheKey, dbCached, cacheDurationSeconds);
+      return NextResponse.json(dbCached);
+    }
+
+    // Fall back to memory cache
+    const memoryCached = serverCache.get<{ headlines: Headline[] }>(memoryCacheKey, useCache);
+    if (memoryCached) {
+      console.log(`📦 Using memory cached news for ${districtCode}`);
+      return NextResponse.json(memoryCached);
     }
 
     console.log(`📰 Fetching local news for district ${districtLabel}`);
@@ -358,8 +377,9 @@ Example output: "Tom Suozzi" OR "NY-03" OR "Nassau County politics"`;
       console.warn(`⚠️ No news found for ${districtCode} after all tiers`);
     }
 
-    // Save to cache
-    serverCache.set(cacheKey, result);
+    // Save to both memory and database cache (always write, even if cache reading was disabled)
+    serverCache.set(memoryCacheKey, result, cacheDurationSeconds);
+    await setInDbCache(dbCacheKey, 'news', districtCode, result, cacheDurationSeconds);
 
     return NextResponse.json(result);
 

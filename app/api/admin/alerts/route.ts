@@ -12,11 +12,20 @@ import {
   updateAlertConfig,
   deleteAlertConfig,
 } from '@/lib/alerts';
-import type { CreateAlertRequest, UpdateAlertRequest } from '@/types/alerts';
+import type { CreateAlertRequest, UpdateAlertRequest, AlertType } from '@/types/alerts';
+
+// Default demo alerts to seed for new users
+const DEFAULT_DEMO_ALERTS: Omit<CreateAlertRequest, 'notify_email'>[] = [
+  { alert_type: 'issue_surge' as AlertType, topic: 'immigration', district_code: 'national', threshold: 50 },
+  { alert_type: 'issue_surge' as AlertType, topic: 'healthcare', district_code: 'national', threshold: 50 },
+  { alert_type: 'sentiment_shift' as AlertType, topic: 'economy', district_code: 'national', threshold: 30 },
+  { alert_type: 'issue_surge' as AlertType, topic: 'climate', district_code: 'national', threshold: 50 },
+];
 
 /**
  * GET /api/admin/alerts
  * Get all alerts for the authenticated user
+ * Seeds default demo alerts for new users
  */
 export async function GET() {
   try {
@@ -29,7 +38,30 @@ export async function GET() {
       );
     }
 
-    const alerts = await getUserAlerts(session.user.email);
+    let alerts = await getUserAlerts(session.user.email);
+
+    // Seed default demo alerts for new users
+    if (alerts.length === 0) {
+      console.log(`Seeding default demo alerts for ${session.user.email}`);
+
+      for (const defaultAlert of DEFAULT_DEMO_ALERTS) {
+        try {
+          await createAlertConfig(session.user.email, {
+            alert_type: defaultAlert.alert_type,
+            enabled: true,
+            topic: defaultAlert.topic,
+            district_code: defaultAlert.district_code || 'national',
+            threshold: defaultAlert.threshold,
+            notify_email: true,
+          });
+        } catch (seedError) {
+          console.error('Error seeding default alert:', seedError);
+        }
+      }
+
+      // Re-fetch after seeding
+      alerts = await getUserAlerts(session.user.email);
+    }
 
     return NextResponse.json({ alerts });
   } catch (error) {

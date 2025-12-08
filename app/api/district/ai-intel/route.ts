@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { TwitterApi } from "twitter-api-v2";
 import { serverCache, generateCacheKey } from "@/src/lib/cache";
 import {
+  getFromDbCache,
+  setInDbCache,
+  generateDistrictCacheKey,
+} from "@/lib/db-cache";
+import {
   Tweet,
   AIIntelResponse,
   STATE_NAMES,
@@ -53,15 +58,29 @@ export async function GET(request: NextRequest) {
     const districtLabel = `${stateCode}-${parseInt(districtNum)}`;
     const districtName = `${stateName}'s ${parseInt(districtNum)} Congressional District`;
 
-    // Check cache (AI intel is expensive, cache for 6 hours)
+    // Check cache headers
     const useCacheHeader = request.headers.get('x-use-cache');
     const useCache = useCacheHeader !== 'false';
-    const cacheKey = generateCacheKey('district-ai-intel', { district: districtCode });
-    const cached = serverCache.get<AIIntelResponse>(cacheKey, useCache);
+    const cacheDurationSeconds = parseInt(request.headers.get('x-cache-duration-seconds') || '21600', 10); // Default 6h for AI intel
 
-    if (cached) {
-      console.log(`📦 Using cached AI intel for ${districtLabel}`);
-      return NextResponse.json(cached);
+    // Generate cache keys
+    const memoryCacheKey = generateCacheKey('district-ai-intel', { district: districtCode });
+    const dbCacheKey = generateDistrictCacheKey('ai-intel', districtCode);
+
+    // Try database cache first (persists across restarts)
+    const dbCached = await getFromDbCache<AIIntelResponse>(dbCacheKey, useCache);
+    if (dbCached) {
+      console.log(`📦 Using DB cached AI intel for ${districtLabel}`);
+      // Also set in memory cache for faster subsequent hits
+      serverCache.set(memoryCacheKey, dbCached, cacheDurationSeconds);
+      return NextResponse.json(dbCached);
+    }
+
+    // Fall back to memory cache
+    const memoryCached = serverCache.get<AIIntelResponse>(memoryCacheKey, useCache);
+    if (memoryCached) {
+      console.log(`📦 Using memory cached AI intel for ${districtLabel}`);
+      return NextResponse.json(memoryCached);
     }
 
     console.log(`🧠 Generating AI political intelligence for ${districtLabel}`);
@@ -363,8 +382,11 @@ ONLY output the bulleted list with NO additional commentary.`;
 
     console.log(`🎯 Generated AI intel: ${aiIntel.polling.estimate} (${aiIntel.election_outlook.rating})${traditionalPollingTrend ? ` [blended with ${traditionalPollingTrend}]` : ''}`);
 
-    // Cache for 6 hours (expensive operation)
-    serverCache.set(cacheKey, aiIntel, 6 * 60 * 60);
+    // Cache in both memory and database (always write, even if cache reading was disabled)
+    // Use user-specified duration or default to 6 hours for AI intel
+    const finalCacheDuration = Math.max(cacheDurationSeconds, 6 * 60 * 60); // Minimum 6h for expensive AI intel
+    serverCache.set(memoryCacheKey, aiIntel, finalCacheDuration);
+    await setInDbCache(dbCacheKey, 'ai-intel', districtCode, aiIntel, finalCacheDuration);
 
     return NextResponse.json(aiIntel);
 
