@@ -1,16 +1,25 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
+// Lazy-load Supabase client
+let supabaseClient: SupabaseClient | null = null;
+
+function getSupabase(): SupabaseClient {
+  if (!supabaseClient) {
+    const url = process.env.ACTALYZE_SUPABASE_URL;
+    const key = process.env.ACTALYZE_SUPABASE_ANON_KEY;
+    if (!url || !key) {
+      throw new Error('Supabase environment variables not configured');
+    }
+    supabaseClient = createClient(url, key, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
   }
-);
+  return supabaseClient;
+}
 
 interface AuthSettings {
   mode: "restricted" | "public" | "guest";
@@ -32,7 +41,7 @@ const DEFAULT_SETTINGS: AuthSettings = {
 export async function GET() {
   try {
     // Try to fetch from Supabase app_settings table
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from("app_settings")
       .select("settings")
       .eq("key", "auth_settings")
@@ -63,7 +72,7 @@ export async function POST(request: Request) {
     }
 
     // Try to upsert to Supabase
-    const { error } = await supabase.from("app_settings").upsert(
+    const { error } = await getSupabase().from("app_settings").upsert(
       {
         key: "auth_settings",
         settings: settings,

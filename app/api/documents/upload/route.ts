@@ -3,8 +3,8 @@ import { createClient } from '@supabase/supabase-js'
 import { processDocument } from '@/lib/document-processor'
 import { DocumentUploadData } from '@/types/rag'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseUrl = process.env.ACTALYZE_SUPABASE_URL!
+const supabaseAnonKey = process.env.ACTALYZE_SUPABASE_ANON_KEY!
 
 export async function POST(request: NextRequest) {
     try {

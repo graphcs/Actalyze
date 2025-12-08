@@ -1,5 +1,5 @@
 // Document Processing Pipeline for RAG System
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import {
     Document,
     DocumentChunk,
@@ -18,17 +18,25 @@ const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 })
 
-// Create server-side Supabase client with service role key for elevated permissions
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-        auth: {
-            autoRefreshToken: false,
-            persistSession: false
+// Lazy-load Supabase client
+let supabaseClient: SupabaseClient | null = null;
+
+function getSupabase(): SupabaseClient {
+    if (!supabaseClient) {
+        const url = process.env.ACTALYZE_SUPABASE_URL;
+        const key = process.env.ACTALYZE_SUPABASE_ANON_KEY;
+        if (!url || !key) {
+            throw new Error('Supabase environment variables not configured');
         }
+        supabaseClient = createClient(url, key, {
+            auth: {
+                autoRefreshToken: false,
+                persistSession: false
+            }
+        });
     }
-)
+    return supabaseClient;
+}
 
 /**
  * Validate uploaded file
@@ -427,7 +435,7 @@ export async function uploadFileToStorage(
 ): Promise<{ url: string; error?: string }> {
     try {
         const fileName = `${documentId}_${file.name}`
-        const { data, error } = await supabase.storage
+        const { data, error } = await getSupabase().storage
             .from('documents')
             .upload(fileName, file, {
                 cacheControl: '3600',
@@ -438,7 +446,7 @@ export async function uploadFileToStorage(
             return { url: '', error: error.message }
         }
 
-        const { data: urlData } = supabase.storage
+        const { data: urlData } = getSupabase().storage
             .from('documents')
             .getPublicUrl(data.path)
 
@@ -479,7 +487,7 @@ export async function saveDocument(
             upload_status: 'completed' as const
         }
 
-        const { data, error } = await supabase
+        const { data, error } = await getSupabase()
             .from('documents')
             .insert(documentRecord)
             .select()
@@ -541,7 +549,7 @@ export async function saveDocumentChunks(
         }
 
         console.log(`Inserting ${chunksWithEmbeddings.length} chunks into database...`)
-        const { error } = await supabase
+        const { error } = await getSupabase()
             .from('document_chunks')
             .insert(chunksWithEmbeddings)
 
@@ -552,7 +560,7 @@ export async function saveDocumentChunks(
         console.log(`Successfully inserted ${chunksWithEmbeddings.length} chunks into database`)
 
         // Update document status to completed
-        await supabase
+        await getSupabase()
             .from('documents')
             .update({ upload_status: 'completed' })
             .eq('id', documentId)
@@ -620,7 +628,7 @@ export async function processDocument(
             } else {
                 fileUrl = url
                 // Update document with file URL
-                await supabase
+                await getSupabase()
                     .from('documents')
                     .update({ file_url: fileUrl })
                     .eq('id', document.id)
@@ -648,7 +656,7 @@ export async function processDocument(
 
         // Auto-approve if enabled (no longer requires auth)
         if (options.auto_approve) {
-            await supabase
+            await getSupabase()
                 .from('documents')
                 .update({
                     status: 'active',
@@ -705,7 +713,7 @@ export async function searchDocuments(
             match_count: limit
         })
 
-        const { data, error } = await supabase.rpc('search_documents', {
+        const { data, error } = await getSupabase().rpc('search_documents', {
             query_embedding: embedding,
             match_threshold: threshold,
             match_count: limit

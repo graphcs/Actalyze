@@ -12,8 +12,8 @@ let supabaseClient: SupabaseClient | null = null;
 
 function getSupabase(): SupabaseClient {
   if (!supabaseClient) {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const url = process.env.ACTALYZE_SUPABASE_URL;
+    const key = process.env.ACTALYZE_SUPABASE_ANON_KEY;
     if (!url || !key) {
       throw new Error('Supabase environment variables not configured');
     }

@@ -9,8 +9,8 @@ export async function GET() {
   const diagnostics: Record<string, string | boolean> = {};
 
   // Check Supabase env vars
-  diagnostics.supabase_url_set = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
-  diagnostics.supabase_key_set = !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  diagnostics.supabase_url_set = !!process.env.ACTALYZE_SUPABASE_URL;
+  diagnostics.supabase_key_set = !!process.env.ACTALYZE_SUPABASE_ANON_KEY;
 
   // Check Resend env var
   diagnostics.resend_key_set = !!process.env.RESEND_API_KEY;
@@ -19,8 +19,8 @@ export async function GET() {
   if (diagnostics.supabase_url_set && diagnostics.supabase_key_set) {
     try {
       const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        process.env.ACTALYZE_SUPABASE_URL!,
+        process.env.ACTALYZE_SUPABASE_ANON_KEY!
       );
 
       // Check alert_configs table
