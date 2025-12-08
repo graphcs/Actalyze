@@ -3,14 +3,24 @@
  * Detects when a topic suddenly trends above baseline
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { getTrendingPoliticsUS } from '@/src/trending';
 import type { AlertConfig, AlertCheckResult, AlertBaseline } from '@/types/alerts';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+// Lazy-load Supabase client
+let supabaseClient: SupabaseClient | null = null;
+
+function getSupabase(): SupabaseClient {
+  if (!supabaseClient) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!url || !key) {
+      throw new Error('Supabase environment variables not configured');
+    }
+    supabaseClient = createClient(url, key);
+  }
+  return supabaseClient;
+}
 
 // Rolling average decay factor (how much weight to give new samples)
 const ROLLING_AVG_WEIGHT = 0.3;
@@ -22,7 +32,7 @@ const DEFAULT_BASELINE_SCORE = 30;
  * Get or create baseline for a topic
  */
 async function getBaseline(topic: string, districtCode: string): Promise<AlertBaseline | null> {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('alert_baselines')
     .select('*')
     .eq('topic', topic.toLowerCase())
@@ -49,7 +59,7 @@ async function updateBaseline(topic: string, districtCode: string, newScore: num
       ? existing.avg_score * (1 - ROLLING_AVG_WEIGHT) + newScore * ROLLING_AVG_WEIGHT
       : newScore;
 
-    await supabase
+    await getSupabase()
       .from('alert_baselines')
       .update({
         avg_score: newAvg,
@@ -59,7 +69,7 @@ async function updateBaseline(topic: string, districtCode: string, newScore: num
       .eq('id', existing.id);
   } else {
     // Create new baseline
-    await supabase
+    await getSupabase()
       .from('alert_baselines')
       .insert({
         topic: topic.toLowerCase(),

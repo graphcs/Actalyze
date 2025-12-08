@@ -3,17 +3,27 @@
  * Orchestrates checking all alerts and sending notifications
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { checkIssueSurge } from './surge-detector';
 import { checkSentimentShift } from './sentiment-detector';
 import { checkRepMention } from './mention-detector';
 import { sendAlertEmail, isEmailConfigured } from '../email/resend';
 import type { AlertConfig, AlertCheckResult, AlertHistoryEntry, CheckAlertsResponse } from '@/types/alerts';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+// Lazy-load Supabase client to avoid build-time errors
+let supabaseClient: SupabaseClient | null = null;
+
+function getSupabase(): SupabaseClient {
+  if (!supabaseClient) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!url || !key) {
+      throw new Error('Supabase environment variables not configured');
+    }
+    supabaseClient = createClient(url, key);
+  }
+  return supabaseClient;
+}
 
 // Cooldown period to prevent duplicate alerts (in hours)
 const ALERT_COOLDOWN_HOURS = 6;
@@ -22,7 +32,7 @@ const ALERT_COOLDOWN_HOURS = 6;
  * Get all enabled alert configs
  */
 async function getEnabledAlerts(): Promise<AlertConfig[]> {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('alert_configs')
     .select('*')
     .eq('enabled', true);
@@ -42,7 +52,7 @@ async function wasRecentlyTriggered(configId: string): Promise<boolean> {
   const cooldownTime = new Date();
   cooldownTime.setHours(cooldownTime.getHours() - ALERT_COOLDOWN_HOURS);
 
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('alert_history')
     .select('id')
     .eq('config_id', configId)
@@ -73,7 +83,7 @@ async function recordAlertHistory(
     delivery_status: emailSent ? 'sent' : 'failed',
   };
 
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('alert_history')
     .insert(entry)
     .select()
@@ -187,7 +197,7 @@ export async function getAlertHistory(
   userEmail?: string,
   limit = 20
 ): Promise<AlertHistoryEntry[]> {
-  let query = supabase
+  let query = getSupabase()
     .from('alert_history')
     .select('*, alert_configs!inner(user_email)')
     .order('sent_at', { ascending: false })
@@ -211,7 +221,7 @@ export async function getAlertHistory(
  * Get alert configs for a user
  */
 export async function getUserAlerts(userEmail: string): Promise<AlertConfig[]> {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('alert_configs')
     .select('*')
     .eq('user_email', userEmail)
@@ -232,7 +242,7 @@ export async function createAlertConfig(
   userEmail: string,
   config: Omit<AlertConfig, 'id' | 'user_email' | 'created_at' | 'updated_at'>
 ): Promise<{ data: AlertConfig | null; error?: string }> {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('alert_configs')
     .insert({
       ...config,
@@ -266,7 +276,7 @@ export async function updateAlertConfig(
   id: string,
   updates: Partial<AlertConfig>
 ): Promise<AlertConfig | null> {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('alert_configs')
     .update(updates)
     .eq('id', id)
@@ -285,7 +295,7 @@ export async function updateAlertConfig(
  * Delete an alert config
  */
 export async function deleteAlertConfig(id: string): Promise<boolean> {
-  const { error } = await supabase
+  const { error } = await getSupabase()
     .from('alert_configs')
     .delete()
     .eq('id', id);

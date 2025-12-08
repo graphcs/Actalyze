@@ -3,14 +3,24 @@
  * Detects when sentiment on a topic changes significantly
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { TwitterApi } from 'twitter-api-v2';
 import type { AlertConfig, AlertCheckResult, AlertBaseline } from '@/types/alerts';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+// Lazy-load Supabase client
+let supabaseClient: SupabaseClient | null = null;
+
+function getSupabase(): SupabaseClient {
+  if (!supabaseClient) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!url || !key) {
+      throw new Error('Supabase environment variables not configured');
+    }
+    supabaseClient = createClient(url, key);
+  }
+  return supabaseClient;
+}
 
 // Rolling average decay factor
 const ROLLING_AVG_WEIGHT = 0.3;
@@ -118,7 +128,7 @@ async function getCurrentSentiment(topic: string): Promise<{ sentiment: number; 
  * Get or create baseline for a topic
  */
 async function getBaseline(topic: string, districtCode: string): Promise<AlertBaseline | null> {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('alert_baselines')
     .select('*')
     .eq('topic', topic.toLowerCase())
@@ -144,7 +154,7 @@ async function updateBaseline(topic: string, districtCode: string, newSentiment:
       ? existing.avg_sentiment * (1 - ROLLING_AVG_WEIGHT) + newSentiment * ROLLING_AVG_WEIGHT
       : newSentiment;
 
-    await supabase
+    await getSupabase()
       .from('alert_baselines')
       .update({
         avg_sentiment: newAvg,
@@ -153,7 +163,7 @@ async function updateBaseline(topic: string, districtCode: string, newSentiment:
       })
       .eq('id', existing.id);
   } else {
-    await supabase
+    await getSupabase()
       .from('alert_baselines')
       .insert({
         topic: topic.toLowerCase(),
