@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -11,9 +12,16 @@ import {
   MessageSquare,
   Shield,
   Users,
+  AlertCircle,
 } from "lucide-react";
 import DistrictSearch from "./components/DistrictSearch";
 import Sidebar from "./components/Sidebar";
+
+interface AuthSettings {
+  mode: "restricted" | "public" | "guest";
+  authorizedEmails: string[];
+  adminEmails: string[];
+}
 
 // State code to name mapping for display
 const STATE_NAMES: Record<string, string> = {
@@ -32,10 +40,35 @@ const STATE_NAMES: Record<string, string> = {
 export default function HomePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [authSettings, setAuthSettings] = useState<AuthSettings | null>(null);
+  const [settingsLoading, setSettingsLoading] = useState(true);
+
+  // Fetch auth settings on mount
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await fetch("/api/admin/settings");
+        if (response.ok) {
+          const data = await response.json();
+          setAuthSettings(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch auth settings:", error);
+      } finally {
+        setSettingsLoading(false);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   const handleGuestAccess = () => {
     router.push("/dashboard?guest=true");
   };
+
+  // Check if current user is authorized (for restricted mode)
+  const isUserAuthorized = session?.user?.email && authSettings?.authorizedEmails.includes(session.user.email);
+  const isRestrictedMode = authSettings?.mode === "restricted";
+  const isGuestModeAllowed = authSettings?.mode === "guest";
 
   // Popular/swing districts to feature
   const featuredDistricts = [
@@ -47,7 +80,7 @@ export default function HomePage() {
     { code: "WI03", label: "WI-3", desc: "Western Wisconsin" },
   ];
 
-  if (status === "loading") {
+  if (status === "loading" || settingsLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-white to-zinc-50 dark:from-zinc-950 dark:to-zinc-900">
         <div className="text-center">
@@ -74,20 +107,29 @@ export default function HomePage() {
           <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-end">
             <div className="flex items-center gap-3">
               {session?.user ? (
-                <button
-                  onClick={() => router.push("/dashboard")}
-                  className="px-6 py-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors text-sm font-medium"
-                >
-                  Dashboard
-                </button>
-              ) : (
-                <>
+                // User is logged in
+                isRestrictedMode && !isUserAuthorized ? (
+                  // Logged in but not authorized in restricted mode
+                  <span className="text-sm text-zinc-500">Not authorized</span>
+                ) : (
                   <button
-                    onClick={handleGuestAccess}
-                    className="px-4 py-2 text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+                    onClick={() => router.push("/dashboard")}
+                    className="px-6 py-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors text-sm font-medium"
                   >
-                    Continue as Guest
+                    Dashboard
                   </button>
+                )
+              ) : (
+                // User is not logged in
+                <>
+                  {isGuestModeAllowed && (
+                    <button
+                      onClick={handleGuestAccess}
+                      className="px-4 py-2 text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+                    >
+                      Continue as Guest
+                    </button>
+                  )}
                   <button
                     onClick={() => signIn("google", { callbackUrl: "/" })}
                     className="px-6 py-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors text-sm font-medium"
@@ -270,35 +312,72 @@ export default function HomePage() {
       >
         <div className="rounded-3xl bg-gradient-to-br from-zinc-900 to-zinc-800 dark:from-zinc-800 dark:to-zinc-900 p-12 text-center text-white border border-zinc-700 dark:border-zinc-800">
           {session?.user ? (
-            <>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Welcome back, {session.user.name?.split(' ')[0] || 'there'}!
-              </h2>
-              <p className="text-xl mb-8 text-zinc-300">
-                Continue exploring congressional district intelligence
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <button
-                  onClick={() => router.push("/dashboard")}
-                  className="px-8 py-4 bg-white text-zinc-900 hover:bg-zinc-100 rounded-xl font-semibold text-lg shadow-lg transition-colors"
-                >
-                  Go to Dashboard
-                </button>
-                <button
-                  onClick={() => router.push("/nationwide")}
-                  className="px-8 py-4 bg-zinc-800 border-2 border-zinc-600 hover:border-zinc-400 text-white rounded-xl font-semibold text-lg transition-colors"
-                >
-                  Explore Districts
-                </button>
-              </div>
-            </>
+            // User is logged in
+            isRestrictedMode && !isUserAuthorized ? (
+              // Logged in but not authorized in restricted mode
+              <>
+                <div className="flex justify-center mb-4">
+                  <AlertCircle className="w-12 h-12 text-amber-400" />
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                  Access Restricted
+                </h2>
+                <p className="text-xl mb-4 text-zinc-300">
+                  Actalyze is currently in private beta.
+                </p>
+                <p className="text-lg mb-8 text-zinc-400">
+                  Your email ({session.user.email}) is not on the authorized list.
+                </p>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                  <button
+                    onClick={() => router.push("/waitlist")}
+                    className="px-8 py-4 bg-white text-zinc-900 hover:bg-zinc-100 rounded-xl font-semibold text-lg shadow-lg transition-colors"
+                  >
+                    Join the Waitlist
+                  </button>
+                  <button
+                    onClick={() => signIn("google", { callbackUrl: "/" })}
+                    className="px-8 py-4 bg-zinc-800 border-2 border-zinc-600 hover:border-zinc-400 text-white rounded-xl font-semibold text-lg transition-colors"
+                  >
+                    Try Different Account
+                  </button>
+                </div>
+              </>
+            ) : (
+              // Authorized user
+              <>
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                  Welcome back, {session.user.name?.split(' ')[0] || 'there'}!
+                </h2>
+                <p className="text-xl mb-8 text-zinc-300">
+                  Continue exploring congressional district intelligence
+                </p>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                  <button
+                    onClick={() => router.push("/dashboard")}
+                    className="px-8 py-4 bg-white text-zinc-900 hover:bg-zinc-100 rounded-xl font-semibold text-lg shadow-lg transition-colors"
+                  >
+                    Go to Dashboard
+                  </button>
+                  <button
+                    onClick={() => router.push("/nationwide")}
+                    className="px-8 py-4 bg-zinc-800 border-2 border-zinc-600 hover:border-zinc-400 text-white rounded-xl font-semibold text-lg transition-colors"
+                  >
+                    Explore Districts
+                  </button>
+                </div>
+              </>
+            )
           ) : (
+            // User is not logged in
             <>
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
                 Ready to get started?
               </h2>
               <p className="text-xl mb-8 text-zinc-300">
-                Join congressional staffers and policy professionals using Actalyze
+                {isRestrictedMode
+                  ? "Sign in to access Actalyze"
+                  : "Join congressional staffers and policy professionals using Actalyze"}
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <button
@@ -313,12 +392,22 @@ export default function HomePage() {
                   </svg>
                   Sign In with Google
                 </button>
-                <button
-                  onClick={handleGuestAccess}
-                  className="px-8 py-4 bg-zinc-800 border-2 border-zinc-600 hover:border-zinc-400 text-white rounded-xl font-semibold text-lg transition-colors"
-                >
-                  Continue as Guest
-                </button>
+                {isGuestModeAllowed && (
+                  <button
+                    onClick={handleGuestAccess}
+                    className="px-8 py-4 bg-zinc-800 border-2 border-zinc-600 hover:border-zinc-400 text-white rounded-xl font-semibold text-lg transition-colors"
+                  >
+                    Continue as Guest
+                  </button>
+                )}
+                {isRestrictedMode && (
+                  <button
+                    onClick={() => router.push("/waitlist")}
+                    className="px-8 py-4 bg-zinc-800 border-2 border-zinc-600 hover:border-zinc-400 text-white rounded-xl font-semibold text-lg transition-colors"
+                  >
+                    Join Waitlist
+                  </button>
+                )}
               </div>
             </>
           )}

@@ -1,6 +1,70 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
+import { createClient } from "@supabase/supabase-js";
+
+interface AuthSettings {
+  mode: "restricted" | "public" | "guest";
+  authorizedEmails: string[];
+  adminEmails: string[];
+}
+
+// Default settings - used as fallback
+const DEFAULT_SETTINGS: AuthSettings = {
+  mode: "restricted",
+  authorizedEmails: [
+    "johnmahan7@gmail.com",
+    "dan@datasyinc.com",
+    "johnmaheswaran@datasyinc.com",
+  ],
+  adminEmails: ["johnmahan7@gmail.com", "dan@datasyinc.com"],
+};
+
+// Cache settings to avoid hitting DB on every request
+let cachedSettings: AuthSettings | null = null;
+let cacheTimestamp = 0;
+const CACHE_DURATION = 60 * 1000; // 1 minute
+
+async function getAuthSettings(): Promise<AuthSettings> {
+  const now = Date.now();
+
+  // Return cached settings if still valid
+  if (cachedSettings && now - cacheTimestamp < CACHE_DURATION) {
+    return cachedSettings;
+  }
+
+  try {
+    const url = process.env.ACTALYZE_SUPABASE_URL;
+    const key = process.env.ACTALYZE_SUPABASE_ANON_KEY;
+
+    if (!url || !key) {
+      return DEFAULT_SETTINGS;
+    }
+
+    const supabase = createClient(url, key, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
+
+    const { data, error } = await supabase
+      .from("app_settings")
+      .select("settings")
+      .eq("key", "auth_settings")
+      .single();
+
+    if (error || !data) {
+      cachedSettings = DEFAULT_SETTINGS;
+    } else {
+      cachedSettings = data.settings as AuthSettings;
+    }
+    cacheTimestamp = now;
+    return cachedSettings;
+  } catch {
+    return DEFAULT_SETTINGS;
+  }
+}
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -14,6 +78,12 @@ export async function middleware(request: NextRequest) {
     "/state",
     "/district",
     "/wordcloud",
+    "/draft-memo",
+    "/standards-checker",
+    "/constituent-meetings",
+    "/casework",
+    "/ethics-compliance",
+    "/connect-cdp",
   ];
 
   const isProtectedRoute = protectedRoutes.some((route) =>
@@ -24,44 +94,52 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Get auth settings
+  const settings = await getAuthSettings();
+
   // Check if user is authenticated
   const token = await getToken({
     req: request,
     secret: process.env.NEXTAUTH_SECRET,
   });
 
-  // If authenticated, allow access
+  // If authenticated, check authorization for restricted mode
   if (token) {
+    const userEmail = token.email as string | undefined;
+
+    // In restricted mode, check if user is authorized
+    if (settings.mode === "restricted" && userEmail) {
+      if (!settings.authorizedEmails.includes(userEmail)) {
+        // User is authenticated but not authorized - redirect to home
+        return NextResponse.redirect(new URL("/", request.url));
+      }
+    }
+
+    // User is authenticated and authorized (or not restricted mode)
     return NextResponse.next();
   }
 
-  // Check if guest mode is enabled (check via cookie or header)
-  const guestModeCookie = request.cookies.get("guest_mode_enabled");
+  // User is not authenticated - check if guest mode is allowed
+  if (settings.mode === "guest") {
+    // Check if guest mode cookie exists or guest param is present
+    const guestModeCookie = request.cookies.get("guest_mode_enabled");
+    const searchParams = request.nextUrl.searchParams;
+    const isGuestAccess = searchParams.get("guest") === "true";
 
-  // For guest mode, we'll check the settings via a special header or cookie
-  // Since we can't access localStorage in middleware, we'll allow access if coming from landing page
-  const referer = request.headers.get("referer");
-  const isFromLandingPage = referer?.includes(request.nextUrl.origin);
-
-  // If guest mode cookie exists or coming from landing page with guest param, allow access
-  const searchParams = request.nextUrl.searchParams;
-  const isGuestAccess = searchParams.get("guest") === "true";
-
-  if (isGuestAccess || guestModeCookie) {
-    // Set a cookie to remember guest mode for this session
-    const response = NextResponse.next();
-    response.cookies.set("guest_mode_enabled", "true", {
-      httpOnly: true,
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24, // 24 hours
-    });
-    return response;
+    if (isGuestAccess || guestModeCookie) {
+      // Set a cookie to remember guest mode for this session
+      const response = NextResponse.next();
+      response.cookies.set("guest_mode_enabled", "true", {
+        httpOnly: true,
+        sameSite: "lax",
+        maxAge: 60 * 60 * 24, // 24 hours
+      });
+      return response;
+    }
   }
 
-  // Not authenticated and not guest mode - redirect to sign in
-  const signInUrl = new URL("/api/auth/signin", request.url);
-  signInUrl.searchParams.set("callbackUrl", pathname);
-  return NextResponse.redirect(signInUrl);
+  // Not authenticated and guest mode not allowed or not activated - redirect to home
+  return NextResponse.redirect(new URL("/", request.url));
 }
 
 export const config = {
@@ -73,5 +151,11 @@ export const config = {
     "/state/:path*",
     "/district/:path*",
     "/wordcloud/:path*",
+    "/draft-memo/:path*",
+    "/standards-checker/:path*",
+    "/constituent-meetings/:path*",
+    "/casework/:path*",
+    "/ethics-compliance/:path*",
+    "/connect-cdp/:path*",
   ],
 };
