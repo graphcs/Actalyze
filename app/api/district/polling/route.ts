@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
 
     // Check DB cache first (if cache reading is enabled)
     if (useCache) {
-      const dbCached = await getFromDbCache<{ trend: string | null; description: string }>(dbCacheKey, true);
+      const dbCached = await getFromDbCache<{ trend: string | null; description: string; sources?: { name: string; url: string }[] }>(dbCacheKey, true);
       if (dbCached) {
         console.log(`📦 DB cache hit for polling ${districtCode}`);
         return NextResponse.json(dbCached);
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
 
     // Check memory cache as fallback
     const cacheKey = generateCacheKey('district-polling', { district: districtCode });
-    const cached = serverCache.get<{ trend: string | null; description: string }>(cacheKey, useCache);
+    const cached = serverCache.get<{ trend: string | null; description: string; sources?: { name: string; url: string }[] }>(cacheKey, useCache);
 
     if (cached) {
       return NextResponse.json(cached);
@@ -88,11 +88,16 @@ export async function GET(request: NextRequest) {
         messages: [
           {
             role: 'user',
-            content: `What are the latest 2026 or 2028 election polls for Congressional District ${districtLabel}? If available, provide the most recent polling average or trend (e.g., "D+5", "R+3", "Tied", "Toss-up", "Likely D", "Likely R"). Return ONLY a JSON object with "trend" (the margin like "D+5" or political leaning like "Likely R") and "description" (one sentence about recent polls or political leaning). If no recent polls, use general district political leaning. Example: {"trend": "D+5", "description": "Recent polls show Democrats leading by 5 points"}`,
+            content: `What are the latest 2026 or 2028 election polls for Congressional District ${districtLabel}? If available, provide the most recent polling average or trend (e.g., "D+5", "R+3", "Tied", "Toss-up", "Likely D", "Likely R"). Return ONLY a JSON object with:
+- "trend" (the margin like "D+5" or political leaning like "Likely R")
+- "description" (one sentence about recent polls or political leaning)
+- "sources" (array of objects with "name" and "url" for each polling source cited)
+
+If no recent polls, use general district political leaning. Example: {"trend": "D+5", "description": "Recent polls show Democrats leading by 5 points", "sources": [{"name": "FiveThirtyEight", "url": "https://fivethirtyeight.com"}, {"name": "Cook Political Report", "url": "https://cookpolitical.com"}]}`,
           },
         ],
         temperature: 0.3,
-        max_tokens: 150,
+        max_tokens: 300,
       }),
       signal: AbortSignal.timeout(10000),
     });
@@ -118,7 +123,8 @@ export async function GET(request: NextRequest) {
 
     const result = {
       trend: pollingData.trend || null,
-      description: pollingData.description || "Recent polling data unavailable"
+      description: pollingData.description || "Recent polling data unavailable",
+      sources: pollingData.sources || []
     };
 
     // Save to memory cache

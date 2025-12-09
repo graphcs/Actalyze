@@ -48,14 +48,21 @@ interface Headline {
   thumbnail?: string;
 }
 
+interface PollingSource {
+  name: string;
+  url: string;
+}
+
 interface PartyPerspectives {
   democrats: {
     summary: string;
     talkingPoints: string[];
+    citations?: string[];
   };
   republicans: {
     summary: string;
     talkingPoints: string[];
+    citations?: string[];
   };
 }
 
@@ -78,7 +85,7 @@ export default function DistrictPage() {
 
   const [headlines, setHeadlines] = useState<Headline[]>([]);
   const [summary, setSummary] = useState<string>("");
-  const [pollingData, setPollingData] = useState<{ trend: string | null; description: string } | null>(null);
+  const [pollingData, setPollingData] = useState<{ trend: string | null; description: string; sources?: PollingSource[] } | null>(null);
   const [perspectives, setPerspectives] = useState<PartyPerspectives | null>(null);
   const [tweets, setTweets] = useState<Tweet[]>([]);
   const [aiIntel, setAiIntel] = useState<AIIntelResponse | null>(null);
@@ -327,9 +334,28 @@ export default function DistrictPage() {
                   <div className="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-2">
                     {pollingData.trend}
                   </div>
-                  <div className="text-sm text-zinc-700 dark:text-zinc-300">
+                  <div className="text-sm text-zinc-700 dark:text-zinc-300 mb-3">
                     {pollingData.description}
                   </div>
+                  {pollingData.sources && pollingData.sources.length > 0 && (
+                    <div className="pt-3 border-t border-zinc-200 dark:border-zinc-700">
+                      <div className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Sources:</div>
+                      <div className="flex flex-wrap gap-2">
+                        {pollingData.sources.map((source, i) => (
+                          <a
+                            key={i}
+                            href={source.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-xs text-purple-600 dark:text-purple-400 hover:underline"
+                          >
+                            {source.name}
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>
@@ -441,6 +467,17 @@ export default function DistrictPage() {
                       </ul>
                     </div>
                   )}
+                  {perspectives?.democrats?.citations && perspectives.democrats.citations.length > 0 && (
+                    <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800">
+                      <div className="text-xs text-blue-600 dark:text-blue-400">
+                        Sources: {perspectives.democrats.citations.slice(0, 3).map((url, i) => (
+                          <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                            [{i + 1}]
+                          </a>
+                        )).reduce((prev, curr, i) => <>{prev}{i > 0 ? ' ' : ''}{curr}</> as React.ReactNode, <></> as React.ReactNode)}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Republicans */}
@@ -467,6 +504,17 @@ export default function DistrictPage() {
                           </li>
                         ))}
                       </ul>
+                    </div>
+                  )}
+                  {perspectives?.republicans?.citations && perspectives.republicans.citations.length > 0 && (
+                    <div className="mt-3 pt-3 border-t border-red-200 dark:border-red-800">
+                      <div className="text-xs text-red-600 dark:text-red-400">
+                        Sources: {perspectives.republicans.citations.slice(0, 3).map((url, i) => (
+                          <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                            [{i + 1}]
+                          </a>
+                        )).reduce((prev, curr, i) => <>{prev}{i > 0 ? ' ' : ''}{curr}</> as React.ReactNode, <></> as React.ReactNode)}
+                      </div>
                     </div>
                   )}
                 </div>

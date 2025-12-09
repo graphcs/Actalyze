@@ -7,7 +7,6 @@ import {
   Landmark,
   MapPin,
   MessageSquare,
-  Upload,
   TrendingUp,
   ChevronLeft,
   ChevronRight,
@@ -19,6 +18,10 @@ import {
   Home,
   FileText,
   CheckSquare,
+  Database,
+  Users,
+  Briefcase,
+  Shield,
 } from "lucide-react";
 import { signIn } from "next-auth/react";
 
@@ -302,18 +305,6 @@ export default function Sidebar({ onChatClick, onUploadClick }: SidebarProps) {
             </button>
 
             <button
-              onClick={() => (onUploadClick ? onUploadClick() : handleNavigation("/upload"))}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
-                pathname === "/upload"
-                  ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
-                  : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-zinc-100"
-              }`}
-            >
-              <Upload className="w-5 h-5" />
-              {!isCollapsed && <span className="text-sm font-medium">Upload Bill</span>}
-            </button>
-
-            <button
               onClick={() => handleNavigation("/draft-memo")}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
                 pathname === "/draft-memo"
@@ -326,6 +317,42 @@ export default function Sidebar({ onChatClick, onUploadClick }: SidebarProps) {
             </button>
 
             <button
+              onClick={() => handleNavigation("/constituent-meetings")}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                pathname === "/constituent-meetings"
+                  ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                  : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-zinc-100"
+              }`}
+            >
+              <Users className="w-5 h-5" />
+              {!isCollapsed && <span className="text-sm font-medium">Meetings</span>}
+            </button>
+
+            <button
+              onClick={() => handleNavigation("/casework")}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                pathname === "/casework"
+                  ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                  : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-zinc-100"
+              }`}
+            >
+              <Briefcase className="w-5 h-5" />
+              {!isCollapsed && <span className="text-sm font-medium">Casework</span>}
+            </button>
+
+            <button
+              onClick={() => handleNavigation("/ethics-compliance")}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                pathname === "/ethics-compliance"
+                  ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                  : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-zinc-100"
+              }`}
+            >
+              <Shield className="w-5 h-5" />
+              {!isCollapsed && <span className="text-sm font-medium">Ethics Copilot</span>}
+            </button>
+
+            <button
               onClick={() => handleNavigation("/standards-checker")}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
                 pathname === "/standards-checker"
@@ -335,6 +362,18 @@ export default function Sidebar({ onChatClick, onUploadClick }: SidebarProps) {
             >
               <CheckSquare className="w-5 h-5" />
               {!isCollapsed && <span className="text-sm font-medium">Standards Checker</span>}
+            </button>
+
+            <button
+              onClick={() => handleNavigation("/connect-cdp")}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                pathname === "/connect-cdp"
+                  ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                  : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-zinc-100"
+              }`}
+            >
+              <Database className="w-5 h-5" />
+              {!isCollapsed && <span className="text-sm font-medium">Connect CDP</span>}
             </button>
           </div>
         )}

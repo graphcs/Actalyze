@@ -39,7 +39,8 @@ export async function GET(request: NextRequest) {
     // Check cache preference from header (default: true)
     const useCacheHeader = request.headers.get('x-use-cache');
     const useCache = useCacheHeader !== 'false';
-    const cacheDuration = parseInt(request.headers.get('x-cache-duration') || '3600', 10);
+    // Default to 24 hours (86400 seconds) for perspectives since they take a while to generate
+    const cacheDuration = parseInt(request.headers.get('x-cache-duration') || '86400', 10);
 
     // Extract district code from topic if it matches pattern (e.g., "VA05 district")
     const districtMatch = topic.match(/^([A-Z]{2}\d{2})\s+district$/i);
