@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import AppLayout from "../components/AppLayout";
-import { Briefcase, Search, Filter, Clock, User, Building2, FileText, Bot, ArrowRight, CheckCircle, AlertCircle, Tag, ChevronRight } from "lucide-react";
+import { Briefcase, Search, Clock, User, Bot, CheckCircle, Tag, ChevronRight, Plus } from "lucide-react";
 
 interface CaseworkRequest {
   id: string;
@@ -180,6 +180,15 @@ export default function CaseworkPage() {
   const [filterCategory, setFilterCategory] = useState("All");
   const [filterStatus, setFilterStatus] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [showNewForm, setShowNewForm] = useState(false);
+  const [newCase, setNewCase] = useState({
+    constituentName: "",
+    email: "",
+    phone: "",
+    category: "Immigration",
+    subject: "",
+    description: "",
+  });
 
   const filteredCases = cases.filter(c => {
     const matchesCategory = filterCategory === "All" || c.category === filterCategory;
@@ -218,6 +227,67 @@ export default function CaseworkPage() {
     }
   };
 
+  const handleCreateCase = () => {
+    if (!newCase.constituentName || !newCase.email || !newCase.subject) return;
+
+    const caseNum = `CW-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 9000) + 1000).padStart(6, "0")}`;
+    const confidence = Math.floor(Math.random() * 20) + 80;
+
+    const categoryTeamMap: Record<string, string> = {
+      Immigration: "Immigration Casework Specialist",
+      "Veterans Affairs": "Veterans Affairs Casework Specialist",
+      "Social Security": "Social Security Casework Specialist",
+      "Small Business": "Economic Development Specialist",
+      Housing: "Housing & Civil Rights Specialist",
+      IRS: "Social Security Casework Specialist",
+      Medicare: "Social Security Casework Specialist",
+    };
+
+    const newCasework: CaseworkRequest = {
+      id: Date.now().toString(),
+      caseNumber: caseNum,
+      constituentName: newCase.constituentName,
+      email: newCase.email,
+      phone: newCase.phone || undefined,
+      category: newCase.category,
+      subcategory: "General Inquiry",
+      subject: newCase.subject,
+      description: newCase.description,
+      status: "new",
+      priority: "medium",
+      submittedAt: new Date().toISOString(),
+      aiSummary: `New ${newCase.category} case regarding: ${newCase.subject}. Awaiting full AI analysis.`,
+      aiRouting: {
+        recommendedTeam: categoryTeamMap[newCase.category] || "Immigration Casework Specialist",
+        confidence,
+        reasoning: `Case categorized as ${newCase.category}. Routing to appropriate specialist team based on subject matter.`,
+        suggestedActions: [
+          "Review case details and constituent information",
+          "Obtain necessary privacy release forms",
+          "Submit inquiry to relevant agency",
+          "Set follow-up reminder for constituent update",
+        ],
+      },
+      relatedAgency: newCase.category === "Immigration" ? "USCIS" :
+        newCase.category === "Veterans Affairs" ? "Department of Veterans Affairs" :
+        newCase.category === "Social Security" ? "Social Security Administration" :
+        newCase.category === "Small Business" ? "Small Business Administration" :
+        newCase.category === "Housing" ? "Department of Housing and Urban Development" : "IRS",
+      timeline: "2-4 weeks for agency response",
+    };
+
+    setCases(prev => [newCasework, ...prev]);
+    setNewCase({
+      constituentName: "",
+      email: "",
+      phone: "",
+      category: "Immigration",
+      subject: "",
+      description: "",
+    });
+    setShowNewForm(false);
+  };
+
   const newCount = cases.filter(c => c.status === "new").length;
   const inProgressCount = cases.filter(c => c.status === "in-progress").length;
 
@@ -226,20 +296,115 @@ export default function CaseworkPage() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-600 to-orange-600 flex items-center justify-center">
-              <Briefcase className="w-5 h-5 text-white" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-600 to-orange-600 flex items-center justify-center">
+                <Briefcase className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+                  Casework Management
+                </h1>
+                <p className="text-zinc-600 dark:text-zinc-400">
+                  AI-powered constituent case routing and management
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-                Casework Management
-              </h1>
-              <p className="text-zinc-600 dark:text-zinc-400">
-                AI-powered constituent case routing and management
-              </p>
-            </div>
+            <button
+              onClick={() => setShowNewForm(!showNewForm)}
+              className="flex items-center gap-2 px-4 py-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              New Casework
+            </button>
           </div>
         </div>
+
+        {/* New Casework Form */}
+        {showNewForm && (
+          <div className="mb-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5">
+            <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 mb-4">New Casework Request</h3>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs text-zinc-500 uppercase mb-1">Constituent Name *</label>
+                <input
+                  type="text"
+                  value={newCase.constituentName}
+                  onChange={(e) => setNewCase(prev => ({ ...prev, constituentName: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                  placeholder="Full name"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-zinc-500 uppercase mb-1">Category</label>
+                <select
+                  value={newCase.category}
+                  onChange={(e) => setNewCase(prev => ({ ...prev, category: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                >
+                  {CATEGORIES.filter(c => c !== "All").map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs text-zinc-500 uppercase mb-1">Email *</label>
+                <input
+                  type="email"
+                  value={newCase.email}
+                  onChange={(e) => setNewCase(prev => ({ ...prev, email: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                  placeholder="email@example.com"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-zinc-500 uppercase mb-1">Phone</label>
+                <input
+                  type="tel"
+                  value={newCase.phone}
+                  onChange={(e) => setNewCase(prev => ({ ...prev, phone: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                  placeholder="(555) 123-4567"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-xs text-zinc-500 uppercase mb-1">Subject *</label>
+                <input
+                  type="text"
+                  value={newCase.subject}
+                  onChange={(e) => setNewCase(prev => ({ ...prev, subject: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                  placeholder="Brief description of the issue"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-xs text-zinc-500 uppercase mb-1">Description</label>
+                <textarea
+                  value={newCase.description}
+                  onChange={(e) => setNewCase(prev => ({ ...prev, description: e.target.value }))}
+                  rows={3}
+                  className="w-full px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                  placeholder="Full details of the casework request..."
+                />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-4">
+              <button
+                onClick={handleCreateCase}
+                disabled={!newCase.constituentName || !newCase.email || !newCase.subject}
+                className="px-4 py-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Create Case
+              </button>
+              <button
+                onClick={() => setShowNewForm(false)}
+                className="px-4 py-2 border border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Stats */}
         <div className="grid grid-cols-4 gap-4 mb-6">

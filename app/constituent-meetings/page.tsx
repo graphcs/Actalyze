@@ -114,7 +114,18 @@ export default function ConstituentMeetingsPage() {
   const [selectedRequest, setSelectedRequest] = useState<MeetingRequest | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [showNewForm, setShowNewForm] = useState(false);
+  const [newRequest, setNewRequest] = useState({
+    constituentName: "",
+    organization: "",
+    email: "",
+    phone: "",
+    topic: "",
+    description: "",
+    preferredDate: "",
+    preferredTime: "",
+    location: "virtual" as "in-district" | "dc-office" | "virtual",
+  });
 
   const filteredRequests = requests.filter(req => {
     const matchesStatus = filterStatus === "all" || req.status === filterStatus;
@@ -153,6 +164,47 @@ export default function ConstituentMeetingsPage() {
     }
   };
 
+  const handleCreateRequest = () => {
+    if (!newRequest.constituentName || !newRequest.email || !newRequest.topic) return;
+
+    const aiScore = Math.floor(Math.random() * 40) + 50; // Random score 50-90
+    const aiRecommendations: Array<"meet" | "delegate" | "decline"> = ["meet", "delegate", "decline"];
+    const aiRecommendation = aiScore >= 70 ? "meet" : aiScore >= 40 ? "delegate" : "decline";
+
+    const newMeetingRequest: MeetingRequest = {
+      id: Date.now().toString(),
+      constituentName: newRequest.constituentName,
+      organization: newRequest.organization || undefined,
+      email: newRequest.email,
+      phone: newRequest.phone || undefined,
+      topic: newRequest.topic,
+      description: newRequest.description,
+      preferredDate: newRequest.preferredDate || new Date().toISOString().split("T")[0],
+      preferredTime: newRequest.preferredTime || "TBD",
+      location: newRequest.location,
+      status: "pending",
+      submittedAt: new Date().toISOString(),
+      aiScore,
+      aiReasoning: "AI analysis pending full review. Initial scoring based on topic relevance and constituent information provided.",
+      aiRecommendation,
+      priority: aiScore >= 70 ? "high" : aiScore >= 40 ? "medium" : "low",
+    };
+
+    setRequests(prev => [newMeetingRequest, ...prev]);
+    setNewRequest({
+      constituentName: "",
+      organization: "",
+      email: "",
+      phone: "",
+      topic: "",
+      description: "",
+      preferredDate: "",
+      preferredTime: "",
+      location: "virtual",
+    });
+    setShowNewForm(false);
+  };
+
   const pendingCount = requests.filter(r => r.status === "pending").length;
   const scheduledCount = requests.filter(r => r.status === "scheduled").length;
 
@@ -175,12 +227,130 @@ export default function ConstituentMeetingsPage() {
                 </p>
               </div>
             </div>
-            <button className="flex items-center gap-2 px-4 py-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors">
+            <button
+              onClick={() => setShowNewForm(!showNewForm)}
+              className="flex items-center gap-2 px-4 py-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors"
+            >
               <Plus className="w-4 h-4" />
               New Request
             </button>
           </div>
         </div>
+
+        {/* New Request Form */}
+        {showNewForm && (
+          <div className="mb-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5">
+            <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 mb-4">New Meeting Request</h3>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs text-zinc-500 uppercase mb-1">Constituent Name *</label>
+                <input
+                  type="text"
+                  value={newRequest.constituentName}
+                  onChange={(e) => setNewRequest(prev => ({ ...prev, constituentName: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                  placeholder="Full name"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-zinc-500 uppercase mb-1">Organization</label>
+                <input
+                  type="text"
+                  value={newRequest.organization}
+                  onChange={(e) => setNewRequest(prev => ({ ...prev, organization: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                  placeholder="Organization (optional)"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-zinc-500 uppercase mb-1">Email *</label>
+                <input
+                  type="email"
+                  value={newRequest.email}
+                  onChange={(e) => setNewRequest(prev => ({ ...prev, email: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                  placeholder="email@example.com"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-zinc-500 uppercase mb-1">Phone</label>
+                <input
+                  type="tel"
+                  value={newRequest.phone}
+                  onChange={(e) => setNewRequest(prev => ({ ...prev, phone: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                  placeholder="(555) 123-4567"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-xs text-zinc-500 uppercase mb-1">Topic *</label>
+                <input
+                  type="text"
+                  value={newRequest.topic}
+                  onChange={(e) => setNewRequest(prev => ({ ...prev, topic: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                  placeholder="Meeting topic"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-xs text-zinc-500 uppercase mb-1">Description</label>
+                <textarea
+                  value={newRequest.description}
+                  onChange={(e) => setNewRequest(prev => ({ ...prev, description: e.target.value }))}
+                  rows={3}
+                  className="w-full px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                  placeholder="Details about the meeting request..."
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-zinc-500 uppercase mb-1">Preferred Date</label>
+                <input
+                  type="date"
+                  value={newRequest.preferredDate}
+                  onChange={(e) => setNewRequest(prev => ({ ...prev, preferredDate: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-zinc-500 uppercase mb-1">Preferred Time</label>
+                <input
+                  type="text"
+                  value={newRequest.preferredTime}
+                  onChange={(e) => setNewRequest(prev => ({ ...prev, preferredTime: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                  placeholder="e.g., 10:00 AM"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-zinc-500 uppercase mb-1">Location</label>
+                <select
+                  value={newRequest.location}
+                  onChange={(e) => setNewRequest(prev => ({ ...prev, location: e.target.value as "in-district" | "dc-office" | "virtual" }))}
+                  className="w-full px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                >
+                  <option value="virtual">Virtual</option>
+                  <option value="in-district">In-District</option>
+                  <option value="dc-office">DC Office</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex gap-3 mt-4">
+              <button
+                onClick={handleCreateRequest}
+                disabled={!newRequest.constituentName || !newRequest.email || !newRequest.topic}
+                className="px-4 py-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Create Request
+              </button>
+              <button
+                onClick={() => setShowNewForm(false)}
+                className="px-4 py-2 border border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Stats */}
         <div className="grid grid-cols-4 gap-4 mb-6">
