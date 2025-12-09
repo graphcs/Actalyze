@@ -15,6 +15,10 @@ import {
   Edit2,
   Bell,
   Mail,
+  Play,
+  Loader2,
+  CheckCircle,
+  XCircle,
 } from "lucide-react";
 import { Button } from "@/app/components/ui/Button";
 import type { AlertConfig, AlertType, CreateAlertRequest } from "@/types/alerts";
@@ -24,6 +28,7 @@ interface AlertsConfigProps {
   onCreateAlert: (alert: CreateAlertRequest) => Promise<void>;
   onUpdateAlert: (id: string, updates: Partial<AlertConfig>) => Promise<void>;
   onDeleteAlert: (id: string) => Promise<void>;
+  onTestAlert?: (alert: AlertConfig, forceTrigger: boolean, sendEmail: boolean) => Promise<TestResult | null>;
   loading?: boolean;
 }
 
@@ -74,6 +79,42 @@ interface AlertFormData {
   threshold: number;
   notify_email: boolean;
 }
+
+// Common political topics for quick selection
+const TOPIC_CHIPS = [
+  // Economic
+  { label: "Economy", category: "Economic" },
+  { label: "Inflation", category: "Economic" },
+  { label: "Jobs", category: "Economic" },
+  { label: "Tax Cuts", category: "Economic" },
+  { label: "Tax Policy", category: "Economic" },
+  { label: "Tariffs", category: "Economic" },
+  { label: "Trade", category: "Economic" },
+  // Social
+  { label: "Immigration", category: "Social" },
+  { label: "Border Security", category: "Social" },
+  { label: "Healthcare", category: "Social" },
+  { label: "Abortion", category: "Social" },
+  { label: "Gun Control", category: "Social" },
+  { label: "Education", category: "Social" },
+  { label: "Social Security", category: "Social" },
+  { label: "Medicare", category: "Social" },
+  // Environment & Energy
+  { label: "Climate", category: "Environment" },
+  { label: "Energy", category: "Environment" },
+  { label: "Oil & Gas", category: "Environment" },
+  { label: "Green Energy", category: "Environment" },
+  // Foreign Policy
+  { label: "Ukraine", category: "Foreign" },
+  { label: "China", category: "Foreign" },
+  { label: "Israel", category: "Foreign" },
+  { label: "NATO", category: "Foreign" },
+  // Government
+  { label: "Government Spending", category: "Government" },
+  { label: "National Debt", category: "Government" },
+  { label: "DOGE", category: "Government" },
+  { label: "Federal Reserve", category: "Government" },
+];
 
 // Recommended alert presets
 const RECOMMENDED_ALERTS: { label: string; description: string; config: Omit<CreateAlertRequest, 'notify_email'> }[] = [
@@ -180,11 +221,35 @@ function AlertForm({
           <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
             Topic to Monitor
           </label>
+
+          {/* Quick topic chips */}
+          <div className="mb-3">
+            <div className="text-xs text-zinc-500 dark:text-zinc-400 mb-2">Quick select:</div>
+            <div className="flex flex-wrap gap-1.5">
+              {TOPIC_CHIPS.map((chip) => (
+                <button
+                  key={chip.label}
+                  type="button"
+                  onClick={() => setFormData({ ...formData, topic: chip.label.toLowerCase() })}
+                  className={`px-2.5 py-1 text-xs rounded-full border transition-all ${
+                    formData.topic.toLowerCase() === chip.label.toLowerCase()
+                      ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-transparent"
+                      : "bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-400 dark:hover:border-zinc-500"
+                  }`}
+                >
+                  {chip.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Custom topic input */}
+          <div className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Or enter custom topic:</div>
           <input
             type="text"
             value={formData.topic}
             onChange={(e) => setFormData({ ...formData, topic: e.target.value })}
-            placeholder="e.g., immigration, healthcare, economy"
+            placeholder="e.g., student loans, minimum wage, crypto regulation"
             className="w-full px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-400"
             required
           />
@@ -230,19 +295,36 @@ function AlertForm({
       {showThreshold && (
         <div>
           <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-            Threshold: {formData.alert_type === "issue_surge" ? `${formData.threshold}% above baseline` : `${(formData.threshold / 100).toFixed(2)} sentiment shift`}
+            Sensitivity Threshold
           </label>
+          <div className="text-xs text-zinc-500 dark:text-zinc-400 mb-2">
+            {formData.alert_type === "issue_surge" ? (
+              <>Alert when topic trends <strong>{formData.threshold}%</strong> above its normal baseline</>
+            ) : (
+              <>Alert when sentiment changes by <strong>{(formData.threshold / 100).toFixed(2)}</strong> (on -1 to +1 scale)</>
+            )}
+          </div>
           <input
             type="range"
             min={formData.alert_type === "issue_surge" ? 20 : 10}
             max={formData.alert_type === "issue_surge" ? 200 : 80}
             value={formData.threshold}
             onChange={(e) => setFormData({ ...formData, threshold: parseInt(e.target.value) })}
-            className="w-full"
+            className="w-full accent-zinc-900 dark:accent-zinc-100"
           />
-          <div className="flex justify-between text-xs text-zinc-500">
-            <span>{formData.alert_type === "issue_surge" ? "20% (sensitive)" : "0.1 (sensitive)"}</span>
-            <span>{formData.alert_type === "issue_surge" ? "200% (rare)" : "0.8 (rare)"}</span>
+          <div className="flex justify-between text-xs text-zinc-500 mt-1">
+            <span className="flex flex-col items-start">
+              <span className="font-medium">{formData.alert_type === "issue_surge" ? "20%" : "0.10"}</span>
+              <span className="text-green-600 dark:text-green-400">More alerts</span>
+            </span>
+            <span className="flex flex-col items-center">
+              <span className="font-medium">{formData.alert_type === "issue_surge" ? "50%" : "0.30"}</span>
+              <span className="text-zinc-400">Balanced</span>
+            </span>
+            <span className="flex flex-col items-end">
+              <span className="font-medium">{formData.alert_type === "issue_surge" ? "200%" : "0.80"}</span>
+              <span className="text-orange-600 dark:text-orange-400">Major events only</span>
+            </span>
           </div>
         </div>
       )}
@@ -283,17 +365,33 @@ function AlertForm({
   );
 }
 
+export interface TestResult {
+  success: boolean;
+  mode: string;
+  result: {
+    triggered: boolean;
+    message?: string;
+  };
+  emailSent?: boolean;
+  emailError?: string;
+}
+
 function AlertCard({
   alert,
   onToggle,
   onEdit,
   onDelete,
+  onTest,
 }: {
   alert: AlertConfig;
   onToggle: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onTest: (forceTrigger: boolean, sendEmail: boolean) => Promise<TestResult | null>;
 }) {
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState<TestResult | null>(null);
+
   const info = ALERT_TYPE_INFO[alert.alert_type];
   const Icon = info.icon;
 
@@ -303,55 +401,121 @@ function AlertCard({
 
   const locationLabel = STATE_OPTIONS.find(s => s.value === alert.district_code)?.label || alert.district_code;
 
+  const handleTest = async (forceTrigger: boolean) => {
+    setTesting(true);
+    setTestResult(null);
+    try {
+      const result = await onTest(forceTrigger, true);
+      setTestResult(result);
+      // Clear result after 10 seconds
+      setTimeout(() => setTestResult(null), 10000);
+    } finally {
+      setTesting(false);
+    }
+  };
+
   return (
-    <div className={`flex items-center justify-between p-4 rounded-lg border transition-all ${
+    <div className={`p-4 rounded-lg border transition-all ${
       alert.enabled
         ? "bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700"
         : "bg-zinc-50 dark:bg-zinc-900 border-zinc-100 dark:border-zinc-800 opacity-60"
     }`}>
-      <div className="flex items-center gap-3">
-        <button
-          onClick={onToggle}
-          className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
-            alert.enabled
-              ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900"
-              : "bg-zinc-200 dark:bg-zinc-700 text-zinc-500"
-          }`}
-        >
-          <Icon className="w-5 h-5" />
-        </button>
-        <div>
-          <div className="font-medium text-zinc-900 dark:text-zinc-100">
-            &ldquo;{displayValue}&rdquo;
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onToggle}
+            className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
+              alert.enabled
+                ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900"
+                : "bg-zinc-200 dark:bg-zinc-700 text-zinc-500"
+            }`}
+          >
+            <Icon className="w-5 h-5" />
+          </button>
+          <div>
+            <div className="font-medium text-zinc-900 dark:text-zinc-100">
+              &ldquo;{displayValue}&rdquo;
+            </div>
+            <div className="text-sm text-zinc-500 dark:text-zinc-400">
+              {locationLabel}
+              {alert.threshold && alert.alert_type !== "rep_mention" && (
+                <span> &bull; Threshold: {alert.alert_type === "issue_surge" ? `${alert.threshold}%` : (alert.threshold / 100).toFixed(2)}</span>
+              )}
+              {alert.notify_email && (
+                <span className="ml-2 inline-flex items-center gap-1">
+                  <Mail className="w-3 h-3" />
+                </span>
+              )}
+            </div>
           </div>
-          <div className="text-sm text-zinc-500 dark:text-zinc-400">
-            {locationLabel}
-            {alert.threshold && alert.alert_type !== "rep_mention" && (
-              <span> &bull; Threshold: {alert.alert_type === "issue_surge" ? `${alert.threshold}%` : alert.threshold}</span>
-            )}
-            {alert.notify_email && (
-              <span className="ml-2 inline-flex items-center gap-1">
-                <Mail className="w-3 h-3" />
-              </span>
-            )}
+        </div>
+
+        <div className="flex items-center gap-2">
+          {/* Test buttons */}
+          <div className="flex items-center gap-1 mr-2">
+            <button
+              onClick={() => handleTest(false)}
+              disabled={testing}
+              className="px-2 py-1 text-xs rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors disabled:opacity-50"
+              title="Run live check against real data"
+            >
+              {testing ? <Loader2 className="w-3 h-3 animate-spin" /> : "Test"}
+            </button>
+            <button
+              onClick={() => handleTest(true)}
+              disabled={testing}
+              className="px-2 py-1 text-xs rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors disabled:opacity-50"
+              title="Force trigger alert (demo mode) and send test email"
+            >
+              {testing ? <Loader2 className="w-3 h-3 animate-spin" /> : "Demo"}
+            </button>
           </div>
+
+          <button
+            onClick={onEdit}
+            className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors"
+          >
+            <Edit2 className="w-4 h-4" />
+          </button>
+          <button
+            onClick={onDelete}
+            className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-zinc-500 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
-        <button
-          onClick={onEdit}
-          className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors"
-        >
-          <Edit2 className="w-4 h-4" />
-        </button>
-        <button
-          onClick={onDelete}
-          className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-zinc-500 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
-      </div>
+      {/* Test result display */}
+      {testResult && (
+        <div className={`mt-3 p-3 rounded-lg text-sm ${
+          testResult.result.triggered
+            ? "bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800"
+            : "bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700"
+        }`}>
+          <div className="flex items-center gap-2 mb-1">
+            {testResult.result.triggered ? (
+              <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
+            ) : (
+              <XCircle className="w-4 h-4 text-zinc-400" />
+            )}
+            <span className="font-medium">
+              {testResult.result.triggered ? "Alert Triggered!" : "No Alert (threshold not met)"}
+            </span>
+            <span className="text-xs text-zinc-500">
+              ({testResult.mode === 'forced_trigger' ? 'Demo mode' : 'Live check'})
+            </span>
+          </div>
+          {testResult.result.message && (
+            <p className="text-zinc-600 dark:text-zinc-300 ml-6">{testResult.result.message}</p>
+          )}
+          {testResult.emailSent !== undefined && (
+            <p className="text-xs text-zinc-500 ml-6 mt-1">
+              {testResult.emailSent ? "Email sent successfully" : `Email not sent${testResult.emailError ? `: ${testResult.emailError}` : ''}`}
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -361,6 +525,7 @@ export default function AlertsConfig({
   onCreateAlert,
   onUpdateAlert,
   onDeleteAlert,
+  onTestAlert,
   loading = false,
 }: AlertsConfigProps) {
   const [showForm, setShowForm] = useState(false);
@@ -476,6 +641,12 @@ export default function AlertsConfig({
                       onToggle={() => onUpdateAlert(alert.id, { enabled: !alert.enabled })}
                       onEdit={() => setEditingId(alert.id)}
                       onDelete={() => onDeleteAlert(alert.id)}
+                      onTest={async (forceTrigger, sendEmail) => {
+                        if (onTestAlert) {
+                          return onTestAlert(alert, forceTrigger, sendEmail);
+                        }
+                        return null;
+                      }}
                     />
                   )
                 ))}

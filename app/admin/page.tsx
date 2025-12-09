@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Shield, Users, Settings, Plus, Trash2, Save, Bell, RefreshCw } from "lucide-react";
-import AlertsConfig from "@/app/components/admin/AlertsConfig";
+import AlertsConfig, { TestResult } from "@/app/components/admin/AlertsConfig";
 import AlertHistory from "@/app/components/admin/AlertHistory";
 import type { AlertConfig, AlertHistoryEntry, CreateAlertRequest } from "@/types/alerts";
 
@@ -289,6 +289,37 @@ export default function AdminPage() {
     } finally {
       setCheckingAlerts(false);
       setTimeout(() => setMessage(""), 5000);
+    }
+  };
+
+  const handleTestAlert = async (
+    alert: AlertConfig,
+    forceTrigger: boolean,
+    sendEmail: boolean
+  ): Promise<TestResult | null> => {
+    try {
+      const response = await fetch("/api/admin/alerts/test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ alert, forceTrigger, sendTestEmail: sendEmail }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.emailSent) {
+          setMessage("Test email sent successfully!");
+          setTimeout(() => setMessage(""), 5000);
+        }
+        return result;
+      } else {
+        const error = await response.json();
+        setMessage(`Test failed: ${error.error}`);
+        return null;
+      }
+    } catch (error) {
+      console.error("Failed to test alert:", error);
+      setMessage("Failed to test alert");
+      return null;
     }
   };
 
@@ -603,6 +634,7 @@ export default function AdminPage() {
                 onCreateAlert={handleCreateAlert}
                 onUpdateAlert={handleUpdateAlert}
                 onDeleteAlert={handleDeleteAlert}
+                onTestAlert={handleTestAlert}
                 loading={alertsLoading}
               />
             </div>
