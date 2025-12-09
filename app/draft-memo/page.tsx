@@ -6,6 +6,7 @@ import AppLayout from "../components/AppLayout";
 import { FileText, Send, Copy, Download, Loader2, User, ChevronDown, ChevronUp, Settings } from "lucide-react";
 
 type MemoType = "press-release" | "newsletter" | "constituent-letter" | "floor-statement" | "social-media";
+type Perspective = "democrat" | "republican" | "neutral" | "";
 
 interface MemoTemplate {
   type: MemoType;
@@ -58,6 +59,7 @@ function DraftMemoContent() {
   const [district, setDistrict] = useState("");
   const [topic, setTopic] = useState("");
   const [additionalContext, setAdditionalContext] = useState("");
+  const [perspective, setPerspective] = useState<Perspective>("");
   const [generatedMemo, setGeneratedMemo] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -123,6 +125,7 @@ function DraftMemoContent() {
           district: district || undefined,
           topic: topic.trim(),
           additionalContext: fullContext || undefined,
+          perspective: perspective || undefined,
         }),
       });
 
@@ -255,6 +258,65 @@ function DraftMemoContent() {
                 rows={3}
                 className="w-full px-4 py-3 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-zinc-500 focus:border-transparent resize-none"
               />
+            </div>
+
+            {/* Perspective Selection */}
+            <div>
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                Drafting Perspective (Optional)
+              </label>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPerspective("")}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    perspective === ""
+                      ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900"
+                      : "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                  }`}
+                >
+                  Default
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPerspective("democrat")}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    perspective === "democrat"
+                      ? "bg-blue-600 text-white"
+                      : "bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30"
+                  }`}
+                >
+                  Democrat
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPerspective("republican")}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    perspective === "republican"
+                      ? "bg-red-600 text-white"
+                      : "bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/30"
+                  }`}
+                >
+                  Republican
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPerspective("neutral")}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    perspective === "neutral"
+                      ? "bg-purple-600 text-white"
+                      : "bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/30"
+                  }`}
+                >
+                  Neutral/Bipartisan
+                </button>
+              </div>
+              <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+                {perspective === "democrat" && "Will use Democratic messaging and progressive framing."}
+                {perspective === "republican" && "Will use Republican messaging and conservative framing."}
+                {perspective === "neutral" && "Will use strictly bipartisan, non-partisan language."}
+                {perspective === "" && "Will generate without specific partisan framing."}
+              </p>
             </div>
 
             {/* House Member Context Section */}

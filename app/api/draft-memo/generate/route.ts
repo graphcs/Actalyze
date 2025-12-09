@@ -7,11 +7,14 @@ const openai = new OpenAI({
 
 type MemoType = "press-release" | "newsletter" | "constituent-letter" | "floor-statement" | "social-media";
 
+type Perspective = "democrat" | "republican" | "neutral";
+
 interface GenerateRequest {
   type: MemoType;
   district?: string;
   topic: string;
   additionalContext?: string;
+  perspective?: Perspective;
 }
 
 const MEMO_FORMATS: Record<MemoType, { systemPrompt: string; format: string }> = {
@@ -83,7 +86,7 @@ Use engaging, accessible language. Avoid partisan attacks. Focus on policy and c
 export async function POST(request: NextRequest) {
   try {
     const body: GenerateRequest = await request.json();
-    const { type, district, topic, additionalContext } = body;
+    const { type, district, topic, additionalContext, perspective } = body;
 
     if (!topic) {
       return NextResponse.json(
@@ -104,9 +107,19 @@ export async function POST(request: NextRequest) {
       ? `The Member represents ${district}. Reference the district when appropriate.`
       : "";
 
+    // Add perspective guidance if specified
+    let perspectiveContext = "";
+    if (perspective === "democrat") {
+      perspectiveContext = `\n\nPERSPECTIVE: Write from a Democratic/progressive perspective. Emphasize values like social equity, environmental protection, workers' rights, healthcare access, and government programs that support working families. Use messaging and framing common in Democratic communications.`;
+    } else if (perspective === "republican") {
+      perspectiveContext = `\n\nPERSPECTIVE: Write from a Republican/conservative perspective. Emphasize values like fiscal responsibility, free markets, individual liberty, limited government, strong national defense, and traditional values. Use messaging and framing common in Republican communications.`;
+    } else if (perspective === "neutral") {
+      perspectiveContext = `\n\nPERSPECTIVE: Write from a strictly neutral, bipartisan perspective. Avoid partisan language or framing. Focus on facts, common ground, and solutions that appeal across party lines. Do not favor either party's talking points.`;
+    }
+
     const userPrompt = `${format.format}
 
-${districtContext}
+${districtContext}${perspectiveContext}
 
 Topic/Description: ${topic}
 
