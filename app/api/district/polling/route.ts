@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { serverCache, generateCacheKey } from "@/src/lib/cache";
+import {
+  getFromDbCache,
+  setInDbCache,
+  generateDistrictCacheKey,
+} from "@/lib/db-cache";
 
 /**
  * GET /api/district/polling?district=VA05
@@ -29,9 +34,22 @@ export async function GET(request: NextRequest) {
     const [, stateCode, districtNum] = match;
     const districtLabel = `${stateCode}-${districtNum}`;
 
-    // Check cache
+    // Check cache settings
     const useCacheHeader = request.headers.get('x-use-cache');
     const useCache = useCacheHeader !== 'false';
+    const cacheDuration = parseInt(request.headers.get('x-cache-duration') || '3600', 10);
+    const dbCacheKey = generateDistrictCacheKey('polling', districtCode);
+
+    // Check DB cache first (if cache reading is enabled)
+    if (useCache) {
+      const dbCached = await getFromDbCache<{ trend: string | null; description: string }>(dbCacheKey, true);
+      if (dbCached) {
+        console.log(`📦 DB cache hit for polling ${districtCode}`);
+        return NextResponse.json(dbCached);
+      }
+    }
+
+    // Check memory cache as fallback
     const cacheKey = generateCacheKey('district-polling', { district: districtCode });
     const cached = serverCache.get<{ trend: string | null; description: string }>(cacheKey, useCache);
 
@@ -103,8 +121,11 @@ export async function GET(request: NextRequest) {
       description: pollingData.description || "Recent polling data unavailable"
     };
 
-    // Save to cache
+    // Save to memory cache
     serverCache.set(cacheKey, result);
+
+    // Save to DB cache (always write, even if cache reading is disabled)
+    await setInDbCache(dbCacheKey, 'polling', districtCode, result, cacheDuration);
 
     return NextResponse.json(result);
 

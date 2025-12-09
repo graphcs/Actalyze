@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { serverCache, generateCacheKey } from "@/src/lib/cache";
+import {
+  getFromDbCache,
+  setInDbCache,
+  generateDistrictCacheKey,
+} from "@/lib/db-cache";
 
 /**
  * Check if the AI response is unhelpful (e.g., "I cannot provide an answer")
@@ -49,9 +54,22 @@ export async function GET(request: NextRequest) {
 
     console.log(`🔍 Fetching hyperlocal summary for district ${districtLabel}`);
 
-    // Check cache
+    // Check cache settings
     const useCacheHeader = request.headers.get('x-use-cache');
     const useCache = useCacheHeader !== 'false';
+    const cacheDuration = parseInt(request.headers.get('x-cache-duration') || '3600', 10);
+    const dbCacheKey = generateDistrictCacheKey('summary', districtCode);
+
+    // Check DB cache first (if cache reading is enabled)
+    if (useCache) {
+      const dbCached = await getFromDbCache<{ summary: string }>(dbCacheKey, true);
+      if (dbCached) {
+        console.log(`📦 DB cache hit for summary ${districtCode}`);
+        return NextResponse.json(dbCached);
+      }
+    }
+
+    // Check memory cache as fallback
     const cacheKey = generateCacheKey('district-summary', { district: districtCode });
     const cached = serverCache.get<{ summary: string }>(cacheKey, useCache);
 
@@ -120,8 +138,11 @@ export async function GET(request: NextRequest) {
 
     const result = { summary };
 
-    // Save to cache
+    // Save to memory cache
     serverCache.set(cacheKey, result);
+
+    // Save to DB cache (always write, even if cache reading is disabled)
+    await setInDbCache(dbCacheKey, 'summary', districtCode, result, cacheDuration);
 
     return NextResponse.json(result);
 

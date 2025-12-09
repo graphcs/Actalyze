@@ -7,6 +7,12 @@ import {
   generateDistrictCacheKey,
 } from "@/lib/db-cache";
 import {
+  getCachedTweets,
+  cacheTweets,
+  getCachedTweetCount,
+  CachedTweet,
+} from "@/lib/tweet-cache";
+import {
   Tweet,
   AIIntelResponse,
   STATE_NAMES,
@@ -176,105 +182,165 @@ ONLY output the bulleted list with NO additional commentary.`;
       searchTerms.push(districtLabel, stateName + ' politics');
     }
 
-    // Step 2: Search Twitter for tweets about these topics
-    const client = new TwitterApi({
-      appKey: twitterKey,
-      appSecret: twitterSecret,
-    });
-
-    const appOnlyClient = await client.appLogin();
+    // Step 2: Check cached tweets first to save API calls
     const now = new Date();
-
     const allTweetsWithMetrics: TweetWithMetrics[] = [];
     const seenTweetIds = new Set<string>();
 
-    // Reduced from 10 to 5 to save API calls
-    for (const searchTerm of searchTerms.slice(0, 5)) {
-      console.log(`🐦 Searching Twitter for: "${searchTerm}"`);
+    // Check if we have enough cached tweets (at least 30)
+    const cachedTweetCount = await getCachedTweetCount(districtCode, 6);
+    let usedCache = false;
 
-      const searchQuery = `${searchTerm} -is:retweet -is:reply lang:en`;
+    if (cachedTweetCount >= 30) {
+      console.log(`📦 Using ${cachedTweetCount} cached tweets for ${districtCode}`);
+      const cachedTweets = await getCachedTweets(searchTerms, districtCode, 6);
+
+      for (const cached of cachedTweets) {
+        if (seenTweetIds.has(cached.id)) continue;
+        seenTweetIds.add(cached.id);
+
+        const createdAt = cached.created_at ? new Date(cached.created_at) : now;
+        const ageDays = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24);
+
+        allTweetsWithMetrics.push({
+          ...cached,
+          age_days: ageDays,
+        });
+      }
+
+      usedCache = true;
+      console.log(`📊 Loaded ${allTweetsWithMetrics.length} tweets from cache`);
+    }
+
+    // Only fetch from Twitter if cache insufficient
+    if (!usedCache || allTweetsWithMetrics.length < 30) {
+      console.log(`🐦 Fetching fresh tweets from Twitter API`);
+
+      // Use Bearer Token if available (more efficient, no OAuth handshake)
+      const bearerToken = process.env.TWITTER_BEARER_TOKEN;
+      let appOnlyClient: TwitterApi;
+
+      if (bearerToken) {
+        appOnlyClient = new TwitterApi(bearerToken);
+      } else {
+        const client = new TwitterApi({
+          appKey: twitterKey,
+          appSecret: twitterSecret,
+        });
+        appOnlyClient = await client.appLogin();
+      }
+
+      // OPTIMIZED: Combine search terms into a single query with OR operators
+      const topTerms = searchTerms.slice(0, 5);
+      const combinedQuery = `(${topTerms.join(' OR ')}) -is:retweet -is:reply lang:en`;
+      console.log(`🐦 Combined Twitter search: "${combinedQuery}"`);
 
       try {
-        const result = await appOnlyClient.v2.search(searchQuery, {
-          max_results: 100, // Increased from 30 for better sample size
+        const result = await appOnlyClient.v2.search(combinedQuery, {
+          max_results: 100,
           'tweet.fields': ['created_at', 'author_id', 'public_metrics'],
           'user.fields': ['location', 'description'],
           expansions: ['author_id'],
         });
 
-        if (!result.data.data || result.data.data.length === 0) {
-          console.log(`⚠️  No tweets found for: "${searchTerm}"`);
-          continue;
-        }
+        const newTweets: CachedTweet[] = [];
 
-        // Map user data
-        const users = new Map<string, UserData>();
-        if (result.data.includes?.users) {
-          for (const user of result.data.includes.users) {
-            users.set(user.id, {
-              id: user.id,
-              name: user.name || 'Unknown',
-              username: user.username || 'unknown',
-              location: user.location,
-              description: user.description,
+        if (result.data.data && result.data.data.length > 0) {
+          // Map user data
+          const users = new Map<string, UserData>();
+          if (result.data.includes?.users) {
+            for (const user of result.data.includes.users) {
+              users.set(user.id, {
+                id: user.id,
+                name: user.name || 'Unknown',
+                username: user.username || 'unknown',
+                location: user.location,
+                description: user.description,
+              });
+            }
+          }
+
+          // Process tweets
+          for (const tweet of result.data.data) {
+            if (seenTweetIds.has(tweet.id)) continue;
+            seenTweetIds.add(tweet.id);
+
+            const user = users.get(tweet.author_id || '');
+            const username = user?.username || 'unknown';
+
+            const createdAt = tweet.created_at ? new Date(tweet.created_at) : now;
+            const ageDays = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24);
+
+            const metrics = tweet.public_metrics || { like_count: 0, retweet_count: 0, reply_count: 0 };
+            const engagementScore =
+              (metrics.like_count || 0) +
+              (metrics.retweet_count || 0) * 2 +
+              (metrics.reply_count || 0);
+
+            const tweetData: TweetWithMetrics = {
+              id: tweet.id,
+              text: tweet.text || '',
+              author: user?.name || 'Unknown',
+              username: username,
+              url: `https://twitter.com/${username}/status/${tweet.id}`,
+              created_at: tweet.created_at || '',
+              user_location: user?.location,
+              user_bio: user?.description,
+              engagement_score: engagementScore,
+              age_days: ageDays,
+            };
+
+            allTweetsWithMetrics.push(tweetData);
+            newTweets.push({
+              ...tweetData,
+              search_terms: topTerms,
+              fetched_at: now.toISOString(),
             });
           }
+
+          console.log(`✅ Found ${result.data.data.length} tweets from Twitter API`);
+
+          // Cache the new tweets for future use
+          if (newTweets.length > 0) {
+            await cacheTweets(newTweets, combinedQuery, districtCode);
+          }
+        } else {
+          console.log(`⚠️ No tweets found from Twitter API`);
         }
-
-        // Process tweets
-        for (const tweet of result.data.data) {
-          if (seenTweetIds.has(tweet.id)) continue;
-          seenTweetIds.add(tweet.id);
-
-          const user = users.get(tweet.author_id || '');
-          const username = user?.username || 'unknown';
-
-          const createdAt = tweet.created_at ? new Date(tweet.created_at) : now;
-          const ageDays = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24);
-
-          const metrics = tweet.public_metrics || { like_count: 0, retweet_count: 0, reply_count: 0 };
-          const engagementScore =
-            (metrics.like_count || 0) +
-            (metrics.retweet_count || 0) * 2 +
-            (metrics.reply_count || 0);
-
-          allTweetsWithMetrics.push({
-            id: tweet.id,
-            text: tweet.text || '',
-            author: user?.name || 'Unknown',
-            username: username,
-            url: `https://twitter.com/${username}/status/${tweet.id}`,
-            created_at: tweet.created_at || '',
-            user_location: user?.location,
-            user_bio: user?.description,
-            engagement_score: engagementScore,
-            age_days: ageDays,
-          });
-        }
-
-        console.log(`✅ Found ${result.data.data.length} tweets for "${searchTerm}"`);
       } catch (error) {
-        console.error(`❌ Error searching for "${searchTerm}":`, error);
-        continue;
+        console.error(`❌ Error in Twitter search:`, error);
       }
     }
 
     console.log(`📊 Total tweets collected: ${allTweetsWithMetrics.length}`);
 
-    // Fallback: if insufficient data, add ONE state-level search (reduced from 3 to save API calls)
-    if (allTweetsWithMetrics.length < 20) {
+    // Fallback: if insufficient data and we didn't use cached data, try state-level search
+    // Skip this if we used cache (to save API calls)
+    if (allTweetsWithMetrics.length < 20 && !usedCache) {
       console.log(`⚠️ Only ${allTweetsWithMetrics.length} tweets found, adding fallback search`);
 
-      const fallbackTerms = [
-        `${stateName} politics`,
-      ];
+      // Initialize Twitter client for fallback
+      const bearerToken = process.env.TWITTER_BEARER_TOKEN;
+      let fallbackClient: TwitterApi;
+
+      if (bearerToken) {
+        fallbackClient = new TwitterApi(bearerToken);
+      } else {
+        const client = new TwitterApi({
+          appKey: twitterKey,
+          appSecret: twitterSecret,
+        });
+        fallbackClient = await client.appLogin();
+      }
+
+      const fallbackTerms = [`${stateName} politics`];
 
       for (const searchTerm of fallbackTerms) {
         console.log(`🐦 Fallback search for: "${searchTerm}"`);
         const searchQuery = `${searchTerm} -is:retweet -is:reply lang:en`;
 
         try {
-          const result = await appOnlyClient.v2.search(searchQuery, {
+          const result = await fallbackClient.v2.search(searchQuery, {
             max_results: 100,
             'tweet.fields': ['created_at', 'author_id', 'public_metrics'],
             'user.fields': ['location', 'description'],
@@ -295,6 +361,8 @@ ONLY output the bulleted list with NO additional commentary.`;
               }
             }
 
+            const fallbackTweets: CachedTweet[] = [];
+
             for (const tweet of result.data.data) {
               if (seenTweetIds.has(tweet.id)) continue;
               seenTweetIds.add(tweet.id);
@@ -306,7 +374,7 @@ ONLY output the bulleted list with NO additional commentary.`;
               const metrics = tweet.public_metrics || { like_count: 0, retweet_count: 0, reply_count: 0 };
               const engagementScore = (metrics.like_count || 0) + (metrics.retweet_count || 0) * 2 + (metrics.reply_count || 0);
 
-              allTweetsWithMetrics.push({
+              const tweetData: TweetWithMetrics = {
                 id: tweet.id,
                 text: tweet.text || '',
                 author: user?.name || 'Unknown',
@@ -317,8 +385,21 @@ ONLY output the bulleted list with NO additional commentary.`;
                 user_bio: user?.description,
                 engagement_score: engagementScore,
                 age_days: ageDays,
+              };
+
+              allTweetsWithMetrics.push(tweetData);
+              fallbackTweets.push({
+                ...tweetData,
+                search_terms: [searchTerm],
+                fetched_at: now.toISOString(),
               });
             }
+
+            // Cache fallback tweets too
+            if (fallbackTweets.length > 0) {
+              await cacheTweets(fallbackTweets, searchQuery, districtCode);
+            }
+
             console.log(`✅ Fallback found ${result.data.data.length} tweets for "${searchTerm}"`);
           }
         } catch (error) {

@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { serverCache, generateCacheKey } from "@/src/lib/cache";
+import {
+  getFromDbCache,
+  setInDbCache,
+  generateDistrictCacheKey,
+} from "@/lib/db-cache";
 
 export interface PartyPerspective {
   democrats: {
@@ -34,8 +39,23 @@ export async function GET(request: NextRequest) {
     // Check cache preference from header (default: true)
     const useCacheHeader = request.headers.get('x-use-cache');
     const useCache = useCacheHeader !== 'false';
+    const cacheDuration = parseInt(request.headers.get('x-cache-duration') || '3600', 10);
 
-    // Try to get from cache
+    // Extract district code from topic if it matches pattern (e.g., "VA05 district")
+    const districtMatch = topic.match(/^([A-Z]{2}\d{2})\s+district$/i);
+    const districtCode = districtMatch ? districtMatch[1].toUpperCase() : 'topic-general';
+    const dbCacheKey = generateDistrictCacheKey('perspectives', districtCode, { topic });
+
+    // Check DB cache first (if cache reading is enabled)
+    if (useCache) {
+      const dbCached = await getFromDbCache<PartyPerspective>(dbCacheKey, true);
+      if (dbCached) {
+        console.log(`📦 DB cache hit for perspectives: ${topic}`);
+        return NextResponse.json(dbCached);
+      }
+    }
+
+    // Fall back to memory cache
     const cacheKey = generateCacheKey('perspectives', { topic });
     const cached = serverCache.get<PartyPerspective>(cacheKey, useCache);
 
@@ -66,8 +86,11 @@ export async function GET(request: NextRequest) {
       republicans: republicanResponse,
     };
 
-    // Save to cache (always save, even if user has caching off)
+    // Save to memory cache
     serverCache.set(cacheKey, result);
+
+    // Save to DB cache (always write, even if cache reading is disabled)
+    await setInDbCache(dbCacheKey, 'perspectives', districtCode, result, cacheDuration);
 
     return NextResponse.json(result);
 
