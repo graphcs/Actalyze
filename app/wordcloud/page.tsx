@@ -8,7 +8,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { BarChart3, Download, TrendingUp, MessageSquare, Heart, ExternalLink, ChevronDown, ChevronUp, MousePointer, Settings } from "lucide-react";
+import { BarChart3, Download, TrendingUp, MessageSquare, Heart, ExternalLink, ChevronDown, ChevronUp, MousePointer, Settings, FileText } from "lucide-react";
 import AppLayout from "../components/AppLayout";
 import WordCloudVisualization from "../components/WordCloudVisualization";
 import WordCloudFiltersComponent from "../components/WordCloudFilters";
@@ -181,6 +181,41 @@ function WordCloudPageContent() {
     URL.revokeObjectURL(url);
   };
 
+  const handleDraftMemo = () => {
+    if (!wordCloudData || !filters) return;
+
+    // Get top words for context
+    const topWords = wordCloudData.words
+      .slice(0, 10)
+      .map((w) => w.text)
+      .join(", ");
+
+    // Calculate sentiment breakdown
+    const positiveCount = wordCloudData.words.filter((w) => w.sentiment > 0.1).length;
+    const negativeCount = wordCloudData.words.filter((w) => w.sentiment < -0.1).length;
+    const neutralCount = wordCloudData.words.length - positiveCount - negativeCount;
+
+    // Build description with analytics context
+    const description = `Topic: "${filters.topic}" (${getLocationLabel(filters.location || "national")})
+
+Key Themes: ${topWords}
+
+Sentiment Analysis:
+- Positive mentions: ${positiveCount}
+- Neutral mentions: ${neutralCount}
+- Negative mentions: ${negativeCount}
+
+Based on ${wordCloudData.metadata.totalTweets.toLocaleString()} tweets analyzed.`;
+
+    // Navigate to draft memo with pre-populated data
+    const params = new URLSearchParams({
+      topic: filters.topic,
+      description: description,
+      source: "wordcloud",
+    });
+    router.push(`/draft-memo?${params.toString()}`);
+  };
+
   return (
     <AppLayout
       onChatClick={() => router.push("/chatbot")}
@@ -266,6 +301,14 @@ function WordCloudPageContent() {
                   <Settings className="w-4 h-4" />
                   Edit Filters
                   {filtersExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleDraftMemo}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-600 dark:border-zinc-400 bg-transparent hover:bg-zinc-800 dark:hover:bg-zinc-200 text-white dark:text-zinc-900 font-medium transition-colors"
+                >
+                  <FileText className="w-4 h-4" />
+                  Draft Memo
                 </Button>
                 <Button
                   variant="outline"

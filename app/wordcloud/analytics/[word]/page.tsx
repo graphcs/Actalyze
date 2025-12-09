@@ -18,6 +18,7 @@ import {
   Users,
   Link2,
   Loader2,
+  FileText,
 } from "lucide-react";
 import AppLayout from "@/app/components/AppLayout";
 import { Button } from "@/app/components/ui/Button";
@@ -110,6 +111,42 @@ function WordAnalyticsContent({ params }: WordAnalyticsPageProps) {
     return (score * 100).toFixed(1);
   };
 
+  const handleDraftMemo = () => {
+    if (!analytics) return;
+
+    // Get related words for context
+    const relatedWords = analytics.relatedWords
+      .slice(0, 5)
+      .map((w) => w.word)
+      .join(", ");
+
+    // Get sentiment info
+    const sentimentLabel = analytics.sentiment.average > 0.1
+      ? "positive"
+      : analytics.sentiment.average < -0.1
+      ? "negative"
+      : "neutral";
+
+    // Build description with analytics context
+    const description = `Topic: "${topic}" - Word: "${word}" (${getLocationLabel(location)})
+
+Key Word Analysis: "${word}"
+- Average Sentiment: ${formatSentimentScore(analytics.sentiment.average)}% (${sentimentLabel})
+- Sentiment Distribution: ${analytics.sentiment.distribution.positive} positive, ${analytics.sentiment.distribution.neutral} neutral, ${analytics.sentiment.distribution.negative} negative
+
+Related Terms: ${relatedWords || "N/A"}
+
+Top Tweet Themes: ${analytics.topTweets.slice(0, 2).map(t => t.text.slice(0, 100)).join("; ")}`;
+
+    // Navigate to draft memo with pre-populated data
+    const params = new URLSearchParams({
+      topic: `${topic} - ${word}`,
+      description: description,
+      source: "word-analytics",
+    });
+    router.push(`/draft-memo?${params.toString()}`);
+  };
+
   return (
     <AppLayout
       onChatClick={() => router.push("/chatbot")}
@@ -123,14 +160,26 @@ function WordAnalyticsContent({ params }: WordAnalyticsPageProps) {
           transition={{ duration: 0.5 }}
           className="mb-8"
         >
-          <Button
-            variant="outline"
-            onClick={() => router.back()}
-            className="mb-6 flex items-center gap-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Word Cloud
-          </Button>
+          <div className="flex items-center gap-3 mb-6">
+            <Button
+              variant="outline"
+              onClick={() => router.back()}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Word Cloud
+            </Button>
+            {analytics && (
+              <Button
+                variant="outline"
+                onClick={handleDraftMemo}
+                className="flex items-center gap-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-zinc-900 dark:border-zinc-100 hover:bg-zinc-800 dark:hover:bg-zinc-200"
+              >
+                <FileText className="w-4 h-4" />
+                Draft Communication Memo
+              </Button>
+            )}
+          </div>
 
           <div className="flex items-center gap-4 mb-4">
             <div className="w-14 h-14 rounded-xl bg-zinc-900 dark:bg-zinc-100 flex items-center justify-center">

@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import AppLayout from "../components/AppLayout";
-import { FileText, Send, Copy, Download, Loader2 } from "lucide-react";
+import { FileText, Send, Copy, Download, Loader2, User, ChevronDown, ChevronUp, Settings } from "lucide-react";
 
 type MemoType = "press-release" | "newsletter" | "constituent-letter" | "floor-statement" | "social-media";
 
@@ -47,8 +47,13 @@ const MEMO_TEMPLATES: MemoTemplate[] = [
   },
 ];
 
-export default function DraftMemoPage() {
+// Local storage key for house member context
+const HOUSE_MEMBER_CONTEXT_KEY = "actalyze_house_member_context";
+
+function DraftMemoContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [selectedType, setSelectedType] = useState<MemoType>("press-release");
   const [district, setDistrict] = useState("");
   const [topic, setTopic] = useState("");
@@ -58,7 +63,40 @@ export default function DraftMemoPage() {
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
 
+  // House member context
+  const [houseMemberContext, setHouseMemberContext] = useState("");
+  const [useHouseMemberContext, setUseHouseMemberContext] = useState(false);
+  const [showContextSettings, setShowContextSettings] = useState(false);
+  const [contextSaved, setContextSaved] = useState(false);
+
   const selectedTemplate = MEMO_TEMPLATES.find((t) => t.type === selectedType)!;
+
+  // Load house member context from localStorage and URL params
+  useEffect(() => {
+    // Load house member context
+    const savedContext = localStorage.getItem(HOUSE_MEMBER_CONTEXT_KEY);
+    if (savedContext) {
+      setHouseMemberContext(savedContext);
+    }
+
+    // Pre-populate from URL params
+    const urlTopic = searchParams.get("topic");
+    const urlDescription = searchParams.get("description");
+
+    if (urlTopic) {
+      setTopic(urlTopic);
+    }
+    if (urlDescription) {
+      setAdditionalContext(urlDescription);
+    }
+  }, [searchParams]);
+
+  // Save house member context to localStorage
+  const saveHouseMemberContext = () => {
+    localStorage.setItem(HOUSE_MEMBER_CONTEXT_KEY, houseMemberContext);
+    setContextSaved(true);
+    setTimeout(() => setContextSaved(false), 2000);
+  };
 
   const handleGenerate = async () => {
     if (!topic.trim()) {
@@ -70,6 +108,12 @@ export default function DraftMemoPage() {
     setError("");
     setGeneratedMemo("");
 
+    // Build context including house member info if enabled
+    let fullContext = additionalContext.trim();
+    if (useHouseMemberContext && houseMemberContext.trim()) {
+      fullContext = `House Member Context:\n${houseMemberContext.trim()}\n\n${fullContext}`;
+    }
+
     try {
       const response = await fetch("/api/draft-memo/generate", {
         method: "POST",
@@ -78,7 +122,7 @@ export default function DraftMemoPage() {
           type: selectedType,
           district: district || undefined,
           topic: topic.trim(),
-          additionalContext: additionalContext.trim() || undefined,
+          additionalContext: fullContext || undefined,
         }),
       });
 
@@ -213,6 +257,74 @@ export default function DraftMemoPage() {
               />
             </div>
 
+            {/* House Member Context Section */}
+            <div className="border border-zinc-200 dark:border-zinc-700 rounded-lg overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setShowContextSettings(!showContextSettings)}
+                className="w-full flex items-center justify-between px-4 py-3 bg-zinc-50 dark:bg-zinc-800/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <User className="w-4 h-4 text-zinc-500" />
+                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    House Member Context
+                  </span>
+                  {houseMemberContext && (
+                    <span className="px-2 py-0.5 text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full">
+                      Saved
+                    </span>
+                  )}
+                </div>
+                {showContextSettings ? (
+                  <ChevronUp className="w-4 h-4 text-zinc-500" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-zinc-500" />
+                )}
+              </button>
+
+              {showContextSettings && (
+                <div className="p-4 space-y-3 border-t border-zinc-200 dark:border-zinc-700">
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                    Add information about the House member (name, district, priorities, voting record, etc.) to personalize generated memos.
+                  </p>
+                  <textarea
+                    value={houseMemberContext}
+                    onChange={(e) => setHouseMemberContext(e.target.value)}
+                    placeholder="e.g., Representative Jane Smith, CA-12. Priorities: climate action, affordable housing, healthcare access. Known for bipartisan work on infrastructure..."
+                    rows={4}
+                    className="w-full px-3 py-2 text-sm rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-zinc-500 focus:border-transparent resize-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={saveHouseMemberContext}
+                    className="px-4 py-2 text-sm bg-zinc-100 dark:bg-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-600 text-zinc-700 dark:text-zinc-300 rounded-lg transition-colors"
+                  >
+                    {contextSaved ? "Saved!" : "Save Context"}
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Use House Member Context Checkbox */}
+            {houseMemberContext && (
+              <label className="flex items-center gap-3 p-3 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/30 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800/50 transition-colors">
+                <input
+                  type="checkbox"
+                  checked={useHouseMemberContext}
+                  onChange={(e) => setUseHouseMemberContext(e.target.checked)}
+                  className="w-4 h-4 rounded border-zinc-300 dark:border-zinc-600 text-zinc-900 dark:text-zinc-100 focus:ring-zinc-500"
+                />
+                <div>
+                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    Use House Member Context
+                  </span>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                    Include saved member information when generating the memo
+                  </p>
+                </div>
+              </label>
+            )}
+
             {error && (
               <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 text-sm">
                 {error}
@@ -298,5 +410,19 @@ export default function DraftMemoPage() {
         </div>
       </div>
     </AppLayout>
+  );
+}
+
+export default function DraftMemoPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-white dark:bg-zinc-950 flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-zinc-400" />
+        </div>
+      }
+    >
+      <DraftMemoContent />
+    </Suspense>
   );
 }
