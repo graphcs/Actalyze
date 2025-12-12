@@ -15,7 +15,6 @@ import { Button } from "./ui/Button";
 import { Badge } from "./ui/Badge";
 import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import CacheToggle from "./CacheToggle";
 
 interface NavProps {
   onChatClick?: () => void;
@@ -65,7 +64,6 @@ export default function Nav({ onChatClick, onUploadClick }: NavProps) {
           </Badge>
         </div>
         <div className="flex items-center gap-2">
-          <CacheToggle />
           <Button variant="ghost" onClick={() => router.push("/")}>
             <MapPin className="w-4 h-4" />
             Districts

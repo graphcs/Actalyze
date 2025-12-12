@@ -13,7 +13,7 @@ const CACHE_DURATIONS = [
 
 export default function CacheToggle() {
   const [cacheEnabled, setCacheEnabled] = useState(true);
-  const [cacheDuration, setCacheDuration] = useState('1h');
+  const [cacheDuration, setCacheDuration] = useState('24h'); // Default to 24 hours
   const [showDropdown, setShowDropdown] = useState(false);
   const [mounted, setMounted] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -63,7 +63,7 @@ export default function CacheToggle() {
     return null; // Avoid hydration mismatch
   }
 
-  const currentDuration = CACHE_DURATIONS.find(d => d.value === cacheDuration) || CACHE_DURATIONS[1];
+  const currentDuration = CACHE_DURATIONS.find(d => d.value === cacheDuration) || CACHE_DURATIONS[3]; // Default to 24h
 
   return (
     <div className="flex items-center gap-2" ref={dropdownRef}>
@@ -129,7 +129,7 @@ export default function CacheToggle() {
  */
 export function useCachePreference(): { enabled: boolean; duration: string; durationSeconds: number } {
   const [cacheEnabled, setCacheEnabled] = useState(true);
-  const [cacheDuration, setCacheDuration] = useState('1h');
+  const [cacheDuration, setCacheDuration] = useState('24h'); // Default to 24 hours
 
   useEffect(() => {
     const savedEnabled = localStorage.getItem('cacheEnabled');
@@ -142,7 +142,7 @@ export function useCachePreference(): { enabled: boolean; duration: string; dura
     }
   }, []);
 
-  const durationConfig = CACHE_DURATIONS.find(d => d.value === cacheDuration) || CACHE_DURATIONS[1];
+  const durationConfig = CACHE_DURATIONS.find(d => d.value === cacheDuration) || CACHE_DURATIONS[3]; // Default to 24h
 
   return {
     enabled: cacheEnabled,

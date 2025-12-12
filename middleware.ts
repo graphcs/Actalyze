@@ -119,26 +119,30 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // User is not authenticated - check if guest mode is allowed
-  if (settings.mode === "guest") {
-    // Check if guest mode cookie exists or guest param is present
-    const guestModeCookie = request.cookies.get("guest_mode_enabled");
-    const searchParams = request.nextUrl.searchParams;
-    const isGuestAccess = searchParams.get("guest") === "true";
+  // User is not authenticated - check for guest access
+  // Check guest cookie/param FIRST, before settings check (in case Supabase fails in Edge Runtime)
+  const guestModeCookie = request.cookies.get("guest_mode_enabled");
+  const searchParams = request.nextUrl.searchParams;
+  const isGuestAccess = searchParams.get("guest") === "true";
 
-    if (isGuestAccess || guestModeCookie) {
-      // Set a cookie to remember guest mode for this session
-      const response = NextResponse.next();
-      response.cookies.set("guest_mode_enabled", "true", {
-        httpOnly: true,
-        sameSite: "lax",
-        maxAge: 60 * 60 * 24, // 24 hours
-      });
-      return response;
-    }
+  // If user has existing guest session cookie, allow access
+  if (guestModeCookie?.value === "true") {
+    return NextResponse.next();
   }
 
-  // Not authenticated and guest mode not allowed or not activated - redirect to home
+  // For new guest access requests, check if guest mode is allowed
+  if (isGuestAccess && settings.mode === "guest") {
+    // Set a cookie to remember guest mode for this session
+    const response = NextResponse.next();
+    response.cookies.set("guest_mode_enabled", "true", {
+      httpOnly: true,
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24, // 24 hours
+    });
+    return response;
+  }
+
+  // Not authenticated and no valid guest session - redirect to home
   return NextResponse.redirect(new URL("/", request.url));
 }
 
@@ -157,5 +161,6 @@ export const config = {
     "/casework/:path*",
     "/ethics-compliance/:path*",
     "/connect-cdp/:path*",
+    "/nationwide/:path*",
   ],
 };

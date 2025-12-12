@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Shield, Users, Settings, Plus, Trash2, Save, Bell, RefreshCw } from "lucide-react";
+import { Shield, Users, Settings, Plus, Trash2, Save, Bell, RefreshCw, Zap, ZapOff } from "lucide-react";
 import AlertsConfig, { TestResult } from "@/app/components/admin/AlertsConfig";
 import AlertHistory from "@/app/components/admin/AlertHistory";
 import type { AlertConfig, AlertHistoryEntry, CreateAlertRequest } from "@/types/alerts";
@@ -36,6 +36,17 @@ export default function AdminPage() {
   const [alertHistory, setAlertHistory] = useState<AlertHistoryEntry[]>([]);
   const [alertsLoading, setAlertsLoading] = useState(false);
   const [checkingAlerts, setCheckingAlerts] = useState(false);
+
+  // Cache settings state
+  const [cacheEnabled, setCacheEnabled] = useState(true);
+  const [cacheDuration, setCacheDuration] = useState('24h');
+
+  const CACHE_DURATIONS = [
+    { value: '15m', label: '15 min' },
+    { value: '1h', label: '1 hour' },
+    { value: '6h', label: '6 hours' },
+    { value: '24h', label: '24 hours' },
+  ];
 
   // Check if current user is admin based on fetched settings
   const isAdmin = settings.adminEmails.includes(session?.user?.email || "");
@@ -82,6 +93,18 @@ export default function AdminPage() {
   useEffect(() => {
     fetchSettings();
   }, [fetchSettings]);
+
+  // Load cache settings from localStorage
+  useEffect(() => {
+    const savedEnabled = localStorage.getItem('cacheEnabled');
+    if (savedEnabled !== null) {
+      setCacheEnabled(savedEnabled === 'true');
+    }
+    const savedDuration = localStorage.getItem('cacheDuration');
+    if (savedDuration) {
+      setCacheDuration(savedDuration);
+    }
+  }, []);
 
   useEffect(() => {
     if (activeTab === "alerts" && isAdmin) {
@@ -321,6 +344,23 @@ export default function AdminPage() {
       setMessage("Failed to test alert");
       return null;
     }
+  };
+
+  // Cache settings handlers
+  const toggleCache = () => {
+    const newValue = !cacheEnabled;
+    setCacheEnabled(newValue);
+    localStorage.setItem('cacheEnabled', String(newValue));
+    setMessage(newValue ? "Cache enabled - using cached data" : "Cache disabled - always fresh data");
+    setTimeout(() => setMessage(""), 3000);
+  };
+
+  const handleCacheDurationChange = (value: string) => {
+    setCacheDuration(value);
+    localStorage.setItem('cacheDuration', value);
+    const label = CACHE_DURATIONS.find(d => d.value === value)?.label || value;
+    setMessage(`Cache duration set to ${label}`);
+    setTimeout(() => setMessage(""), 3000);
   };
 
   if (status === "loading" || loading) {
@@ -597,6 +637,72 @@ export default function AdminPage() {
                     </button>
                   </div>
                 ))}
+              </div>
+            </div>
+
+            {/* Cache Settings */}
+            <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6">
+              <div className="flex items-center gap-3 mb-4">
+                {cacheEnabled ? (
+                  <Zap className="w-6 h-6 text-green-600 dark:text-green-400" />
+                ) : (
+                  <ZapOff className="w-6 h-6 text-zinc-500 dark:text-zinc-500" />
+                )}
+                <h2 className="text-xl font-bold">Cache Settings</h2>
+              </div>
+
+              <div className="mb-4 p-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm text-zinc-700 dark:text-zinc-300">
+                <strong>Note:</strong> Cache settings control how long data is stored before being refreshed.
+                Disabling cache will always fetch fresh data but may increase load times.
+              </div>
+
+              <div className="space-y-4">
+                {/* Cache Toggle */}
+                <div className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
+                  <div>
+                    <div className="font-semibold">Enable Caching</div>
+                    <div className="text-sm text-zinc-600 dark:text-zinc-400">
+                      Use cached data for faster loading
+                    </div>
+                  </div>
+                  <button
+                    onClick={toggleCache}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      cacheEnabled ? 'bg-green-600' : 'bg-zinc-300 dark:bg-zinc-600'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        cacheEnabled ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                {/* Cache Duration */}
+                <div className="p-4 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
+                  <div className="mb-3">
+                    <div className="font-semibold">Cache Duration</div>
+                    <div className="text-sm text-zinc-600 dark:text-zinc-400">
+                      How long to keep cached data before refreshing
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {CACHE_DURATIONS.map((duration) => (
+                      <button
+                        key={duration.value}
+                        onClick={() => handleCacheDurationChange(duration.value)}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          cacheDuration === duration.value
+                            ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
+                            : 'bg-white dark:bg-zinc-700 border border-zinc-200 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-600'
+                        }`}
+                      >
+                        {duration.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
 
