@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from "../components/AppLayout";
 import Hero from "../components/Hero";
 import TrendingGrid from "../components/TrendingGrid";
+import { fetchWithCache } from "@/src/lib/fetchWithCache";
 
 interface Topic {
   id: string;
@@ -39,8 +40,8 @@ export default function NationwidePage() {
   useEffect(() => {
     // Fetch data if authenticated OR in guest mode
     if (status === "authenticated" || isGuestMode) {
-      // Fetch trending topics
-      fetch("/api/trending")
+      // Fetch trending topics with cache settings
+      fetchWithCache("/api/trending")
       .then((res) => res.json())
       .then((data) => {
         setTopics(data);
@@ -55,7 +56,7 @@ export default function NationwidePage() {
       return;
     } else {
       // Not authenticated and not guest mode - still load for preview
-      fetch("/api/trending")
+      fetchWithCache("/api/trending")
       .then((res) => res.json())
       .then((data) => {
         setTopics(data);

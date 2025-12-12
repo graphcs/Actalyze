@@ -124,11 +124,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Check cache
+    // Check cache - uses global cache setting from admin (default: 24h)
     const useCacheHeader = request.headers.get('x-use-cache');
     const useCache = useCacheHeader !== 'false';
-    // Cache word cloud data for 6 hours (21600 seconds) to reduce Twitter API calls
-    const cacheDurationSeconds = parseInt(request.headers.get('x-cache-duration-seconds') || '21600', 10);
+    const cacheDurationSeconds = parseInt(request.headers.get('x-cache-duration-seconds') || '86400', 10);
 
     const cacheKey = generateCacheKey('wordcloud', {
       topic: filters.topic,

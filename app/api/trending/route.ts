@@ -326,11 +326,10 @@ export async function GET(request: NextRequest) {
   try {
     console.log("🚀 Trending API called at", new Date().toISOString());
 
-    // Check cache settings
+    // Check cache settings - uses global cache setting from admin (default: 24h)
     const useCacheHeader = request.headers.get('x-use-cache');
     const useCache = useCacheHeader !== 'false';
-    // Cache trending topics for 1 hour (3600 seconds)
-    const cacheDurationSeconds = parseInt(request.headers.get('x-cache-duration-seconds') || '3600', 10);
+    const cacheDurationSeconds = parseInt(request.headers.get('x-cache-duration-seconds') || '86400', 10);
 
     const memoryCacheKey = generateCacheKey('trending-topics', {});
     const dbCacheKey = generateDistrictCacheKey('trending', 'national', {});

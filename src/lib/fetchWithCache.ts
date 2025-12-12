@@ -12,9 +12,9 @@ const CACHE_DURATION_SECONDS: Record<string, number> = {
 };
 
 export async function fetchWithCache(url: string, options?: RequestInit): Promise<Response> {
-  // Check localStorage for cache preferences (default: enabled, 1h duration)
+  // Check localStorage for cache preferences (default: enabled, 24h duration)
   let useCache = true;
-  let cacheDuration = '1h';
+  let cacheDuration = '24h';
 
   if (typeof window !== 'undefined') {
     const savedEnabled = localStorage.getItem('cacheEnabled');

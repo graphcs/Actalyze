@@ -108,11 +108,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Check cache settings
+    // Check cache settings - uses global cache setting from admin (default: 24h)
     const useCacheHeader = request.headers.get('x-use-cache');
     const useCache = useCacheHeader !== 'false';
-    // Cache series data for 6 hours (21600 seconds)
-    const cacheDurationSeconds = parseInt(request.headers.get('x-cache-duration-seconds') || '21600', 10);
+    const cacheDurationSeconds = parseInt(request.headers.get('x-cache-duration-seconds') || '86400', 10);
 
     const memoryCacheKey = generateCacheKey('trending-series', { topic });
     const dbCacheKey = generateDistrictCacheKey('trending-series', 'national', { topic });
