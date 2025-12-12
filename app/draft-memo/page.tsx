@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import AppLayout from "../components/AppLayout";
 import { FileText, Send, Loader2, User, ChevronDown, ChevronUp, Share2 } from "lucide-react";
 import ShareToolbar from "../components/ShareToolbar";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 type MemoType = "press-release" | "newsletter" | "constituent-letter" | "floor-statement" | "social-media";
 type Perspective = "democrat" | "republican" | "neutral" | "";
@@ -425,17 +427,45 @@ function DraftMemoContent() {
                 </div>
               )}
 
-              <div className="min-h-[400px] p-4 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800">
+              <div className="min-h-[400px] p-4 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 overflow-y-auto">
                 {isLoading ? (
                   <div className="flex items-center justify-center h-full text-zinc-500">
                     <Loader2 className="w-6 h-6 animate-spin mr-2" />
                     Generating your communication...
                   </div>
                 ) : generatedMemo ? (
-                  <div className="prose prose-zinc dark:prose-invert max-w-none">
-                    <pre className="whitespace-pre-wrap font-sans text-sm text-zinc-800 dark:text-zinc-200">
+                  <div className="prose prose-zinc dark:prose-invert prose-sm max-w-none">
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        strong: ({ children }) => (
+                          <strong className="font-semibold text-zinc-900 dark:text-zinc-100">{children}</strong>
+                        ),
+                        p: ({ children }) => (
+                          <p className="mb-3 text-zinc-800 dark:text-zinc-200">{children}</p>
+                        ),
+                        ul: ({ children }) => (
+                          <ul className="list-disc pl-5 mb-3 text-zinc-800 dark:text-zinc-200">{children}</ul>
+                        ),
+                        ol: ({ children }) => (
+                          <ol className="list-decimal pl-5 mb-3 text-zinc-800 dark:text-zinc-200">{children}</ol>
+                        ),
+                        li: ({ children }) => (
+                          <li className="mb-1">{children}</li>
+                        ),
+                        h1: ({ children }) => (
+                          <h1 className="text-xl font-bold mb-3 text-zinc-900 dark:text-zinc-100">{children}</h1>
+                        ),
+                        h2: ({ children }) => (
+                          <h2 className="text-lg font-bold mb-2 text-zinc-900 dark:text-zinc-100">{children}</h2>
+                        ),
+                        h3: ({ children }) => (
+                          <h3 className="text-base font-bold mb-2 text-zinc-900 dark:text-zinc-100">{children}</h3>
+                        ),
+                      }}
+                    >
                       {generatedMemo}
-                    </pre>
+                    </ReactMarkdown>
                   </div>
                 ) : (
                   <div className="flex items-center justify-center h-full text-zinc-400 dark:text-zinc-500">
