@@ -2,7 +2,23 @@
 
 import { useState } from "react";
 import AppLayout from "../components/AppLayout";
-import { Briefcase, Search, Clock, User, Bot, CheckCircle, Tag, ChevronRight, Plus } from "lucide-react";
+import { Briefcase, Search, Clock, User, Bot, CheckCircle, Tag, ChevronRight, Plus, ExternalLink, Loader2 } from "lucide-react";
+
+interface CaseCompassClassification {
+  tier1: { label_id: string; name: string; abbreviation?: string } | null;
+  tier2: { label_id: string; name: string } | null;
+  tier3: { label_id: string; name: string } | null;
+  tier4: { label_id: string; name: string; description?: string } | null;
+  categoryPath: string;
+  categoryIds: string[];
+  confidence: number;
+  reasoning: string;
+  suggestedActions: string[];
+  relatedAgency: string;
+  estimatedTimeline: string;
+  caseCompassVersion: string;
+  taxonomySource: string;
+}
 
 interface CaseworkRequest {
   id: string;
@@ -27,6 +43,8 @@ interface CaseworkRequest {
   };
   relatedAgency?: string;
   timeline?: string;
+  // CaseCompass classification
+  caseCompass?: CaseCompassClassification;
 }
 
 const SAMPLE_CASES: CaseworkRequest[] = [
@@ -56,7 +74,22 @@ const SAMPLE_CASES: CaseworkRequest[] = [
       ]
     },
     relatedAgency: "USCIS",
-    timeline: "2-4 weeks for agency response"
+    timeline: "2-4 weeks for agency response",
+    caseCompass: {
+      tier1: { label_id: "DHS1", name: "Department of Homeland Security (DHS)", abbreviation: "DHS" },
+      tier2: { label_id: "USCIS2", name: "US Citizenship and Immigration Services (USCIS)" },
+      tier3: { label_id: "VISA3", name: "Visa Processing" },
+      tier4: { label_id: "IR14", name: "IR-1 Spouse Visa", description: "Immediate relative spouse visa" },
+      categoryPath: "DHS > USCIS > Visa Processing > IR-1 Spouse Visa",
+      categoryIds: ["DHS1", "USCIS2", "VISA3", "IR14"],
+      confidence: 95,
+      reasoning: "Clear IR-1 spouse visa processing delay case with USCIS.",
+      suggestedActions: ["Submit G-28", "File congressional inquiry", "Request expedite"],
+      relatedAgency: "Department of Homeland Security (DHS)",
+      estimatedTimeline: "2-4 weeks",
+      caseCompassVersion: "1.0.2",
+      taxonomySource: "House Digital Service"
+    }
   },
   {
     id: "2",
@@ -84,7 +117,22 @@ const SAMPLE_CASES: CaseworkRequest[] = [
       ]
     },
     relatedAgency: "Department of Veterans Affairs",
-    timeline: "1-2 weeks for status update"
+    timeline: "1-2 weeks for status update",
+    caseCompass: {
+      tier1: { label_id: "VA1", name: "Department of Veterans Affairs (VA)", abbreviation: "VA" },
+      tier2: { label_id: "VBA2", name: "Veterans Benefits Administration (VBA)" },
+      tier3: { label_id: "COMP3", name: "Compensation" },
+      tier4: { label_id: "DISC4", name: "Disability Claims", description: "Service-connected disability compensation" },
+      categoryPath: "VA > VBA > Compensation > Disability Claims",
+      categoryIds: ["VA1", "VBA2", "COMP3", "DISC4"],
+      confidence: 98,
+      reasoning: "VA disability compensation claim with extended processing delay.",
+      suggestedActions: ["Obtain privacy release", "Contact VA Congressional Liaison", "Request expedite"],
+      relatedAgency: "Department of Veterans Affairs (VA)",
+      estimatedTimeline: "1-2 weeks",
+      caseCompassVersion: "1.0.2",
+      taxonomySource: "House Digital Service"
+    }
   },
   {
     id: "3",
@@ -189,6 +237,7 @@ export default function CaseworkPage() {
     subject: "",
     description: "",
   });
+  const [isClassifying, setIsClassifying] = useState(false);
 
   const filteredCases = cases.filter(c => {
     const matchesCategory = filterCategory === "All" || c.category === filterCategory;
@@ -227,21 +276,47 @@ export default function CaseworkPage() {
     }
   };
 
-  const handleCreateCase = () => {
+  const handleCreateCase = async () => {
     if (!newCase.constituentName || !newCase.email || !newCase.subject) return;
 
+    setIsClassifying(true);
+
     const caseNum = `CW-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 9000) + 1000).padStart(6, "0")}`;
-    const confidence = Math.floor(Math.random() * 20) + 80;
+
+    // Call CaseCompass classification API
+    let caseCompassData: CaseCompassClassification | undefined;
+    try {
+      const classifyResponse = await fetch("/api/casework/classify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          subject: newCase.subject,
+          description: newCase.description,
+          constituentName: newCase.constituentName,
+        }),
+      });
+
+      if (classifyResponse.ok) {
+        caseCompassData = await classifyResponse.json();
+      }
+    } catch (error) {
+      console.error("Classification error:", error);
+    }
 
     const categoryTeamMap: Record<string, string> = {
-      Immigration: "Immigration Casework Specialist",
-      "Veterans Affairs": "Veterans Affairs Casework Specialist",
-      "Social Security": "Social Security Casework Specialist",
-      "Small Business": "Economic Development Specialist",
-      Housing: "Housing & Civil Rights Specialist",
-      IRS: "Social Security Casework Specialist",
-      Medicare: "Social Security Casework Specialist",
+      DHS: "Immigration Casework Specialist",
+      VA: "Veterans Affairs Casework Specialist",
+      SSA: "Social Security Casework Specialist",
+      SBA: "Economic Development Specialist",
+      HUD: "Housing & Civil Rights Specialist",
+      IRS: "Tax & Revenue Specialist",
+      DOS: "Passport & Consular Specialist",
+      DOD: "Military Affairs Specialist",
+      ED: "Education Benefits Specialist",
     };
+
+    const tier1Abbrev = caseCompassData?.tier1?.abbreviation || "";
+    const recommendedTeam = categoryTeamMap[tier1Abbrev] || "General Casework Specialist";
 
     const newCasework: CaseworkRequest = {
       id: Date.now().toString(),
@@ -249,34 +324,32 @@ export default function CaseworkPage() {
       constituentName: newCase.constituentName,
       email: newCase.email,
       phone: newCase.phone || undefined,
-      category: newCase.category,
-      subcategory: "General Inquiry",
+      category: caseCompassData?.tier1?.abbreviation || newCase.category,
+      subcategory: caseCompassData?.tier3?.name || "General Inquiry",
       subject: newCase.subject,
       description: newCase.description,
       status: "new",
       priority: "medium",
       submittedAt: new Date().toISOString(),
-      aiSummary: `New ${newCase.category} case regarding: ${newCase.subject}. Awaiting full AI analysis.`,
+      aiSummary: caseCompassData?.reasoning || `New case regarding: ${newCase.subject}.`,
       aiRouting: {
-        recommendedTeam: categoryTeamMap[newCase.category] || "Immigration Casework Specialist",
-        confidence,
-        reasoning: `Case categorized as ${newCase.category}. Routing to appropriate specialist team based on subject matter.`,
-        suggestedActions: [
+        recommendedTeam,
+        confidence: caseCompassData?.confidence || 75,
+        reasoning: caseCompassData?.reasoning || `Case categorized based on subject matter.`,
+        suggestedActions: caseCompassData?.suggestedActions || [
           "Review case details and constituent information",
           "Obtain necessary privacy release forms",
           "Submit inquiry to relevant agency",
           "Set follow-up reminder for constituent update",
         ],
       },
-      relatedAgency: newCase.category === "Immigration" ? "USCIS" :
-        newCase.category === "Veterans Affairs" ? "Department of Veterans Affairs" :
-        newCase.category === "Social Security" ? "Social Security Administration" :
-        newCase.category === "Small Business" ? "Small Business Administration" :
-        newCase.category === "Housing" ? "Department of Housing and Urban Development" : "IRS",
-      timeline: "2-4 weeks for agency response",
+      relatedAgency: caseCompassData?.relatedAgency || "Federal Agency",
+      timeline: caseCompassData?.estimatedTimeline || "2-4 weeks for agency response",
+      caseCompass: caseCompassData,
     };
 
     setCases(prev => [newCasework, ...prev]);
+    setSelectedCase(newCasework);
     setNewCase({
       constituentName: "",
       email: "",
@@ -286,6 +359,7 @@ export default function CaseworkPage() {
       description: "",
     });
     setShowNewForm(false);
+    setIsClassifying(false);
   };
 
   const newCount = cases.filter(c => c.status === "new").length;
@@ -306,7 +380,16 @@ export default function CaseworkPage() {
                   Casework Management
                 </h1>
                 <p className="text-zinc-600 dark:text-zinc-400">
-                  AI-powered constituent case routing and management
+                  AI-powered classification using{" "}
+                  <a
+                    href="https://github.com/usgpo/innovation/issues/92"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-amber-600 dark:text-amber-400 hover:underline inline-flex items-center gap-1"
+                  >
+                    CaseCompass Taxonomy
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
                 </p>
               </div>
             </div>
@@ -391,14 +474,22 @@ export default function CaseworkPage() {
             <div className="flex gap-3 mt-4">
               <button
                 onClick={handleCreateCase}
-                disabled={!newCase.constituentName || !newCase.email || !newCase.subject}
-                className="px-4 py-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={!newCase.constituentName || !newCase.email || !newCase.subject || isClassifying}
+                className="flex items-center gap-2 px-4 py-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Create Case
+                {isClassifying ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Classifying with CaseCompass...
+                  </>
+                ) : (
+                  "Create Case"
+                )}
               </button>
               <button
                 onClick={() => setShowNewForm(false)}
-                className="px-4 py-2 border border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+                disabled={isClassifying}
+                className="px-4 py-2 border border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -563,6 +654,77 @@ export default function CaseworkPage() {
                     </div>
                   </div>
                 </div>
+
+                {/* CaseCompass Classification */}
+                {selectedCase.caseCompass && (
+                  <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-4 mb-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <Tag className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                        <span className="font-semibold text-zinc-900 dark:text-zinc-100">CaseCompass Classification</span>
+                      </div>
+                      <a
+                        href="https://github.com/usgpo/innovation/issues/92"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1"
+                      >
+                        v{selectedCase.caseCompass.caseCompassVersion}
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+
+                    <div className="mb-3">
+                      <span className="text-xs text-zinc-500 uppercase">Taxonomy Path</span>
+                      <div className="flex flex-wrap items-center gap-1 mt-1">
+                        {selectedCase.caseCompass.tier1 && (
+                          <span className="px-2 py-0.5 bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-200 text-xs rounded font-medium">
+                            {selectedCase.caseCompass.tier1.abbreviation || selectedCase.caseCompass.tier1.name}
+                          </span>
+                        )}
+                        {selectedCase.caseCompass.tier2 && (
+                          <>
+                            <ChevronRight className="w-3 h-3 text-zinc-400" />
+                            <span className="px-2 py-0.5 bg-orange-100 dark:bg-orange-900/50 text-orange-800 dark:text-orange-200 text-xs rounded">
+                              {selectedCase.caseCompass.tier2.name}
+                            </span>
+                          </>
+                        )}
+                        {selectedCase.caseCompass.tier3 && (
+                          <>
+                            <ChevronRight className="w-3 h-3 text-zinc-400" />
+                            <span className="px-2 py-0.5 bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-200 text-xs rounded">
+                              {selectedCase.caseCompass.tier3.name}
+                            </span>
+                          </>
+                        )}
+                        {selectedCase.caseCompass.tier4 && (
+                          <>
+                            <ChevronRight className="w-3 h-3 text-zinc-400" />
+                            <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200 text-xs rounded">
+                              {selectedCase.caseCompass.tier4.name}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {selectedCase.caseCompass.tier4?.description && (
+                      <div className="mb-3">
+                        <span className="text-xs text-zinc-500 uppercase">Category Description</span>
+                        <p className="text-sm text-zinc-700 dark:text-zinc-300 mt-1">
+                          {selectedCase.caseCompass.tier4.description}
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="flex items-center gap-2 text-xs text-zinc-500 pt-2 border-t border-amber-200 dark:border-amber-800">
+                      <span>Source: {selectedCase.caseCompass.taxonomySource}</span>
+                      <span>|</span>
+                      <span>Confidence: {selectedCase.caseCompass.confidence}%</span>
+                    </div>
+                  </div>
+                )}
 
                 {/* AI Routing Analysis */}
                 <div className="bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-zinc-800/50 dark:to-zinc-800 rounded-lg p-4 mb-4">
