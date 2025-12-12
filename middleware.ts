@@ -120,7 +120,6 @@ export async function middleware(request: NextRequest) {
   }
 
   // User is not authenticated - check for guest access
-  // Check guest cookie/param FIRST, before settings check (in case Supabase fails in Edge Runtime)
   const guestModeCookie = request.cookies.get("guest_mode_enabled");
   const searchParams = request.nextUrl.searchParams;
   const isGuestAccess = searchParams.get("guest") === "true";
@@ -130,9 +129,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // For new guest access requests, check if guest mode is allowed
-  if (isGuestAccess && settings.mode === "guest") {
-    // Set a cookie to remember guest mode for this session
+  // For guest access requests (with ?guest=true param), allow and set cookie
+  // The home page controls whether to show "Continue as Guest" based on settings
+  // Here we just need to honor the request if the param is present
+  if (isGuestAccess) {
     const response = NextResponse.next();
     response.cookies.set("guest_mode_enabled", "true", {
       httpOnly: true,
