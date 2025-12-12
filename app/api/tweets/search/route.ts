@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { TwitterApi } from "twitter-api-v2";
 import { serverCache, generateCacheKey } from "@/src/lib/cache";
+import {
+  getFromDbCache,
+  setInDbCache,
+} from "@/lib/db-cache";
 
 interface UserData {
   id: string;
@@ -41,11 +45,26 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Check cache
+    // Check cache settings - default to 6 hours (21600 seconds)
     const useCacheHeader = request.headers.get('x-use-cache');
     const useCache = useCacheHeader !== 'false';
-    const cacheKey = generateCacheKey('tweets-search', { query, limit });
-    const cached = serverCache.get<{ tweets: Tweet[] }>(cacheKey, useCache);
+    const cacheDurationSeconds = parseInt(request.headers.get('x-cache-duration-seconds') || '21600', 10);
+
+    // Generate cache keys
+    const memoryCacheKey = generateCacheKey('tweets-search', { query, limit: String(limit) });
+    const dbCacheKey = `tweets:search:${query.toLowerCase().replace(/\s+/g, '-')}:${limit}`;
+
+    // Check DB cache first (persistent across server restarts)
+    if (useCache) {
+      const dbCached = await getFromDbCache<{ tweets: Tweet[] }>(dbCacheKey, true);
+      if (dbCached) {
+        console.log(`📦 DB cache hit for tweets: "${query}"`);
+        return NextResponse.json(dbCached);
+      }
+    }
+
+    // Check memory cache as fallback
+    const cached = serverCache.get<{ tweets: Tweet[] }>(memoryCacheKey, useCache);
 
     if (cached) {
       return NextResponse.json(cached);
@@ -134,8 +153,14 @@ export async function GET(request: NextRequest) {
 
     const response = { tweets };
 
-    // Save to cache
-    serverCache.set(cacheKey, response);
+    // Only cache if we got results (don't cache empty results)
+    if (tweets.length > 0) {
+      // Save to memory cache
+      serverCache.set(memoryCacheKey, response, cacheDurationSeconds);
+
+      // Save to DB cache (always write, even if cache reading is disabled)
+      await setInDbCache(dbCacheKey, 'tweets', 'global', response, cacheDurationSeconds);
+    }
 
     return NextResponse.json(response);
 
