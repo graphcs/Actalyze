@@ -7,6 +7,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { TwitterApi } from "twitter-api-v2";
 import { serverCache, generateCacheKey } from "@/src/lib/cache";
 import {
+  getFromDbCache,
+  setInDbCache,
+  generateDistrictCacheKey,
+} from "@/lib/db-cache";
+import {
   processTweet,
   calculateWordFrequencies,
   calculateAverageSentiment,
@@ -122,6 +127,9 @@ export async function GET(request: NextRequest) {
     // Check cache
     const useCacheHeader = request.headers.get('x-use-cache');
     const useCache = useCacheHeader !== 'false';
+    // Cache word cloud data for 6 hours (21600 seconds) to reduce Twitter API calls
+    const cacheDurationSeconds = parseInt(request.headers.get('x-cache-duration-seconds') || '21600', 10);
+
     const cacheKey = generateCacheKey('wordcloud', {
       topic: filters.topic,
       timeRange: filters.timeRange,
@@ -130,10 +138,27 @@ export async function GET(request: NextRequest) {
       minFrequency: filters.minFrequency || 2,
       maxTweets: maxTweets,
     });
-    const cached = serverCache.get<WordCloudData>(cacheKey, useCache);
 
+    // Generate DB cache key for word cloud
+    const dbCacheKey = generateDistrictCacheKey('wordcloud', filters.location || 'national', {
+      topic: filters.topic,
+      timeRange: filters.timeRange || '7d',
+      sentimentType: filters.sentimentType || 'all',
+    });
+
+    // Try database cache first (persists across restarts)
+    const dbCached = await getFromDbCache<WordCloudData>(dbCacheKey, useCache);
+    if (dbCached) {
+      console.log(`📦 Using DB cached word cloud for "${filters.topic}"`);
+      // Also set in memory cache for faster subsequent hits
+      serverCache.set(cacheKey, dbCached, cacheDurationSeconds);
+      return NextResponse.json(dbCached);
+    }
+
+    // Fall back to memory cache
+    const cached = serverCache.get<WordCloudData>(cacheKey, useCache);
     if (cached) {
-      console.log('✅ Returning cached word cloud data');
+      console.log('✅ Returning memory cached word cloud data');
       return NextResponse.json(cached);
     }
 
@@ -385,10 +410,11 @@ export async function GET(request: NextRequest) {
       },
     };
 
-    // Cache for 30 minutes
-    serverCache.set(cacheKey, responseData, 30 * 60);
+    // Cache in memory and DB (6 hours default)
+    serverCache.set(cacheKey, responseData, cacheDurationSeconds);
+    await setInDbCache(dbCacheKey, 'wordcloud', filters.location || 'national', responseData, cacheDurationSeconds);
 
-    console.log(`✅ Generated word cloud with ${words.length} words`);
+    console.log(`✅ Generated word cloud with ${words.length} words (cached for ${cacheDurationSeconds / 3600}h)`);
 
     return NextResponse.json(responseData);
 

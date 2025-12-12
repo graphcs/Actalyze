@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { TrendingUp, Upload, MessageSquare, Users, MapPinned } from "lucide-react";
+import { TrendingUp, MessageSquare, Users, MapPinned } from "lucide-react";
 import { Button } from "./ui/Button";
 import { Badge } from "./ui/Badge";
 import { Card, CardHeader, CardContent } from "./ui/Card";
@@ -23,17 +23,16 @@ import DistrictSearch from "./DistrictSearch";
 
 interface HeroProps {
   onExplore: () => void;
-  onUpload: () => void;
   onChat: () => void;
 }
 
-export default function Hero({ onExplore, onUpload, onChat }: HeroProps) {
+export default function Hero({ onExplore, onChat }: HeroProps) {
   return (
     <div className="relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 py-12 grid md:grid-cols-2 gap-8 items-center">
         <div>
           <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight leading-tight text-zinc-900 dark:text-white">
-            See What&apos;s Moving in Washington — in Real Time
+            See What&apos;s Moving in Washington in Real Time
           </h1>
           <p className="text-zinc-600 dark:text-zinc-300 mt-4 text-lg">
             Actalyze merges AI reasoning, social pulse, and real-time
@@ -45,11 +44,7 @@ export default function Hero({ onExplore, onUpload, onChat }: HeroProps) {
               <TrendingUp className="w-5 h-5" />
               Explore Trending
             </Button>
-            <Button size="lg" variant="outline" onClick={onUpload}>
-              <Upload className="w-5 h-5" />
-              Upload a Bill
-            </Button>
-            <Button size="lg" variant="ghost" onClick={onChat}>
+            <Button size="lg" variant="outline" onClick={onChat}>
               <MessageSquare className="w-5 h-5" />
               Start a Chat
             </Button>

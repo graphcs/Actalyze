@@ -110,7 +110,6 @@ export default function Dashboard() {
         >
           <Hero
             onExplore={handleExplore}
-            onUpload={handleUpload}
             onChat={handleChat}
           />
           <TrendingGrid topics={topics} onOpen={handleTopicOpen} />

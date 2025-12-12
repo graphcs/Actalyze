@@ -119,7 +119,6 @@ export default function NationwidePage() {
         >
           <Hero
             onExplore={handleExplore}
-            onUpload={handleUpload}
             onChat={handleChat}
           />
           <TrendingGrid topics={topics} onOpen={handleTopicOpen} />

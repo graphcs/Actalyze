@@ -1,5 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getTrendingPoliticsUS } from "@/src/trending/index";
+import { serverCache, generateCacheKey } from "@/src/lib/cache";
+import {
+  getFromDbCache,
+  setInDbCache,
+  generateDistrictCacheKey,
+} from "@/lib/db-cache";
 
 interface TrendingTopic {
   id: string;
@@ -316,9 +322,33 @@ Return ONLY the cleaned up title, nothing else. Make it clear what the topic is 
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     console.log("🚀 Trending API called at", new Date().toISOString());
+
+    // Check cache settings
+    const useCacheHeader = request.headers.get('x-use-cache');
+    const useCache = useCacheHeader !== 'false';
+    // Cache trending topics for 1 hour (3600 seconds)
+    const cacheDurationSeconds = parseInt(request.headers.get('x-cache-duration-seconds') || '3600', 10);
+
+    const memoryCacheKey = generateCacheKey('trending-topics', {});
+    const dbCacheKey = generateDistrictCacheKey('trending', 'national', {});
+
+    // Try database cache first
+    const dbCached = await getFromDbCache<TrendingTopic[]>(dbCacheKey, useCache);
+    if (dbCached) {
+      console.log(`📦 Using DB cached trending topics`);
+      serverCache.set(memoryCacheKey, dbCached, cacheDurationSeconds);
+      return NextResponse.json(dbCached);
+    }
+
+    // Fall back to memory cache
+    const memoryCached = serverCache.get<TrendingTopic[]>(memoryCacheKey, useCache);
+    if (memoryCached) {
+      console.log(`📦 Using memory cached trending topics`);
+      return NextResponse.json(memoryCached);
+    }
 
     // Fetch trending political topics from SERPAPI
     // Request 12 topics so after deduplication we have ~9
@@ -386,6 +416,12 @@ export async function GET() {
 
     // Ensure we always return exactly 9 topics
     const finalTopics = dedupedTopics.slice(0, 9);
+
+    // Cache the results
+    serverCache.set(memoryCacheKey, finalTopics, cacheDurationSeconds);
+    await setInDbCache(dbCacheKey, 'trending', 'national', finalTopics, cacheDurationSeconds);
+
+    console.log(`✅ Cached ${finalTopics.length} trending topics for ${cacheDurationSeconds / 3600}h`);
 
     return NextResponse.json(finalTopics);
 

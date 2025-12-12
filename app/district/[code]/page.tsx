@@ -523,24 +523,20 @@ export default function DistrictPage() {
           </Card>
         </div>
 
-        {/* Top Tweets */}
-        <div className="max-w-7xl mx-auto px-4 pb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div className="font-semibold flex items-center gap-2">
-                <TrendingUp className="w-4 h-4" />
-                Top Tweets
-              </div>
-              <Badge className="bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100">
-                Social Media
-              </Badge>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <div className="text-sm text-zinc-500 dark:text-zinc-400 py-8 text-center">
-                  Loading tweets...
+        {/* Top Tweets - only show if tweets are found */}
+        {!loading && tweets.length > 0 && (
+          <div className="max-w-7xl mx-auto px-4 pb-8">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div className="font-semibold flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4" />
+                  Top Tweets
                 </div>
-              ) : tweets.length > 0 ? (
+                <Badge className="bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100">
+                  Social Media
+                </Badge>
+              </CardHeader>
+              <CardContent>
                 <div className="grid grid-cols-2 gap-3">
                   {tweets.map((tweet) => (
                     <CompactTweet
@@ -556,14 +552,10 @@ export default function DistrictPage() {
                     />
                   ))}
                 </div>
-              ) : (
-                <div className="text-sm text-zinc-500 dark:text-zinc-400 py-8 text-center">
-                  No tweets found for this district
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Bottom Actions */}
         <div className="max-w-7xl mx-auto px-4 pb-16 flex items-center justify-between">

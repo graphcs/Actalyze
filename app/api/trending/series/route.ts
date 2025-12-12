@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { fetchTrendsSeries, fetchTopTweets, fetchRelatedQueries, Tweet } from "@/src/trending/series";
+import { fetchTrendsSeries } from "@/src/trending/series";
+import { serverCache, generateCacheKey } from "@/src/lib/cache";
+import {
+  getFromDbCache,
+  setInDbCache,
+  generateDistrictCacheKey,
+} from "@/lib/db-cache";
 
 export interface SeriesResponse {
   source: 'trends' | 'tweets' | 'queries';
   points?: Array<{ t: string; v: number }>;
-  tweets?: Tweet[];
-  queries?: string[];
 }
 
 /**
@@ -104,6 +108,30 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Check cache settings
+    const useCacheHeader = request.headers.get('x-use-cache');
+    const useCache = useCacheHeader !== 'false';
+    // Cache series data for 6 hours (21600 seconds)
+    const cacheDurationSeconds = parseInt(request.headers.get('x-cache-duration-seconds') || '21600', 10);
+
+    const memoryCacheKey = generateCacheKey('trending-series', { topic });
+    const dbCacheKey = generateDistrictCacheKey('trending-series', 'national', { topic });
+
+    // Try database cache first
+    const dbCached = await getFromDbCache<SeriesResponse>(dbCacheKey, useCache);
+    if (dbCached) {
+      console.log(`📦 Using DB cached series for "${topic}"`);
+      serverCache.set(memoryCacheKey, dbCached, cacheDurationSeconds);
+      return NextResponse.json(dbCached);
+    }
+
+    // Fall back to memory cache
+    const memoryCached = serverCache.get<SeriesResponse>(memoryCacheKey, useCache);
+    if (memoryCached) {
+      console.log(`📦 Using memory cached series for "${topic}"`);
+      return NextResponse.json(memoryCached);
+    }
+
     console.log(`📊 Fetching series data for topic: "${topic}"`);
 
     // Try Google Trends first (accept any number of points)
@@ -112,19 +140,27 @@ export async function GET(request: NextRequest) {
       console.log(`✅ Using Trends series (${trendsData.length} points)`);
       // Ensure flat trendlines have slight upward trend
       const processedTrends = ensureTrendingUp(trendsData);
-      return NextResponse.json({
+      const result: SeriesResponse = {
         source: 'trends',
         points: processedTrends,
-      } as SeriesResponse);
+      };
+      // Cache the result
+      serverCache.set(memoryCacheKey, result, cacheDurationSeconds);
+      await setInDbCache(dbCacheKey, 'trending-series', 'national', result, cacheDurationSeconds);
+      return NextResponse.json(result);
     }
 
     // Fallback: Generate fake trending graph (never show tweets on homepage)
     console.log(`📈 Using generated trendline for topic: "${topic}"`);
     const fakeTrendline = generateFakeTrendline(topic);
-    return NextResponse.json({
+    const result: SeriesResponse = {
       source: 'trends',
       points: fakeTrendline,
-    } as SeriesResponse);
+    };
+    // Cache the generated trendline too
+    serverCache.set(memoryCacheKey, result, cacheDurationSeconds);
+    await setInDbCache(dbCacheKey, 'trending-series', 'national', result, cacheDurationSeconds);
+    return NextResponse.json(result);
 
   } catch (error) {
     console.error('❌ Error in series API:', error);

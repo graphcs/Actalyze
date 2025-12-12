@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { serverCache, generateCacheKey } from "@/src/lib/cache";
+import {
+  getFromDbCache,
+  setInDbCache,
+  generateDistrictCacheKey,
+} from "@/lib/db-cache";
 
 const STATE_NAMES: Record<string, string> = {
   "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas", "CA": "California",
@@ -60,14 +65,28 @@ export async function GET(request: NextRequest) {
 
     const stateName = STATE_NAMES[stateCode];
 
-    // Check cache
+    // Check cache settings
     const useCacheHeader = request.headers.get('x-use-cache');
     const useCache = useCacheHeader !== 'false';
-    const cacheKey = generateCacheKey('state-news', { state: stateCode });
-    const cached = serverCache.get<{ headlines: Headline[] }>(cacheKey, useCache);
+    // Cache state news for 6 hours (21600 seconds)
+    const cacheDurationSeconds = parseInt(request.headers.get('x-cache-duration-seconds') || '21600', 10);
 
-    if (cached) {
-      return NextResponse.json(cached);
+    const memoryCacheKey = generateCacheKey('state-news', { state: stateCode });
+    const dbCacheKey = generateDistrictCacheKey('state-news', stateCode, {});
+
+    // Try database cache first
+    const dbCached = await getFromDbCache<{ headlines: Headline[] }>(dbCacheKey, useCache);
+    if (dbCached) {
+      console.log(`📦 Using DB cached state news for ${stateCode}`);
+      serverCache.set(memoryCacheKey, dbCached, cacheDurationSeconds);
+      return NextResponse.json(dbCached);
+    }
+
+    // Fall back to memory cache
+    const memoryCached = serverCache.get<{ headlines: Headline[] }>(memoryCacheKey, useCache);
+    if (memoryCached) {
+      console.log(`📦 Using memory cached state news for ${stateCode}`);
+      return NextResponse.json(memoryCached);
     }
 
     console.log(`📰 Fetching local news for ${stateName}`);
@@ -147,8 +166,9 @@ export async function GET(request: NextRequest) {
       ],
     };
 
-    // Save to cache
-    serverCache.set(cacheKey, result);
+    // Save to both memory and database cache
+    serverCache.set(memoryCacheKey, result, cacheDurationSeconds);
+    await setInDbCache(dbCacheKey, 'state-news', stateCode, result, cacheDurationSeconds);
 
     return NextResponse.json(result);
 
