@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import CompactTweet from "../../components/CompactTweet";
 import {
   ChevronLeft,
@@ -301,9 +303,29 @@ export default function DistrictPage() {
                 </div>
               ) : (
                 <div className="prose prose-sm dark:prose-invert max-w-none">
-                  <p className="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      p: ({ children }) => (
+                        <p className="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed mb-2">{children}</p>
+                      ),
+                      strong: ({ children }) => (
+                        <strong className="font-semibold text-zinc-900 dark:text-zinc-100">{children}</strong>
+                      ),
+                      a: ({ href, children }) => (
+                        <a
+                          href={href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 dark:text-blue-400 hover:underline"
+                        >
+                          {children}
+                        </a>
+                      ),
+                    }}
+                  >
                     {summary}
-                  </p>
+                  </ReactMarkdown>
                 </div>
               )}
             </CardContent>

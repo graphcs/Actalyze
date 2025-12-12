@@ -125,18 +125,45 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await response.json();
-    const summary = data.choices?.[0]?.message?.content?.trim();
+    let summary = data.choices?.[0]?.message?.content?.trim();
 
     if (!summary || isUnhelpfulResponse(summary)) {
       console.log(`⚠️ Unhelpful or empty response for ${districtLabel}, using fallback`);
       return NextResponse.json({
-        summary: `Political news and developments for ${districtLabel}. This district's representative and local political landscape may have recent updates in local news sources.`
+        summary: `Political news and developments for ${districtLabel}. This district's representative and local political landscape may have recent updates in local news sources.`,
+        citations: []
       });
     }
 
-    console.log(`✅ Generated summary for ${districtLabel}`);
+    // Extract citations from Perplexity response
+    const citations: { index: number; url: string; title?: string }[] = [];
+    if (data.citations && Array.isArray(data.citations)) {
+      data.citations.forEach((url: string, idx: number) => {
+        citations.push({ index: idx + 1, url, title: url });
+      });
+    }
 
-    const result = { summary };
+    // Convert citation references [1], [2], etc. to markdown links if we have citations
+    if (citations.length > 0) {
+      summary = summary.replace(/\[(\d+)\]/g, (match: string, num: string) => {
+        const idx = parseInt(num, 10);
+        const citation = citations.find(c => c.index === idx);
+        if (citation) {
+          // Extract domain for display
+          try {
+            const domain = new URL(citation.url).hostname.replace('www.', '');
+            return `[[${num}]](${citation.url} "${domain}")`;
+          } catch {
+            return `[[${num}]](${citation.url})`;
+          }
+        }
+        return match;
+      });
+    }
+
+    console.log(`✅ Generated summary for ${districtLabel} with ${citations.length} citations`);
+
+    const result = { summary, citations };
 
     // Save to memory cache
     serverCache.set(cacheKey, result, cacheDurationSeconds);
