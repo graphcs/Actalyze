@@ -85,11 +85,15 @@ export async function POST(request: Request) {
 
     if (error) {
       console.error("Failed to save to Supabase:", error);
-      // Still return success - the client can use localStorage as backup
-      return NextResponse.json({
-        success: true,
-        warning: "Settings saved locally only - database table may not exist",
-      });
+      // Return error so client knows it failed
+      return NextResponse.json(
+        {
+          error: "Failed to save settings to database",
+          details: error.message,
+          hint: "The app_settings table may not exist. Run the SQL in lib/app-settings-schema.sql"
+        },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({ success: true });
