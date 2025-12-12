@@ -137,10 +137,8 @@ export default function Sidebar({ onChatClick, onUploadClick }: SidebarProps) {
   }, [pathname]);
 
   const handleNavigation = (href: string) => {
-    // Add guest=true parameter to allow access without sign-in
-    const url = new URL(href, window.location.origin);
-    url.searchParams.set("guest", "true");
-    router.push(url.pathname + url.search);
+    // Navigate directly - guest access is controlled via cookie set on home page
+    router.push(href);
   };
 
   const toggleState = (stateCode: string) => {

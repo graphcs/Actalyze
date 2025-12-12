@@ -119,27 +119,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // User is not authenticated - check for guest access
+  // User is not authenticated - check for guest access via cookie only
+  // The cookie is set client-side by the home page when user clicks "Continue as Guest"
+  // This ensures admin settings control whether guest mode is available
   const guestModeCookie = request.cookies.get("guest_mode_enabled");
-  const searchParams = request.nextUrl.searchParams;
-  const isGuestAccess = searchParams.get("guest") === "true";
 
-  // If user has existing guest session cookie, allow access
   if (guestModeCookie?.value === "true") {
     return NextResponse.next();
-  }
-
-  // For guest access requests (with ?guest=true param), allow and set cookie
-  // The home page controls whether to show "Continue as Guest" based on settings
-  // Here we just need to honor the request if the param is present
-  if (isGuestAccess) {
-    const response = NextResponse.next();
-    response.cookies.set("guest_mode_enabled", "true", {
-      httpOnly: true,
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24, // 24 hours
-    });
-    return response;
   }
 
   // Not authenticated and no valid guest session - redirect to home
