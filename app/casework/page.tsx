@@ -6,8 +6,8 @@ import { Briefcase, Search, Clock, User, Bot, CheckCircle, Tag, ChevronRight, Pl
 
 interface CaseCompassClassification {
   tier1: { label_id: string; name: string; abbreviation?: string } | null;
-  tier2: { label_id: string; name: string } | null;
-  tier3: { label_id: string; name: string } | null;
+  tier2: { label_id: string; name: string; description?: string } | null;
+  tier3: { label_id: string; name: string; description?: string } | null;
   tier4: { label_id: string; name: string; description?: string } | null;
   categoryPath: string;
   categoryIds: string[];
@@ -159,7 +159,22 @@ const SAMPLE_CASES: CaseworkRequest[] = [
       ]
     },
     relatedAgency: "Social Security Administration",
-    timeline: "2-3 weeks for resolution"
+    timeline: "2-3 weeks for resolution",
+    caseCompass: {
+      tier1: { label_id: "SSA1", name: "Social Security Administration (SSA)", abbreviation: "SSA" },
+      tier2: { label_id: "MEDI2", name: "Medicare" },
+      tier3: { label_id: "MEDB3", name: "Medicare Part B", description: "Medical insurance enrollment" },
+      tier4: null,
+      categoryPath: "SSA > Medicare > Medicare Part B",
+      categoryIds: ["SSA1", "MEDI2", "MEDB3"],
+      confidence: 92,
+      reasoning: "SSA Medicare Part B erroneous enrollment case requiring disenrollment.",
+      suggestedActions: ["Collect employer coverage proof", "Submit SSA inquiry", "Request premium refund"],
+      relatedAgency: "Social Security Administration (SSA)",
+      estimatedTimeline: "2-3 weeks",
+      caseCompassVersion: "1.0.2",
+      taxonomySource: "House Digital Service"
+    }
   },
   {
     id: "4",
@@ -188,7 +203,22 @@ const SAMPLE_CASES: CaseworkRequest[] = [
       ]
     },
     relatedAgency: "Small Business Administration",
-    timeline: "3-4 weeks for SBA response"
+    timeline: "3-4 weeks for SBA response",
+    caseCompass: {
+      tier1: { label_id: "SBA1", name: "Small Business Administration (SBA)", abbreviation: "SBA" },
+      tier2: { label_id: "LOAN2", name: "Loans" },
+      tier3: { label_id: "EIDL3", name: "EIDL", description: "Economic Injury Disaster Loans" },
+      tier4: null,
+      categoryPath: "SBA > Loans > EIDL",
+      categoryIds: ["SBA1", "LOAN2", "EIDL3"],
+      confidence: 85,
+      reasoning: "SBA EIDL loan reconsideration denial requiring clarification of denial reasons.",
+      suggestedActions: ["Request specific denial reasons", "Review documentation", "Submit congressional inquiry"],
+      relatedAgency: "Small Business Administration (SBA)",
+      estimatedTimeline: "3-4 weeks",
+      caseCompassVersion: "1.0.2",
+      taxonomySource: "House Digital Service"
+    }
   },
   {
     id: "5",
@@ -215,7 +245,22 @@ const SAMPLE_CASES: CaseworkRequest[] = [
       ]
     },
     relatedAgency: "Department of Housing and Urban Development",
-    timeline: "2-3 weeks for status update"
+    timeline: "2-3 weeks for status update",
+    caseCompass: {
+      tier1: { label_id: "HUD1", name: "Department of Housing and Urban Development (HUD)", abbreviation: "HUD" },
+      tier2: { label_id: "FHEO2", name: "Fair Housing" },
+      tier3: { label_id: "REAS3", name: "Reasonable Accommodation", description: "Disability accommodation requests" },
+      tier4: null,
+      categoryPath: "HUD > Fair Housing > Reasonable Accommodation",
+      categoryIds: ["HUD1", "FHEO2", "REAS3"],
+      confidence: 90,
+      reasoning: "HUD fair housing complaint involving disability discrimination and service animal accommodation.",
+      suggestedActions: ["Contact HUD FHEO", "Request case status", "Document discrimination incidents"],
+      relatedAgency: "Department of Housing and Urban Development (HUD)",
+      estimatedTimeline: "2-3 weeks",
+      caseCompassVersion: "1.0.2",
+      taxonomySource: "House Digital Service"
+    }
   }
 ];
 
