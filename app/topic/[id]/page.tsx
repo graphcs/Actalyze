@@ -249,23 +249,19 @@ export default function TopicPage() {
 
         {/* Content Sections */}
         <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-5 pb-16">
-          {/* Top Tweets */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div className="font-semibold flex items-center gap-2">
-                <TrendingUp className="w-4 h-4" />
-                Top Tweets
-              </div>
-              <Badge className="bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100">
-                Social Media
-              </Badge>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <div className="text-sm text-zinc-500 dark:text-zinc-400 py-8 text-center">
-                  Loading tweets...
+          {/* Top Tweets - Only show if we have tweets */}
+          {tweets.length > 0 && (
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div className="font-semibold flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4" />
+                  Top Tweets
                 </div>
-              ) : tweets.length > 0 ? (
+                <Badge className="bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100">
+                  Social Media
+                </Badge>
+              </CardHeader>
+              <CardContent>
                 <div className="space-y-3">
                   {tweets.map((tweet) => (
                     <CompactTweet
@@ -281,16 +277,12 @@ export default function TopicPage() {
                     />
                   ))}
                 </div>
-              ) : (
-                <div className="text-sm text-zinc-500 dark:text-zinc-400 py-8 text-center">
-                  No tweets found for this topic
-                </div>
-              )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Top Headlines */}
-          <Card>
+          <Card className={tweets.length === 0 ? "md:col-span-2" : ""}>
             <CardHeader className="flex flex-row items-center justify-between">
               <div className="font-semibold flex items-center gap-2">
                 <Newspaper className="w-4 h-4" />
