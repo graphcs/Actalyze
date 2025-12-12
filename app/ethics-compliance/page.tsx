@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import AppLayout from "../components/AppLayout";
-import { Shield, Search, Send, Bot, AlertTriangle, CheckCircle, XCircle, Info, BookOpen, Gift, Plane, DollarSign, Users, Building2, FileText, Loader2 } from "lucide-react";
+import { Shield, Send, AlertTriangle, CheckCircle, XCircle, Info, BookOpen, Gift, Plane, DollarSign, Users, Building2, FileText, Loader2 } from "lucide-react";
 
 interface EthicsQuery {
   id: string;
@@ -86,26 +88,51 @@ export default function EthicsCompliancePage() {
     setIsLoading(true);
     setQuery("");
 
-    // Simulate AI response
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      const response = await fetch("/api/ethics/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question }),
+      });
 
-    const newQuery: EthicsQuery = {
-      id: Date.now().toString(),
-      question: question,
-      answer: `Based on House ethics rules, here is guidance on your question about "${question}":\n\n**Analysis:**\nThis scenario requires careful consideration of applicable ethics rules. The specific circumstances matter significantly in determining compliance.\n\n**Key Considerations:**\n1. Review the source and nature of any benefit\n2. Consider whether any exceptions apply\n3. Document the circumstances thoroughly\n4. When in doubt, seek pre-approval\n\n**Recommendation:**\nFor this specific situation, I recommend consulting with the House Ethics Committee for a formal advisory opinion if you're uncertain. This provides protection and clarity.\n\n**Note:** This is AI-generated guidance for informational purposes. For binding opinions, contact the Committee on Ethics directly.`,
-      category: "General",
-      riskLevel: "medium",
-      references: [
-        "House Rule 25",
-        "House Ethics Manual",
-        "Committee on Ethics Advisory Opinions"
-      ],
-      timestamp: new Date().toISOString()
-    };
+      if (!response.ok) {
+        throw new Error("Failed to get response");
+      }
 
-    setHistory(prev => [newQuery, ...prev]);
-    setSelectedQuery(newQuery);
-    setIsLoading(false);
+      const data = await response.json();
+
+      const newQuery: EthicsQuery = {
+        id: Date.now().toString(),
+        question: question,
+        answer: data.answer,
+        category: data.category || "General",
+        riskLevel: data.riskLevel || "medium",
+        references: data.references || [
+          "House Ethics Manual",
+          "Committee on Ethics Advisory Opinions"
+        ],
+        timestamp: new Date().toISOString()
+      };
+
+      setHistory(prev => [newQuery, ...prev]);
+      setSelectedQuery(newQuery);
+    } catch (error) {
+      console.error("Error getting ethics guidance:", error);
+      // Fallback response
+      const newQuery: EthicsQuery = {
+        id: Date.now().toString(),
+        question: question,
+        answer: "I apologize, but I'm unable to process your question at the moment. Please try again or contact the House Committee on Ethics directly at (202) 225-7103.",
+        category: "General",
+        riskLevel: "medium",
+        references: ["House Committee on Ethics: ethics.house.gov"],
+        timestamp: new Date().toISOString()
+      };
+      setHistory(prev => [newQuery, ...prev]);
+      setSelectedQuery(newQuery);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const getRiskColor = (risk: string) => {
@@ -230,10 +257,21 @@ export default function EthicsCompliancePage() {
                   </span>
                 </div>
 
-                <div className="prose prose-zinc dark:prose-invert max-w-none mb-4">
-                  <div className="text-sm text-zinc-700 dark:text-zinc-300 whitespace-pre-line">
+                <div className="prose prose-zinc dark:prose-invert max-w-none mb-4 prose-sm">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      p: ({ children }) => <p className="text-zinc-700 dark:text-zinc-300 mb-3">{children}</p>,
+                      strong: ({ children }) => <strong className="font-semibold text-zinc-900 dark:text-zinc-100">{children}</strong>,
+                      ul: ({ children }) => <ul className="list-disc list-inside space-y-1 text-zinc-700 dark:text-zinc-300 mb-3">{children}</ul>,
+                      ol: ({ children }) => <ol className="list-decimal list-inside space-y-1 text-zinc-700 dark:text-zinc-300 mb-3">{children}</ol>,
+                      li: ({ children }) => <li className="text-zinc-700 dark:text-zinc-300">{children}</li>,
+                      h2: ({ children }) => <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mt-4 mb-2">{children}</h2>,
+                      h3: ({ children }) => <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100 mt-3 mb-2">{children}</h3>,
+                    }}
+                  >
                     {selectedQuery.answer}
-                  </div>
+                  </ReactMarkdown>
                 </div>
 
                 <div className="border-t border-zinc-200 dark:border-zinc-700 pt-4">
