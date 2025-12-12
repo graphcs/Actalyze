@@ -106,27 +106,16 @@ function StandardsCheckerContent() {
     }
   };
 
-  const formatResultsForShare = () => {
-    if (!result) return "";
-    let text = `Standards Compliance Report\n`;
-    text += `═══════════════════════════\n\n`;
-    text += `Overall Grade: ${result.overallGrade} (${result.overallScore}%)\n`;
-    text += `${result.summary}\n\n`;
-
-    result.categories.forEach(cat => {
-      const status = cat.status === "pass" ? "✓" : cat.status === "warning" ? "⚠" : "✗";
-      text += `${status} ${cat.name}: ${cat.score}%\n`;
-      if (cat.findings.length > 0) {
-        cat.findings.forEach(f => text += `  • ${f}\n`);
-      }
-      if (cat.recommendations.length > 0) {
-        text += `  Recommendations:\n`;
-        cat.recommendations.forEach(r => text += `  → ${r}\n`);
-      }
-      text += `\n`;
-    });
-
-    return text;
+  const getContentTypeLabel = () => {
+    const labels: Record<string, string> = {
+      "general": "Communication",
+      "press-release": "Press Release",
+      "newsletter": "Newsletter",
+      "constituent-letter": "Constituent Letter",
+      "floor-statement": "Floor Statement",
+      "social-media": "Social Media Post",
+    };
+    return labels[contentType] || "Communication";
   };
 
   return (
@@ -246,11 +235,11 @@ function StandardsCheckerContent() {
                   </button>
                 </div>
 
-                {/* Share Toolbar */}
+                {/* Share Toolbar - shares the original content, not the results */}
                 {showShareToolbar && (
                   <ShareToolbar
-                    content={formatResultsForShare()}
-                    title="Standards Compliance Report"
+                    content={content}
+                    title={getContentTypeLabel()}
                     onClose={() => setShowShareToolbar(false)}
                   />
                 )}
