@@ -13,7 +13,6 @@ import {
   Shield,
   Users,
   AlertCircle,
-  X,
 } from "lucide-react";
 import DistrictSearch from "./components/DistrictSearch";
 import Sidebar from "./components/Sidebar";
@@ -131,14 +130,6 @@ export default function HomePage() {
               transition={{ duration: 0.2 }}
               className="relative w-full max-w-md mx-4 bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden"
             >
-              {/* Close button */}
-              <button
-                onClick={() => setShowLoginModal(false)}
-                className="absolute top-4 right-4 p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-              >
-                <X className="w-5 h-5 text-zinc-500" />
-              </button>
-
               {/* Modal content */}
               <div className="p-8">
                 {/* Logo/Header */}
@@ -151,8 +142,10 @@ export default function HomePage() {
                   </h2>
                   <p className="text-zinc-600 dark:text-zinc-400 mt-2">
                     {isRestrictedMode
-                      ? "Sign in to access the platform"
-                      : "Choose how you'd like to continue"}
+                      ? "Private Beta - Sign in to continue"
+                      : isGuestModeAllowed
+                      ? "Choose how you'd like to continue"
+                      : "Sign in to continue"}
                   </p>
                 </div>
 
@@ -194,23 +187,6 @@ export default function HomePage() {
                     </>
                   )}
                 </div>
-
-                {/* Restricted mode notice */}
-                {isRestrictedMode && (
-                  <div className="mt-6 p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-xl">
-                    <div className="flex items-start gap-3">
-                      <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
-                          Private Beta
-                        </p>
-                        <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
-                          Access is currently limited to authorized users only.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
 
                 {/* Footer */}
                 <p className="text-center text-xs text-zinc-500 mt-6">
