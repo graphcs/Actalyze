@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   generateTaxonomyContext,
   findNode,
-  getCategoryPath,
+  isValidLabelId,
   FLATTENED_CATEGORIES,
-  type FlattenedCategory,
+  TAXONOMY_VERSION,
+  CASECOMPASS_METADATA,
 } from "@/lib/casecompass";
 
 interface ClassificationResult {
@@ -30,45 +31,38 @@ interface ClassificationResult {
   taxonomySource: string;
 }
 
+// Generate taxonomy context once at startup
 const TAXONOMY_CONTEXT = generateTaxonomyContext();
 
-const SYSTEM_PROMPT = `You are an expert congressional casework classifier using the official House Digital Service CaseCompass taxonomy.
-Your job is to analyze constituent casework requests and classify them according to the standardized taxonomy.
+const SYSTEM_PROMPT = `You are an expert congressional casework classifier using the official House Digital Service CaseCompass taxonomy v${TAXONOMY_VERSION}.
+
+Your job is to analyze constituent casework requests and classify them using ONLY the exact label_ids from the official taxonomy.
 
 ${TAXONOMY_CONTEXT}
 
-## CLASSIFICATION RULES
+## CRITICAL CLASSIFICATION RULES
 
-1. **Always classify to the most specific tier possible** - If a case clearly matches a Tier 4 category, use it
-2. **Use the label_id codes exactly** - These are the official CaseCompass identifiers
-3. **Consider agency first** - Start with the Tier 1 agency, then narrow down
-4. **When uncertain, choose the broader category** - Better to be accurate at Tier 3 than wrong at Tier 4
-
-## COMMON CASEWORK PATTERNS
-
-- Visa delays, green cards, citizenship → DHS > USCIS
-- Passport issues → DOS > Passport Services
-- VA disability, benefits → VA > VBA
-- Social Security, Medicare → SSA
-- Tax refunds, identity theft → IRS
-- Student loans, PSLF → ED > FSA
-- Small business loans, EIDL → SBA
-- Housing discrimination → HUD > FHEO
-- Military records, discharge → DOD > Military Personnel
+1. **ONLY use label_ids that appear in the taxonomy above** - Do NOT make up or guess IDs
+2. **If a label_id doesn't exist, use null** - Better to leave a tier empty than use an invalid ID
+3. **Classify to the most specific tier possible** - Use Tier 4 if a match exists
+4. **Start with Tier 1 (agency) and work down** - Each tier must be a child of the previous
+5. **Validate the hierarchy** - tier2 must be under tier1, tier3 under tier2, etc.
 
 ## RESPONSE FORMAT
 
-Return ONLY valid JSON with these exact fields:
+Return ONLY valid JSON with these exact fields. Use ONLY label_ids from the taxonomy above:
 {
-  "tier1_id": "AGENCY_ID or null",
-  "tier2_id": "SUB_AGENCY_ID or null",
-  "tier3_id": "CATEGORY_ID or null",
-  "tier4_id": "SPECIFIC_ID or null",
+  "tier1_id": "exact_label_id_from_taxonomy or null",
+  "tier2_id": "exact_label_id_from_taxonomy or null",
+  "tier3_id": "exact_label_id_from_taxonomy or null",
+  "tier4_id": "exact_label_id_from_taxonomy or null",
   "confidence": 0-100,
-  "reasoning": "Brief explanation of classification",
+  "reasoning": "Brief explanation referencing the specific taxonomy categories chosen",
   "suggestedActions": ["Action 1", "Action 2", "Action 3"],
   "estimatedTimeline": "X-Y weeks for agency response"
-}`;
+}
+
+REMEMBER: Only use label_ids exactly as they appear in the taxonomy. If you're unsure, use a broader category or null.`;
 
 export async function POST(request: NextRequest) {
   try {
@@ -104,13 +98,13 @@ export async function POST(request: NextRequest) {
       headers["X-Title"] = "Actalyze Casework Classifier";
     }
 
-    const userMessage = `Classify this constituent casework request:
+    const userMessage = `Classify this constituent casework request using the CaseCompass taxonomy:
 
 Subject: ${subject || "Not provided"}
 Description: ${description || "Not provided"}
 ${constituentName ? `Constituent: ${constituentName}` : ""}
 
-Respond with JSON classification using CaseCompass taxonomy.`;
+IMPORTANT: Only use label_ids that exist in the taxonomy. Respond with JSON only.`;
 
     console.log(`📋 Classifying casework: "${subject}"`);
 
@@ -123,7 +117,7 @@ Respond with JSON classification using CaseCompass taxonomy.`;
           { role: "system", content: SYSTEM_PROMPT },
           { role: "user", content: userMessage },
         ],
-        temperature: 0.2,
+        temperature: 0.1, // Lower temperature for more consistent classification
         max_tokens: 1000,
         ...(useOpenRouter ? {} : { response_format: { type: "json_object" } }),
       }),
@@ -155,11 +149,22 @@ Respond with JSON classification using CaseCompass taxonomy.`;
       );
     }
 
-    // Build the classification result
-    const tier1 = parsed.tier1_id ? findNode(parsed.tier1_id) : null;
-    const tier2 = parsed.tier2_id ? findNode(parsed.tier2_id) : null;
-    const tier3 = parsed.tier3_id ? findNode(parsed.tier3_id) : null;
-    const tier4 = parsed.tier4_id ? findNode(parsed.tier4_id) : null;
+    // Validate and find nodes - only use valid label_ids
+    const tier1_id = parsed.tier1_id && isValidLabelId(parsed.tier1_id) ? parsed.tier1_id : null;
+    const tier2_id = parsed.tier2_id && isValidLabelId(parsed.tier2_id) ? parsed.tier2_id : null;
+    const tier3_id = parsed.tier3_id && isValidLabelId(parsed.tier3_id) ? parsed.tier3_id : null;
+    const tier4_id = parsed.tier4_id && isValidLabelId(parsed.tier4_id) ? parsed.tier4_id : null;
+
+    // Log if AI returned invalid IDs
+    if (parsed.tier1_id && !tier1_id) console.warn(`⚠️ Invalid tier1_id: ${parsed.tier1_id}`);
+    if (parsed.tier2_id && !tier2_id) console.warn(`⚠️ Invalid tier2_id: ${parsed.tier2_id}`);
+    if (parsed.tier3_id && !tier3_id) console.warn(`⚠️ Invalid tier3_id: ${parsed.tier3_id}`);
+    if (parsed.tier4_id && !tier4_id) console.warn(`⚠️ Invalid tier4_id: ${parsed.tier4_id}`);
+
+    const tier1 = tier1_id ? findNode(tier1_id) : null;
+    const tier2 = tier2_id ? findNode(tier2_id) : null;
+    const tier3 = tier3_id ? findNode(tier3_id) : null;
+    const tier4 = tier4_id ? findNode(tier4_id) : null;
 
     // Build category path
     const pathParts: string[] = [];
@@ -201,11 +206,12 @@ Respond with JSON classification using CaseCompass taxonomy.`;
       ],
       relatedAgency,
       estimatedTimeline: parsed.estimatedTimeline || "2-4 weeks for agency response",
-      caseCompassVersion: "1.0.2",
-      taxonomySource: "House Digital Service",
+      caseCompassVersion: TAXONOMY_VERSION,
+      taxonomySource: CASECOMPASS_METADATA.publisher,
     };
 
     console.log(`✅ Classified: ${result.categoryPath} (${result.confidence}% confidence)`);
+    console.log(`   Label IDs: ${pathIds.join(" > ")}`);
 
     return NextResponse.json(result);
   } catch (error) {
@@ -223,8 +229,8 @@ Respond with JSON classification using CaseCompass taxonomy.`;
 export async function GET() {
   return NextResponse.json({
     categories: FLATTENED_CATEGORIES,
-    version: "1.0.2",
-    source: "House Digital Service CaseCompass Taxonomy",
+    version: TAXONOMY_VERSION,
+    source: CASECOMPASS_METADATA.publisher,
     url: "https://github.com/usgpo/innovation/blob/master/resources/CaseCompass/CaseCompassTaxonomy.json",
   });
 }
