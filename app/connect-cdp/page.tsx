@@ -15,12 +15,28 @@ interface CDPIntegration {
   recordCount?: number;
 }
 
+// Logo colors for fallback display
+const LOGO_COLORS: Record<string, string> = {
+  "ngp-van": "bg-blue-600",
+  "l2": "bg-red-600",
+  "aristotle": "bg-emerald-600",
+  "nationbuilder": "bg-sky-600",
+  "salesforce": "bg-blue-500",
+  "hubspot": "bg-orange-500",
+  "fireside21": "bg-amber-600",
+  "intranet-quorum": "bg-violet-600",
+  "mailchimp": "bg-yellow-500",
+  "actblue": "bg-blue-700",
+  "winred": "bg-red-700",
+  "anedot": "bg-indigo-600",
+};
+
 const CDP_INTEGRATIONS: CDPIntegration[] = [
   {
     id: "ngp-van",
     name: "NGP VAN",
     description: "The leading technology provider to Democratic campaigns and progressive organizations",
-    logo: "https://www.ngpvan.com/sites/default/files/NGP_VAN_Logo_RGB.png",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/NGP_VAN_logo.svg/320px-NGP_VAN_logo.svg.png",
     category: "Voter Data",
     status: "disconnected",
   },
@@ -28,7 +44,7 @@ const CDP_INTEGRATIONS: CDPIntegration[] = [
     id: "l2",
     name: "L2 Political",
     description: "Comprehensive voter file and consumer data for political campaigns",
-    logo: "https://l2-data.com/wp-content/uploads/2021/03/L2-Logo-2021.png",
+    logo: "https://images.crunchbase.com/image/upload/c_pad,h_170,w_170,f_auto,b_white,q_auto:eco,dpr_1/v1486050690/xsqjwh7cwdqezhwhtbrh.png",
     category: "Voter Data",
     status: "disconnected",
   },
@@ -36,7 +52,7 @@ const CDP_INTEGRATIONS: CDPIntegration[] = [
     id: "aristotle",
     name: "Aristotle",
     description: "Political data and compliance solutions for campaigns and organizations",
-    logo: "https://aristotle.com/wp-content/uploads/2023/03/aristotle-logo.svg",
+    logo: "https://images.crunchbase.com/image/upload/c_pad,h_170,w_170,f_auto,b_white,q_auto:eco,dpr_1/lktb0yvqpdrxsqmscvst",
     category: "Voter Data",
     status: "disconnected",
   },
@@ -44,7 +60,7 @@ const CDP_INTEGRATIONS: CDPIntegration[] = [
     id: "nationbuilder",
     name: "NationBuilder",
     description: "Community organizing and campaign management platform",
-    logo: "https://assets.nationbuilder.com/themes/5d1ba84a6b22fc6c9c000000/attachments/original/1652891743/nationbuilder-logo.svg",
+    logo: "https://images.crunchbase.com/image/upload/c_pad,h_170,w_170,f_auto,b_white,q_auto:eco,dpr_1/v1455807371/xbqvtqnrlbktjfttjnj7.png",
     category: "CRM",
     status: "disconnected",
   },
@@ -52,7 +68,7 @@ const CDP_INTEGRATIONS: CDPIntegration[] = [
     id: "salesforce",
     name: "Salesforce NPSP",
     description: "Nonprofit Success Pack for constituent relationship management",
-    logo: "https://www.salesforce.com/content/dam/sfdc-docs/www/logos/logo-salesforce.svg",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Salesforce.com_logo.svg/320px-Salesforce.com_logo.svg.png",
     category: "CRM",
     status: "disconnected",
   },
@@ -60,7 +76,7 @@ const CDP_INTEGRATIONS: CDPIntegration[] = [
     id: "hubspot",
     name: "HubSpot",
     description: "Marketing, sales, and service software for growing organizations",
-    logo: "https://www.hubspot.com/hubfs/HubSpot_Logos/HubSpot-Inversed-Favicon.png",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/HubSpot_Logo.svg/320px-HubSpot_Logo.svg.png",
     category: "CRM",
     status: "disconnected",
   },
@@ -68,7 +84,7 @@ const CDP_INTEGRATIONS: CDPIntegration[] = [
     id: "fireside21",
     name: "Fireside21",
     description: "Constituent correspondence management system used by Congress",
-    logo: "https://www.fireside21.com/assets/images/fireside-logo.png",
+    logo: "https://images.crunchbase.com/image/upload/c_pad,h_170,w_170,f_auto,b_white,q_auto:eco,dpr_1/v1486989887/bvcbxwryqmxvqaopwzvi.png",
     category: "Congressional",
     status: "disconnected",
   },
@@ -76,7 +92,7 @@ const CDP_INTEGRATIONS: CDPIntegration[] = [
     id: "intranet-quorum",
     name: "Intranet Quorum (IQ)",
     description: "Congressional office management and constituent services platform",
-    logo: "https://www.quorum.us/wp-content/uploads/2021/02/quorum-logo.svg",
+    logo: "https://images.crunchbase.com/image/upload/c_pad,h_170,w_170,f_auto,b_white,q_auto:eco,dpr_1/rkyrkmmzdw9pxnkfhnlk",
     category: "Congressional",
     status: "disconnected",
   },
@@ -84,7 +100,7 @@ const CDP_INTEGRATIONS: CDPIntegration[] = [
     id: "mailchimp",
     name: "Mailchimp",
     description: "Email marketing and automation platform",
-    logo: "https://mailchimp.com/release/plums/cxp/images/freddie.svg",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Mailchimp_Logo.svg/320px-Mailchimp_Logo.svg.png",
     category: "Email",
     status: "disconnected",
   },
@@ -92,7 +108,7 @@ const CDP_INTEGRATIONS: CDPIntegration[] = [
     id: "actblue",
     name: "ActBlue",
     description: "Fundraising platform for Democratic candidates and progressive causes",
-    logo: "https://secure.actblue.com/cf/assets/images/actblue_logo.svg",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/ActBlue_logo.svg/320px-ActBlue_logo.svg.png",
     category: "Fundraising",
     status: "disconnected",
   },
@@ -100,7 +116,7 @@ const CDP_INTEGRATIONS: CDPIntegration[] = [
     id: "winred",
     name: "WinRed",
     description: "Fundraising platform for Republican candidates and conservative causes",
-    logo: "https://winred.com/static/winred-logo-red.svg",
+    logo: "https://images.crunchbase.com/image/upload/c_pad,h_170,w_170,f_auto,b_white,q_auto:eco,dpr_1/mzwm4zjzfpwrgukofzxb",
     category: "Fundraising",
     status: "disconnected",
   },
@@ -108,7 +124,7 @@ const CDP_INTEGRATIONS: CDPIntegration[] = [
     id: "anedot",
     name: "Anedot",
     description: "Payment processing and fundraising for political organizations",
-    logo: "https://www.anedot.com/hubfs/anedot-logo.svg",
+    logo: "https://images.crunchbase.com/image/upload/c_pad,h_170,w_170,f_auto,b_white,q_auto:eco,dpr_1/dxaflr93tqy0sldz5chj",
     category: "Fundraising",
     status: "disconnected",
   },
@@ -234,14 +250,16 @@ export default function ConnectCDPPage() {
               className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 hover:shadow-lg transition-shadow"
             >
               <div className="flex items-start justify-between mb-4">
-                <div className="w-12 h-12 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center overflow-hidden">
+                <div className={`w-12 h-12 rounded-lg flex items-center justify-center overflow-hidden relative ${LOGO_COLORS[integration.id] || 'bg-zinc-500'}`}>
+                  <span className="text-xl font-bold text-white">
+                    {integration.name.charAt(0)}
+                  </span>
                   <img
                     src={integration.logo}
                     alt={integration.name}
-                    className="w-8 h-8 object-contain"
+                    className="absolute inset-0 w-full h-full object-contain p-1 bg-white rounded-lg"
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = 'none';
-                      (e.target as HTMLImageElement).parentElement!.innerHTML = `<span class="text-lg font-bold text-zinc-500">${integration.name.charAt(0)}</span>`;
                     }}
                   />
                 </div>

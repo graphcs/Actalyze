@@ -3,7 +3,8 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import AppLayout from "../components/AppLayout";
-import { CheckSquare, Loader2, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import { CheckSquare, Loader2, CheckCircle, XCircle, AlertCircle, Share2 } from "lucide-react";
+import ShareToolbar from "../components/ShareToolbar";
 
 interface CheckResult {
   overallScore: number;
@@ -27,6 +28,7 @@ function StandardsCheckerContent() {
   const [result, setResult] = useState<CheckResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showShareToolbar, setShowShareToolbar] = useState(false);
 
   // Load content from session storage if coming from Draft Memo
   useEffect(() => {
@@ -102,6 +104,29 @@ function StandardsCheckerContent() {
       default:
         return "text-red-600 dark:text-red-400";
     }
+  };
+
+  const formatResultsForShare = () => {
+    if (!result) return "";
+    let text = `Standards Compliance Report\n`;
+    text += `═══════════════════════════\n\n`;
+    text += `Overall Grade: ${result.overallGrade} (${result.overallScore}%)\n`;
+    text += `${result.summary}\n\n`;
+
+    result.categories.forEach(cat => {
+      const status = cat.status === "pass" ? "✓" : cat.status === "warning" ? "⚠" : "✗";
+      text += `${status} ${cat.name}: ${cat.score}%\n`;
+      if (cat.findings.length > 0) {
+        cat.findings.forEach(f => text += `  • ${f}\n`);
+      }
+      if (cat.recommendations.length > 0) {
+        text += `  Recommendations:\n`;
+        cat.recommendations.forEach(r => text += `  → ${r}\n`);
+      }
+      text += `\n`;
+    });
+
+    return text;
   };
 
   return (
@@ -210,6 +235,26 @@ function StandardsCheckerContent() {
               </div>
             ) : result ? (
               <div className="space-y-6">
+                {/* Share Button */}
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => setShowShareToolbar(!showShareToolbar)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 rounded-lg transition-colors"
+                  >
+                    <Share2 className="w-4 h-4" />
+                    Share & Export
+                  </button>
+                </div>
+
+                {/* Share Toolbar */}
+                {showShareToolbar && (
+                  <ShareToolbar
+                    content={formatResultsForShare()}
+                    title="Standards Compliance Report"
+                    onClose={() => setShowShareToolbar(false)}
+                  />
+                )}
+
                 {/* Overall Score */}
                 <div className="p-6 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800">
                   <div className="flex items-center justify-between mb-4">

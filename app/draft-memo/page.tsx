@@ -3,7 +3,8 @@
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import AppLayout from "../components/AppLayout";
-import { FileText, Send, Copy, Download, Loader2, User, ChevronDown, ChevronUp, Settings } from "lucide-react";
+import { FileText, Send, Loader2, User, ChevronDown, ChevronUp, Share2 } from "lucide-react";
+import ShareToolbar from "../components/ShareToolbar";
 
 type MemoType = "press-release" | "newsletter" | "constituent-letter" | "floor-statement" | "social-media";
 type Perspective = "democrat" | "republican" | "neutral" | "";
@@ -63,7 +64,7 @@ function DraftMemoContent() {
   const [generatedMemo, setGeneratedMemo] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [copied, setCopied] = useState(false);
+  const [showShareToolbar, setShowShareToolbar] = useState(false);
 
   // House member context
   const [houseMemberContext, setHouseMemberContext] = useState("");
@@ -141,24 +142,6 @@ function DraftMemoContent() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(generatedMemo);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleDownload = () => {
-    const blob = new Blob([generatedMemo], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${selectedType}-${new Date().toISOString().split("T")[0]}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
   };
 
   const handleCheckStandards = () => {
@@ -421,24 +404,26 @@ function DraftMemoContent() {
                   Generated Communication
                 </label>
                 {generatedMemo && (
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={handleCopy}
-                      className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
-                    >
-                      <Copy className="w-4 h-4" />
-                      {copied ? "Copied!" : "Copy"}
-                    </button>
-                    <button
-                      onClick={handleDownload}
-                      className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
-                    >
-                      <Download className="w-4 h-4" />
-                      Download
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => setShowShareToolbar(!showShareToolbar)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 rounded-lg transition-colors"
+                  >
+                    <Share2 className="w-4 h-4" />
+                    Share & Export
+                  </button>
                 )}
               </div>
+
+              {/* Share Toolbar */}
+              {generatedMemo && showShareToolbar && (
+                <div className="mb-3">
+                  <ShareToolbar
+                    content={generatedMemo}
+                    title={`${selectedTemplate.label} - ${topic.slice(0, 50)}`}
+                    onClose={() => setShowShareToolbar(false)}
+                  />
+                </div>
+              )}
 
               <div className="min-h-[400px] p-4 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800">
                 {isLoading ? (
