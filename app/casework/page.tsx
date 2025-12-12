@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import AppLayout from "../components/AppLayout";
-import { Briefcase, Search, Clock, User, Bot, CheckCircle, Tag, ChevronRight, Plus, ExternalLink, Loader2 } from "lucide-react";
+import { Briefcase, Search, Clock, User, Bot, CheckCircle, Tag, ChevronRight, Plus, ExternalLink, Loader2, Trash2 } from "lucide-react";
 
 interface CaseCompassClassification {
   tier1: { label_id: string; name: string; abbreviation?: string } | null;
@@ -278,7 +278,6 @@ export default function CaseworkPage() {
     constituentName: "",
     email: "",
     phone: "",
-    category: "Immigration",
     subject: "",
     description: "",
   });
@@ -299,6 +298,14 @@ export default function CaseworkPage() {
     ));
     if (selectedCase?.id === caseId) {
       setSelectedCase(prev => prev ? { ...prev, assignedTo: team, status: "in-progress" } : null);
+    }
+  };
+
+  const handleDeleteCase = (caseId: string) => {
+    if (!confirm("Are you sure you want to delete this case?")) return;
+    setCases(prev => prev.filter(c => c.id !== caseId));
+    if (selectedCase?.id === caseId) {
+      setSelectedCase(null);
     }
   };
 
@@ -369,7 +376,7 @@ export default function CaseworkPage() {
       constituentName: newCase.constituentName,
       email: newCase.email,
       phone: newCase.phone || undefined,
-      category: caseCompassData?.tier1?.abbreviation || newCase.category,
+      category: caseCompassData?.tier1?.abbreviation || "Pending",
       subcategory: caseCompassData?.tier3?.name || "General Inquiry",
       subject: newCase.subject,
       description: newCase.description,
@@ -399,7 +406,6 @@ export default function CaseworkPage() {
       constituentName: "",
       email: "",
       phone: "",
-      category: "Immigration",
       subject: "",
       description: "",
     });
@@ -451,7 +457,12 @@ export default function CaseworkPage() {
         {/* New Casework Form */}
         {showNewForm && (
           <div className="mb-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5">
-            <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 mb-4">New Casework Request</h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">New Casework Request</h3>
+              <span className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 px-2 py-1 rounded-full">
+                Category auto-detected by AI
+              </span>
+            </div>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs text-zinc-500 uppercase mb-1">Constituent Name *</label>
@@ -462,18 +473,6 @@ export default function CaseworkPage() {
                   className="w-full px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
                   placeholder="Full name"
                 />
-              </div>
-              <div>
-                <label className="block text-xs text-zinc-500 uppercase mb-1">Category</label>
-                <select
-                  value={newCase.category}
-                  onChange={(e) => setNewCase(prev => ({ ...prev, category: e.target.value }))}
-                  className="w-full px-3 py-2 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
-                >
-                  {CATEGORIES.filter(c => c !== "All").map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
               </div>
               <div>
                 <label className="block text-xs text-zinc-500 uppercase mb-1">Email *</label>
@@ -495,7 +494,7 @@ export default function CaseworkPage() {
                   placeholder="(555) 123-4567"
                 />
               </div>
-              <div className="md:col-span-2">
+              <div>
                 <label className="block text-xs text-zinc-500 uppercase mb-1">Subject *</label>
                 <input
                   type="text"
@@ -667,9 +666,18 @@ export default function CaseworkPage() {
               <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto">
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-xs font-mono text-zinc-500">{selectedCase.caseNumber}</span>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(selectedCase.status)}`}>
-                    {selectedCase.status.replace("-", " ")}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(selectedCase.status)}`}>
+                      {selectedCase.status.replace("-", " ")}
+                    </span>
+                    <button
+                      onClick={() => handleDeleteCase(selectedCase.id)}
+                      className="p-1.5 rounded-lg text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                      title="Delete case"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
 
                 <h3 className="font-bold text-lg text-zinc-900 dark:text-zinc-100 mb-2">
