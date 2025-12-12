@@ -64,10 +64,10 @@ export async function GET(request: NextRequest) {
     const districtLabel = `${stateCode}-${parseInt(districtNum)}`;
     const districtName = `${stateName}'s ${parseInt(districtNum)} Congressional District`;
 
-    // Check cache headers
+    // Check cache headers - default to 24 hours (86400 seconds)
     const useCacheHeader = request.headers.get('x-use-cache');
     const useCache = useCacheHeader !== 'false';
-    const cacheDurationSeconds = parseInt(request.headers.get('x-cache-duration-seconds') || '21600', 10); // Default 6h for AI intel
+    const cacheDurationSeconds = parseInt(request.headers.get('x-cache-duration-seconds') || '86400', 10);
 
     // Generate cache keys
     const memoryCacheKey = generateCacheKey('district-ai-intel', { district: districtCode });

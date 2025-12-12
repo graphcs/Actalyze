@@ -54,10 +54,10 @@ export async function GET(request: NextRequest) {
 
     console.log(`🔍 Fetching hyperlocal summary for district ${districtLabel}`);
 
-    // Check cache settings
+    // Check cache settings - default to 24 hours (86400 seconds)
     const useCacheHeader = request.headers.get('x-use-cache');
     const useCache = useCacheHeader !== 'false';
-    const cacheDuration = parseInt(request.headers.get('x-cache-duration') || '3600', 10);
+    const cacheDurationSeconds = parseInt(request.headers.get('x-cache-duration-seconds') || '86400', 10);
     const dbCacheKey = generateDistrictCacheKey('summary', districtCode);
 
     // Check DB cache first (if cache reading is enabled)
@@ -139,10 +139,10 @@ export async function GET(request: NextRequest) {
     const result = { summary };
 
     // Save to memory cache
-    serverCache.set(cacheKey, result);
+    serverCache.set(cacheKey, result, cacheDurationSeconds);
 
     // Save to DB cache (always write, even if cache reading is disabled)
-    await setInDbCache(dbCacheKey, 'summary', districtCode, result, cacheDuration);
+    await setInDbCache(dbCacheKey, 'summary', districtCode, result, cacheDurationSeconds);
 
     return NextResponse.json(result);
 

@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
     const useCacheHeader = request.headers.get('x-use-cache');
     const useCache = useCacheHeader !== 'false';
     // Default to 24 hours (86400 seconds) for perspectives since they take a while to generate
-    const cacheDuration = parseInt(request.headers.get('x-cache-duration') || '86400', 10);
+    const cacheDurationSeconds = parseInt(request.headers.get('x-cache-duration-seconds') || '86400', 10);
 
     // Extract district code from topic if it matches pattern (e.g., "VA05 district")
     const districtMatch = topic.match(/^([A-Z]{2}\d{2})\s+district$/i);
@@ -88,10 +88,10 @@ export async function GET(request: NextRequest) {
     };
 
     // Save to memory cache
-    serverCache.set(cacheKey, result);
+    serverCache.set(cacheKey, result, cacheDurationSeconds);
 
     // Save to DB cache (always write, even if cache reading is disabled)
-    await setInDbCache(dbCacheKey, 'perspectives', districtCode, result, cacheDuration);
+    await setInDbCache(dbCacheKey, 'perspectives', districtCode, result, cacheDurationSeconds);
 
     return NextResponse.json(result);
 

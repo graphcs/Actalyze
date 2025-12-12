@@ -34,10 +34,10 @@ export async function GET(request: NextRequest) {
     const [, stateCode, districtNum] = match;
     const districtLabel = `${stateCode}-${districtNum}`;
 
-    // Check cache settings
+    // Check cache settings - default to 24 hours (86400 seconds)
     const useCacheHeader = request.headers.get('x-use-cache');
     const useCache = useCacheHeader !== 'false';
-    const cacheDuration = parseInt(request.headers.get('x-cache-duration') || '3600', 10);
+    const cacheDurationSeconds = parseInt(request.headers.get('x-cache-duration-seconds') || '86400', 10);
     const dbCacheKey = generateDistrictCacheKey('polling', districtCode);
 
     // Check DB cache first (if cache reading is enabled)
@@ -128,10 +128,10 @@ If no recent polls, use general district political leaning. Example: {"trend": "
     };
 
     // Save to memory cache
-    serverCache.set(cacheKey, result);
+    serverCache.set(cacheKey, result, cacheDurationSeconds);
 
     // Save to DB cache (always write, even if cache reading is disabled)
-    await setInDbCache(dbCacheKey, 'polling', districtCode, result, cacheDuration);
+    await setInDbCache(dbCacheKey, 'polling', districtCode, result, cacheDurationSeconds);
 
     return NextResponse.json(result);
 

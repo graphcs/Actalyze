@@ -236,10 +236,10 @@ export async function GET(request: NextRequest) {
     const districtLabel = `${stateCode}-${districtNum}`;
     const stateName = STATE_NAMES[stateCode] || stateCode;
 
-    // Check cache headers
+    // Check cache headers - default to 24 hours (86400 seconds)
     const useCacheHeader = request.headers.get('x-use-cache');
     const useCache = useCacheHeader !== 'false';
-    const cacheDurationSeconds = parseInt(request.headers.get('x-cache-duration-seconds') || '3600', 10);
+    const cacheDurationSeconds = parseInt(request.headers.get('x-cache-duration-seconds') || '86400', 10);
 
     // Generate cache keys
     const memoryCacheKey = generateCacheKey('district-news', { district: districtCode });
