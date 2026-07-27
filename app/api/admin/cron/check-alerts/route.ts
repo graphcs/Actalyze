@@ -12,13 +12,27 @@ import { checkAllAlerts } from '@/lib/alerts';
  */
 export async function GET(request: NextRequest) {
   try {
-    // Verify cron secret for security
+    // Verify cron secret for security.
+    // This must FAIL CLOSED: an unset CRON_SECRET previously let anyone on the
+    // internet trigger a full alert sweep (LLM + email spend), so a missing
+    // secret now disables the endpoint entirely rather than opening it.
     const authHeader = request.headers.get('authorization');
     const cronSecret = process.env.CRON_SECRET;
 
-    // If CRON_SECRET is set, verify it
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-      console.log('Unauthorized cron request');
+    if (!cronSecret) {
+      console.error(
+        'CRON_SECRET is not configured - refusing to run the alert sweep. ' +
+          'Set CRON_SECRET in the environment (see .env.example) and have the ' +
+          'cron scheduler send "Authorization: Bearer <CRON_SECRET>".'
+      );
+      return NextResponse.json(
+        { error: 'Cron endpoint is not configured' },
+        { status: 503 }
+      );
+    }
+
+    if (authHeader !== `Bearer ${cronSecret}`) {
+      console.warn('Unauthorized cron request rejected');
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }

@@ -1,11 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 const supabaseUrl = process.env.ACTALYZE_SUPABASE_URL!
 const supabaseAnonKey = process.env.ACTALYZE_SUPABASE_ANON_KEY!
 
 export async function DELETE(request: NextRequest) {
     try {
+        // Destructive: removes the document row, its chunks and the storage
+        // object. Never expose this to anonymous callers.
+        const session = await getServerSession(authOptions)
+
+        if (!session?.user?.email) {
+            return NextResponse.json(
+                { error: 'Unauthorized' },
+                { status: 401 }
+            )
+        }
+
         const supabase = createClient(supabaseUrl, supabaseAnonKey)
         const { searchParams } = new URL(request.url)
         const documentId = searchParams.get('id')

@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { searchDocuments } from '@/lib/document-processor'
+import { OPENROUTER_KEY } from "@/lib/ai-provider";
+import { checkRateLimit } from '@/lib/rate-limit'
 
 // Use OpenRouter for AI with web access (fallback to OpenAI if not configured)
 const openai = new OpenAI({
-    apiKey: process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY!,
-    baseURL: process.env.OPENROUTER_API_KEY ? 'https://openrouter.ai/api/v1' : undefined,
-    defaultHeaders: process.env.OPENROUTER_API_KEY ? {
+    apiKey: OPENROUTER_KEY || process.env.OPENAI_API_KEY!,
+    baseURL: OPENROUTER_KEY ? 'https://openrouter.ai/api/v1' : undefined,
+    defaultHeaders: OPENROUTER_KEY ? {
         'HTTP-Referer': process.env.NEXT_PUBLIC_URL || 'http://localhost:3000',
         'X-Title': 'Actalyze',
     } : undefined
@@ -94,6 +96,11 @@ function extractFinancialData(response: string, query: string): { type: string; 
 
 export async function POST(request: NextRequest) {
     try {
+        // This route is public and every call costs LLM tokens. Cap it per IP.
+        // Per-instance only - see lib/rate-limit.ts; a WAF rule is the real fix.
+        const limited = checkRateLimit(request, 'chatbot', { limit: 20, windowMs: 60_000 })
+        if (limited) return limited
+
         const { message, history = [] }: ChatRequest = await request.json()
 
         if (!message || typeof message !== 'string') {
@@ -210,10 +217,10 @@ Please provide a helpful, accurate response to the user's question, incorporatin
         // Step 6: Generate AI response
         // Using Perplexity's online model for web access (or GPT-4 as fallback)
         // Note: OpenRouter/Perplexity with streaming doesn't include citations, so we use non-streaming for OpenRouter
-        const useStreaming = !process.env.OPENROUTER_API_KEY
+        const useStreaming = !OPENROUTER_KEY
 
         const response = await openai.chat.completions.create({
-            model: process.env.OPENROUTER_API_KEY ? 'perplexity/sonar' : 'gpt-4',
+            model: OPENROUTER_KEY ? 'perplexity/sonar' : 'gpt-4o-mini',
             messages: [
                 {
                     role: 'system',
