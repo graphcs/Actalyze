@@ -50,3 +50,6 @@ next-env.d.ts
 
 # cursor
 .cursor/
+
+# claude code scratch (agent worktrees)
+.claude/worktrees/
