@@ -38,26 +38,22 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-    // Fetch data if authenticated OR in guest mode
-    if (status === "authenticated" || isGuestMode) {
-      // Fetch trending topics with cache settings
-      fetchWithCache("/api/trending")
+    // Wait for the auth check to resolve, then load regardless of its outcome.
+    // The site runs in public mode and /api/trending is public, so gating the
+    // fetch on "authenticated || guest" left every anonymous visitor staring at
+    // an empty grid that read "Trending topics are unavailable".
+    if (status === "loading") return;
+
+    fetchWithCache("/api/trending")
       .then((res) => res.json())
       .then((data) => {
-        setTopics(data);
+        setTopics(Array.isArray(data) ? data : []);
         setLoading(false);
       })
       .catch((error) => {
         console.error("Error fetching trending topics:", error);
         setLoading(false);
       });
-    } else if (status === "loading") {
-      // Still loading auth state
-      return;
-    } else {
-      // Not authenticated and not guest mode
-      setLoading(false);
-    }
   }, [status, isGuestMode]);
 
   const handleExplore = () => {

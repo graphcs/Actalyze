@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { TwitterApi } from "twitter-api-v2";
 import { serverCache, generateCacheKey } from "@/src/lib/cache";
+import { OPENROUTER_KEY } from "@/lib/ai-provider";
 
 interface UserData {
   id: string;
@@ -72,7 +73,7 @@ export async function GET(request: NextRequest) {
     console.log(`🔍 Finding trending topics for district ${districtLabel}`);
 
     // Step 1: Call Claude Sonnet 4.5 via OpenRouter to get trending topics
-    const openrouterKey = process.env.OPENROUTER_API_KEY;
+    const openrouterKey = OPENROUTER_KEY;
     if (!openrouterKey) {
       console.error('❌ OPENROUTER_API_KEY not found');
       return NextResponse.json({ tweets: [] });

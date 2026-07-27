@@ -5,6 +5,7 @@ import {
   getFromDbCache,
   setInDbCache,
 } from "@/lib/db-cache";
+import { searchTweetsViaSerpApi } from "@/lib/serpapi-tweets";
 
 interface UserData {
   id: string;
@@ -26,6 +27,33 @@ interface Tweet {
 
 interface TweetWithMetrics extends Tweet {
   engagement_score: number;
+}
+
+/**
+ * X's free API tier does not allow search, so the live path above 403s in this
+ * deployment. Recover genuine tweets through SerpAPI instead, and cache them on
+ * the same keys the live path uses so repeat views are instant.
+ */
+async function recoverTweets(
+  query: string,
+  limit: number,
+  reason: string,
+  cacheKeys?: { memory: string; db: string; ttl: number }
+) {
+  const tweets = await searchTweetsViaSerpApi(query, limit);
+  if (tweets.length === 0) {
+    return NextResponse.json({ tweets: [] });
+  }
+
+  console.log(`✅ Serving ${tweets.length} tweets via SerpAPI for "${query}" (${reason})`);
+  const response = { tweets };
+
+  if (cacheKeys) {
+    serverCache.set(cacheKeys.memory, response, cacheKeys.ttl);
+    await setInDbCache(cacheKeys.db, 'tweets', 'global', response, cacheKeys.ttl);
+  }
+
+  return NextResponse.json(response);
 }
 
 /**
@@ -77,7 +105,11 @@ export async function GET(request: NextRequest) {
 
     if (!apiKey || !apiSecret) {
       console.error('❌ Twitter API credentials not found');
-      return NextResponse.json({ tweets: [] });
+      return recoverTweets(query, limit, 'no credentials', {
+        memory: memoryCacheKey,
+        db: dbCacheKey,
+        ttl: cacheDurationSeconds,
+      });
     }
 
     // Authenticate with Twitter API v2
@@ -101,7 +133,11 @@ export async function GET(request: NextRequest) {
 
     if (!result.data.data || result.data.data.length === 0) {
       console.log(`⚠️  No tweets found for: "${query}"`);
-      return NextResponse.json({ tweets: [] });
+      return recoverTweets(query, limit, 'no live results', {
+        memory: memoryCacheKey,
+        db: dbCacheKey,
+        ttl: cacheDurationSeconds,
+      });
     }
 
     // Map user data for easy lookup
@@ -167,6 +203,21 @@ export async function GET(request: NextRequest) {
   } catch (error: unknown) {
     const err = error as { message?: string; code?: string };
     console.error('❌ Error searching Twitter:', err.message || error);
-    return NextResponse.json({ tweets: [] });
+
+    // The cache keys are scoped to the try block, so rebuild them here to cache
+    // the recovered results on the same keys the live path would have used.
+    const { searchParams } = request.nextUrl;
+    const query = searchParams.get('query') || '';
+    if (!query) {
+      return NextResponse.json({ tweets: [] });
+    }
+    const limit = parseInt(searchParams.get('limit') || '4');
+    const ttl = parseInt(request.headers.get('x-cache-duration-seconds') || '21600', 10);
+
+    return recoverTweets(query, limit, `live error ${err.code ?? ''}`.trim(), {
+      memory: generateCacheKey('tweets-search', { query, limit: String(limit) }),
+      db: `tweets:search:${query.toLowerCase().replace(/\s+/g, '-')}:${limit}`,
+      ttl,
+    });
   }
 }

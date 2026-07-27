@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { TwitterApi } from "twitter-api-v2";
 import { serverCache, generateCacheKey } from "@/src/lib/cache";
+import { chatCompletions } from "@/lib/ai-provider";
+import { searchTweetsViaSerpApi } from "@/lib/serpapi-tweets";
 import {
   getFromDbCache,
   setInDbCache,
@@ -92,12 +94,12 @@ export async function GET(request: NextRequest) {
     console.log(`🧠 Generating AI political intelligence for ${districtLabel}`);
 
     // Check for required API keys
-    const openrouterKey = process.env.OPENROUTER_API_KEY;
+    const ai = chatCompletions({ webSearch: true });
     const twitterKey = process.env.TWITTER_API_KEY;
     const twitterSecret = process.env.TWITTER_API_SECRET;
 
-    if (!openrouterKey) {
-      console.error('❌ OPENROUTER_API_KEY not found');
+    if (!ai) {
+      console.error('❌ No LLM provider configured (OPENAI_API_KEY / OPENROUTER_API_KEY)');
       return NextResponse.json({
         error: 'AI service unavailable',
         district: districtCode,
@@ -132,16 +134,11 @@ Each search term should be SHORT (1-4 words), use keywords people actually tweet
 
 ONLY output the bulleted list with NO additional commentary.`;
 
-    const topicsResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    const topicsResponse = await fetch(ai.url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${openrouterKey}`,
-        'HTTP-Referer': process.env.NEXT_PUBLIC_URL || 'http://localhost:3000',
-        'X-Title': 'Actalyze',
-      },
+      headers: ai.headers,
       body: JSON.stringify({
-        model: 'perplexity/sonar-pro',
+        model: ai.model,
         messages: [{ role: 'user', content: topicsPrompt }],
         temperature: 0.3,
         max_tokens: 500,
@@ -314,6 +311,58 @@ ONLY output the bulleted list with NO additional commentary.`;
 
     console.log(`📊 Total tweets collected: ${allTweetsWithMetrics.length}`);
 
+    // X's free API tier forbids /2/tweets/search/recent, so on this deployment both
+    // attempts above return 403 and every downstream card renders empty. Recover
+    // genuine posts through SerpAPI instead - real handles, ids, text and links.
+    if (allTweetsWithMetrics.length < 20) {
+      console.log(`🔎 Recovering posts via SerpAPI for ${districtLabel}`);
+
+      // Query the most specific terms first, then widen to the state, so a
+      // district with little chatter still yields something relevant.
+      const recoveryTerms = [
+        ...searchTerms.slice(0, 6),
+        `${districtName} ${stateName}`,
+        `${stateName} politics`,
+        `${stateName} congress`,
+      ];
+
+      const recovered = await Promise.all(
+        recoveryTerms.map((term) => searchTweetsViaSerpApi(term, 8).catch(() => []))
+      );
+
+      const fresh: CachedTweet[] = [];
+      for (const [i, batch] of recovered.entries()) {
+        for (const t of batch) {
+          if (seenTweetIds.has(t.id)) continue;
+          seenTweetIds.add(t.id);
+
+          const createdAt = t.created_at ? new Date(t.created_at) : now;
+          const ageDays = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24);
+          const engagement = (t.likes ?? 0) + (t.retweets ?? 0) * 2 + (t.replies ?? 0);
+
+          const cacheable: CachedTweet = {
+            id: t.id,
+            text: t.text,
+            author: t.author,
+            username: t.username,
+            url: t.url,
+            created_at: t.created_at ?? now.toISOString(),
+            engagement_score: engagement,
+            search_terms: [recoveryTerms[i]],
+            fetched_at: now.toISOString(),
+          };
+
+          fresh.push(cacheable);
+          allTweetsWithMetrics.push({ ...cacheable, age_days: ageDays });
+        }
+      }
+
+      if (fresh.length > 0) {
+        await cacheTweets(fresh, recoveryTerms.join(' | '), districtCode);
+      }
+      console.log(`🔎 SerpAPI recovery added ${fresh.length} posts (total ${allTweetsWithMetrics.length})`);
+    }
+
     // Fallback: if insufficient data and we didn't use cached data, try state-level search
     // Skip this if we used cache (to save API calls)
     if (allTweetsWithMetrics.length < 20 && !usedCache) {
@@ -435,7 +484,8 @@ ONLY output the bulleted list with NO additional commentary.`;
       tweetsForClassification,
       districtCode,
       districtName,
-      openrouterKey
+      // classifyTweets resolves its own provider now; kept for signature compat.
+      ''
     );
 
     console.log(`✅ Classified ${classifications.length} tweets`);

@@ -17,9 +17,10 @@ interface MeetingRequest {
   location: "in-district" | "dc-office" | "virtual";
   status: "pending" | "approved" | "declined" | "scheduled";
   submittedAt: string;
-  aiScore: number;
+  /** null until the request has actually been analysed. */
+  aiScore: number | null;
   aiReasoning: string;
-  aiRecommendation: "meet" | "delegate" | "decline";
+  aiRecommendation: "meet" | "delegate" | "decline" | null;
   priority: "high" | "medium" | "low";
 }
 
@@ -144,32 +145,66 @@ export default function ConstituentMeetingsPage() {
     }
   };
 
-  const getScoreColor = (score: number) => {
+  // A null score means the request has not been analysed yet - render it neutrally
+  // rather than colouring it as if it had scored badly.
+  const getScoreColor = (score: number | null) => {
+    if (score === null) return "text-zinc-500 dark:text-zinc-400";
     if (score >= 80) return "text-green-600 dark:text-green-400";
     if (score >= 50) return "text-yellow-600 dark:text-yellow-400";
     return "text-red-600 dark:text-red-400";
   };
 
-  const getScoreBg = (score: number) => {
+  const getScoreBg = (score: number | null) => {
+    if (score === null) return "bg-zinc-100 dark:bg-zinc-800/40";
     if (score >= 80) return "bg-green-100 dark:bg-green-900/30";
     if (score >= 50) return "bg-yellow-100 dark:bg-yellow-900/30";
     return "bg-red-100 dark:bg-red-900/30";
   };
 
-  const getRecommendationIcon = (rec: string) => {
+  const getRecommendationIcon = (rec: string | null) => {
     switch (rec) {
       case "meet": return <ThumbsUp className="w-4 h-4 text-green-600" />;
       case "delegate": return <AlertTriangle className="w-4 h-4 text-yellow-600" />;
       case "decline": return <ThumbsDown className="w-4 h-4 text-red-600" />;
+      default: return null;
     }
   };
 
-  const handleCreateRequest = () => {
+  const scoredRequests = requests.filter(
+    (r): r is MeetingRequest & { aiScore: number } => r.aiScore !== null
+  );
+
+  const handleCreateRequest = async () => {
     if (!newRequest.constituentName || !newRequest.email || !newRequest.topic) return;
 
-    const aiScore = Math.floor(Math.random() * 40) + 50; // Random score 50-90
-    const aiRecommendations: Array<"meet" | "delegate" | "decline"> = ["meet", "delegate", "decline"];
-    const aiRecommendation = aiScore >= 70 ? "meet" : aiScore >= 40 ? "delegate" : "decline";
+    // Score the request with the real model rather than assigning a number.
+    // If scoring is unavailable the request is still created, marked as awaiting
+    // analysis — never with an invented score.
+    let aiScore: number | null = null;
+    let aiReasoning = "Awaiting analysis.";
+    let aiRecommendation: "meet" | "delegate" | "decline" | null = null;
+
+    try {
+      const res = await fetch("/api/meetings/score", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          constituentName: newRequest.constituentName,
+          organization: newRequest.organization,
+          topic: newRequest.topic,
+          description: newRequest.description,
+          location: newRequest.location,
+        }),
+      });
+      const data = await res.json();
+      if (data?.analyzed) {
+        aiScore = data.score;
+        aiReasoning = data.reasoning;
+        aiRecommendation = data.recommendation;
+      }
+    } catch {
+      // Leave the request unscored rather than guessing.
+    }
 
     const newMeetingRequest: MeetingRequest = {
       id: Date.now().toString(),
@@ -185,9 +220,9 @@ export default function ConstituentMeetingsPage() {
       status: "pending",
       submittedAt: new Date().toISOString(),
       aiScore,
-      aiReasoning: "AI analysis pending full review. Initial scoring based on topic relevance and constituent information provided.",
+      aiReasoning,
       aiRecommendation,
-      priority: aiScore >= 70 ? "high" : aiScore >= 40 ? "medium" : "low",
+      priority: aiScore === null ? "medium" : aiScore >= 70 ? "high" : aiScore >= 40 ? "medium" : "low",
     };
 
     setRequests(prev => [newMeetingRequest, ...prev]);
@@ -369,7 +404,11 @@ export default function ConstituentMeetingsPage() {
           <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4">
             <p className="text-sm text-zinc-500">Avg AI Score</p>
             <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-              {Math.round(requests.reduce((sum, r) => sum + r.aiScore, 0) / requests.length)}
+              {scoredRequests.length === 0
+                ? "—"
+                : Math.round(
+                    scoredRequests.reduce((sum, r) => sum + r.aiScore, 0) / scoredRequests.length
+                  )}
             </p>
           </div>
         </div>
@@ -430,7 +469,7 @@ export default function ConstituentMeetingsPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <div className={`px-2.5 py-1 rounded-full text-xs font-semibold ${getScoreBg(request.aiScore)} ${getScoreColor(request.aiScore)}`}>
-                      AI: {request.aiScore}
+                      {request.aiScore === null ? "Awaiting analysis" : `AI: ${request.aiScore}`}
                     </div>
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                       request.status === "pending" ? "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300" :
@@ -533,7 +572,7 @@ export default function ConstituentMeetingsPage() {
                     <Bot className="w-5 h-5 text-zinc-600 dark:text-zinc-400" />
                     <span className="font-semibold text-zinc-900 dark:text-zinc-100">AI Analysis</span>
                     <span className={`ml-auto text-lg font-bold ${getScoreColor(selectedRequest.aiScore)}`}>
-                      {selectedRequest.aiScore}/100
+                      {selectedRequest.aiScore === null ? "—" : `${selectedRequest.aiScore}/100`}
                     </span>
                   </div>
                   <p className="text-sm text-zinc-700 dark:text-zinc-300 mb-3">

@@ -57,7 +57,17 @@ export default function AdminPage() {
       const response = await fetch("/api/admin/settings");
       if (response.ok) {
         const data = await response.json();
-        setSettings(data);
+        // The endpoint only returns the email arrays to an authenticated admin;
+        // anonymous and non-admin callers get `{ mode }` alone. Merge defensively
+        // so the arrays are never undefined - every consumer below calls
+        // .includes()/.filter() on them and would otherwise throw.
+        setSettings((prev) => ({
+          mode: data?.mode ?? prev.mode,
+          authorizedEmails: Array.isArray(data?.authorizedEmails)
+            ? data.authorizedEmails
+            : [],
+          adminEmails: Array.isArray(data?.adminEmails) ? data.adminEmails : [],
+        }));
       }
     } catch (error) {
       console.error("Failed to fetch settings:", error);

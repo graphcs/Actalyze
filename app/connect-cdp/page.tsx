@@ -44,7 +44,7 @@ const CDP_INTEGRATIONS: CDPIntegration[] = [
     id: "l2",
     name: "L2 Political",
     description: "Comprehensive voter file and consumer data for political campaigns",
-    logo: "https://images.crunchbase.com/image/upload/c_pad,h_170,w_170,f_auto,b_white,q_auto:eco,dpr_1/v1486050690/xsqjwh7cwdqezhwhtbrh.png",
+    logo: "",
     category: "Voter Data",
     status: "disconnected",
   },
@@ -52,7 +52,7 @@ const CDP_INTEGRATIONS: CDPIntegration[] = [
     id: "aristotle",
     name: "Aristotle",
     description: "Political data and compliance solutions for campaigns and organizations",
-    logo: "https://images.crunchbase.com/image/upload/c_pad,h_170,w_170,f_auto,b_white,q_auto:eco,dpr_1/lktb0yvqpdrxsqmscvst",
+    logo: "",
     category: "Voter Data",
     status: "disconnected",
   },
@@ -60,7 +60,7 @@ const CDP_INTEGRATIONS: CDPIntegration[] = [
     id: "nationbuilder",
     name: "NationBuilder",
     description: "Community organizing and campaign management platform",
-    logo: "https://images.crunchbase.com/image/upload/c_pad,h_170,w_170,f_auto,b_white,q_auto:eco,dpr_1/v1455807371/xbqvtqnrlbktjfttjnj7.png",
+    logo: "",
     category: "CRM",
     status: "disconnected",
   },
@@ -84,7 +84,7 @@ const CDP_INTEGRATIONS: CDPIntegration[] = [
     id: "fireside21",
     name: "Fireside21",
     description: "Constituent correspondence management system used by Congress",
-    logo: "https://images.crunchbase.com/image/upload/c_pad,h_170,w_170,f_auto,b_white,q_auto:eco,dpr_1/v1486989887/bvcbxwryqmxvqaopwzvi.png",
+    logo: "",
     category: "Congressional",
     status: "disconnected",
   },
@@ -92,7 +92,7 @@ const CDP_INTEGRATIONS: CDPIntegration[] = [
     id: "intranet-quorum",
     name: "Intranet Quorum (IQ)",
     description: "Congressional office management and constituent services platform",
-    logo: "https://images.crunchbase.com/image/upload/c_pad,h_170,w_170,f_auto,b_white,q_auto:eco,dpr_1/rkyrkmmzdw9pxnkfhnlk",
+    logo: "",
     category: "Congressional",
     status: "disconnected",
   },
@@ -116,7 +116,7 @@ const CDP_INTEGRATIONS: CDPIntegration[] = [
     id: "winred",
     name: "WinRed",
     description: "Fundraising platform for Republican candidates and conservative causes",
-    logo: "https://images.crunchbase.com/image/upload/c_pad,h_170,w_170,f_auto,b_white,q_auto:eco,dpr_1/mzwm4zjzfpwrgukofzxb",
+    logo: "",
     category: "Fundraising",
     status: "disconnected",
   },
@@ -124,7 +124,7 @@ const CDP_INTEGRATIONS: CDPIntegration[] = [
     id: "anedot",
     name: "Anedot",
     description: "Payment processing and fundraising for political organizations",
-    logo: "https://images.crunchbase.com/image/upload/c_pad,h_170,w_170,f_auto,b_white,q_auto:eco,dpr_1/dxaflr93tqy0sldz5chj",
+    logo: "",
     category: "Fundraising",
     status: "disconnected",
   },
@@ -254,14 +254,18 @@ export default function ConnectCDPPage() {
                   <span className="text-xl font-bold text-white">
                     {integration.name.charAt(0)}
                   </span>
-                  <img
-                    src={integration.logo}
-                    alt={integration.name}
-                    className="absolute inset-0 w-full h-full object-contain p-1 bg-white rounded-lg"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none';
-                    }}
-                  />
+                  {/* Some vendors no longer host a usable logo; those entries carry an
+                      empty string and fall back to the coloured initial behind this. */}
+                  {integration.logo && (
+                    <img
+                      src={integration.logo}
+                      alt={integration.name}
+                      className="absolute inset-0 w-full h-full object-contain p-1 bg-white rounded-lg"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  )}
                 </div>
                 <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                   integration.status === "connected"

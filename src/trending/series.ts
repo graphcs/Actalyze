@@ -1,3 +1,5 @@
+import { OPENROUTER_KEY } from "@/lib/ai-provider";
+import { searchTweetsViaSerpApi } from "@/lib/serpapi-tweets";
 /**
  * SERPAPI series data fetchers for trending topic charts
  * Provides time-series data with automatic fallbacks
@@ -275,84 +277,37 @@ export async function fetchNewsVelocity(topic: string, hours = 36): Promise<Time
 }
 
 /**
- * Fetch top tweets about a topic using AI with web access to create authentic tweets
- * based on real current discourse and news about the topic
+ * Fetch top tweets about a topic.
+ *
+ * This previously asked an LLM to "generate authentic tweets", inventing quotes,
+ * plausible-looking @handles and `Math.random()` engagement counts, then linked
+ * them to real x.com profile URLs. That produced fabricated statements attributed
+ * to accounts that may belong to real people. It now returns genuine tweets
+ * located via SerpAPI, or null when none can be found.
  */
 export async function fetchTopTweets(topic: string): Promise<Tweet[] | null> {
-  const cacheKey = `series:tweets:${topic.toLowerCase()}`;
+  const cacheKey = `series:tweets:v2:${topic.toLowerCase()}`;
   const cached = getCached<Tweet[]>(cacheKey);
   if (cached) return cached;
 
-  const apiKey = process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY;
-  if (!apiKey) return null;
-
-  const useOpenRouter = !!process.env.OPENROUTER_API_KEY;
-
   try {
     const keywords = extractKeywordsForTrends(topic);
-    console.log(`🐦 Generating authentic tweets for: "${keywords}"`);
+    const found = await searchTweetsViaSerpApi(keywords, 3);
+    if (found.length === 0) return null;
 
-    const baseURL = useOpenRouter ? 'https://openrouter.ai/api/v1/chat/completions' : 'https://api.openai.com/v1/chat/completions';
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
-    };
-
-    if (useOpenRouter) {
-      headers['HTTP-Referer'] = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000';
-      headers['X-Title'] = 'Actalyze';
-    }
-
-    const response = await fetch(baseURL, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({
-        model: useOpenRouter ? 'perplexity/sonar' : 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a social media analyst with web access. Generate 3 AUTHENTIC tweets based on REAL recent news and discourse about the topic. Search the web for actual recent tweets, news, and commentary. Make them sound like real people tweeting, with varied perspectives (supporters, critics, neutral). Include realistic Twitter handles and engagement counts. Return ONLY valid JSON with no markdown: {"tweets": [{"text": "...", "author": "username", "engagement": 1234}, ...]}'
-          },
-          {
-            role: 'user',
-            content: `Search the web for recent tweets and discourse about "${topic}". Generate 3 authentic tweets that reflect REAL current opinions and news about this topic. Base them on actual recent events and commentary you find. Return ONLY JSON with no markdown.`
-          }
-        ],
-        temperature: 0.8,
-        max_tokens: 500,
-        ...(useOpenRouter ? {} : { response_format: { type: "json_object" } }),
-      }),
-      signal: AbortSignal.timeout(15000),
-    });
-
-    if (!response.ok) {
-      console.error(`OpenRouter API error: ${response.status}`);
-      return null;
-    }
-
-    const data = await response.json();
-    let message = data.choices?.[0]?.message?.content;
-
-    if (!message) return null;
-
-    // Strip markdown code blocks if present (Perplexity wraps JSON in ```json blocks)
-    message = message.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-
-    const parsed = JSON.parse(message);
-    const tweets: Tweet[] = (parsed.tweets || []).slice(0, 3).map((tweet: Tweet) => ({
-      text: tweet.text,
-      author: tweet.author,
-      engagement: tweet.engagement || Math.floor(Math.random() * 5000) + 100,
-      url: `https://x.com/${tweet.author}`,
+    const tweets: Tweet[] = found.map((t) => ({
+      text: t.text,
+      author: `@${t.username}`,
+      // Real engagement where Google surfaced it; 0 rather than an invented number.
+      engagement: (t.likes ?? 0) + (t.retweets ?? 0),
+      url: t.url,
     }));
 
-    if (tweets.length === 0) return null;
-
-    console.log(`✅ Generated ${tweets.length} authentic tweets based on real discourse`);
+    console.log(`✅ Found ${tweets.length} real tweets for "${keywords}"`);
     setCache(cacheKey, tweets);
     return tweets;
   } catch (error) {
-    console.error('Error generating tweets:', error);
+    console.error('Error fetching tweets:', error);
     return null;
   }
 }

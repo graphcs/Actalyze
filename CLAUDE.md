@@ -47,9 +47,33 @@ User Query → Query Embedding → Vector Similarity Search → Context → LLM 
 ### External Services
 
 - **Supabase**: PostgreSQL database with pgvector for embeddings, plus storage
-- **OpenAI**: GPT-4 for chat, text-embedding-3-large (1536 dims) for embeddings
-- **OpenRouter**: Alternative LLM provider (Perplexity sonar for web access)
-- **SERPAPI**: Google Trends and News for trending political topics
+- **OpenAI**: chat + text-embedding-3-large (1536 dims) for embeddings. Primary LLM provider.
+- **OpenRouter**: secondary LLM provider (Perplexity sonar, which can search the web)
+- **SERPAPI**: Google Trends and News for trending topics, and tweet recovery
+
+### LLM provider selection
+
+Routes must not read `process.env.OPENROUTER_API_KEY` directly. Import from
+`lib/ai-provider.ts` instead:
+
+- `OPENROUTER_KEY` — for routes using the OpenAI SDK. It is `undefined` whenever
+  `OPENAI_API_KEY` is set, so the existing `OPENROUTER_KEY || process.env.OPENAI_API_KEY`
+  pattern resolves to OpenAI.
+- `chatCompletions({ webSearch })` — for routes calling `/chat/completions` with raw
+  `fetch`. Returns the URL, headers and model for whichever provider is active.
+
+Why: these routes were written as `OPENROUTER_API_KEY || OPENAI_API_KEY`, so a key
+that is *present but revoked* silently shadowed a working OpenAI key and every AI
+route failed. OpenAI is now primary; set `USE_OPENROUTER=true` to force OpenRouter
+back on once its key is healthy.
+
+### Social data
+
+X's free API tier does not permit `/2/tweets/search/recent`, so the live Twitter
+path returns 403. `lib/serpapi-tweets.ts` recovers genuine tweets via SerpAPI —
+real handles, status ids, text, and engagement counts where Google surfaced them.
+Unknown values are omitted, never synthesised. Reddit is blocked at the IP level
+and its UI components are unused.
 
 ### Database Schema
 
@@ -60,9 +84,23 @@ Defined in `lib/rag-database-schema.sql`:
 
 The search uses `search_documents` RPC function for vector similarity search.
 
-### API Authentication
+### Access control
 
-The chatbot and document APIs are publicly accessible (no auth required). Some APIs use Twitter/Reddit credentials for social data.
+`middleware.ts` gates page routes only — it does **not** match `/api/*`, so API routes
+are reachable unauthenticated unless they check a session themselves.
+
+Access mode lives in Supabase `app_settings` under the `auth_settings` key:
+- `public` — open to everyone, no sign-in (current setting)
+- `guest` — allowed via the `guest_mode_enabled` cookie
+- `restricted` — allowlisted emails only
+
+`AUTH_MODE` overrides the stored value without a database write.
+
+Routes that mutate data or spend money must gate themselves. Already gated:
+`POST /api/admin/settings` (admin session), `DELETE /api/documents/delete` (session),
+`/api/admin/cron/check-alerts` (fails closed without `CRON_SECRET`), and
+`/api/chatbot` (per-IP rate limit, `lib/rate-limit.ts`). The rate limiter is
+per-instance; an edge WAF rule is the durable fix.
 
 ### Environment Variables
 

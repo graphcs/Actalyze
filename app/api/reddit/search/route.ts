@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { serverCache, generateCacheKey } from "@/src/lib/cache";
+import { OPENROUTER_KEY } from "@/lib/ai-provider";
 
 interface RedditPost {
     id: string;
@@ -81,7 +82,7 @@ export async function GET(request: NextRequest) {
             .filter((post) => !post.url.includes('v.redd.it')); // Filter out video posts if they cause embed issues (optional)
 
         // AI Filtering to remove unrelated content (sports, gaming, etc.)
-        const apiKey = process.env.OPENROUTER_API_KEY;
+        const apiKey = OPENROUTER_KEY;
         if (posts.length > 0 && apiKey) {
             try {
                 // Analyze top candidates (up to 10) to save tokens/time

@@ -9,13 +9,21 @@ interface ElectionOutlookProps {
   rating: Rating;
   confidence: number;
   keyFactors: string[];
+  /**
+   * Number of posts behind the estimate. When 0 the upstream confidence is a
+   * fixed placeholder, so showing it would present a confident-looking number
+   * derived from no data.
+   */
+  sampleSize?: number;
 }
 
 export const ElectionOutlook: React.FC<ElectionOutlookProps> = ({
   rating,
   confidence,
   keyFactors,
+  sampleSize,
 }) => {
+  const hasSample = sampleSize === undefined || sampleSize > 0;
   const getRatingStyles = (rating: Rating) => {
     switch (rating) {
       case 'Safe D':
@@ -98,10 +106,18 @@ export const ElectionOutlook: React.FC<ElectionOutlookProps> = ({
             </div>
           </div>
           <div className="text-right">
-            <div className="text-2xl font-bold text-zinc-700 dark:text-zinc-200">
-              {Math.round(confidence * 100)}%
-            </div>
-            <div className="text-xs text-zinc-400">confidence</div>
+            {hasSample ? (
+              <>
+                <div className="text-2xl font-bold text-zinc-700 dark:text-zinc-200">
+                  {Math.round(confidence * 100)}%
+                </div>
+                <div className="text-xs text-zinc-400">confidence</div>
+              </>
+            ) : (
+              <div className="text-xs text-zinc-400 max-w-[9rem]">
+                No posts analysed
+              </div>
+            )}
           </div>
         </div>
       </CardHeader>

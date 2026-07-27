@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getTrendingPoliticsUS } from "@/src/trending/index";
 import { serverCache, generateCacheKey } from "@/src/lib/cache";
+import { OPENROUTER_KEY } from "@/lib/ai-provider";
 import {
   getFromDbCache,
   setInDbCache,
@@ -11,33 +12,14 @@ interface TrendingTopic {
   id: string;
   title: string;
   tags: string[];
-  mentions: number;
+  /** SERPAPI trend score for the topic (0-100) */
   momentum: number;
-  cost: number;
   color: string;
-  mentionsOverTime?: Array<{ day: number; count: number }>;
   thumbnails?: string[];
-}
-
-/**
- * Generate a consistent seed from a string (for deterministic random)
- */
-function hashCode(str: string): number {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32bit integer
-  }
-  return Math.abs(hash);
-}
-
-/**
- * Seeded random number generator (0-1)
- */
-function seededRandom(seed: number): number {
-  const x = Math.sin(seed++) * 10000;
-  return x - Math.floor(x);
+  /** Optional, only set when an actual measured value is available */
+  mentions?: number;
+  cost?: number;
+  mentionsOverTime?: Array<{ day: number; count: number }>;
 }
 
 /**
@@ -92,13 +74,13 @@ async function deduplicateTopics(topics: TrendingTopic[]): Promise<TrendingTopic
   try {
     if (topics.length <= 1) return topics;
 
-    const apiKey = process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY;
+    const apiKey = OPENROUTER_KEY || process.env.OPENAI_API_KEY;
     if (!apiKey) {
       console.warn('⚠️ API key not set, skipping deduplication');
       return topics;
     }
 
-    const useOpenRouter = !!process.env.OPENROUTER_API_KEY;
+    const useOpenRouter = !!OPENROUTER_KEY;
     const baseURL = useOpenRouter
       ? 'https://openrouter.ai/api/v1/chat/completions'
       : 'https://api.openai.com/v1/chat/completions';
@@ -178,12 +160,12 @@ Return ONLY the JSON array, nothing else.`,
  */
 async function generateTags(topic: string, examples: string[]): Promise<string[]> {
   try {
-    const apiKey = process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY;
+    const apiKey = OPENROUTER_KEY || process.env.OPENAI_API_KEY;
     if (!apiKey) {
       return ['Politics', 'Trending'];
     }
 
-    const useOpenRouter = !!process.env.OPENROUTER_API_KEY;
+    const useOpenRouter = !!OPENROUTER_KEY;
     const baseURL = useOpenRouter
       ? 'https://openrouter.ai/api/v1/chat/completions'
       : 'https://api.openai.com/v1/chat/completions';
@@ -249,7 +231,7 @@ Return ONLY a JSON array of strings. Example: ["Senate", "Healthcare", "Budget"]
  */
 async function convertTopicTitle(rawTopic: string, examples: string[]): Promise<string> {
   try {
-    const apiKey = process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY;
+    const apiKey = OPENROUTER_KEY || process.env.OPENAI_API_KEY;
     if (!apiKey) {
       console.warn('⚠️ OpenRouter API key not set, using simple title case');
       return rawTopic
@@ -258,7 +240,7 @@ async function convertTopicTitle(rawTopic: string, examples: string[]): Promise<
         .join(' ');
     }
 
-    const useOpenRouter = !!process.env.OPENROUTER_API_KEY;
+    const useOpenRouter = !!OPENROUTER_KEY;
     const baseURL = useOpenRouter
       ? 'https://openrouter.ai/api/v1/chat/completions'
       : 'https://api.openai.com/v1/chat/completions';
@@ -322,6 +304,23 @@ Return ONLY the cleaned up title, nothing else. Make it clear what the topic is 
   }
 }
 
+/**
+ * Drop any non-measured fields that may still be present in cache entries
+ * written by earlier versions of this route (generated mention counts, spend
+ * figures and per-day series). Only values we actually measure are returned.
+ */
+function sanitizeTopics(topics: TrendingTopic[]): TrendingTopic[] {
+  if (!Array.isArray(topics)) return [];
+  return topics.map(({ id, title, tags, momentum, color, thumbnails }) => ({
+    id,
+    title,
+    tags,
+    momentum,
+    color,
+    ...(thumbnails && thumbnails.length > 0 ? { thumbnails } : {}),
+  }));
+}
+
 export async function GET(request: NextRequest) {
   try {
     console.log("🚀 Trending API called at", new Date().toISOString());
@@ -338,15 +337,16 @@ export async function GET(request: NextRequest) {
     const dbCached = await getFromDbCache<TrendingTopic[]>(dbCacheKey, useCache);
     if (dbCached) {
       console.log(`📦 Using DB cached trending topics`);
-      serverCache.set(memoryCacheKey, dbCached, cacheDurationSeconds);
-      return NextResponse.json(dbCached);
+      const sanitized = sanitizeTopics(dbCached);
+      serverCache.set(memoryCacheKey, sanitized, cacheDurationSeconds);
+      return NextResponse.json(sanitized);
     }
 
     // Fall back to memory cache
     const memoryCached = serverCache.get<TrendingTopic[]>(memoryCacheKey, useCache);
     if (memoryCached) {
       console.log(`📦 Using memory cached trending topics`);
-      return NextResponse.json(memoryCached);
+      return NextResponse.json(sanitizeTopics(memoryCached));
     }
 
     // Fetch trending political topics from SERPAPI
@@ -360,8 +360,10 @@ export async function GET(request: NextRequest) {
     console.log(`✅ Got ${topics.length} topics from SERPAPI`);
 
     if (topics.length === 0) {
-      console.log("⚠️ No topics returned, falling back to mock data");
-      return NextResponse.json(getMockTrendingTopics());
+      // No live topics available. Return nothing rather than substituting
+      // invented topics - the UI renders an "unavailable" state.
+      console.log("⚠️ No topics returned from SERPAPI - returning empty list");
+      return NextResponse.json([]);
     }
 
     // Transform SERPAPI topics to our frontend format (with parallel Gemini calls and thumbnail fetching)
@@ -379,33 +381,16 @@ export async function GET(request: NextRequest) {
       // Use AI-generated tags (already unique and relevant)
       const uniqueTags = aiTags;
 
-      // Generate realistic-looking sparkline data with natural variation
-      // Use seeded random for consistency across refreshes
-      const seed = hashCode(cleanTopicName);
-      const baseCount = 20 + Math.floor(seededRandom(seed) * 30);
-      const trendSlope = 1.2; // Gentle upward slope
-
-      const mentionsOverTime = Array.from({ length: 7 }, (_, i) => {
-        const trend = i * trendSlope; // Consistent upward trend
-        const noise = (seededRandom(seed + i + 100) - 0.5) * 3; // Small variation
-        return {
-          day: i + 1,
-          count: Math.max(10, Math.floor(baseCount + trend + noise)),
-        };
-      });
-
-      // Estimate mentions based on score
-      const mentions = Math.floor((topic.score / 100) * 100000) + 10000;
-
+      // Only measured values are returned. `momentum` is the SERPAPI trend
+      // score for the topic. Mention counts, spend estimates and per-day
+      // series are not measured by this pipeline, so they are omitted rather
+      // than generated.
       return {
         id: cleanTopicName.toLowerCase().replace(/\s+/g, '-'),
         title: displayTitle,
         tags: uniqueTags.slice(0, 3),
-        mentions,
         momentum: topic.score,
-        cost: Math.floor(Math.random() * 1000) + 50,
         color: getColorForTopic(cleanTopicName.toLowerCase()),
-        mentionsOverTime,
         thumbnails: thumbnails.length > 0 ? thumbnails : undefined,
       };
     }));
@@ -426,8 +411,8 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error("❌ Error fetching trending topics:", error);
-    console.log("⚠️ Falling back to mock data due to error");
-    return NextResponse.json(getMockTrendingTopics());
+    // Fail closed: return no topics rather than invented ones.
+    return NextResponse.json([]);
   }
 }
 
@@ -450,61 +435,4 @@ function getColorForTopic(topic: string): string {
   }
 
   return colors[Math.abs(hash) % colors.length];
-}
-
-function getMockTrendingTopics(): TrendingTopic[] {
-  return [
-    {
-      id: "infrastructure-bill",
-      title: "Infrastructure Bill",
-      tags: ["Infrastructure", "Transportation"],
-      mentions: 42000,
-      momentum: 78,
-      cost: 1100,
-      color: "#111827",
-      mentionsOverTime: Array.from({ length: 7 }, (_, i) => ({
-        day: i + 1,
-        count: Math.floor(30 + i * 3 + Math.random() * 10),
-      })),
-    },
-    {
-      id: "healthcare-reform",
-      title: "Healthcare Reform",
-      tags: ["Healthcare", "Reform"],
-      mentions: 37000,
-      momentum: 69,
-      cost: 210,
-      color: "#0ea5e9",
-      mentionsOverTime: Array.from({ length: 7 }, (_, i) => ({
-        day: i + 1,
-        count: Math.floor(25 + i * 3 + Math.random() * 10),
-      })),
-    },
-    {
-      id: "farm-bill",
-      title: "Farm Bill",
-      tags: ["Agriculture", "Farm"],
-      mentions: 19500,
-      momentum: 61,
-      cost: 95,
-      color: "#16a34a",
-      mentionsOverTime: Array.from({ length: 7 }, (_, i) => ({
-        day: i + 1,
-        count: Math.floor(22 + i * 3 + Math.random() * 10),
-      })),
-    },
-    {
-      id: "defense-appropriations",
-      title: "Defense Appropriations",
-      tags: ["Defense", "Appropriations"],
-      mentions: 26500,
-      momentum: 72,
-      cost: 840,
-      color: "#ef4444",
-      mentionsOverTime: Array.from({ length: 7 }, (_, i) => ({
-        day: i + 1,
-        count: Math.floor(27 + i * 3 + Math.random() * 10),
-      })),
-    },
-  ];
 }

@@ -31,6 +31,57 @@ interface UserData {
   username: string;
 }
 
+/**
+ * WordAnalytics plus a machine-readable availability flag so the client can
+ * tell "the social API could not be reached" apart from "we looked and this
+ * word genuinely has no matching posts". Both render a calm empty state.
+ */
+type WordAnalyticsResponse = WordAnalytics & {
+  available: boolean;
+  unavailableReason?: string;
+};
+
+/**
+ * A complete, well-formed, zero-valued analytics payload.
+ * Every field the UI reads is present, so the page never sees `undefined`.
+ */
+function emptyAnalytics(
+  word: string,
+  topic: string,
+  timeRange: string,
+  location: string,
+  available: boolean,
+  unavailableReason?: string
+): WordAnalyticsResponse {
+  return {
+    word,
+    totalOccurrences: 0,
+    sentiment: {
+      average: 0,
+      distribution: { positive: 0, neutral: 0, negative: 0 },
+    },
+    topTweets: [],
+    relatedWords: [],
+    timeSeriesData: [],
+    context: { topic, timeRange, location },
+    available,
+    ...(unavailableReason ? { unavailableReason } : {}),
+  };
+}
+
+/**
+ * Rejects if `promise` has not settled within `ms`, so an unresponsive
+ * upstream can never hold this route (and the page) open indefinitely.
+ */
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms)
+    ),
+  ]);
+}
+
 export async function GET(request: NextRequest) {
   try {
     const urlParams = request.nextUrl.searchParams;
@@ -55,10 +106,16 @@ export async function GET(request: NextRequest) {
     const apiSecret = process.env.TWITTER_API_SECRET;
 
     if (!apiKey || !apiSecret) {
-      console.error("[Word Analytics] Twitter API credentials not configured");
+      console.warn("[Word Analytics] Social API credentials not configured");
       return NextResponse.json(
-        { error: "Twitter API credentials not configured" },
-        { status: 500 }
+        emptyAnalytics(
+          word,
+          topic,
+          timeRange,
+          location,
+          false,
+          "credentials_not_configured"
+        )
       );
     }
 
@@ -69,7 +126,15 @@ export async function GET(request: NextRequest) {
       appSecret: apiSecret,
     });
 
-    const appOnlyClient = await client.appLogin();
+    let appOnlyClient;
+    try {
+      appOnlyClient = await withTimeout(client.appLogin(), 10000, "appLogin");
+    } catch (authError) {
+      console.warn("[Word Analytics] Social API authentication unavailable:", authError);
+      return NextResponse.json(
+        emptyAnalytics(word, topic, timeRange, location, false, "upstream_unavailable")
+      );
+    }
 
     // Build search query - search for the word within the topic context
     const query = `${topic} ${word} -is:retweet lang:en`;
@@ -88,11 +153,20 @@ export async function GET(request: NextRequest) {
 
     let tweets;
     try {
-      tweets = await appOnlyClient.v2.search(query, searchParams);
+      tweets = await withTimeout(
+        appOnlyClient.v2.search(query, searchParams),
+        15000,
+        "tweet search"
+      );
       console.log(`[Word Analytics] Received ${tweets.data?.data?.length || 0} tweets`);
     } catch (twitterError) {
-      console.error("[Word Analytics] Twitter API Error:", twitterError);
-      throw new Error(`Twitter API failed: ${twitterError instanceof Error ? twitterError.message : String(twitterError)}`);
+      // The social API is unavailable on this plan (403), rate limited, or slow.
+      // This is not a server fault - answer 200 with an empty, well-formed
+      // payload so the client can render a calm empty state.
+      console.warn("[Word Analytics] Social API unavailable:", twitterError);
+      return NextResponse.json(
+        emptyAnalytics(word, topic, timeRange, location, false, "upstream_unavailable")
+      );
     }
 
     const tweetData = (tweets.data?.data as TweetData[]) || [];
@@ -102,18 +176,10 @@ export async function GET(request: NextRequest) {
 
     if (tweetData.length === 0) {
       console.log("[Word Analytics] No tweets found, returning empty analytics");
-      return NextResponse.json({
-        word,
-        totalOccurrences: 0,
-        sentiment: {
-          average: 0,
-          distribution: { positive: 0, neutral: 0, negative: 0 },
-        },
-        topTweets: [],
-        relatedWords: [],
-        timeSeriesData: [],
-        context: { topic, timeRange, location },
-      } as WordAnalytics);
+      // Reached upstream successfully, it just had nothing for this word.
+      return NextResponse.json(
+        emptyAnalytics(word, topic, timeRange, location, true)
+      );
     }
 
     // Process tweets
@@ -222,7 +288,8 @@ export async function GET(request: NextRequest) {
       .sort((a, b) => a.timestamp.localeCompare(b.timestamp));
 
     // Calculate analytics
-    const analytics: WordAnalytics = {
+    const analytics: WordAnalyticsResponse = {
+      available: true,
       word,
       totalOccurrences,
       sentiment: {
@@ -246,19 +313,25 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(analytics);
   } catch (error) {
     console.error("[Word Analytics API Error]:", error);
-    
+
     // Log more details for debugging
     if (error instanceof Error) {
       console.error("Error message:", error.message);
       console.error("Error stack:", error.stack);
     }
-    
+
+    // Never surface a raw 500 to the UI. Answer 200 with an empty, well-formed
+    // payload flagged `available: false`; the page renders an empty state.
+    const urlParams = request.nextUrl.searchParams;
     return NextResponse.json(
-      {
-        error: "Failed to fetch word analytics",
-        details: error instanceof Error ? error.message : String(error),
-      },
-      { status: 500 }
+      emptyAnalytics(
+        urlParams.get("word") || "",
+        urlParams.get("topic") || "",
+        urlParams.get("timeRange") || "7d",
+        urlParams.get("location") || "national",
+        false,
+        "upstream_unavailable"
+      )
     );
   }
 }

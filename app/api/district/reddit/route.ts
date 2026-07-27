@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { serverCache, generateCacheKey } from "@/src/lib/cache";
+import { OPENROUTER_KEY } from "@/lib/ai-provider";
 
 interface RedditPost {
     id: string;
@@ -65,7 +66,7 @@ export async function GET(request: NextRequest) {
 
         // Step 1: Call Claude Sonnet 4.5 via OpenRouter to get trending topics
         // We use the same logic as the Twitter endpoint to ensure consistency
-        const openrouterKey = process.env.OPENROUTER_API_KEY;
+        const openrouterKey = OPENROUTER_KEY;
         if (!openrouterKey) {
             console.error('❌ OPENROUTER_API_KEY not found');
             return NextResponse.json({ posts: [] });

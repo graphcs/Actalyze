@@ -19,6 +19,7 @@ import {
   Link2,
   Loader2,
   FileText,
+  CloudOff,
 } from "lucide-react";
 import AppLayout from "@/app/components/AppLayout";
 import { Button } from "@/app/components/ui/Button";
@@ -29,6 +30,23 @@ interface WordAnalyticsPageProps {
   params: Promise<{
     word: string;
   }>;
+}
+
+/** The API adds `available: false` when the upstream social API was unreachable. */
+type WordAnalyticsResponse = WordAnalytics & {
+  available?: boolean;
+  unavailableReason?: string;
+};
+
+/** True only when there is something worth rendering a dashboard for. */
+function hasAnalyticsData(a: WordAnalyticsResponse | null): boolean {
+  if (!a) return false;
+  return (
+    a.totalOccurrences > 0 ||
+    a.topTweets.length > 0 ||
+    a.relatedWords.length > 0 ||
+    a.timeSeriesData.length > 0
+  );
 }
 
 const STATE_NAMES: Record<string, string> = {
@@ -56,25 +74,33 @@ function WordAnalyticsContent({ params }: WordAnalyticsPageProps) {
   const { word: encodedWord } = use(params);
   const word = decodeURIComponent(encodedWord);
 
-  const [analytics, setAnalytics] = useState<WordAnalytics | null>(null);
+  const [analytics, setAnalytics] = useState<WordAnalyticsResponse | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Set when the request failed or the upstream social API was unreachable.
+  // Rendered as a calm empty state, never as a red error banner.
+  const [dataUnavailable, setDataUnavailable] = useState(false);
 
   const topic = searchParams.get("topic") || "";
   const timeRange = searchParams.get("timeRange") || "7d";
   const location = searchParams.get("location") || "national";
 
   useEffect(() => {
+    // Never let a stalled upstream hold the skeleton open forever.
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
+    // Ignore results from a request this effect has already superseded.
+    let cancelled = false;
+
     const fetchAnalytics = async () => {
       if (!word || !topic) {
-        setError("Missing required parameters");
+        setDataUnavailable(true);
         setLoading(false);
         return;
       }
 
       try {
         setLoading(true);
-        setError(null);
+        setDataUnavailable(false);
 
         const params = new URLSearchParams({
           word,
@@ -85,27 +111,39 @@ function WordAnalyticsContent({ params }: WordAnalyticsPageProps) {
         });
 
         const response = await fetch(
-          `/api/wordcloud/analytics?${params.toString()}`
+          `/api/wordcloud/analytics?${params.toString()}`,
+          { signal: controller.signal }
         );
 
         if (!response.ok) {
           throw new Error("Failed to fetch analytics");
         }
 
-        const data: WordAnalytics = await response.json();
+        const data: WordAnalyticsResponse = await response.json();
+        if (cancelled) return;
         setAnalytics(data);
+        setDataUnavailable(data.available === false);
       } catch (err) {
+        if (cancelled) return;
         console.error("Error fetching analytics:", err);
-        setError(
-          err instanceof Error ? err.message : "Failed to load analytics"
-        );
+        setAnalytics(null);
+        setDataUnavailable(true);
       } finally {
-        setLoading(false);
+        clearTimeout(timeout);
+        if (!cancelled) setLoading(false);
       }
     };
 
     fetchAnalytics();
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timeout);
+      controller.abort();
+    };
   }, [word, topic, timeRange, location]);
+
+  const hasData = hasAnalyticsData(analytics);
 
   const formatSentimentScore = (score: number): string => {
     return (score * 100).toFixed(1);
@@ -169,7 +207,7 @@ Top Tweet Themes: ${analytics.topTweets.slice(0, 2).map(t => t.text.slice(0, 100
               <ArrowLeft className="w-4 h-4" />
               Back to Word Cloud
             </Button>
-            {analytics && (
+            {hasData && (
               <Button
                 variant="outline"
                 onClick={handleDraftMemo}
@@ -212,16 +250,35 @@ Top Tweet Themes: ${analytics.topTweets.slice(0, 2).map(t => t.text.slice(0, 100
           </div>
         )}
 
-        {error && (
-          <div className="bg-red-50 dark:bg-red-950/30 border-2 border-red-200 dark:border-red-800 rounded-2xl p-6 text-center">
-            <p className="text-red-900 dark:text-red-100 font-semibold mb-2">
-              Error loading analytics
-            </p>
-            <p className="text-red-700 dark:text-red-300">{error}</p>
+        {/* Nothing to chart. One clear, calm empty state - no error banner,
+            no dashboard full of zeros, no blank screen. */}
+        {!loading && !hasData && (
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6">
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="w-16 h-16 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-4">
+                <CloudOff className="w-8 h-8 text-zinc-400 dark:text-zinc-500" />
+              </div>
+              <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
+                No word cloud data to display
+              </h2>
+              <p className="text-zinc-600 dark:text-zinc-400 max-w-md">
+                {dataUnavailable
+                  ? `The social media data source is not returning results for “${word}” right now. Return to the word cloud and try another term or a different topic.`
+                  : `No posts mentioning “${word}” were found for this topic, time range and location.`}
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => router.back()}
+                className="mt-6 flex items-center gap-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to Word Cloud
+              </Button>
+            </div>
           </div>
         )}
 
-        {analytics && !loading && (
+        {hasData && analytics && !loading && (
           <div className="space-y-6">
             {/* Key Metrics */}
             <motion.div

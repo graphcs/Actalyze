@@ -13,6 +13,14 @@
 # testing
 /coverage
 
+# playwright — specs are tracked, run output is not
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+tests/e2e/.test-results/
+tests/e2e/screenshots/
+
 # next.js
 /.next/
 /out/

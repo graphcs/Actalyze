@@ -32,6 +32,13 @@ export const AIPollingGauge: React.FC<AIPollingGaugeProps> = ({
   // Is this a blended estimate?
   const isBlended = traditionalMargin !== undefined && blendWeight !== undefined && blendWeight > 0;
 
+  // No sampled posts means the confidence figure is not derived from data.
+  const hasSample = sampleSize > 0;
+
+  // Values arrive as "<label>: D+20". Strip any leading "<label>: " so wording
+  // changes upstream never leak into the gauge.
+  const baselineValue = vsTraditional?.replace(/^[^:]{1,40}:\s*/, '').trim();
+
   // Determine color based on margin
   const getMarginColor = () => {
     if (margin < -5) return 'text-blue-600 dark:text-blue-400';
@@ -49,24 +56,32 @@ export const AIPollingGauge: React.FC<AIPollingGaugeProps> = ({
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
-              {isBlended ? 'Combined Polling Estimate' : 'AI Polling Estimate'}
+              {isBlended ? 'Model Estimate (Combined)' : 'Model Estimate'}
             </h3>
             <p className={`text-3xl font-bold mt-1 ${getMarginColor()}`}>
               {estimate}
             </p>
             {isBlended && (
               <p className="text-xs text-zinc-400 mt-0.5">
-                {Math.round((blendWeight || 0) * 100)}% traditional + {Math.round((1 - (blendWeight || 0)) * 100)}% AI
+                Weighting: {Math.round((blendWeight || 0) * 100)}% baseline estimate + {Math.round((1 - (blendWeight || 0)) * 100)}% social-signal estimate
               </p>
             )}
           </div>
           <div className="text-right">
-            <div className="text-xs text-zinc-400">
-              {Math.round(confidence * 100)}% confidence
-            </div>
-            <div className="text-xs text-zinc-400">
-              n={sampleSize} tweets
-            </div>
+            {hasSample ? (
+              <>
+                <div className="text-xs text-zinc-400">
+                  {Math.round(confidence * 100)}% model confidence
+                </div>
+                <div className="text-xs text-zinc-400">
+                  n={sampleSize} posts analysed
+                </div>
+              </>
+            ) : (
+              <div className="text-xs text-zinc-400">
+                No posts analysed
+              </div>
+            )}
           </div>
         </div>
       </CardHeader>
@@ -87,18 +102,18 @@ export const AIPollingGauge: React.FC<AIPollingGaugeProps> = ({
           <span>R+15</span>
         </div>
 
-        {/* Source breakdown for blended estimates */}
+        {/* Component breakdown for blended estimates */}
         {isBlended && (
           <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800 space-y-1.5">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-zinc-400">Traditional Polls:</span>
+              <span className="text-zinc-400">Baseline estimate:</span>
               <span className="font-medium text-zinc-600 dark:text-zinc-300">
-                {vsTraditional?.replace('Traditional polls: ', '') || 'N/A'}
+                {baselineValue || 'N/A'}
               </span>
             </div>
             {aiOnlyEstimate && (
               <div className="flex items-center justify-between text-xs">
-                <span className="text-zinc-400">AI Analysis (Twitter):</span>
+                <span className="text-zinc-400">Social-signal estimate:</span>
                 <span className="font-medium text-zinc-600 dark:text-zinc-300">
                   {aiOnlyEstimate}
                 </span>
@@ -107,13 +122,13 @@ export const AIPollingGauge: React.FC<AIPollingGaugeProps> = ({
           </div>
         )}
 
-        {/* Non-blended: show vs Traditional if available */}
-        {!isBlended && vsTraditional && (
+        {/* Non-blended: show the baseline estimate if available */}
+        {!isBlended && baselineValue && (
           <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800">
             <div className="flex items-center gap-2 text-xs">
-              <span className="text-zinc-400">vs Traditional Polls:</span>
+              <span className="text-zinc-400">Baseline estimate:</span>
               <span className="font-medium text-zinc-600 dark:text-zinc-300">
-                {vsTraditional}
+                {baselineValue}
               </span>
             </div>
           </div>
@@ -123,8 +138,9 @@ export const AIPollingGauge: React.FC<AIPollingGaugeProps> = ({
         <div className="mt-3 pt-3 border-t border-zinc-100 dark:border-zinc-800">
           <p className="text-[10px] text-zinc-400 leading-relaxed">
             {isBlended
-              ? 'Blended estimate combining traditional polling with AI analysis of Twitter sentiment. Traditional polls weighted more heavily for reliability.'
-              : 'Based on AI analysis of Twitter discussions. Methodology inspired by "Artificially Intelligent Opinion Polling" (Cerina & Duch, 2023).'}
+              ? 'Model-derived estimate. Combines a baseline partisan-lean estimate generated by a language model with an AI reading of recent public posts. It is not a poll and no voters were surveyed.'
+              : 'Model-derived estimate from AI classification of recent public posts. It is not a poll and no voters were surveyed. Methodology inspired by "Artificially Intelligent Opinion Polling" (Cerina & Duch, 2023).'}
+            {!hasSample && ' No posts were available for this area, so no social signal contributed to this estimate.'}
           </p>
         </div>
       </CardContent>

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { OPENROUTER_KEY } from "@/lib/ai-provider";
 
 interface EthicsResponse {
   answer: string;
@@ -216,7 +217,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const apiKey = process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY;
+    const apiKey = OPENROUTER_KEY || process.env.OPENAI_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
         { error: "AI API key not configured" },
@@ -224,7 +225,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const useOpenRouter = !!process.env.OPENROUTER_API_KEY;
+    const useOpenRouter = !!OPENROUTER_KEY;
     const baseURL = useOpenRouter
       ? "https://openrouter.ai/api/v1/chat/completions"
       : "https://api.openai.com/v1/chat/completions";

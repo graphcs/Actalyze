@@ -27,7 +27,7 @@ interface Tweet {
 }
 
 interface SeriesResponse {
-  source: 'trends' | 'tweets' | 'queries';
+  source: 'trends' | 'tweets' | 'queries' | 'unavailable';
   points?: Array<{ t: string; v: number }>;
   tweets?: Tweet[];
   queries?: string[];
@@ -45,7 +45,7 @@ export default function TopicChart({ topic }: TopicChartProps) {
         setData(json);
       } catch (error) {
         console.error('Error fetching series:', error);
-        setData({ source: 'queries', queries: [] });
+        setData({ source: 'unavailable' });
       } finally {
         setLoading(false);
       }
@@ -66,23 +66,32 @@ export default function TopicChart({ topic }: TopicChartProps) {
     return null;
   }
 
+  // Only claim a source when there is actual data from that source to show.
+  const hasTrendPoints = data.source === 'trends' && !!data.points && data.points.length > 0;
+  const hasTweets = data.source === 'tweets' && !!data.tweets && data.tweets.length > 0;
+  const hasQueries = data.source === 'queries' && !!data.queries && data.queries.length > 0;
+  const hasData = hasTrendPoints || hasTweets || hasQueries;
+
   return (
     <div className="relative">
-      {/* Source badge */}
-      <div className="absolute top-0 right-0 text-[10px] px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
-        {data.source === 'trends' && 'Trends'}
-        {data.source === 'tweets' && 'Tweets'}
-        {data.source === 'queries' && 'Related'}
-      </div>
+      {/* Source badge - shown only when data from that source is actually rendered */}
+      {hasData && (
+        <div className="absolute top-0 right-0 text-[10px] px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+          {hasTrendPoints && 'Trends'}
+          {hasTweets && 'Tweets'}
+          {hasQueries && 'Related'}
+        </div>
+      )}
 
       {/* Render sparkline for trends */}
-      {data.source === 'trends' && data.points && data.points.length > 0 ? (
-        <Sparkline points={data.points} />
-      ) : data.source === 'trends' ? (
+      {hasTrendPoints && <Sparkline points={data.points!} />}
+
+      {/* No series available (Trends returned nothing, or the lookup failed) */}
+      {(data.source === 'unavailable' || (data.source === 'trends' && !hasTrendPoints)) && (
         <div className="h-16 flex items-center justify-center text-xs text-zinc-400 dark:text-zinc-500">
-          No trend data available
+          No trend data
         </div>
-      ) : null}
+      )}
 
       {/* Render tweets */}
       {data.source === 'tweets' && data.tweets && data.tweets.length > 0 ? (

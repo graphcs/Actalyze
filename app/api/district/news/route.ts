@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { serverCache, generateCacheKey } from "@/src/lib/cache";
+import { OPENROUTER_KEY } from "@/lib/ai-provider";
 import {
   getFromDbCache,
   setInDbCache,
@@ -281,7 +282,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const openrouterKey = process.env.OPENROUTER_API_KEY;
+    const openrouterKey = OPENROUTER_KEY;
     let headlines: Headline[] = [];
 
     // ========== TIER 1: AI-enhanced district-specific search ==========
