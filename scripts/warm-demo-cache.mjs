@@ -105,6 +105,22 @@ const states = process.env.WARM_STATES
   : STATES;
 const DISTRICT_CONCURRENCY = Number(process.env.WARM_CONCURRENCY || 2);
 
+/**
+ * WARM_FORCE=1 sends `x-use-cache: false`, which makes each route regenerate
+ * instead of serving its cached copy.
+ *
+ * This is the only way to push an existing entry's expiry out. A cache HIT
+ * re-seeds the in-memory copy with the requested TTL but leaves the Supabase
+ * row's original expires_at alone, so a plain re-warm of an already-warm demo
+ * does nothing for its lifetime. Forcing regeneration is what actually applies
+ * CACHE_TTL_SECONDS to the stored rows.
+ *
+ * It costs real quota - every district goes down the cold path - so use it
+ * deliberately: once, after a deploy, to bake in a long TTL before a demo.
+ * Not for routine re-warming.
+ */
+const FORCE = process.env.WARM_FORCE === '1';
+
 /** Rolling tally so the run ends with a verdict rather than a wall of lines. */
 const stats = { ok: 0, warn: 0, fail: 0, slowest: [], problems: [] };
 
@@ -117,6 +133,8 @@ async function hit(path, timeoutMs = 180_000) {
         'user-agent': 'actalyze-cache-warmer',
         // Ask for a longer-lived entry than the app's 24h default (see CACHE_TTL_SECONDS).
         'x-cache-duration-seconds': String(CACHE_TTL_SECONDS),
+        // Only when explicitly forced - see FORCE above.
+        ...(FORCE ? { 'x-use-cache': 'false' } : {}),
       },
     });
     const ms = Date.now() - started;
@@ -168,7 +186,9 @@ const runStarted = Date.now();
 console.log(`Warming ${BASE}`);
 console.log(
   `  ${districts.length} districts, ${states.length} states, concurrency ${DISTRICT_CONCURRENCY}, ` +
-    `requested TTL ${(CACHE_TTL_SECONDS / 86400).toFixed(1)}d\n`
+    `requested TTL ${(CACHE_TTL_SECONDS / 86400).toFixed(1)}d` +
+    (FORCE ? '\n  ⚠️  WARM_FORCE=1 — regenerating everything, this spends SerpAPI quota' : '') +
+    '\n'
 );
 
 console.log('Global:');
