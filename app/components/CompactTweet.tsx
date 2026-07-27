@@ -11,6 +11,8 @@ interface CompactTweetProps {
   retweets?: number;
   replies?: number;
   created_at?: string;
+  /** Canonical tweet permalink. Falls back to a URL built from username + id. */
+  url?: string;
 }
 
 function formatNumber(num: number): string {
@@ -40,8 +42,9 @@ export default function CompactTweet({
   retweets = 0,
   replies = 0,
   created_at,
+  url,
 }: CompactTweetProps) {
-  const tweetUrl = `https://twitter.com/${username}/status/${id}`;
+  const tweetUrl = url || `https://twitter.com/${username}/status/${id}`;
 
   // Truncate text to ~140 chars
   const truncatedText = text.length > 140 ? text.slice(0, 140) + '...' : text;
