@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { signIn, useSession } from "next-auth/react";
+import { signIn, signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -13,14 +13,20 @@ import {
   Shield,
   Users,
   AlertCircle,
+  LogIn,
+  LogOut,
+  User,
 } from "lucide-react";
 import DistrictSearch from "./components/DistrictSearch";
 import Sidebar from "./components/Sidebar";
 
 interface AuthSettings {
   mode: "restricted" | "public" | "guest";
-  authorizedEmails: string[];
-  adminEmails: string[];
+  // GET /api/admin/settings only returns the allow-lists to a signed-in admin.
+  // Anonymous callers get `{ mode }` alone, so these are optional and every read
+  // must be optionally chained.
+  authorizedEmails?: string[];
+  adminEmails?: string[];
 }
 
 // State code to name mapping for display
@@ -52,9 +58,13 @@ export default function HomePage() {
         if (response.ok) {
           const data = await response.json();
           setAuthSettings(data);
+        } else {
+          // Fail open: the home page is public, a settings blip must not gate it.
+          setAuthSettings({ mode: "public" });
         }
       } catch (error) {
         console.error("Failed to fetch auth settings:", error);
+        setAuthSettings({ mode: "public" });
       } finally {
         setSettingsLoading(false);
       }
@@ -62,12 +72,21 @@ export default function HomePage() {
     fetchSettings();
   }, []);
 
-  // Show login modal for unauthenticated users after settings load
+  // Access mode. Unknown (settings still loading / unreachable) is treated as
+  // "public" so the home page is never gated by a failure to read settings.
+  const mode = authSettings?.mode ?? "public";
+  const isPublicMode = mode === "public";
+  const isRestrictedMode = mode === "restricted";
+  const isGuestModeAllowed = mode === "guest";
+
+  // Show the login modal for unauthenticated users after settings load, but ONLY
+  // when the site is not in public mode. In public mode the home page is open and
+  // signing in is an optional action in the header.
   useEffect(() => {
-    if (!settingsLoading && status === "unauthenticated") {
+    if (!settingsLoading && status === "unauthenticated" && !isPublicMode) {
       setShowLoginModal(true);
     }
-  }, [settingsLoading, status]);
+  }, [settingsLoading, status, isPublicMode]);
 
   const handleGuestAccess = () => {
     // Set the guest cookie client-side before navigating
@@ -82,10 +101,15 @@ export default function HomePage() {
     signIn("google", { callbackUrl: "/" });
   };
 
-  // Check if current user is authorized (for restricted mode)
-  const isUserAuthorized = session?.user?.email && authSettings?.authorizedEmails.includes(session.user.email);
-  const isRestrictedMode = authSettings?.mode === "restricted";
-  const isGuestModeAllowed = authSettings?.mode === "guest";
+  const handleSignOut = () => {
+    signOut({ callbackUrl: "/" });
+  };
+
+  // Check if current user is authorized (for restricted mode).
+  // `authorizedEmails` is only present for signed-in admins, hence the `?.` on
+  // the array itself - reading it unguarded throws for everyone else.
+  const isUserAuthorized =
+    session?.user?.email && authSettings?.authorizedEmails?.includes(session.user.email);
 
   // Popular/swing districts to feature
   const featuredDistricts = [
@@ -97,20 +121,9 @@ export default function HomePage() {
     { code: "WI03", label: "WI-3", desc: "Western Wisconsin" },
   ];
 
-  if (status === "loading" || settingsLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-white to-zinc-50 dark:from-zinc-950 dark:to-zinc-900">
-        <div className="text-center">
-          <div className="inline-flex items-center space-x-2 mb-4">
-            <div className="w-3 h-3 bg-zinc-700 dark:bg-zinc-300 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
-            <div className="w-3 h-3 bg-zinc-700 dark:bg-zinc-300 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
-            <div className="w-3 h-3 bg-zinc-700 dark:bg-zinc-300 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
-          </div>
-          <p className="text-zinc-600 dark:text-zinc-300">Loading...</p>
-        </div>
-      </div>
-    );
-  }
+  // No loading gate: the home page is public, so it renders immediately for
+  // anonymous visitors. The header simply shows the signed-out affordance until
+  // the session resolves.
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-zinc-50 to-white dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950">
@@ -205,41 +218,59 @@ export default function HomePage() {
       <div className="ml-64 transition-all duration-300">
         {/* Navigation */}
         <nav className="border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-sm sticky top-0 z-30">
-          <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-end">
-            <div className="flex items-center gap-3">
-              {session?.user ? (
-                // User is logged in
-                isRestrictedMode && !isUserAuthorized ? (
-                  // Logged in but not authorized in restricted mode
+          <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-end gap-2">
+            {session?.user ? (
+              // Signed in: identity + an explicit way back out.
+              <>
+                {isRestrictedMode && !isUserAuthorized ? (
                   <span className="text-sm text-zinc-500">Not authorized</span>
                 ) : (
                   <button
                     onClick={() => router.push("/dashboard")}
-                    className="px-6 py-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors text-sm font-medium"
+                    className="px-4 py-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors text-sm font-medium"
                   >
                     Dashboard
                   </button>
-                )
-              ) : (
-                // User is not logged in
-                <>
-                  {isGuestModeAllowed && (
-                    <button
-                      onClick={handleGuestAccess}
-                      className="px-4 py-2 text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
-                    >
-                      Continue as Guest
-                    </button>
-                  )}
+                )}
+
+                <div
+                  className="hidden sm:flex items-center gap-2 min-w-0 max-w-[14rem] px-3 py-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700"
+                  title={session.user.email ?? undefined}
+                >
+                  <User className="w-4 h-4 text-zinc-500 flex-shrink-0" />
+                  <span className="text-sm text-zinc-700 dark:text-zinc-300 truncate">
+                    {session.user.name || session.user.email}
+                  </span>
+                </div>
+
+                <button
+                  onClick={handleSignOut}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950/30 transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sign out
+                </button>
+              </>
+            ) : (
+              // Signed out: signing in is optional, never a gate.
+              <>
+                {isGuestModeAllowed && (
                   <button
-                    onClick={() => signIn("google", { callbackUrl: "/" })}
-                    className="px-6 py-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors text-sm font-medium"
+                    onClick={handleGuestAccess}
+                    className="px-3 py-2 text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
                   >
-                    Sign In
+                    Continue as Guest
                   </button>
-                </>
-              )}
-            </div>
+                )}
+                <button
+                  onClick={handleSignIn}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 transition-colors text-sm font-medium"
+                >
+                  <LogIn className="w-4 h-4" />
+                  Sign in
+                </button>
+              </>
+            )}
           </div>
         </nav>
 

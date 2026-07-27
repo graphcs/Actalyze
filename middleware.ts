@@ -9,9 +9,11 @@ interface AuthSettings {
   adminEmails: string[];
 }
 
-// Default settings - used as fallback
+// Default settings - used as fallback when the settings row is unreachable.
+// Mode is "public": the app is open to everyone, so a database blip must not
+// lock legitimate visitors out.
 const DEFAULT_SETTINGS: AuthSettings = {
-  mode: "restricted",
+  mode: "public",
   authorizedEmails: [
     "johnmahan7@gmail.com",
     "dan@datasyinc.com",
@@ -19,6 +21,13 @@ const DEFAULT_SETTINGS: AuthSettings = {
   ],
   adminEmails: ["johnmahan7@gmail.com", "dan@datasyinc.com"],
 };
+
+// Escape hatch so access can be forced without a database write.
+// AUTH_MODE=public | guest | restricted overrides the stored setting.
+function modeOverride(): AuthSettings["mode"] | null {
+  const m = process.env.AUTH_MODE?.trim().toLowerCase();
+  return m === "public" || m === "guest" || m === "restricted" ? m : null;
+}
 
 // Cache settings to avoid hitting DB on every request
 let cachedSettings: AuthSettings | null = null;
@@ -95,7 +104,14 @@ export async function middleware(request: NextRequest) {
   }
 
   // Get auth settings
-  const settings = await getAuthSettings();
+  const stored = await getAuthSettings();
+  const override = modeOverride();
+  const settings: AuthSettings = override ? { ...stored, mode: override } : stored;
+
+  // Public mode: the app is open to everyone, no sign-in and no guest cookie.
+  if (settings.mode === "public") {
+    return NextResponse.next();
+  }
 
   // Check if user is authenticated
   const token = await getToken({

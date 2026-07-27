@@ -38,35 +38,20 @@ export default function NationwidePage() {
   }, []);
 
   useEffect(() => {
-    // Fetch data if authenticated OR in guest mode
-    if (status === "authenticated" || isGuestMode) {
-      // Fetch trending topics with cache settings
-      fetchWithCache("/api/trending")
+    // Both former branches did the same fetch; collapsed into one. Wait only for
+    // the auth check to resolve, then load regardless of its outcome.
+    if (status === "loading") return;
+
+    fetchWithCache("/api/trending")
       .then((res) => res.json())
       .then((data) => {
-        setTopics(data);
+        setTopics(Array.isArray(data) ? data : []);
         setLoading(false);
       })
       .catch((error) => {
         console.error("Error fetching trending topics:", error);
         setLoading(false);
       });
-    } else if (status === "loading") {
-      // Still loading auth state
-      return;
-    } else {
-      // Not authenticated and not guest mode - still load for preview
-      fetchWithCache("/api/trending")
-      .then((res) => res.json())
-      .then((data) => {
-        setTopics(data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error fetching trending topics:", error);
-        setLoading(false);
-      });
-    }
   }, [status, isGuestMode]);
 
   const handleExplore = () => {
