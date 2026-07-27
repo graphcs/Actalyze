@@ -52,11 +52,7 @@ export async function GET(request: NextRequest) {
     if (!apiKey) {
       console.warn('⚠️ API key not set, returning placeholder');
       return NextResponse.json({
-        issues: [
-          "State legislative session updates",
-          "Local election news",
-          "Policy developments"
-        ]
+        issues: [] as string[]
       });
     }
 
@@ -75,6 +71,39 @@ export async function GET(request: NextRequest) {
       headers['X-Title'] = 'Actalyze';
     }
 
+    // Ground the answer in real current coverage. Asking the model what is
+    // happening "right now" only works when it can search the web; on plain
+    // OpenAI it answers from training data, which is how a 2026 page ended up
+    // listing a "2024 gubernatorial election" as a live issue. Pull the real
+    // headlines this app already retrieves and let the model only summarise
+    // those.
+    let headlineContext = '';
+    try {
+      // Resolve against this request's own origin rather than NEXT_PUBLIC_URL,
+      // which can be stale or point at a different deployment.
+      const newsUrl = new URL(`/api/state/news?state=${stateCode}`, request.nextUrl.origin);
+      const newsRes = await fetch(newsUrl, { signal: AbortSignal.timeout(20000) });
+      if (newsRes.ok) {
+        const news = await newsRes.json();
+        const titles = (news?.headlines ?? [])
+          .map((h: { title?: string }) => h?.title)
+          .filter(Boolean)
+          .slice(0, 8);
+        if (titles.length) {
+          headlineContext = titles.map((t: string, i: number) => `${i + 1}. ${t}`).join('\n');
+        }
+      }
+    } catch {
+      // Fall through - handled below.
+    }
+
+    // With no real coverage to work from, say nothing rather than inventing
+    // plausible-sounding issues.
+    if (!headlineContext) {
+      console.warn(`⚠️ No headlines available for ${stateName}; returning empty issues`);
+      return NextResponse.json({ issues: [] });
+    }
+
     const response = await fetch(baseURL, {
       method: 'POST',
       headers,
@@ -83,23 +112,23 @@ export async function GET(request: NextRequest) {
         messages: [
           {
             role: 'user',
-            content: `What are the top 3-4 political issues or news stories in ${stateName} right now? Focus on state politics, legislation, elections, and major policy debates. Return ONLY a JSON array of strings, each being a concise issue/headline (max 10 words each). Example: ["Healthcare reform debate", "Governor's budget proposal", "Education funding bill"]`,
+            content: `Here are current news headlines from ${stateName}:
+
+${headlineContext}
+
+Summarise the 3-4 political issues these headlines are about. Use ONLY what the headlines above support - do not add issues from your own knowledge, and do not mention any election year unless a headline does. Return ONLY a JSON array of strings, each a concise issue (max 10 words). Example: ["Healthcare reform debate", "Governor's budget proposal"]`,
           },
         ],
-        temperature: 0.3,
+        temperature: 0.2,
         max_tokens: 200,
       }),
-      signal: AbortSignal.timeout(10000),
+      signal: AbortSignal.timeout(20000),
     });
 
     if (!response.ok) {
       console.error(`State news API error: ${response.status}`);
       return NextResponse.json({
-        issues: [
-          "Recent legislative updates",
-          "State policy developments",
-          "Political news"
-        ]
+        issues: [] as string[]
       });
     }
 
@@ -108,11 +137,7 @@ export async function GET(request: NextRequest) {
 
     if (!content) {
       return NextResponse.json({
-        issues: [
-          "State government updates",
-          "Policy news",
-          "Legislative developments"
-        ]
+        issues: [] as string[]
       });
     }
 
@@ -137,11 +162,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Error fetching state news:', error);
     return NextResponse.json({
-      issues: [
-        "State political updates",
-        "Legislative news",
-        "Policy developments"
-      ]
+      issues: [] as string[]
     });
   }
 }
