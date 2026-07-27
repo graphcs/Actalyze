@@ -36,11 +36,129 @@ interface TweetWithMetrics extends Tweet {
 }
 
 /**
+ * Per-request stage timer.
+ *
+ * The cold path for this route was ~45s and nobody knew which stage owned it.
+ * Every stage is wrapped in `time()` so the breakdown lands in the server log
+ * and in the `x-stage-timings` response header, where a load test can read it
+ * without scraping stdout.
+ */
+function createTimer() {
+  const started = Date.now();
+  const stages: Record<string, number> = {};
+
+  async function time<T>(name: string, fn: () => Promise<T>): Promise<T> {
+    const t0 = Date.now();
+    try {
+      return await fn();
+    } finally {
+      stages[name] = (stages[name] ?? 0) + (Date.now() - t0);
+    }
+  }
+
+  function summary() {
+    return { ...stages, total: Date.now() - started };
+  }
+
+  return { time, summary };
+}
+
+/** 1 -> "1st", 2 -> "2nd", 11 -> "11th". */
+function ordinal(n: number): string {
+  const rem100 = n % 100;
+  if (rem100 >= 11 && rem100 <= 13) return `${n}th`;
+  switch (n % 10) {
+    case 1: return `${n}st`;
+    case 2: return `${n}nd`;
+    case 3: return `${n}rd`;
+    default: return `${n}th`;
+  }
+}
+
+/**
+ * Search terms for a district, derived from the district code alone.
+ *
+ * These used to come from a gpt-4o call asking for "local politicians, district
+ * issues, local controversies". On this deployment `chatCompletions({webSearch:true})`
+ * resolves to plain OpenAI, which has no web access, so that call was inventing
+ * plausible-sounding names from training data — and the terms were only ever fed
+ * to SerpAPI as queries anyway. Deriving them from the district code costs 0ms
+ * instead of ~1.1s, removes a fabrication surface, and makes the queries stable,
+ * so SerpAPI's 1h fetch cache can actually hit and save quota.
+ *
+ * `primary` is queried first. `widen` is queried only when `primary` did not
+ * return enough distinct posts — each SerpAPI query spends one search from a
+ * shared monthly quota, so the fan-out is kept deliberately small.
+ */
+function buildDistrictSearchTerms(
+  stateName: string,
+  districtLabel: string,
+  districtNumber: number
+): { primary: string[]; widen: string[] } {
+  const seat =
+    districtNumber === 0
+      ? `${stateName} at-large congressional district`
+      : `${stateName}'s ${ordinal(districtNumber)} congressional district`;
+
+  return {
+    primary: [
+      seat,
+      `${stateName} politics`,
+      `${stateName} governor race`,
+      `${stateName} congress election`,
+    ],
+    widen: [`${districtLabel} election`],
+  };
+}
+
+/**
+ * Fetch the traditional polling baseline. Never rejects — a missing baseline
+ * just means the AI estimate stands on its own.
+ */
+async function fetchTraditionalPolling(districtCode: string): Promise<string | null> {
+  try {
+    const pollingUrl = new URL(
+      '/api/district/polling',
+      process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'
+    );
+    pollingUrl.searchParams.set('district', districtCode);
+    const pollingResponse = await fetch(pollingUrl.toString(), {
+      headers: { 'x-use-cache': 'true' },
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!pollingResponse.ok) return null;
+    const pollingData = await pollingResponse.json();
+    return pollingData.trend ?? null;
+  } catch {
+    console.log('⚠️ Could not fetch traditional polling, using AI-only estimate');
+    return null;
+  }
+}
+
+/**
+ * How many retrieved posts get sent to the classifier.
+ *
+ * Classification was the route's single biggest stage (29.5s for 50 posts), but
+ * the cost was the *sequencing*, not the volume: batches of 5 ran one after the
+ * other. With a concurrency-20 worker pool the same 40 posts finish in ~4s, and
+ * classification is no longer on the critical path at all.
+ *
+ * Cutting this to 20-25 was tried and reverted. Only ~25% of classified posts
+ * clear the `location_confidence >= 0.3` filter, and `calculatePollingEstimate`
+ * needs MIN_PARTISAN_POSTS (6) survivors before it will report a margin — so a
+ * 25-post cap pushed `ai_only_estimate` to "Unknown" on thin districts, i.e. the
+ * AI signal stopped contributing at all. Since the guards must not be weakened,
+ * the input has to stay large enough to satisfy them.
+ */
+const MAX_POSTS_TO_CLASSIFY = 40;
+
+/**
  * GET /api/district/ai-intel?district=VA10
  * Returns AI-powered political intelligence for a congressional district
  * Based on concepts from "Artificially Intelligent Opinion Polling" (Cerina & Duch, 2023)
  */
 export async function GET(request: NextRequest) {
+  const timer = createTimer();
   try {
     const searchParams = request.nextUrl.searchParams;
     const districtCode = searchParams.get('district')?.toUpperCase();
@@ -76,7 +194,9 @@ export async function GET(request: NextRequest) {
     const dbCacheKey = generateDistrictCacheKey('ai-intel', districtCode);
 
     // Try database cache first (persists across restarts)
-    const dbCached = await getFromDbCache<AIIntelResponse>(dbCacheKey, useCache);
+    const dbCached = await timer.time('db_cache_read', () =>
+      getFromDbCache<AIIntelResponse>(dbCacheKey, useCache)
+    );
     if (dbCached) {
       console.log(`📦 Using DB cached AI intel for ${districtLabel}`);
       // Also set in memory cache for faster subsequent hits
@@ -93,8 +213,9 @@ export async function GET(request: NextRequest) {
 
     console.log(`🧠 Generating AI political intelligence for ${districtLabel}`);
 
-    // Check for required API keys
-    const ai = chatCompletions({ webSearch: true });
+    // Check for required API keys. Only classification needs a chat provider
+    // now; search terms are derived from the district code.
+    const ai = chatCompletions();
     const twitterKey = process.env.TWITTER_API_KEY;
     const twitterSecret = process.env.TWITTER_API_SECRET;
 
@@ -114,70 +235,22 @@ export async function GET(request: NextRequest) {
       }, { status: 503 });
     }
 
-    // Step 1: Get trending topics for the district using Perplexity
-    console.log(`🔍 Finding trending topics for ${districtLabel}`);
+    // The traditional polling baseline depends on nothing else this route does,
+    // but it used to be awaited after classification had finished — ~7s of dead
+    // time on the critical path. Start it now and collect it at the end.
+    const traditionalPollingPromise = timer.time('traditional_polling_fetch', () =>
+      fetchTraditionalPolling(districtCode)
+    );
 
-    const topicsPrompt = `You are a political research assistant with access to current news and web search. Research and identify 10 search terms for finding political discussions relevant to ${districtName} (${districtLabel}) in ${stateName} as of December 2025.
+    // Step 1: Derive search terms from the district code (no LLM round trip).
+    const { primary: primaryTerms, widen: widenTerms } = buildDistrictSearchTerms(
+      stateName,
+      districtLabel,
+      parseInt(districtNum)
+    );
+    const searchTerms = [...primaryTerms, ...widenTerms];
 
-Generate search terms across these categories:
-- 3 DISTRICT-SPECIFIC: Local politicians, district issues, local controversies
-- 3 STATE-LEVEL: ${stateName} governor, state legislature, statewide issues
-- 2 REGIONAL: Major cities in the district, regional concerns (economy, traffic, housing)
-- 2 NATIONAL ISSUES relevant to ${stateName}: Immigration, economy, healthcare debates with state context
-
-Output ONLY a bulleted list of Twitter/X search terms:
-- [search term]
-- [search term]
-...
-
-Each search term should be SHORT (1-4 words), use keywords people actually tweet about. Include a mix of specific local terms AND broader state/regional terms to ensure sufficient data.
-
-ONLY output the bulleted list with NO additional commentary.`;
-
-    const topicsResponse = await fetch(ai.url, {
-      method: 'POST',
-      headers: ai.headers,
-      body: JSON.stringify({
-        model: ai.model,
-        messages: [{ role: 'user', content: topicsPrompt }],
-        temperature: 0.3,
-        max_tokens: 500,
-      }),
-      signal: AbortSignal.timeout(30000),
-    });
-
-    if (!topicsResponse.ok) {
-      console.error(`❌ Topics API error: ${topicsResponse.status}`);
-      return NextResponse.json({
-        error: 'Failed to identify trending topics',
-        district: districtCode,
-      }, { status: 502 });
-    }
-
-    const topicsData = await topicsResponse.json();
-    const topicsText = topicsData.choices?.[0]?.message?.content?.trim();
-
-    // Parse search terms
-    const searchTerms: string[] = [];
-    if (topicsText) {
-      const lines = topicsText.split('\n');
-      for (const line of lines) {
-        const trimmed = line.trim();
-        if (trimmed.startsWith('-')) {
-          const term = trimmed.substring(1).trim();
-          if (term && term.length > 0) {
-            searchTerms.push(term);
-          }
-        }
-      }
-    }
-
-    console.log(`📋 Extracted ${searchTerms.length} search terms:`, searchTerms);
-
-    if (searchTerms.length === 0) {
-      // Fallback to generic district search
-      searchTerms.push(districtLabel, stateName + ' politics');
-    }
+    console.log(`📋 Search terms for ${districtLabel}:`, searchTerms);
 
     // Step 2: Check cached tweets first to save API calls
     const now = new Date();
@@ -185,12 +258,16 @@ ONLY output the bulleted list with NO additional commentary.`;
     const seenTweetIds = new Set<string>();
 
     // Check if we have enough cached tweets (at least 30)
-    const cachedTweetCount = await getCachedTweetCount(districtCode, 6);
+    const cachedTweetCount = await timer.time('tweet_cache_count', () =>
+      getCachedTweetCount(districtCode, 6)
+    );
     let usedCache = false;
 
     if (cachedTweetCount >= 30) {
       console.log(`📦 Using ${cachedTweetCount} cached tweets for ${districtCode}`);
-      const cachedTweets = await getCachedTweets(searchTerms, districtCode, 6);
+      const cachedTweets = await timer.time('tweet_cache_read', () =>
+        getCachedTweets(searchTerms, districtCode, 6)
+      );
 
       for (const cached of cachedTweets) {
         if (seenTweetIds.has(cached.id)) continue;
@@ -233,12 +310,14 @@ ONLY output the bulleted list with NO additional commentary.`;
       console.log(`🐦 Combined Twitter search: "${combinedQuery}"`);
 
       try {
-        const result = await appOnlyClient.v2.search(combinedQuery, {
-          max_results: 100,
-          'tweet.fields': ['created_at', 'author_id', 'public_metrics'],
-          'user.fields': ['location', 'description'],
-          expansions: ['author_id'],
-        });
+        const result = await timer.time('twitter_search', () =>
+          appOnlyClient.v2.search(combinedQuery, {
+            max_results: 100,
+            'tweet.fields': ['created_at', 'author_id', 'public_metrics'],
+            'user.fields': ['location', 'description'],
+            expansions: ['author_id'],
+          })
+        );
 
         const newTweets: CachedTweet[] = [];
 
@@ -317,21 +396,23 @@ ONLY output the bulleted list with NO additional commentary.`;
     if (allTweetsWithMetrics.length < 20) {
       console.log(`🔎 Recovering posts via SerpAPI for ${districtLabel}`);
 
-      // Query the most specific terms first, then widen to the state, so a
-      // district with little chatter still yields something relevant.
-      const recoveryTerms = [
-        ...searchTerms.slice(0, 6),
-        `${districtName} ${stateName}`,
-        `${stateName} politics`,
-        `${stateName} congress`,
-      ];
-
-      const recovered = await Promise.all(
-        recoveryTerms.map((term) => searchTweetsViaSerpApi(term, 8).catch(() => []))
-      );
+      // Every query here spends one search from a shared, finite monthly SerpAPI
+      // quota, so the fan-out is deliberately small. It used to be 9 near-duplicate
+      // terms fired unconditionally; it is now 3 terms, widened to 5 only when the
+      // first wave did not find enough distinct posts.
+      //
+      // POSTS_PER_TERM is raised from 8 to 20 for free: searchTweetsViaSerpApi
+      // already asks Google for 40 results per query and then truncates to `limit`,
+      // so a higher limit extracts more posts from the SAME search rather than
+      // buying another one. That is what lets 3 terms replace 9 without losing
+      // sample size.
+      const POSTS_PER_TERM = 20;
+      const ENOUGH_POSTS = 20;
 
       const fresh: CachedTweet[] = [];
-      for (const [i, batch] of recovered.entries()) {
+      const termsQueried: string[] = [];
+
+      const absorb = (batch: Awaited<ReturnType<typeof searchTweetsViaSerpApi>>, term: string) => {
         for (const t of batch) {
           if (seenTweetIds.has(t.id)) continue;
           seenTweetIds.add(t.id);
@@ -348,19 +429,42 @@ ONLY output the bulleted list with NO additional commentary.`;
             url: t.url,
             created_at: t.created_at ?? now.toISOString(),
             engagement_score: engagement,
-            search_terms: [recoveryTerms[i]],
+            search_terms: [term],
             fetched_at: now.toISOString(),
           };
 
           fresh.push(cacheable);
           allTweetsWithMetrics.push({ ...cacheable, age_days: ageDays });
         }
-      }
+      };
+
+      const runWave = async (terms: string[]) => {
+        const batches = await Promise.all(
+          terms.map((term) => searchTweetsViaSerpApi(term, POSTS_PER_TERM).catch(() => []))
+        );
+        batches.forEach((batch, i) => absorb(batch, terms[i]));
+        termsQueried.push(...terms);
+      };
+
+      await timer.time('serpapi_recovery', async () => {
+        await runWave(primaryTerms);
+        // Only pay for the broader terms when the district-specific ones came up short.
+        if (allTweetsWithMetrics.length < ENOUGH_POSTS) {
+          console.log(
+            `🔎 Only ${allTweetsWithMetrics.length} posts from ${primaryTerms.length} terms, widening`
+          );
+          await runWave(widenTerms);
+        }
+      });
 
       if (fresh.length > 0) {
-        await cacheTweets(fresh, recoveryTerms.join(' | '), districtCode);
+        await timer.time('tweet_cache_write', () =>
+          cacheTweets(fresh, termsQueried.join(' | '), districtCode)
+        );
       }
-      console.log(`🔎 SerpAPI recovery added ${fresh.length} posts (total ${allTweetsWithMetrics.length})`);
+      console.log(
+        `🔎 SerpAPI recovery: ${termsQueried.length} searches spent, added ${fresh.length} posts (total ${allTweetsWithMetrics.length})`
+      );
     }
 
     // Fallback: if insufficient data and we didn't use cached data, try state-level search
@@ -389,12 +493,14 @@ ONLY output the bulleted list with NO additional commentary.`;
         const searchQuery = `${searchTerm} -is:retweet -is:reply lang:en`;
 
         try {
-          const result = await fallbackClient.v2.search(searchQuery, {
-            max_results: 100,
-            'tweet.fields': ['created_at', 'author_id', 'public_metrics'],
-            'user.fields': ['location', 'description'],
-            expansions: ['author_id'],
-          });
+          const result = await timer.time('twitter_fallback_search', () =>
+            fallbackClient.v2.search(searchQuery, {
+              max_results: 100,
+              'tweet.fields': ['created_at', 'author_id', 'public_metrics'],
+              'user.fields': ['location', 'description'],
+              expansions: ['author_id'],
+            })
+          );
 
           if (result.data.data && result.data.data.length > 0) {
             const users = new Map<string, UserData>();
@@ -469,7 +575,7 @@ ONLY output the bulleted list with NO additional commentary.`;
 
     // Sort by engagement and take top tweets for analysis
     filteredTweets.sort((a, b) => b.engagement_score - a.engagement_score);
-    const tweetsToAnalyze = filteredTweets.slice(0, 50); // Analyze top 50 tweets (up from 20)
+    const tweetsToAnalyze = filteredTweets.slice(0, MAX_POSTS_TO_CLASSIFY);
 
     console.log(`🔬 Analyzing ${tweetsToAnalyze.length} tweets with AI`);
 
@@ -480,33 +586,22 @@ ONLY output the bulleted list with NO additional commentary.`;
       ({ engagement_score, age_days, ...tweet }) => tweet
     );
 
-    const classifications = await classifyTweets(
-      tweetsForClassification,
-      districtCode,
-      districtName,
-      // classifyTweets resolves its own provider now; kept for signature compat.
-      ''
+    const classifications = await timer.time('classify_tweets', () =>
+      classifyTweets(
+        tweetsForClassification,
+        districtCode,
+        districtName,
+        // classifyTweets resolves its own provider now; kept for signature compat.
+        ''
+      )
     );
 
     console.log(`✅ Classified ${classifications.length} tweets`);
 
-    // Step 4: Fetch traditional polling data to blend with AI estimates
-    let traditionalPollingTrend: string | null = null;
-    try {
-      const pollingUrl = new URL('/api/district/polling', process.env.NEXT_PUBLIC_URL || 'http://localhost:3000');
-      pollingUrl.searchParams.set('district', districtCode);
-      const pollingResponse = await fetch(pollingUrl.toString(), {
-        headers: { 'x-use-cache': 'true' },
-        signal: AbortSignal.timeout(10000),
-      });
-      if (pollingResponse.ok) {
-        const pollingData = await pollingResponse.json();
-        traditionalPollingTrend = pollingData.trend;
-        console.log(`📊 Traditional polling: ${traditionalPollingTrend}`);
-      }
-    } catch (error) {
-      console.log('⚠️ Could not fetch traditional polling, using AI-only estimate');
-    }
+    // Step 4: Collect the traditional polling baseline started before retrieval.
+    // By now it has almost always already resolved, so this await is free.
+    const traditionalPollingTrend = await traditionalPollingPromise;
+    console.log(`📊 Traditional polling: ${traditionalPollingTrend}`);
 
     // Step 5: Aggregate into district-level intelligence (blending with traditional polling)
     const aiIntel = aggregateClassifications(classifications, districtCode, districtName, traditionalPollingTrend);
@@ -517,9 +612,16 @@ ONLY output the bulleted list with NO additional commentary.`;
     // Use user-specified duration or default to 6 hours for AI intel
     const finalCacheDuration = Math.max(cacheDurationSeconds, 6 * 60 * 60); // Minimum 6h for expensive AI intel
     serverCache.set(memoryCacheKey, aiIntel, finalCacheDuration);
-    await setInDbCache(dbCacheKey, 'ai-intel', districtCode, aiIntel, finalCacheDuration);
+    await timer.time('db_cache_write', () =>
+      setInDbCache(dbCacheKey, 'ai-intel', districtCode, aiIntel, finalCacheDuration)
+    );
 
-    return NextResponse.json(aiIntel);
+    const timings = timer.summary();
+    console.log(`⏱️ ai-intel ${districtLabel} stage timings:`, JSON.stringify(timings));
+
+    return NextResponse.json(aiIntel, {
+      headers: { 'x-stage-timings': JSON.stringify(timings) },
+    });
 
   } catch (error: unknown) {
     const err = error as { message?: string; code?: string };

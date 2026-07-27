@@ -144,76 +144,117 @@ export function parseClassificationResponse(response: string): PostClassificatio
 }
 
 /**
+ * How many classification requests may be in flight at once.
+ *
+ * This used to run as fixed batches of 5 with a 200ms sleep between them, so 50
+ * posts meant 10 strictly sequential rounds — measured at 29.5s, by far the
+ * largest slice of the route's 52s cold path. A worker pool keeps `CONCURRENCY`
+ * requests busy continuously, so one slow response no longer stalls a whole
+ * round, and there is no artificial delay between them.
+ */
+const CLASSIFY_CONCURRENCY = 20;
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Classify a single post. Returns null when the model could not be reached or
+ * its answer was unparseable — callers drop nulls rather than substituting a
+ * guess, so an unclassifiable post simply does not enter the sample.
+ *
+ * One retry on 429/5xx: dropped classifications shrink `sample_size`, and a
+ * transient rate-limit blip is exactly the case worth paying 400ms to avoid.
+ */
+async function classifyOne(
+  tweet: Tweet,
+  districtCode: string,
+  districtName: string,
+  provider: NonNullable<ReturnType<typeof chatCompletions>>,
+  model: string
+): Promise<PostClassification | null> {
+  const prompt = buildClassificationPrompt(tweet, districtCode, districtName);
+
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const response = await fetch(provider.url, {
+        method: 'POST',
+        headers: provider.headers,
+        body: JSON.stringify({
+          model,
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.3,
+          max_tokens: 500,
+          // The prompt already demands bare JSON; constraining the format too
+          // removes the occasional prose preamble that made parsing fail.
+          response_format: { type: 'json_object' },
+        }),
+        signal: AbortSignal.timeout(15000),
+      });
+
+      if (!response.ok) {
+        if (attempt === 0 && (response.status === 429 || response.status >= 500)) {
+          await sleep(400);
+          continue;
+        }
+        console.error(`LLM API error: ${response.status}`);
+        return null;
+      }
+
+      const data = await response.json();
+      const content = data.choices?.[0]?.message?.content?.trim();
+      if (!content) return null;
+
+      return parseClassificationResponse(content);
+    } catch (error) {
+      if (attempt === 0) {
+        await sleep(400);
+        continue;
+      }
+      console.error('Error classifying tweet:', error);
+      return null;
+    }
+  }
+
+  return null;
+}
+
+/**
  * Call the LLM to classify a batch of tweets
  */
 export async function classifyTweets(
   tweets: Tweet[],
   districtCode: string,
   districtName: string,
-  apiKey: string
+  apiKey: string,
+  concurrency: number = CLASSIFY_CONCURRENCY
 ): Promise<PostClassification[]> {
-  const classifications: PostClassification[] = [];
+  if (tweets.length === 0) return [];
 
-  // Process tweets in batches to avoid rate limits
-  const batchSize = 5;
-  for (let i = 0; i < tweets.length; i += batchSize) {
-    const batch = tweets.slice(i, i + batchSize);
+  const provider = chatCompletions();
+  if (!provider) {
+    console.error('No LLM provider configured; cannot classify posts');
+    return [];
+  }
 
-    // Process batch in parallel
-    const promises = batch.map(async (tweet) => {
-      const prompt = buildClassificationPrompt(tweet, districtCode, districtName);
+  // Classification is cheap and high-volume; use the small model on whichever
+  // provider is active.
+  const model = provider.provider === 'openrouter' ? 'openai/gpt-4o-mini' : 'gpt-4o-mini';
 
-      try {
-        const provider = chatCompletions();
-        if (!provider) throw new Error('No LLM provider configured');
-        const response = await fetch(provider.url, {
-          method: 'POST',
-          headers: provider.headers,
-          body: JSON.stringify({
-            // Classification is cheap and high-volume; use the small model on
-            // whichever provider is active.
-            model: provider.provider === 'openrouter' ? 'openai/gpt-4o-mini' : 'gpt-4o-mini',
-            messages: [
-              {
-                role: 'user',
-                content: prompt,
-              },
-            ],
-            temperature: 0.3,
-            max_tokens: 500,
-          }),
-          signal: AbortSignal.timeout(15000),
-        });
+  const results: (PostClassification | null)[] = new Array(tweets.length).fill(null);
+  let cursor = 0;
 
-        if (!response.ok) {
-          console.error(`LLM API error: ${response.status}`);
-          return null;
-        }
-
-        const data = await response.json();
-        const content = data.choices?.[0]?.message?.content?.trim();
-
-        if (!content) {
-          return null;
-        }
-
-        return parseClassificationResponse(content);
-      } catch (error) {
-        console.error('Error classifying tweet:', error);
-        return null;
-      }
-    });
-
-    const results = await Promise.all(promises);
-    classifications.push(...results.filter((r): r is PostClassification => r !== null));
-
-    // Small delay between batches to avoid rate limits
-    if (i + batchSize < tweets.length) {
-      await new Promise(resolve => setTimeout(resolve, 200));
+  async function worker() {
+    for (;;) {
+      const i = cursor++;
+      if (i >= tweets.length) return;
+      results[i] = await classifyOne(tweets[i], districtCode, districtName, provider!, model);
     }
   }
 
-  return classifications;
+  await Promise.all(
+    Array.from({ length: Math.min(concurrency, tweets.length) }, () => worker())
+  );
+
+  return results.filter((r): r is PostClassification => r !== null);
 }
 
 /**
