@@ -1,6 +1,8 @@
 // AI Political Intelligence Library
 // Based on concepts from "Artificially Intelligent Opinion Polling" (Cerina & Duch, 2023)
 
+import { chatCompletions } from "@/lib/ai-provider";
+
 export interface Tweet {
   id: string;
   text: string;
@@ -162,16 +164,15 @@ export async function classifyTweets(
       const prompt = buildClassificationPrompt(tweet, districtCode, districtName);
 
       try {
-        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        const provider = chatCompletions();
+        if (!provider) throw new Error('No LLM provider configured');
+        const response = await fetch(provider.url, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`,
-            'HTTP-Referer': process.env.NEXT_PUBLIC_URL || 'http://localhost:3000',
-            'X-Title': 'Actalyze',
-          },
+          headers: provider.headers,
           body: JSON.stringify({
-            model: 'openai/gpt-4o-mini',
+            // Classification is cheap and high-volume; use the small model on
+            // whichever provider is active.
+            model: provider.provider === 'openrouter' ? 'openai/gpt-4o-mini' : 'gpt-4o-mini',
             messages: [
               {
                 role: 'user',
@@ -311,13 +312,15 @@ export function aggregateClassifications(
         estimate = `R+${Math.round(traditionalMargin)}`;
       }
 
+      // Same provenance caveat as below: this is a model-derived district lean,
+      // not an aggregate of published polls.
       let vsTraditional: string;
       if (traditionalMargin === 0) {
-        vsTraditional = 'Traditional polls: Tied';
+        vsTraditional = 'Baseline estimate: Tied';
       } else if (traditionalMargin < 0) {
-        vsTraditional = `Traditional polls: D+${Math.abs(Math.round(traditionalMargin))}`;
+        vsTraditional = `Baseline estimate: D+${Math.abs(Math.round(traditionalMargin))}`;
       } else {
-        vsTraditional = `Traditional polls: R+${Math.round(traditionalMargin)}`;
+        vsTraditional = `Baseline estimate: R+${Math.round(traditionalMargin)}`;
       }
 
       const outlook = determineElectionOutlook(traditionalMargin, 0.6, []);
@@ -341,7 +344,7 @@ export function aggregateClassifications(
         election_outlook: outlook,
         insights: [{
           type: 'pattern' as const,
-          text: 'AI analysis unavailable due to insufficient social media data. Estimate based on traditional polling only.',
+          text: 'No social media posts were available for this area, so no social signal contributed. The figure shown is a model-derived baseline estimate, not a poll.',
           timestamp: now,
         }],
       };
@@ -406,15 +409,18 @@ export function aggregateClassifications(
   // Extract key insights
   const insights = extractInsights(localUsers);
 
-  // Format traditional polling comparison
+  // Comparison baseline. This margin comes from /api/district/polling, which is a
+  // model-derived estimate of district lean — NOT an aggregate of published polls.
+  // Label it accordingly; calling it "Traditional polls" claims a provenance the
+  // number does not have.
   let vsTraditional: string | undefined;
   if (traditionalMargin !== null) {
     if (traditionalMargin === 0) {
-      vsTraditional = 'Traditional polls: Tied';
+      vsTraditional = 'Baseline estimate: Tied';
     } else if (traditionalMargin < 0) {
-      vsTraditional = `Traditional polls: D+${Math.abs(Math.round(traditionalMargin))}`;
+      vsTraditional = `Baseline estimate: D+${Math.abs(Math.round(traditionalMargin))}`;
     } else {
-      vsTraditional = `Traditional polls: R+${Math.round(traditionalMargin)}`;
+      vsTraditional = `Baseline estimate: R+${Math.round(traditionalMargin)}`;
     }
   }
 
@@ -452,6 +458,10 @@ function calculatePollingEstimate(
   let demWeight = 0;
   let repWeight = 0;
   let totalWeight = 0;
+  // Count of posts that actually carried a D or R signal. Weights are products of
+  // two confidences so they run well below 1 each; gating on the weighted sum would
+  // reject samples that are perfectly reportable.
+  let partisanPosts = 0;
 
   for (const c of classifications) {
     if (c.political_leaning === 'unknown') continue;
@@ -461,8 +471,10 @@ function calculatePollingEstimate(
 
     if (c.political_leaning === 'D') {
       demWeight += weight;
+      partisanPosts++;
     } else if (c.political_leaning === 'R') {
       repWeight += weight;
+      partisanPosts++;
     }
     // Independents don't count toward either side
 
@@ -473,10 +485,28 @@ function calculatePollingEstimate(
     return { estimate: 'Unknown', margin: 0, confidence: 0 };
   }
 
-  // Calculate margin: negative = D advantage, positive = R advantage
+  // A handful of posts is not a sample worth reporting a margin from.
+  const MIN_PARTISAN_POSTS = 6;
+  if (partisanPosts < MIN_PARTISAN_POSTS) {
+    return { estimate: 'Unknown', margin: 0, confidence: 0 };
+  }
+
   const demShare = demWeight / totalWeight;
   const repShare = repWeight / totalWeight;
-  const margin = Math.round((repShare - demShare) * 100);
+
+  // The raw share difference is NOT an electoral margin. It is the split of a small,
+  // self-selected set of public posts, so a district where every retrieved post leans
+  // one way produces ±100 - a figure that is both meaningless and embarrassing next to
+  // a real margin. Shrink toward zero as a function of sample size (a standard
+  // small-sample prior: with n posts and prior strength k, keep n/(n+k) of the signal),
+  // then clamp to a range real congressional margins actually occupy.
+  const PRIOR_STRENGTH = 25;
+  const rawMargin = (repShare - demShare) * 100;
+  const shrunk = rawMargin * (partisanPosts / (partisanPosts + PRIOR_STRENGTH));
+  const MAX_PLAUSIBLE_MARGIN = 40;
+  const margin = Math.round(
+    Math.max(-MAX_PLAUSIBLE_MARGIN, Math.min(MAX_PLAUSIBLE_MARGIN, shrunk))
+  );
 
   // Calculate confidence based on sample size
   // Use logarithmic scale: need ~30 weighted samples for 70% confidence, ~50 for 80%
