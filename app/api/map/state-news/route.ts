@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { serverCache, generateCacheKey } from "@/src/lib/cache";
+import { OPENROUTER_KEY } from "@/lib/ai-provider";
 
 // Map of state codes to full names
 const STATE_NAMES: Record<string, string> = {
@@ -47,7 +48,7 @@ export async function GET(request: NextRequest) {
 
     console.log(`📰 Fetching top issues for ${stateName} (${stateCode})`);
 
-    const apiKey = process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY;
+    const apiKey = OPENROUTER_KEY || process.env.OPENAI_API_KEY;
     if (!apiKey) {
       console.warn('⚠️ API key not set, returning placeholder');
       return NextResponse.json({
@@ -59,7 +60,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const useOpenRouter = !!process.env.OPENROUTER_API_KEY;
+    const useOpenRouter = !!OPENROUTER_KEY;
     const baseURL = useOpenRouter
       ? 'https://openrouter.ai/api/v1/chat/completions'
       : 'https://api.openai.com/v1/chat/completions';

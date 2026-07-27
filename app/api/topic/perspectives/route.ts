@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { serverCache, generateCacheKey } from "@/src/lib/cache";
+import { OPENROUTER_KEY } from "@/lib/ai-provider";
 import {
   getFromDbCache,
   setInDbCache,
@@ -64,7 +65,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(cached);
     }
 
-    const apiKey = process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY;
+    const apiKey = OPENROUTER_KEY || process.env.OPENAI_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
         { error: 'AI API key not configured' },
@@ -72,7 +73,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const useOpenRouter = !!process.env.OPENROUTER_API_KEY;
+    const useOpenRouter = !!OPENROUTER_KEY;
 
     console.log(`🤖 Generating party perspectives for: "${topic}"`);
 
