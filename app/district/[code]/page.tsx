@@ -28,6 +28,7 @@ import TrendingTopicsPanel from "../../components/TrendingTopicsPanel";
 import ElectionOutlook from "../../components/ElectionOutlook";
 import KeyInsightsFeed from "../../components/KeyInsightsFeed";
 import type { AIIntelResponse } from "@/lib/ai-intel";
+import { normalizeDistrictCode } from "@/lib/district-code";
 
 // Dynamically import map to avoid SSR issues
 const DistrictMap = dynamic(
@@ -83,7 +84,10 @@ interface Tweet {
 export default function DistrictPage() {
   const params = useParams();
   const router = useRouter();
-  const districtCode = (params.code as string)?.toUpperCase();
+  // The district APIs only accept the canonical "CA12" shape, but the UI (sidebar,
+  // badges, the search hint) advertises "CA-12", so a shared or typed link arrives
+  // hyphenated. Normalise the same way DistrictSearch does before using it.
+  const districtCode = normalizeDistrictCode(params.code as string);
 
   const [headlines, setHeadlines] = useState<Headline[]>([]);
   const [summary, setSummary] = useState<string>("");
@@ -331,7 +335,11 @@ export default function DistrictPage() {
             </CardContent>
           </Card>
 
-          {/* Recent Polling */}
+          {/* Recent Polling. Published polling rarely exists at district level, and
+              the endpoint only reports a figure it can ground in a real retrieved
+              article. Rather than occupy the layout with an "unavailable" placeholder,
+              omit the card entirely unless there is a genuine poll to show. */}
+          {(loading || pollingData?.trend) && (
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <div className="font-semibold flex items-center gap-2">
@@ -339,7 +347,7 @@ export default function DistrictPage() {
                 Recent Polling
               </div>
               <Badge className="bg-green-100 text-green-900 dark:bg-green-900 dark:text-green-100">
-                Trends
+                Polls
               </Badge>
             </CardHeader>
             <CardContent>
@@ -347,19 +355,15 @@ export default function DistrictPage() {
                 <div className="text-sm text-zinc-500 dark:text-zinc-400 py-8 text-center">
                   Loading polling data...
                 </div>
-              ) : !pollingData || !pollingData.trend ? (
-                <div className="text-sm text-zinc-500 dark:text-zinc-400 py-8 text-center">
-                  Polling data unavailable
-                </div>
               ) : (
                 <div>
                   <div className="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-2">
-                    {pollingData.trend}
+                    {pollingData?.trend}
                   </div>
                   <div className="text-sm text-zinc-700 dark:text-zinc-300 mb-3">
-                    {pollingData.description}
+                    {pollingData?.description}
                   </div>
-                  {pollingData.sources && pollingData.sources.length > 0 && (
+                  {pollingData?.sources && pollingData.sources.length > 0 && (
                     <div className="pt-3 border-t border-zinc-200 dark:border-zinc-700">
                       <div className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Sources:</div>
                       <div className="flex flex-wrap gap-2">
@@ -382,6 +386,7 @@ export default function DistrictPage() {
               )}
             </CardContent>
           </Card>
+          )}
         </div>
 
         {/* AI Political Intelligence Section */}
@@ -429,6 +434,7 @@ export default function DistrictPage() {
                   rating={aiIntel.election_outlook.rating}
                   confidence={aiIntel.election_outlook.confidence}
                   keyFactors={aiIntel.election_outlook.key_factors}
+                  sampleSize={aiIntel.sample_size}
                 />
               </div>
 

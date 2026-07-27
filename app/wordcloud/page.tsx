@@ -8,7 +8,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { BarChart3, Download, TrendingUp, MessageSquare, Heart, ExternalLink, ChevronDown, ChevronUp, MousePointer, Settings, FileText } from "lucide-react";
+import { BarChart3, Download, TrendingUp, MessageSquare, Heart, ExternalLink, ChevronDown, ChevronUp, MousePointer, Settings, FileText, CloudOff } from "lucide-react";
 import AppLayout from "../components/AppLayout";
 import WordCloudVisualization from "../components/WordCloudVisualization";
 import WordCloudFiltersComponent from "../components/WordCloudFilters";
@@ -26,6 +26,9 @@ interface TopTweet {
 
 interface WordCloudResponse extends WordCloudData {
   topTweets?: TopTweet[];
+  /** false when the upstream social API could not be reached. */
+  available?: boolean;
+  unavailableReason?: string;
 }
 
 const STATE_NAMES: Record<string, string> = {
@@ -58,6 +61,12 @@ function WordCloudPageContent() {
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState<WordCloudFilters | null>(null);
   const [filtersExpanded, setFiltersExpanded] = useState(false);
+  // Set when the request itself failed or the upstream social API was
+  // unreachable. Rendered inline - never as a browser modal.
+  const [dataUnavailable, setDataUnavailable] = useState(false);
+
+  // A result is only "showable" when it actually contains words.
+  const hasWords = !!wordCloudData && wordCloudData.words.length > 0;
 
   // Check if we should exclude the main keyword from the cloud
   const excludeKeyword = searchParams.get("excludeKeyword") === "true";
@@ -85,6 +94,11 @@ function WordCloudPageContent() {
   const handleGenerateWordCloud = async (newFilters: WordCloudFilters) => {
     setLoading(true);
     setFilters(newFilters);
+    setDataUnavailable(false);
+
+    // Never let a stalled upstream hold the spinner open forever.
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
 
     try {
       // Update URL params
@@ -105,7 +119,8 @@ function WordCloudPageContent() {
 
       // Fetch word cloud data
       const response = await fetch(
-        `/api/wordcloud/generate?${params.toString()}`
+        `/api/wordcloud/generate?${params.toString()}`,
+        { signal: controller.signal }
       );
 
       if (!response.ok) {
@@ -115,10 +130,16 @@ function WordCloudPageContent() {
       const data: WordCloudResponse = await response.json();
       setWordCloudData(data);
       setTopTweets(data.topTweets || []);
+      // The API answered, but the social data source behind it was unreachable.
+      setDataUnavailable(data.available === false);
     } catch (error) {
+      // Inline, non-blocking. A browser modal must never interrupt the app.
       console.error("Error generating word cloud:", error);
-      alert("Failed to generate word cloud. Please try again.");
+      setWordCloudData(null);
+      setTopTweets([]);
+      setDataUnavailable(true);
     } finally {
+      clearTimeout(timeout);
       setLoading(false);
     }
   };
@@ -127,6 +148,7 @@ function WordCloudPageContent() {
     setWordCloudData(null);
     setTopTweets([]);
     setFilters(null);
+    setDataUnavailable(false);
     router.push("/wordcloud", { scroll: false });
   };
 
@@ -245,8 +267,8 @@ Based on ${wordCloudData.metadata.totalTweets.toLocaleString()} tweets analyzed.
 
         </motion.div>
 
-        {/* Stats Bar - Prominent at top */}
-        {wordCloudData && !loading && (
+        {/* Stats Bar - Prominent at top. Only meaningful with real results. */}
+        {hasWords && !loading && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -323,8 +345,9 @@ Based on ${wordCloudData.metadata.totalTweets.toLocaleString()} tweets analyzed.
           </motion.div>
         )}
 
-        {/* Collapsible Filters - Show when no data or expanded */}
-        {(!wordCloudData || filtersExpanded) && (
+        {/* Collapsible Filters - Show whenever there are no results to display
+            (including empty results) so the user can always adjust and retry. */}
+        {(!hasWords || filtersExpanded) && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
@@ -353,7 +376,8 @@ Based on ${wordCloudData.metadata.totalTweets.toLocaleString()} tweets analyzed.
 
             {/* Word Cloud */}
             <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6">
-              {!wordCloudData && !loading && (
+              {/* Nothing requested yet */}
+              {!wordCloudData && !dataUnavailable && !loading && (
                 <div className="flex flex-col items-center justify-center py-16 text-center">
                   <div className="w-16 h-16 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-4">
                     <TrendingUp className="w-8 h-8 text-zinc-400 dark:text-zinc-500" />
@@ -368,8 +392,28 @@ Based on ${wordCloudData.metadata.totalTweets.toLocaleString()} tweets analyzed.
                 </div>
               )}
 
+              {/* Requested, but there is nothing to draw. Inline and calm -
+                  no modal, no red error banner. */}
+              {!loading && !hasWords && (dataUnavailable || !!wordCloudData) && (
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <div className="w-16 h-16 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-4">
+                    <CloudOff className="w-8 h-8 text-zinc-400 dark:text-zinc-500" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
+                    No word cloud data to display
+                  </h3>
+                  <p className="text-zinc-600 dark:text-zinc-400 max-w-md">
+                    {dataUnavailable
+                      ? "The social media data source is not returning results for this query right now. Adjust the filters and try again, or try a different topic."
+                      : `No matching posts were found${
+                          filters?.topic ? ` for “${filters.topic}”` : ""
+                        }. Try a broader topic, a wider time range, or a different location.`}
+                  </p>
+                </div>
+              )}
+
               {/* Interactive hint */}
-              {wordCloudData && !loading && (
+              {hasWords && !loading && (
                 <div className="flex items-center justify-center gap-2 mb-4 py-3 px-4 bg-zinc-100 dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700">
                   <MousePointer className="w-5 h-5 text-zinc-600 dark:text-zinc-400" />
                   <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
@@ -378,11 +422,13 @@ Based on ${wordCloudData.metadata.totalTweets.toLocaleString()} tweets analyzed.
                 </div>
               )}
 
-              <WordCloudVisualization
-                words={wordCloudData?.words || []}
-                onWordClick={handleWordClick}
-                loading={loading}
-              />
+              {(loading || hasWords) && (
+                <WordCloudVisualization
+                  words={wordCloudData?.words || []}
+                  onWordClick={handleWordClick}
+                  loading={loading}
+                />
+              )}
             </div>
 
             {/* Top Tweets Section */}

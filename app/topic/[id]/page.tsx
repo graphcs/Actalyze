@@ -12,6 +12,8 @@ import {
   Scale,
   Newspaper,
   TrendingUp,
+  SearchX,
+  Check,
 } from "lucide-react";
 import AppLayout from "../../components/AppLayout";
 import { Button } from "../../components/ui/Button";
@@ -63,6 +65,21 @@ interface Headline {
   thumbnail?: string;
 }
 
+/**
+ * fetch() that always settles: rejects once `timeoutMs` elapses so a stalled
+ * upstream can never leave the page stuck on a loading state.
+ */
+function fetchWithTimeout(
+  input: string,
+  timeoutMs = 15000
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  return fetch(input, { signal: controller.signal }).finally(() =>
+    clearTimeout(timer)
+  );
+}
+
 function getHeatColor(score: number): string {
   if (score >= 90) {
     return "bg-red-100 text-red-700 border-red-300 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800";
@@ -81,15 +98,18 @@ export default function TopicPage() {
   const [tweets, setTweets] = useState<Tweet[]>([]);
   const [headlines, setHeadlines] = useState<Headline[]>([]);
   const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const topicId = params.id as string;
 
     // Fetch trending topics to find this one
-    fetch("/api/trending")
+    fetchWithTimeout("/api/trending")
       .then((res) => res.json())
       .then((data) => {
-        const foundTopic = data.find((t: Topic) => t.id === topicId);
+        const foundTopic = Array.isArray(data)
+          ? data.find((t: Topic) => t.id === topicId)
+          : undefined;
         if (foundTopic) {
           setTopic(foundTopic);
 
@@ -97,7 +117,7 @@ export default function TopicPage() {
           const topicTitle = foundTopic.title;
 
           // Fetch party perspectives
-          fetch(`/api/topic/perspectives?topic=${encodeURIComponent(topicTitle)}`)
+          fetchWithTimeout(`/api/topic/perspectives?topic=${encodeURIComponent(topicTitle)}`)
             .then((res) => res.json())
             .then((data) => setPerspectives(data))
             .catch((error) => {
@@ -115,7 +135,7 @@ export default function TopicPage() {
             });
 
           // Fetch real tweets from Twitter
-          fetch(`/api/tweets/search?query=${encodeURIComponent(topicTitle)} politics&limit=4`)
+          fetchWithTimeout(`/api/tweets/search?query=${encodeURIComponent(topicTitle)} politics&limit=4`)
             .then((res) => res.json())
             .then((data) => setTweets(data.tweets || []))
             .catch((error) => {
@@ -124,7 +144,7 @@ export default function TopicPage() {
             });
 
           // Fetch headlines
-          fetch(`/api/topic/headlines?topic=${encodeURIComponent(topicTitle)}`)
+          fetchWithTimeout(`/api/topic/headlines?topic=${encodeURIComponent(topicTitle)}`)
             .then((res) => res.json())
             .then((data) => setHeadlines(data.headlines || []))
             .catch((error) => {
@@ -160,10 +180,19 @@ export default function TopicPage() {
         title: topic?.title,
         text: `Check out ${topic?.title} on Actalyze`,
         url: window.location.href,
+      }).catch(() => {
+        // User dismissed the share sheet, or sharing is unavailable - no-op
       });
     } else {
-      navigator.clipboard.writeText(window.location.href);
-      alert("Link copied to clipboard!");
+      navigator.clipboard
+        .writeText(window.location.href)
+        .then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        })
+        .catch((error) => {
+          console.error("Error copying link:", error);
+        });
     }
   };
 
@@ -175,7 +204,8 @@ export default function TopicPage() {
     }
   };
 
-  if (loading || !topic) {
+  // Genuine loading phase - the trending feed has not answered yet.
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-white to-zinc-50 dark:from-zinc-950 dark:to-zinc-900">
         <div className="text-center">
@@ -196,6 +226,57 @@ export default function TopicPage() {
           <p className="text-zinc-600 dark:text-zinc-300">Loading topic...</p>
         </div>
       </div>
+    );
+  }
+
+  // Loading finished and no matching topic - trending IDs rotate, so a stale or
+  // bookmarked link lands here. Show a real dead end instead of spinning.
+  if (!topic) {
+    return (
+      <AppLayout onChatClick={handleChat}>
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-7xl mx-auto px-4 pt-8 pb-16"
+        >
+          <div className="flex items-center gap-3 text-sm text-zinc-500 mb-6">
+            <Button variant="ghost" onClick={handleBack}>
+              <ChevronLeft className="w-4 h-4" />
+              Back
+            </Button>
+            <span>/</span>
+            <span>Topic</span>
+          </div>
+
+          <Card>
+            <CardContent>
+              <div className="flex flex-col items-center justify-center text-center py-16 px-4">
+                <div className="w-16 h-16 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-5">
+                  <SearchX className="w-8 h-8 text-zinc-400 dark:text-zinc-500" />
+                </div>
+                <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 mb-2">
+                  Topic not found
+                </h1>
+                <p className="text-zinc-600 dark:text-zinc-400 max-w-md mb-8">
+                  This topic is no longer in the trending feed. Trending topics
+                  refresh throughout the day, so saved links can point to a
+                  topic that has since rotated out.
+                </p>
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  <Button onClick={handleBack}>
+                    <ChevronLeft className="w-4 h-4" />
+                    Back to Dashboard
+                  </Button>
+                  <Button variant="outline" onClick={handleChat}>
+                    <MessageSquare className="w-4 h-4" />
+                    Open Chat
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </AppLayout>
     );
   }
 
@@ -244,6 +325,15 @@ export default function TopicPage() {
               <ExternalLink className="w-4 h-4" />
               View on X
             </Button>
+            {copied && (
+              <span
+                role="status"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-green-700 dark:text-green-400"
+              >
+                <Check className="w-4 h-4" />
+                Link copied
+              </span>
+            )}
           </div>
         </div>
 
@@ -274,6 +364,7 @@ export default function TopicPage() {
                       retweets={tweet.retweets}
                       replies={tweet.replies}
                       created_at={tweet.created_at}
+                      url={tweet.url}
                     />
                   ))}
                 </div>

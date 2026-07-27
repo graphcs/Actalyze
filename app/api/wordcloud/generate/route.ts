@@ -31,6 +31,48 @@ interface TweetData {
 }
 
 /**
+ * WordCloudData plus a machine-readable availability flag, so the client can
+ * distinguish "the social API could not be reached" from "we searched and this
+ * topic genuinely has no matching posts". Both render a calm empty state.
+ */
+type WordCloudResponse = WordCloudData & {
+  available: boolean;
+  unavailableReason?: string;
+  topTweets?: Array<{
+    id: string;
+    text: string;
+    author: string;
+    username: string;
+    engagement: number;
+    created_at: string;
+  }>;
+};
+
+/**
+ * A complete, well-formed, zero-valued word cloud payload. Every field the UI
+ * reads is present, so the page never sees `undefined`.
+ */
+function emptyWordCloud(
+  filters: WordCloudFilters,
+  available: boolean,
+  unavailableReason?: string
+): WordCloudResponse {
+  return {
+    words: [],
+    topTweets: [],
+    metadata: {
+      topic: filters.topic,
+      filters,
+      totalTweets: 0,
+      processedAt: new Date().toISOString(),
+      uniqueWords: 0,
+    },
+    available,
+    ...(unavailableReason ? { unavailableReason } : {}),
+  };
+}
+
+/**
  * Sleep utility for rate limit handling
  */
 function sleep(ms: number): Promise<void> {
@@ -168,10 +210,11 @@ export async function GET(request: NextRequest) {
     try {
       twitterClient = await getTwitterClient();
     } catch (authError) {
-      console.error('❌ Twitter API credentials not found');
+      // Not a server fault - the social API is simply not reachable on this
+      // plan/config. Answer 200 with an empty payload flagged unavailable.
+      console.warn('⚠️ Social API unavailable (auth):', authError);
       return NextResponse.json(
-        { error: 'Twitter API not configured' },
-        { status: 500 }
+        emptyWordCloud(filters, false, 'upstream_unavailable')
       );
     }
 
@@ -195,6 +238,9 @@ export async function GET(request: NextRequest) {
     const tweetsPerPage = 100; // Twitter API max per request
     const maxPages = Math.ceil(maxTweets / tweetsPerPage);
     const maxRetries = 3;
+    // Tracks whether the social API itself failed (403/429/network), as opposed
+    // to answering successfully with no matching posts.
+    let upstreamFailed = false;
 
     for (let page = 0; page < maxPages; page++) {
       console.log(`📥 Fetching page ${page + 1}/${maxPages}...`);
@@ -264,6 +310,7 @@ export async function GET(request: NextRequest) {
 
       // If we still have an error after retries, stop pagination
       if (lastError) {
+        upstreamFailed = true;
         console.warn('⚠️ Pagination stopped after retries. Continuing with tweets collected so far.');
         break;
       }
@@ -276,16 +323,14 @@ export async function GET(request: NextRequest) {
 
     if (allTweets.length === 0) {
       console.log(`⚠️ No tweets found for: "${filters.topic}"`);
-      return NextResponse.json({
-        words: [],
-        metadata: {
-          topic: filters.topic,
+      // Do not cache an empty result - the upstream may recover.
+      return NextResponse.json(
+        emptyWordCloud(
           filters,
-          totalTweets: 0,
-          processedAt: new Date().toISOString(),
-          uniqueWords: 0,
-        },
-      } as WordCloudData);
+          !upstreamFailed,
+          upstreamFailed ? 'upstream_unavailable' : undefined
+        )
+      );
     }
 
     console.log(`✅ Found ${allTweets.length} tweets total`);
@@ -397,7 +442,8 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const responseData = {
+    const responseData: WordCloudResponse = {
+      available: true,
       words: words,
       topTweets: topTweets,
       metadata: {
@@ -420,13 +466,20 @@ export async function GET(request: NextRequest) {
   } catch (error: unknown) {
     const err = error as { message?: string; code?: string };
     console.error('❌ Error generating word cloud:', err.message || error);
-    
+
+    // Never surface a raw 500 to the UI. Answer 200 with an empty, well-formed
+    // payload flagged `available: false`; the page renders an empty state.
+    const sp = request.nextUrl.searchParams;
+    const fallbackFilters: WordCloudFilters = {
+      topic: sp.get('topic') || '',
+      timeRange: (sp.get('timeRange') as WordCloudFilters['timeRange']) || '7d',
+      location: sp.get('location') || 'national',
+      sentimentType: (sp.get('sentimentType') as WordCloudFilters['sentimentType']) || 'all',
+      minFrequency: parseInt(sp.get('minFrequency') || '2'),
+    };
+
     return NextResponse.json(
-      { 
-        error: 'Failed to generate word cloud',
-        details: err.message 
-      },
-      { status: 500 }
+      emptyWordCloud(fallbackFilters, false, 'upstream_unavailable')
     );
   }
 }

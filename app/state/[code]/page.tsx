@@ -100,25 +100,20 @@ export default function StatePage() {
       fetchWithCache(`/api/state/news?state=${stateCode}`).then(res => res.json()),
       fetchWithCache(`/api/state/polling?state=${stateCode}`).then(res => res.json()),
       fetch(`/api/tweets/search?query=${encodeURIComponent(stateName)} politics&limit=4`).then(res => res.json()),
+      // Isolated so a perspectives failure cannot empty the rest of the page.
+      fetchWithCache(`/api/topic/perspectives?topic=${encodeURIComponent(`${stateName} politics`)}`)
+        .then(res => res.json())
+        .catch(() => null),
     ])
-      .then(([mapData, newsData, polling, tweetsData]) => {
+      .then(([mapData, newsData, polling, tweetsData, perspectivesData]) => {
         setIssues(mapData.issues || []);
         setHeadlines(newsData.headlines || []);
         setPollingData(polling);
         setTweets(tweetsData.tweets || []);
-
-        // Generate perspectives based on news
-        // In a real app, this would be an API call
-        setPerspectives({
-          democrats: {
-            summary: `Democrats in ${stateName} are focusing on healthcare expansion and education funding.`,
-            talkingPoints: ["Expand Medicaid access", "Increase teacher pay", "Protect voting rights"]
-          },
-          republicans: {
-            summary: `Republicans in ${stateName} are emphasizing tax cuts and deregulation to spur growth.`,
-            talkingPoints: ["Reduce state income tax", "Cut business regulations", "Support law enforcement"]
-          }
-        });
+        // Real party analysis for this state, generated from current coverage.
+        if (perspectivesData?.democrats && perspectivesData?.republicans) {
+          setPerspectives(perspectivesData);
+        }
       })
       .catch((error) => {
         console.error("Error fetching state data:", error);
@@ -297,7 +292,9 @@ export default function StatePage() {
             </CardContent>
           </Card>
 
-          {/* Recent Polling */}
+          {/* Recent Polling. Only rendered when there is a real, retrieved poll to
+              show - see the district page for the same reasoning. */}
+          {(loading || pollingData?.trend) && (
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <div className="font-semibold flex items-center gap-2">
@@ -305,7 +302,7 @@ export default function StatePage() {
                 Recent Polling
               </div>
               <Badge className="bg-green-100 text-green-900 dark:bg-green-900 dark:text-green-100">
-                Trends
+                Polls
               </Badge>
             </CardHeader>
             <CardContent>
@@ -313,22 +310,19 @@ export default function StatePage() {
                 <div className="text-sm text-zinc-500 dark:text-zinc-400 py-8 text-center">
                   Loading polling data...
                 </div>
-              ) : !pollingData || !pollingData.trend ? (
-                <div className="text-sm text-zinc-500 dark:text-zinc-400 py-8 text-center">
-                  Polling data unavailable
-                </div>
               ) : (
                 <div>
                   <div className="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-2">
-                    {pollingData.trend}
+                    {pollingData?.trend}
                   </div>
                   <div className="text-sm text-zinc-700 dark:text-zinc-300">
-                    {pollingData.description}
+                    {pollingData?.description}
                   </div>
                 </div>
               )}
             </CardContent>
           </Card>
+          )}
         </div>
 
         {/* Political Context */}
@@ -354,7 +348,7 @@ export default function StatePage() {
                     </div>
                   </div>
                   <div className="text-sm text-blue-800 dark:text-blue-200 mb-3">
-                    {perspectives?.democrats?.summary || "Loading perspective..."}
+                    {perspectives?.democrats?.summary || "Party analysis is unavailable for this state right now."}
                   </div>
                   {perspectives?.democrats?.talkingPoints && perspectives.democrats.talkingPoints.length > 0 && (
                     <div className="space-y-1.5">
@@ -382,7 +376,7 @@ export default function StatePage() {
                     </div>
                   </div>
                   <div className="text-sm text-red-800 dark:text-red-200 mb-3">
-                    {perspectives?.republicans?.summary || "Loading perspective..."}
+                    {perspectives?.republicans?.summary || "Party analysis is unavailable for this state right now."}
                   </div>
                   {perspectives?.republicans?.talkingPoints && perspectives.republicans.talkingPoints.length > 0 && (
                     <div className="space-y-1.5">
@@ -435,6 +429,7 @@ export default function StatePage() {
                       retweets={tweet.retweets}
                       replies={tweet.replies}
                       created_at={tweet.created_at}
+                      url={tweet.url}
                     />
                   ))}
                 </div>
