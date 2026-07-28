@@ -1,13 +1,106 @@
 /*
- * Pakistan-subtree styling.
+ * Pakistan-subtree styling and visual identity.
  *
  * Everything here is scoped under `.pk-root` or `[dir="rtl"]`, so it is structurally
  * incapable of affecting the US app even though both share `globals.css`.
+ *
+ * ── The palette, and why it is this green ──────────────────────────────────────────
+ *
+ * The institutional colour is `#01411C` — the deep green of the national flag, the
+ * shade the Flag Code and every government printer use. It is deliberately NOT a
+ * mid-green. PML-N's colour is `#228B22` and five other parties in this House are
+ * some shade of green, so a mid-green as chrome would read as a party allegiance to
+ * an audience that is politically split and will notice. `#01411C` is dark enough
+ * that nobody reads it as a party shade, it is the shade with the strongest national
+ * association, and it is the only one of them that passes AA as body text on white
+ * (11.84:1 against `#228B22`'s 4.39:1).
+ *
+ * Party colours are therefore confined to data marks — the House composition bar and
+ * the small seat dots — and never appear as chrome: no coloured buttons, badges,
+ * headers, rules or focus rings.
+ *
+ * ── Flag protocol ─────────────────────────────────────────────────────────────────
+ *
+ * The national flag is not reproduced anywhere. No green-and-white rectangle, no flag
+ * texture, no flag in a spinner or a mask. What is used is flag-derived *colour*,
+ * which is always safe, and a self-authored crescent-and-star drawn as a circular
+ * roundel — a seal, not a flag, so there is nothing that can be cropped, stretched or
+ * tiled into a defaced flag. Assets are in `public/pk/` and are drawn from geometry
+ * in this repository; nothing is copied and nothing has unclear licensing.
  */
 
+/* ── Tokens ─────────────────────────────────────────────────────────────────────── */
+
 .pk-root {
-  font-family: var(--font-urdu), "Segoe UI", system-ui, sans-serif;
+  /* Surfaces. A faintly warm paper rather than pure white: institutional print stock
+     rather than a SaaS dashboard. */
+  --pk-paper: #fbfaf7;
+  --pk-surface: #ffffff;
+  --pk-surface-sunk: #f3f2ed;
+  --pk-border: #e2e0d8;
+  --pk-border-strong: #cfccc1;
+
+  /* Three ink levels, and all three pass AA as body text. `--pk-text-faint` is the
+     one that traditionally does not: it is used for provenance notes and the hatch
+     caveat, which are small, and which are precisely the lines a careful reader
+     stops on. It is set to 5.20:1 on paper rather than the 4.31:1 a conventional
+     "muted grey" would give. */
+  --pk-text: #1a1a18;
+  --pk-text-muted: #55554e;
+  --pk-text-faint: #6b6a63;
+
+  /* The deep green band used for the sidebar, the hero and the footer rule. */
+  --pk-band: #01411c;
+  --pk-band-deep: #012a12;
+  --pk-on-band: #ffffff;
+  --pk-on-band-muted: #c7dccd;
+  --pk-on-band-line: rgba(255, 255, 255, 0.18);
+
+  /* Green used as ink on light surfaces. Same value as the band in light mode; it
+     lightens in dark mode so it stays readable. */
+  --pk-accent: #01411c;
+  --pk-accent-hover: #012a12;
+  --pk-accent-soft: #e9efea;
+  --pk-accent-line: rgba(1, 65, 28, 0.18);
+
+  /* A single hairline brass, used only as a 1–2px rule. Parliamentary stationery,
+     not decoration; never a fill and never behind text. */
+  --pk-brass: #a8842c;
+
+  font-family: "Inter", var(--font-urdu), ui-sans-serif, system-ui, sans-serif;
+  background-image: none;
+  background-color: var(--pk-paper);
+  color: var(--pk-text);
 }
+
+@media (prefers-color-scheme: dark) {
+  .pk-root {
+    --pk-paper: #0c0d0c;
+    --pk-surface: #141614;
+    --pk-surface-sunk: #101210;
+    --pk-border: #2a2d29;
+    --pk-border-strong: #3a3e38;
+
+    --pk-text: #f2f2ef;
+    --pk-text-muted: #a9aca6;
+    --pk-text-faint: #8a8d87;
+
+    --pk-band: #072012;
+    --pk-band-deep: #04150b;
+    --pk-on-band: #ffffff;
+    --pk-on-band-muted: #b7cfbe;
+    --pk-on-band-line: rgba(255, 255, 255, 0.12);
+
+    --pk-accent: #8fd4ac;
+    --pk-accent-hover: #a7dcbe;
+    --pk-accent-soft: rgba(143, 212, 172, 0.12);
+    --pk-accent-line: rgba(143, 212, 172, 0.22);
+
+    --pk-brass: #d3b062;
+  }
+}
+
+/* ── Script handling ────────────────────────────────────────────────────────────── */
 
 /* Urdu in Naskh needs more leading than Latin, but nowhere near what Nastaliq wants.
    These values keep the existing cards, badges and table rows intact. */
@@ -46,6 +139,167 @@
    the call site; this is here for the inline SVGs that predate that convention. */
 .pk-root[dir="rtl"] .mirror-in-rtl {
   transform: scaleX(-1);
+}
+
+/* ── Type scale ─────────────────────────────────────────────────────────────────── */
+
+/*
+ * Display line. In English a quiet serif, which is the register parliamentary
+ * printing has always used; in Urdu, Nastaliq — the script Urdu readers actually
+ * want — which is allowed here precisely because this is display type and nothing
+ * around it has a fixed height. Nastaliq is kept out of every other component.
+ */
+.pk-root .pk-display {
+  font-family: "Young Serif", Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  line-height: 1.06;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+/*
+ * Nastaliq sets its words on a descending diagonal, so a single line occupies far
+ * more vertical space than its point size suggests and the top of the second word
+ * climbs above a normal line box. The size is therefore set here rather than by a
+ * utility class — two-class specificity so it wins — and the leading is 2.15 rather
+ * than the 1.85 that is enough for Latin. Anything tighter clips the head of the
+ * line, which is exactly the defect a native reader spots first and an English
+ * reviewer does not see at all.
+ */
+.pk-root[dir="rtl"] .pk-display {
+  font-family: var(--font-urdu-prose), var(--font-urdu), serif;
+  font-size: clamp(1.625rem, 3.6vw, 2.75rem);
+  line-height: 2.15;
+  letter-spacing: normal;
+  padding-block-start: 0.12em;
+}
+
+/*
+ * Eyebrow / section label.
+ *
+ * `letter-spacing` must never reach Arabic script: it forces the shaper to break
+ * cursive joins, so an Urdu word comes apart into disconnected letters. `uppercase`
+ * is meanwhile a no-op in Urdu. Both are therefore applied only under `[dir="ltr"]`,
+ * and the RTL branch buys the same emphasis with size and weight instead.
+ */
+.pk-root .pk-eyebrow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.pk-root[dir="ltr"] .pk-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+.pk-root[dir="rtl"] .pk-eyebrow {
+  font-size: 0.875rem;
+  letter-spacing: normal;
+  line-height: 1.7;
+}
+
+/*
+ * Numerals in statistics. Tabular figures so a column of counts aligns.
+ *
+ * The optical tightening is deliberately confined to the `<bdi>` that `Ltr`/
+ * `LtrNumber` emit, never to the class itself. Tracking applied to Arabic script
+ * forces the shaper to break cursive joins, so an Urdu word beside a figure would
+ * come apart into loose letters — and the class is exactly the sort of thing that
+ * gets added to a wrapper containing both a number and its Urdu unit.
+ */
+.pk-root .pk-figure {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+.pk-root .pk-figure bdi,
+.pk-root bdi.pk-figure {
+  letter-spacing: -0.02em;
+}
+
+/* ── Marks ──────────────────────────────────────────────────────────────────────── */
+
+/*
+ * The crescent-and-star and the girih lattice are drawn as CSS masks rather than
+ * `<img>`, so a single authored asset takes the colour of whatever it sits on —
+ * white on the green band, deep green on paper, the light tint in dark mode — with
+ * no second copy of the artwork to drift out of sync.
+ */
+/* No `display` here on purpose. `.pk-root .pk-mask` outranks Tailwind's single-class
+   `hidden`, so setting display in this rule would quietly defeat every responsive
+   `hidden md:block` at the call site. The components carry `block` as a utility
+   instead, where the cascade can do its job. */
+.pk-root .pk-mask {
+  background-color: currentColor;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+.pk-root .pk-mask-crest {
+  -webkit-mask-image: url("/pk/crescent-star.svg");
+  mask-image: url("/pk/crescent-star.svg");
+}
+.pk-root .pk-mask-seal {
+  -webkit-mask-image: url("/pk/seal.svg");
+  mask-image: url("/pk/seal.svg");
+}
+
+/* Mughal jali lattice, laid behind the hero at a few per cent so it is texture and
+   never pattern. Islamic geometry is a local, safe and genuinely Pakistani source of
+   ornament; the flag is not. */
+.pk-root .pk-girih {
+  background-color: currentColor;
+  -webkit-mask-image: url("/pk/girih.svg");
+  mask-image: url("/pk/girih.svg");
+  -webkit-mask-repeat: repeat;
+  mask-repeat: repeat;
+  -webkit-mask-size: 132px 132px;
+  mask-size: 132px 132px;
+}
+
+/* ── Chrome ─────────────────────────────────────────────────────────────────────── */
+
+.pk-root .pk-band {
+  background-color: var(--pk-band);
+  color: var(--pk-on-band);
+}
+
+/*
+ * The navigation rail is off-canvas below `lg` and slides in.
+ *
+ * Written as a logical transform rather than Tailwind's `-translate-x-full`, which is
+ * physical: in Urdu the rail is on the right, so the same class would slide it the
+ * wrong way and leave it parked over the content.
+ */
+.pk-root .pk-rail {
+  transform: translateX(-100%);
+}
+.pk-root[dir="rtl"] .pk-rail {
+  transform: translateX(100%);
+}
+.pk-root .pk-rail.pk-rail-open,
+.pk-root[dir="rtl"] .pk-rail.pk-rail-open {
+  transform: translateX(0);
+}
+@media (min-width: 1024px) {
+  .pk-root .pk-rail,
+  .pk-root[dir="rtl"] .pk-rail {
+    transform: translateX(0);
+  }
+}
+
+/* Active navigation row: an ivory bar on the leading edge of the rail. `border-inline-start`
+   so it sits against the content in both directions. */
+.pk-root .pk-nav-active {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-inline-start: 3px solid var(--pk-on-band);
+  color: var(--pk-on-band);
+}
+
+/* Focus ring, once, in the institutional green — never in a party colour. */
+.pk-root .pk-focus:focus-visible {
+  outline: 2px solid var(--pk-accent);
+  outline-offset: 2px;
 }
 
 @media print {

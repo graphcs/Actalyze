@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-labelledby="seal-t">
+  <title id="seal-t">Crescent and star roundel</title>
+  <g fill="none" stroke="#01411C">
+    <circle cx="100" cy="100" r="97" stroke-width="2"/>
+    <circle cx="100" cy="100" r="89" stroke-width="0.8"/>
+  </g>
+  <path fill="#01411C" fill-rule="evenodd" d="M46 100a54 54 0 1 0 108 0a54 54 0 1 0 -108 0ZM58.751 91.674a49.575 49.575 0 1 0 99.149 0a49.575 49.575 0 1 0 -99.149 0Z"/>
+  <path fill="#01411C" d="M128.256 71.744 L122.201 83.629 L131.632 93.062 L118.458 90.976 L112.401 102.86 L110.314 89.686 L97.14 87.599 L109.024 81.542 L106.938 68.368 L116.371 77.799 Z"/>
+</svg>
