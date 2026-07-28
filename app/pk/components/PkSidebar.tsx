@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import {
   Home, MapPin, Map, TrendingUp, FileText, Inbox, MessageSquare, Library,
-  HelpCircle, ChevronsLeft, Languages, X,
+  HelpCircle, Users, ChevronsLeft, Languages, X,
 } from "lucide-react";
 import { useLocale } from "../i18n/LocaleProvider";
 import type { MessageKey } from "../i18n/dictionary";
@@ -43,6 +43,7 @@ const NAV: Array<{ href: string; labelKey: MessageKey; Icon: typeof Home }> = [
   // in the current session or the two before it, so "has this been asked" is the
   // step immediately before filing, not a separate research errand.
   { href: "/pk/questions", labelKey: "questions.nav", Icon: HelpCircle },
+  { href: "/pk/committees", labelKey: "committees.title", Icon: Users },
   { href: "/pk/casework", labelKey: "nav.casework", Icon: Inbox },
   { href: "/pk/chat", labelKey: "nav.chat", Icon: MessageSquare },
   { href: "/pk/documents", labelKey: "nav.documents", Icon: Library },

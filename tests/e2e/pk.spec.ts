@@ -30,6 +30,7 @@ const PK_PAGES = [
   "/pk/documents",
   "/pk/province/pb",
   "/pk/province/ict",
+  "/pk/committees",
   "/pk/constituency/na-123",
   "/pk/constituency/na-247",
 ];
