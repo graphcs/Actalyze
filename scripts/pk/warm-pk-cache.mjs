@@ -86,11 +86,34 @@ await pool(
 
 console.log('\nPages:');
 await pool([
-  ...['', '/trending', '/instruments', '/casework', '/chat', '/documents'].map(
-    (p) => () => hit(`/pk${p}`, 60_000)
-  ),
+  ...['', '/trending', '/instruments', '/casework', '/chat', '/documents', '/questions',
+      '/committees', '/repugnancy'].map((p) => () => hit(`/pk${p}`, 60_000)),
   ...PROVINCES.map((p) => () => hit(`/pk/province/${p}`, 60_000)),
   ...SEATS.map((s) => () => hit(`/pk/constituency/${s}`, 60_000)),
+], 4);
+
+/**
+ * The provincial routes.
+ *
+ * These cost no SerpAPI quota at all — the geometry is a static asset and the rosters
+ * are bundled — so they are warmed generously. What is being warmed is the Next.js
+ * route cache and the CDN copy of the district GeoJSON, which is the one thing on the
+ * board that crosses the network at demo time.
+ */
+console.log('\nProvincial (no SerpAPI cost):');
+const DEMO_DISTRICTS = [
+  ['pb', 'lahore'], ['pb', 'rawalpindi'], ['pb', 'multan'], ['pb', 'faisalabad'],
+  ['sd', 'central-karachi'], ['sd', 'hyderabad'],
+  ['kp', 'peshawar'], ['ba', 'quetta'],
+];
+await pool([
+  ...['punjab', 'sindh', 'kp', 'balochistan', 'ict', 'manifest'].map(
+    (g) => () => hit(`/pk/geo/${g}.json`, 30_000)
+  ),
+  ...PROVINCES.filter((p) => p !== 'ict').map((p) => () => hit(`/pk/province/${p}/assembly`, 60_000)),
+  ...DEMO_DISTRICTS.map(([p, d]) => () => hit(`/pk/province/${p}/district/${d}`, 60_000)),
+  // A deep-linked district is the shape a demo actually opens.
+  () => hit('/pk/province/pb?district=Lahore', 60_000),
 ], 4);
 
 console.log('\nDone.');

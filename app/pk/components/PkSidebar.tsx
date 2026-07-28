@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import {
   Home, MapPin, Map, TrendingUp, FileText, Inbox, MessageSquare, Library,
-  HelpCircle, Users, Scale, ChevronsLeft, Languages, X,
+  HelpCircle, Users, Scale, Landmark, ChevronsLeft, Languages, X,
 } from "lucide-react";
 import { useLocale } from "../i18n/LocaleProvider";
 import type { MessageKey } from "../i18n/dictionary";
@@ -38,6 +38,11 @@ const NAV: Array<{ href: string; labelKey: MessageKey; Icon: typeof Home }> = [
   { href: "/pk/trending", labelKey: "nav.trending", Icon: TrendingUp },
   { href: "/pk/constituency/na-123", labelKey: "nav.constituencies", Icon: MapPin },
   { href: "/pk/province/pb", labelKey: "nav.provinces", Icon: Map },
+  // Punjab's chamber is the default target for the same reason its board is: it is the
+  // largest House and the province the build is deepest in. `isActive` matches the
+  // whole /pk/province subtree, so this row and the one above share a highlight — which
+  // is correct, they are two views of the same place.
+  { href: "/pk/province/pb/assembly", labelKey: "assembly.nav", Icon: Landmark },
   { href: "/pk/instruments", labelKey: "nav.instruments", Icon: FileText },
   // Sits next to drafting deliberately: Rule 78(j) bars a question already answered
   // in the current session or the two before it, so "has this been asked" is the
