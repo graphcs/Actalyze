@@ -1,7 +1,8 @@
 import { test, expect } from "@playwright/test";
 import { collectErrors } from "./helpers";
 import {
-  renderAll, referenceNumber, missingFields, SMS_LIMIT, SOCIAL_LIMIT,
+  renderAll, referenceNumber, missingFields, normaliseEffectiveFrom,
+  SMS_LIMIT, SOCIAL_LIMIT,
   type NoticeIntake,
 } from "../../lib/pk/notice";
 
@@ -146,6 +147,33 @@ test.describe("Notification pipeline", () => {
     const withoutRef = n.split("\n").filter((l) => !l.includes("No.SO(")).join(" ");
     const latinWords = withoutRef.match(/\b[A-Za-z]{4,}\b/g) ?? [];
     expect(latinWords, `stray English in the Urdu notification: ${latinWords.join(", ")}`).toEqual([]);
+  });
+
+  test("a commencement date is never left in a guessed past year", () => {
+    /**
+     * Caught on the live service: asked to date "14 August" with no year, the model
+     * answered 2023, and a notification issued in 2026 rendered "shall come into force
+     * with effect from 14th August, 2023". Nonsense, and visible from the back of a room.
+     */
+    const rolled = normaliseEffectiveFrom("2023-08-14", "2026-07-28");
+    expect(rolled.value).toBe("2026-08-14");
+    expect(rolled.adjusted).toBe(true);
+
+    // Already in the future: untouched.
+    expect(normaliseEffectiveFrom("2026-08-14", "2026-07-28")).toEqual({
+      value: "2026-08-14",
+      adjusted: false,
+    });
+
+    // A day-and-month that has passed this year rolls to next year, not backwards.
+    expect(normaliseEffectiveFrom("2023-01-05", "2026-07-28").value).toBe("2027-01-05");
+
+    // Genuinely retrospective commencement, within a month, is left alone — that is a
+    // real thing a department does, and forbidding it would be wrong.
+    expect(normaliseEffectiveFrom("2026-07-10", "2026-07-28").adjusted).toBe(false);
+
+    // "At once" stays null.
+    expect(normaliseEffectiveFrom(null, "2026-07-28").value).toBeNull();
   });
 
   test("the page turns one instruction into six artefacts", async ({ page }) => {

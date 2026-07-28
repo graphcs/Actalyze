@@ -606,6 +606,47 @@ export function urduGaps(i: NoticeIntake): string[] {
   return gaps;
 }
 
+/**
+ * Pull a bare day-and-month back onto the right year.
+ *
+ * Asked to date "14 August" with no year, a model will happily answer `2023-08-14`. On a
+ * notification issued in 2026 that renders as "shall come into force with effect from
+ * 14th August, 2023" — a commencement three years before the instrument exists. It is
+ * nonsense, it is instantly visible to anyone in the room, and it was caught on the live
+ * service rather than in review, which is where these things always surface.
+ *
+ * A commencement date genuinely can be retrospective, so this does not forbid the past —
+ * it rolls a date more than a month behind the notification forward to the next
+ * occurrence of the same day and month, and reports that it did so. An officer who
+ * really means a retrospective date types it and it stands, because their value always
+ * wins over the model's.
+ */
+export function normaliseEffectiveFrom(
+  effectiveFrom: string | null,
+  dated: string
+): { value: string | null; adjusted: boolean } {
+  if (!effectiveFrom) return { value: null, adjusted: false };
+  const eff = new Date(effectiveFrom);
+  const ref = new Date(dated);
+  if (Number.isNaN(eff.getTime()) || Number.isNaN(ref.getTime())) {
+    return { value: effectiveFrom, adjusted: false };
+  }
+
+  const GRACE_DAYS = 31;
+  const behindBy = (ref.getTime() - eff.getTime()) / 86_400_000;
+  if (behindBy <= GRACE_DAYS) return { value: effectiveFrom, adjusted: false };
+
+  for (let year = ref.getUTCFullYear(); year <= ref.getUTCFullYear() + 1; year++) {
+    const candidate = new Date(
+      Date.UTC(year, eff.getUTCMonth(), eff.getUTCDate())
+    );
+    if (candidate.getTime() >= ref.getTime()) {
+      return { value: candidate.toISOString().slice(0, 10), adjusted: true };
+    }
+  }
+  return { value: effectiveFrom, adjusted: false };
+}
+
 /** Whether the Urdu is the officer's throughout, so the UI can say which. */
 export function urduIsReviewed(i: NoticeIntake): boolean {
   return urduGaps(i).length === 0;

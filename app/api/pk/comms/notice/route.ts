@@ -36,6 +36,7 @@ import {
   missingFields,
   urduIsReviewed,
   urduGaps,
+  normaliseEffectiveFrom,
   COMMON_DISTRIBUTION,
   type NoticeIntake,
 } from '@/lib/pk/notice';
@@ -75,7 +76,10 @@ Return JSON only, with these keys:
                  A bare noun phrase, no leading capital unless it is a proper noun, and
                  no full stop — it is dropped into the middle of a sentence.
   effectiveFrom  ISO date (YYYY-MM-DD) if a commencement date is stated or clearly
-                 implied, otherwise null for "at once".
+                 implied, otherwise null for "at once". **If the instruction gives a day
+                 and month but no year, use the year that makes the date fall on or after
+                 the notification date.** A commencement earlier than the notification
+                 itself is almost always a guessed year.
   statutoryPower The provision the power comes from, e.g. "Section 23F of the ... Act,
                  1997". **Return null unless the instruction actually names it.** Never
                  guess a section number, an Act, or a year. A notification citing a power
@@ -88,6 +92,12 @@ Return JSON only, with these keys:
                  Up to six offices that plainly need a copy given the subject matter,
                  drawn from this list only:
 ${COMMON_DISTRIBUTION.map((d) => `                   - ${d}`).join('\n')}
+
+NEVER STATE A YEAR THE INSTRUCTION DID NOT GIVE. If it says "14 August", write
+"14 August" — not "14 August 2024". You do not know which year is meant, and a
+notification carrying a year nobody chose is worse than one carrying no year at all.
+This applies to subject, effect and their Urdu equivalents. The commencement date is the
+only field where you may resolve a year, and only forward, per effectiveFrom above.
 
 Urdu must be real Urdu prose, not transliteration, and must not leave English noun
 phrases embedded in it. Use Urdu-Indic digits in the Urdu fields.`;
@@ -160,12 +170,20 @@ export async function POST(request: NextRequest) {
      * model to invent them would produce a plausible-looking file number that collides
      * with a real one.
      */
+    const dated = o.dated ?? today();
+    const requestedEffective =
+      o.effectiveFrom !== undefined ? o.effectiveFrom : (extracted.effectiveFrom ?? null);
+    // The officer's own value is never adjusted; only the model's is.
+    const effective =
+      o.effectiveFrom !== undefined
+        ? { value: o.effectiveFrom, adjusted: false }
+        : normaliseEffectiveFrom(requestedEffective, dated);
+
     const intake: NoticeIntake = {
       subject: o.subject ?? extracted.subject ?? instruction.slice(0, 90),
       effect: o.effect ?? extracted.effect ?? instruction,
       appliesTo: o.appliesTo ?? extracted.appliesTo ?? '',
-      effectiveFrom:
-        o.effectiveFrom !== undefined ? o.effectiveFrom : (extracted.effectiveFrom ?? null),
+      effectiveFrom: effective.value,
       statutoryPower: o.statutoryPower ?? extracted.statutoryPower ?? undefined,
       supersedes: o.supersedes ?? extracted.supersedes ?? undefined,
 
@@ -175,7 +193,7 @@ export async function POST(request: NextRequest) {
       serial: o.serial ?? '',
       year: o.year ?? new Date().getUTCFullYear(),
       station: o.station ?? 'Lahore',
-      dated: o.dated ?? today(),
+      dated,
       signatoryName: o.signatoryName ?? '',
       signatoryDesignation: o.signatoryDesignation ?? 'Section Officer',
       distribution:
@@ -203,6 +221,8 @@ export async function POST(request: NextRequest) {
       statutoryPowerFromModel: Boolean(!o.statutoryPower && extracted.statutoryPower),
       urduReviewed: urduIsReviewed(intake),
       urduGaps: urduGaps(intake),
+      /** True where a model-supplied commencement date was rolled onto a sane year. */
+      effectiveFromAdjusted: effective.adjusted,
       reference: referenceNumber(intake),
       // Rendered on every response so the officer sees the document change as they
       // correct the form, rather than after a separate "generate" step.
