@@ -499,6 +499,77 @@ export const en = {
   'committees.viewOnNa': 'This committee on na.gov.pk',
   'committees.loading': 'Building the pack…',
   'committees.packFailed': 'The rules, coverage and questions could not be built. Composition below is local data and is unaffected.',
+  // ── repugnancy research ─────────────────────────────────────────────────────────
+  // Appended as a block at the end so this merges cleanly alongside other agents'
+  // additions. Note the register: every label describes RETRIEVAL, never a finding.
+  // There is deliberately no key anywhere below that could render as a verdict —
+  // no "compliant", no "at risk", no "issue found". See lib/pk/repugnancy.ts.
+  'nav.repugnancy': 'Repugnancy Research',
+  'repugnancy.title': 'Repugnancy Research',
+  'repugnancy.subtitle':
+    'What the Council of Islamic Ideology and the Federal Shariat Court have already said about a subject, with the source.',
+  'repugnancy.inputLabel': 'Draft provision or subject',
+  'repugnancy.inputPlaceholder':
+    'Paste a clause, or name a subject — e.g. interest on agricultural loans, inheritance shares for orphaned grandchildren, the minimum age of marriage',
+  'repugnancy.search': 'Search the record',
+  'repugnancy.searching': 'Searching…',
+  'repugnancy.examples': 'Try a subject',
+  'repugnancy.example1': 'Riba and interest-based banking',
+  'repugnancy.example2': 'Inheritance shares of an orphaned grandchild',
+  'repugnancy.example3': 'Evidence and the competence of witnesses',
+  'repugnancy.example4': 'Zakat deduction from bank accounts',
+  'repugnancy.emptyTitle': 'Ask what has already been said',
+  'repugnancy.emptyBody':
+    'Enter a draft provision or a subject in English or Urdu. The answer comes back in the language of the question.',
+
+  // 1 — the constitutional position
+  'repugnancy.constitutionTitle': 'The constitutional position',
+  'repugnancy.constitutionSub':
+    'The Articles that govern review, quoted from the Constitution as it sits in the document library.',
+  'repugnancy.councilArticles': 'The Council of Islamic Ideology — Part IX',
+  'repugnancy.courtArticles': 'The Federal Shariat Court — Chapter 3A of Part VII',
+  'repugnancy.grounded': 'found in the library',
+  'repugnancy.ungrounded': 'not confirmed against the library',
+  'repugnancy.groundedSummary':
+    '{n} of {total} Articles were confirmed against the Constitution in the library.',
+  'repugnancy.urduTranslationNote':
+    'The Urdu below is a working translation. Under Article 251 the Constitution’s own Urdu text is authoritative, and it is not what is reproduced here.',
+  'repugnancy.showArticleText': 'Show the text',
+  'repugnancy.hideArticleText': 'Hide the text',
+
+  // 2 — CII
+  'repugnancy.councilTitle': 'Council of Islamic Ideology — recommendations located',
+  'repugnancy.councilSub':
+    'Passages retrieved from the Council’s published reports. Each is quoted as it stands, with the report it came from.',
+  'repugnancy.councilNone': 'No Council of Islamic Ideology recommendation was located on this subject.',
+  'repugnancy.councilNoneBody':
+    'That means nothing in the Council reports held in the library matched this subject. It does not mean the Council has not addressed it — the library holds only part of what the Council has published.',
+  'repugnancy.councilCorpus': 'Council documents searched',
+
+  // 3 — FSC
+  'repugnancy.courtTitle': 'Federal Shariat Court — judgments located',
+  'repugnancy.courtSub':
+    'Decisions of the Court under Article 203D, quoted as they stand.',
+  'repugnancy.courtNone': 'No Federal Shariat Court judgment was located on this subject.',
+
+  // 4 — procedure
+  'repugnancy.procedureTitle': 'Making a reference under Article 229',
+  'repugnancy.procedureSub':
+    'How the advisory route is actually opened, and what it does and does not achieve.',
+
+  // 5 — the boundary
+  'repugnancy.boundaryTitle': 'What this tool is not',
+
+  // provenance and diagnostics
+  'repugnancy.quotedFrom': 'Quoted from',
+  'repugnancy.whatItRecords': 'What this passage records',
+  'repugnancy.noteWithheld':
+    'A summary of this passage was generated and discarded because it read as a ruling. The passage is shown unaltered.',
+  'repugnancy.relevance': 'Match',
+  'repugnancy.openSource': 'Open the original',
+  'repugnancy.chunksRetrieved': 'passages retrieved',
+  'repugnancy.failed': 'The search could not be completed. Please try again.',
+  'repugnancy.rateLimited': 'Too many searches in a short time. Please wait a moment.',
 } as const;
 
 export type MessageKey = keyof typeof en;
@@ -958,6 +1029,70 @@ export const ur: Record<MessageKey, string> = {
   'committees.viewOnNa': 'یہ کمیٹی na.gov.pk پر',
   'committees.loading': 'پیکٹ تیار کیا جا رہا ہے…',
   'committees.packFailed': 'قواعد، خبریں اور سوالات تیار نہیں ہو سکے۔ نیچے دی گئی ترکیب مقامی معلومات سے ہے اور اس پر کوئی اثر نہیں پڑا۔',
+  // ── repugnancy research ─────────────────────────────────────────────────────────
+  // @review — "تصادم" is used throughout for "repugnancy" because it is the word the
+  // Constitution's own Urdu text uses at Article 227 ("متصادم"). Confirm against the
+  // Council's own Urdu publications before the demo; the Council writes in this
+  // register daily and its usage should win over anything reconstructed here.
+  'nav.repugnancy': 'تصادمِ قانون کی تحقیق',
+  'repugnancy.title': 'تصادمِ قانون کی تحقیق',
+  'repugnancy.subtitle':
+    'کسی موضوع پر اسلامی نظریاتی کونسل اور وفاقی شرعی عدالت پہلے کیا کہہ چکی ہیں — حوالے کے ساتھ۔',
+  'repugnancy.inputLabel': 'مجوزہ شق یا موضوع',
+  'repugnancy.inputPlaceholder':
+    'کوئی شق چسپاں کریں، یا موضوع لکھیں — مثلاً زرعی قرضوں پر سود، یتیم پوتے پوتیوں کا حصۂ وراثت، نکاح کی کم از کم عمر',
+  'repugnancy.search': 'ریکارڈ میں تلاش کریں',
+  'repugnancy.searching': 'تلاش جاری ہے…',
+  'repugnancy.examples': 'کوئی موضوع آزمائیں',
+  'repugnancy.example1': 'سود اور سودی بینکاری',
+  'repugnancy.example2': 'یتیم پوتے پوتیوں کا حصۂ وراثت',
+  'repugnancy.example3': 'شہادت اور گواہوں کی اہلیت',
+  'repugnancy.example4': 'بینک کھاتوں سے زکوٰۃ کی کٹوتی',
+  'repugnancy.emptyTitle': 'پوچھیے کہ پہلے کیا کہا جا چکا ہے',
+  'repugnancy.emptyBody':
+    'کوئی مجوزہ شق یا موضوع اردو یا انگریزی میں درج کریں۔ جواب اُسی زبان میں آئے گا جس زبان میں سوال ہو گا۔',
+
+  'repugnancy.constitutionTitle': 'آئینی حیثیت',
+  'repugnancy.constitutionSub':
+    'وہ آرٹیکل جو اس جائزے کو منضبط کرتے ہیں، دستاویزی لائبریری میں موجود آئین سے نقل کردہ۔',
+  'repugnancy.councilArticles': 'اسلامی نظریاتی کونسل — حصہ نہم',
+  'repugnancy.courtArticles': 'وفاقی شرعی عدالت — حصہ ہفتم کا باب ۳الف',
+  'repugnancy.grounded': 'لائبریری میں موجود',
+  'repugnancy.ungrounded': 'لائبریری سے تصدیق نہیں ہوئی',
+  'repugnancy.groundedSummary':
+    '{total} میں سے {n} آرٹیکل لائبریری میں موجود آئین سے تصدیق شدہ ہیں۔',
+  'repugnancy.urduTranslationNote':
+    'ذیل کا اردو متن محض ترجمہ ہے۔ آرٹیکل ۲۵۱ کے تحت آئین کا اپنا اردو متن مستند ہے، اور وہ یہاں درج نہیں۔',
+  'repugnancy.showArticleText': 'متن دکھائیں',
+  'repugnancy.hideArticleText': 'متن چھپائیں',
+
+  'repugnancy.councilTitle': 'اسلامی نظریاتی کونسل — دستیاب سفارشات',
+  'repugnancy.councilSub':
+    'کونسل کی شائع شدہ رپورٹوں سے حاصل کردہ عبارات۔ ہر ایک بعینہٖ نقل کی گئی ہے، اُس رپورٹ کے حوالے کے ساتھ جس سے لی گئی۔',
+  'repugnancy.councilNone': 'اس موضوع پر اسلامی نظریاتی کونسل کی کوئی سفارش نہیں ملی۔',
+  'repugnancy.councilNoneBody':
+    'اس کا مطلب یہ ہے کہ لائبریری میں موجود کونسل کی رپورٹوں میں سے کوئی اس موضوع سے مطابقت نہیں رکھتی۔ اس کا مطلب یہ نہیں کہ کونسل نے اس پر کبھی بات نہیں کی — لائبریری میں کونسل کی شائع کردہ دستاویزات کا صرف ایک حصہ موجود ہے۔',
+  'repugnancy.councilCorpus': 'کونسل کی جن دستاویزات میں تلاش کیا گیا',
+
+  'repugnancy.courtTitle': 'وفاقی شرعی عدالت — دستیاب فیصلے',
+  'repugnancy.courtSub': 'آرٹیکل ۲۰۳ڈی کے تحت عدالت کے فیصلے، بعینہٖ نقل کردہ۔',
+  'repugnancy.courtNone': 'اس موضوع پر وفاقی شرعی عدالت کا کوئی فیصلہ نہیں ملا۔',
+
+  'repugnancy.procedureTitle': 'آرٹیکل ۲۲۹ کے تحت حوالہ بھیجنے کا طریقہ',
+  'repugnancy.procedureSub':
+    'مشورے کا راستہ عملاً کیسے کھولا جاتا ہے، اور اس سے کیا حاصل ہوتا ہے اور کیا نہیں۔',
+
+  'repugnancy.boundaryTitle': 'یہ ٹول کیا نہیں ہے',
+
+  'repugnancy.quotedFrom': 'ماخوذ از',
+  'repugnancy.whatItRecords': 'یہ عبارت کیا درج کرتی ہے',
+  'repugnancy.noteWithheld':
+    'اس عبارت کا خلاصہ تیار ہوا تھا مگر حذف کر دیا گیا کیونکہ وہ فیصلے کی صورت اختیار کر رہا تھا۔ عبارت بغیر کسی تبدیلی کے دکھائی گئی ہے۔',
+  'repugnancy.relevance': 'مطابقت',
+  'repugnancy.openSource': 'اصل دستاویز کھولیں',
+  'repugnancy.chunksRetrieved': 'عبارات حاصل ہوئیں',
+  'repugnancy.failed': 'تلاش مکمل نہ ہو سکی۔ دوبارہ کوشش کریں۔',
+  'repugnancy.rateLimited': 'مختصر وقت میں بہت زیادہ تلاش۔ براہِ کرم کچھ دیر انتظار کریں۔',
 };
 
 export const DICTIONARIES = { en, ur } as const;

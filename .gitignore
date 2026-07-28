@@ -53,3 +53,7 @@ next-env.d.ts
 
 # claude code scratch (agent worktrees)
 .claude/worktrees/
+
+# downloaded source PDFs for scripts/pk/ingest-documents.mjs — re-fetchable, and the
+# Council of Islamic Ideology's annual reports alone run to 120MB
+.pk-doc-cache/
