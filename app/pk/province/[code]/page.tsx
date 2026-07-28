@@ -4,6 +4,8 @@ import { use, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { AlertTriangle, ExternalLink, Newspaper } from "lucide-react";
 import { PkAppLayout } from "../../components/PkAppLayout";
+import { PkProvinceBoard } from "../../components/PkProvinceBoard";
+import type { ProvinceCode } from "@/lib/pk/provinces";
 import { Ltr, LtrNumber } from "../../components/Ltr";
 import { useLocale } from "../../i18n/LocaleProvider";
 import {
@@ -182,6 +184,18 @@ export default function PkProvincePage({
             {t("province.ictNote")}
           </div>
         )}
+
+        {/*
+          The provincial board leads the page.
+
+          Everything below it is the National Assembly view of this province — the NA
+          seats it returns, and provincial news — which is still the right context for a
+          federal reader. But a Chief Minister arrives asking about districts and their
+          own House, so those come first.
+        */}
+        <div className="mb-12">
+          <PkProvinceBoard provinceCode={provinceCode as unknown as ProvinceCode} />
+        </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
           {[

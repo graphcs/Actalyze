@@ -158,12 +158,48 @@ for (const prov of PROVINCES) {
       // Everything the map needs and nothing it does not: the raw file carries four
       // name variants per level plus validity dates, which is most of its weight.
       '-filter-fields', 'adm2_name,adm2_pcode,area_sqkm,center_lat,center_lon',
-      '-o', tmp, 'format=geojson', 'precision=0.0001',
+      /**
+       * `rfc7946` is not cosmetic — without it the map renders as a solid block.
+       *
+       * COD-AB descends from shapefiles, whose exterior rings wind clockwise. d3-geo
+       * treats polygons as spherical and follows the right-hand rule, so a clockwise
+       * ring means "the whole sphere except this shape". Every district then draws as
+       * the projection's clip rectangle with itself punched out as a hole — 36 of them
+       * stacked, which is indistinguishable from a filled rectangle.
+       *
+       * RFC 7946 mandates counter-clockwise exteriors, so this flag rewinds them.
+       */
+      '-o', tmp, 'format=geojson', 'rfc7946', 'precision=0.0001',
     ],
     { stdio: ['ignore', 'pipe', 'pipe'] }
   );
 
   const fc = JSON.parse(readFileSync(tmp, 'utf8'));
+
+  /**
+   * Rewind every ring to d3-geo's winding, which is the OPPOSITE of the GeoJSON spec's.
+   *
+   * RFC 7946 mandates counter-clockwise exterior rings; d3-geo treats polygons as
+   * spherical and wants them clockwise. Hand it a spec-compliant ring and it concludes
+   * the polygon covers the entire sphere *except* that shape, and renders each district
+   * as the projection's clip rectangle with itself punched out as a hole. Thirty-six of
+   * those stacked is a solid green rectangle, which is exactly what the first build
+   * produced — and note that it fails silently: the path data is well-formed, the fills
+   * are right, and nothing errors.
+   *
+   * mapshaper's `rfc7946` above normalises the source (COD-AB descends from shapefiles,
+   * whose winding is not guaranteed) so that this reversal starts from a known state
+   * rather than flipping whatever happened to arrive.
+   *
+   * The output therefore deliberately violates RFC 7946 and `manifest.json` says so.
+   */
+  const reverseRings = (geom) => {
+    const rev = (poly) => poly.map((ring) => [...ring].reverse());
+    if (geom.type === 'Polygon') return { ...geom, coordinates: rev(geom.coordinates) };
+    if (geom.type === 'MultiPolygon') return { ...geom, coordinates: geom.coordinates.map(rev) };
+    return geom;
+  };
+  for (const f of fc.features) f.geometry = reverseRings(f.geometry);
 
   /**
    * Attach population here rather than at request time so the page has no join to do.
@@ -217,6 +253,8 @@ writeFileSync(
       source: 'OCHA COD-AB, Pakistan Subnational Administrative Boundaries',
       sourceUrl: 'https://data.humdata.org/dataset/cod-ab-pak',
       licence: 'CC BY-IGO',
+      windingOrder:
+        'Rings are wound CLOCKWISE for d3-geo, which is the opposite of RFC 7946. Reverse them before using these files with any spec-compliant consumer.',
       boundaryVintage: '2026-01-26',
       populationSource: 'HDX COD-PS, Pakistan Subnational Population Statistics',
       populationVintage: 'Census 2017',

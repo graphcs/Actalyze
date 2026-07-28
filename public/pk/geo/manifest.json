@@ -2,6 +2,7 @@
   "source": "OCHA COD-AB, Pakistan Subnational Administrative Boundaries",
   "sourceUrl": "https://data.humdata.org/dataset/cod-ab-pak",
   "licence": "CC BY-IGO",
+  "windingOrder": "Rings are wound CLOCKWISE for d3-geo, which is the opposite of RFC 7946. Reverse them before using these files with any spec-compliant consumer.",
   "boundaryVintage": "2026-01-26",
   "populationSource": "HDX COD-PS, Pakistan Subnational Population Statistics",
   "populationVintage": "Census 2017",
