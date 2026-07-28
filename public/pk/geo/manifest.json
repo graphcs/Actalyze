@@ -1,0 +1,41 @@
+{
+  "source": "OCHA COD-AB, Pakistan Subnational Administrative Boundaries",
+  "sourceUrl": "https://data.humdata.org/dataset/cod-ab-pak",
+  "licence": "CC BY-IGO",
+  "boundaryVintage": "2026-01-26",
+  "populationSource": "HDX COD-PS, Pakistan Subnational Population Statistics",
+  "populationVintage": "Census 2017",
+  "builtBy": "scripts/pk/build-province-geo.mjs",
+  "provinces": [
+    {
+      "province": "Punjab",
+      "districts": 36,
+      "matched": 36,
+      "kb": 99
+    },
+    {
+      "province": "Sindh",
+      "districts": 29,
+      "matched": 23,
+      "kb": 49
+    },
+    {
+      "province": "Khyber Pakhtunkhwa",
+      "districts": 35,
+      "matched": 30,
+      "kb": 61
+    },
+    {
+      "province": "Balochistan",
+      "districts": 35,
+      "matched": 32,
+      "kb": 40
+    },
+    {
+      "province": "Islamabad",
+      "districts": 1,
+      "matched": 1,
+      "kb": 3
+    }
+  ]
+}

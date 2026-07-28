@@ -57,3 +57,6 @@ next-env.d.ts
 # downloaded source PDFs for scripts/pk/ingest-documents.mjs — re-fetchable, and the
 # Council of Islamic Ideology's annual reports alone run to 120MB
 .pk-doc-cache/
+# COD-AB source download for scripts/pk/build-province-geo.mjs — re-fetchable,
+# and the district layer alone is 11MB
+.pk-geo-cache/

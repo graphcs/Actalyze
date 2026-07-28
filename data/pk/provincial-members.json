@@ -1,0 +1,5374 @@
+{
+  "scrapedAt": "2026-07-28T15:32:01.741Z",
+  "provenance": [
+    {
+      "assembly": "PP",
+      "province": "PB",
+      "generalSeats": 297,
+      "filled": 297,
+      "source": "Wikipedia — List of members of the 18th Provincial Assembly of the Punjab",
+      "sourceUrl": "https://en.wikipedia.org/wiki/List_of_members_of_the_18th_Provincial_Assembly_of_the_Punjab",
+      "officialUrl": null,
+      "officialSeatCount": null,
+      "officialNote": "pap.gov.pk did not respond when this roster was built",
+      "crossCheck": "pap.gov.pk did not respond when this roster was built"
+    },
+    {
+      "assembly": "PS",
+      "province": "SD",
+      "generalSeats": 130,
+      "filled": 130,
+      "source": "Wikipedia — List of members of the 16th Provincial Assembly of Sindh",
+      "sourceUrl": "https://en.wikipedia.org/wiki/List_of_members_of_the_16th_Provincial_Assembly_of_Sindh",
+      "officialUrl": "https://pas.gov.pk/assembly-members-directory",
+      "officialSeatCount": 78,
+      "officialNote": "pas.gov.pk paginates its directory, so its first page lists fewer seats than the House has",
+      "crossCheck": "pas.gov.pk paginates its directory, so its first page lists fewer seats than the House has (it lists 78)"
+    },
+    {
+      "assembly": "PK",
+      "province": "KP",
+      "generalSeats": 115,
+      "filled": 115,
+      "source": "Wikipedia — List of members of the 12th Provincial Assembly of Khyber Pakhtunkhwa",
+      "sourceUrl": "https://en.wikipedia.org/wiki/List_of_members_of_the_12th_Provincial_Assembly_of_Khyber_Pakhtunkhwa",
+      "officialUrl": "https://www.pakp.gov.pk/members/",
+      "officialSeatCount": 120,
+      "officialNote": "pakp.gov.pk's list includes the reserved-seat members, so it exceeds the general-seat count",
+      "crossCheck": "pakp.gov.pk's list includes the reserved-seat members, so it exceeds the general-seat count (it lists 120)"
+    },
+    {
+      "assembly": "PB",
+      "province": "BA",
+      "generalSeats": 51,
+      "filled": 51,
+      "source": "Wikipedia — List of members of the 12th Provincial Assembly of Balochistan",
+      "sourceUrl": "https://en.wikipedia.org/wiki/List_of_members_of_the_12th_Provincial_Assembly_of_Balochistan",
+      "officialUrl": "https://pabalochistan.gov.pk/list-members",
+      "officialSeatCount": 50,
+      "officialNote": null,
+      "crossCheck": "differs from the Assembly's own site, which lists 50 — unexplained"
+    }
+  ],
+  "members": [
+    {
+      "name": "Qazi Ahmed Akbar",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-1",
+      "seatType": "general"
+    },
+    {
+      "name": "Sardar Mohammad Ali Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-2",
+      "seatType": "general"
+    },
+    {
+      "name": "Ejaz Hussain Bukhari",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-3",
+      "seatType": "general"
+    },
+    {
+      "name": "Chaudhry Sher Ali Khan",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-4",
+      "seatType": "general"
+    },
+    {
+      "name": "Malik Aitbar Khan",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-5",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Bilal Yamin",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-6",
+      "seatType": "general"
+    },
+    {
+      "name": "Raja Sagheer Ahmed",
+      "party": "UNKNOWN",
+      "partyRaw": null,
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-7",
+      "seatType": "general"
+    },
+    {
+      "name": "Chaudhary Javed Kausar",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-8",
+      "seatType": "general"
+    },
+    {
+      "name": "Raja Shoukat Aziz Bhatti",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-9",
+      "seatType": "general"
+    },
+    {
+      "name": "Naeem Ejaz",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-10",
+      "seatType": "general"
+    },
+    {
+      "name": "Imran Ilyas Chaudhry",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-11",
+      "seatType": "general"
+    },
+    {
+      "name": "Mohsin Ayub Khan",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-12",
+      "seatType": "general"
+    },
+    {
+      "name": "Malik Fahad Masood",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-13",
+      "seatType": "general"
+    },
+    {
+      "name": "Malik Iftikhar Ahmed",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-14",
+      "seatType": "general"
+    },
+    {
+      "name": "Malik Mansoor Afsar",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-15",
+      "seatType": "general"
+    },
+    {
+      "name": "Zia Ullah Shah",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-16",
+      "seatType": "general"
+    },
+    {
+      "name": "Raja Abdul Hanif",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-17",
+      "seatType": "general"
+    },
+    {
+      "name": "Asad Abbas",
+      "party": "MWM",
+      "partyRaw": "Majlis Wahdat-e-Muslimeen",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-18",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Tanveer Aslam",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-19",
+      "seatType": "general"
+    },
+    {
+      "name": "Sultan Haider Ali Khan",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-20",
+      "seatType": "general"
+    },
+    {
+      "name": "Tanveer Aslam Malik",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-21",
+      "seatType": "general"
+    },
+    {
+      "name": "Malik Falak Sher Awan",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-22",
+      "seatType": "general"
+    },
+    {
+      "name": "Shehryar Malik",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-23",
+      "seatType": "general"
+    },
+    {
+      "name": "Syed Riffat Mehmood",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-24",
+      "seatType": "general"
+    },
+    {
+      "name": "Yasir Mehmood Qureshi",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-25",
+      "seatType": "general"
+    },
+    {
+      "name": "Mushtaq Ahmed",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-26",
+      "seatType": "general"
+    },
+    {
+      "name": "Raja Muhammad Aslam Khan",
+      "party": "PMLQ",
+      "partyRaw": "Pakistan Muslim League (Q)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-27",
+      "seatType": "general"
+    },
+    {
+      "name": "Shahid Raza",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-28",
+      "seatType": "general"
+    },
+    {
+      "name": "Khalid Javed Asghar Ghural",
+      "party": "PMLQ",
+      "partyRaw": "Pakistan Muslim League (Q)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-29",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Abdullah Warraich",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-30",
+      "seatType": "general"
+    },
+    {
+      "name": "Shafay Hussain",
+      "party": "PMLQ",
+      "partyRaw": "Pakistan Muslim League (Q)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-31",
+      "seatType": "general"
+    },
+    {
+      "name": "Chaudhry Musa Elahi",
+      "party": "PMLQ",
+      "partyRaw": "Pakistan Muslim League (Q)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-32",
+      "seatType": "general"
+    },
+    {
+      "name": "Syed Madad Ali Shah",
+      "party": "PMLQ",
+      "partyRaw": "Pakistan Muslim League (Q)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-33",
+      "seatType": "general"
+    },
+    {
+      "name": "Chaudhry ljaz Ahmad",
+      "party": "PMLQ",
+      "partyRaw": "Pakistan Muslim League (Q)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-34",
+      "seatType": "general"
+    },
+    {
+      "name": "Waqar Ahmad Cheema",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-35",
+      "seatType": "general"
+    },
+    {
+      "name": "Adnan Afzal Chattha",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-36",
+      "seatType": "general"
+    },
+    {
+      "name": "Shahid Hussain Bhatti",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-37",
+      "seatType": "general"
+    },
+    {
+      "name": "Zameer Ul Hassan Bhatti",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-38",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Aoun Jahangir",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-39",
+      "seatType": "general"
+    },
+    {
+      "name": "Zarnab Sher",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-40",
+      "seatType": "general"
+    },
+    {
+      "name": "Basma Riaz Choudhry",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-41",
+      "seatType": "general"
+    },
+    {
+      "name": "Khalid Mahmood Ranjha",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-42",
+      "seatType": "general"
+    },
+    {
+      "name": "Chaudhry Akhtar Abbas Bosal",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-43",
+      "seatType": "general"
+    },
+    {
+      "name": "Rana Muhammad Arif Iqbal Harnah",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-44",
+      "seatType": "general"
+    },
+    {
+      "name": "Tariq Subhani",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-45",
+      "seatType": "general"
+    },
+    {
+      "name": "Faisal Akram",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-46",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Mansha Ullah Butt",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-47",
+      "seatType": "general"
+    },
+    {
+      "name": "Khurram Khan Virk",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-48",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Fiaz",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-49",
+      "seatType": "general"
+    },
+    {
+      "name": "Chaudhry Naveed Ashraf",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-50",
+      "seatType": "general"
+    },
+    {
+      "name": "Zeeshan Rafiq",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-51",
+      "seatType": "general"
+    },
+    {
+      "name": "Hina Arshad Warraich",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-52",
+      "seatType": "general"
+    },
+    {
+      "name": "Rana Abdul Sattar",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-53",
+      "seatType": "general"
+    },
+    {
+      "name": "Ahmad Iqbal Chaudhary",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-54",
+      "seatType": "general"
+    },
+    {
+      "name": "Chaudhry Mehmood Ahmad Sungran",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-55",
+      "seatType": "general"
+    },
+    {
+      "name": "Rana Mannan Khan",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-56",
+      "seatType": "general"
+    },
+    {
+      "name": "Khawaja Muhammad Waseem",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-57",
+      "seatType": "general"
+    },
+    {
+      "name": "Bilal Akbar Khan",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-58",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Nasir Cheema",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-59",
+      "seatType": "general"
+    },
+    {
+      "name": "Kaleem Ullah Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-60",
+      "seatType": "general"
+    },
+    {
+      "name": "Imran Khalid Butt",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-61",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Nawaz Chohan",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-62",
+      "seatType": "general"
+    },
+    {
+      "name": "Chaudhry Muhammad Tariq",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-63",
+      "seatType": "general"
+    },
+    {
+      "name": "Umar Farooq Dar",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-64",
+      "seatType": "general"
+    },
+    {
+      "name": "Hassan Ali",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-65",
+      "seatType": "general"
+    },
+    {
+      "name": "Qaiser Iqbal Sindhu",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-66",
+      "seatType": "general"
+    },
+    {
+      "name": "Chaudhry Akhtar Ali Khan",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-67",
+      "seatType": "general"
+    },
+    {
+      "name": "Mian Arqam Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-68",
+      "seatType": "general"
+    },
+    {
+      "name": "Irfan Bashir",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-69",
+      "seatType": "general"
+    },
+    {
+      "name": "Tashakul Abbas Warraich",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-70",
+      "seatType": "general"
+    },
+    {
+      "name": "Sohaib Ahmad Malik",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-71",
+      "seatType": "general"
+    },
+    {
+      "name": "Mansoor Azam",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-72",
+      "seatType": "general"
+    },
+    {
+      "name": "Mian Sultan Ali Ranjha",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-73",
+      "seatType": "general"
+    },
+    {
+      "name": "Ikram Ul Haq",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-74",
+      "seatType": "general"
+    },
+    {
+      "name": "Ali Asif",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-75",
+      "seatType": "general"
+    },
+    {
+      "name": "Zulfiqar Ali Bhatti",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-76",
+      "seatType": "general"
+    },
+    {
+      "name": "Safdar Hussain Sahi",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-77",
+      "seatType": "general"
+    },
+    {
+      "name": "Rana Munawar Hussain",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-78",
+      "seatType": "general"
+    },
+    {
+      "name": "Taimur Ali Khan",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-79",
+      "seatType": "general"
+    },
+    {
+      "name": "Sardar Muhammad Asim Sher Maken",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-80",
+      "seatType": "general"
+    },
+    {
+      "name": "Hasan Aslam Awan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-81",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Asif Malik",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-82",
+      "seatType": "general"
+    },
+    {
+      "name": "Zafar Khan Baloch",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-83",
+      "seatType": "general"
+    },
+    {
+      "name": "Fateh Khaliq",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-84",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Iqbal",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-85",
+      "seatType": "general"
+    },
+    {
+      "name": "Amin Ullah Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-86",
+      "seatType": "general"
+    },
+    {
+      "name": "Ali Haider Noor Khan Niazi",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-87",
+      "seatType": "general"
+    },
+    {
+      "name": "Mumtaz Ahmad",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-88",
+      "seatType": "general"
+    },
+    {
+      "name": "Ameer Muhammad Khan",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-89",
+      "seatType": "general"
+    },
+    {
+      "name": "Ahmad Nawaz Khan",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-90",
+      "seatType": "general"
+    },
+    {
+      "name": "Ghazanfar Abbas Cheena",
+      "party": "IPP",
+      "partyRaw": "Istehkam-e-Pakistan Party",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-91",
+      "seatType": "general"
+    },
+    {
+      "name": "Amir Inayat Khan Shahani",
+      "party": "IPP",
+      "partyRaw": "Istehkam-e-Pakistan Party",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-92",
+      "seatType": "general"
+    },
+    {
+      "name": "Saeed Akbar Khan Nawani",
+      "party": "IPP",
+      "partyRaw": "Istehkam-e-Pakistan Party",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-93",
+      "seatType": "general"
+    },
+    {
+      "name": "Taimoor Ali Lali",
+      "party": "IPP",
+      "partyRaw": "Istehkam-e-Pakistan Party",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-94",
+      "seatType": "general"
+    },
+    {
+      "name": "Ilyas Chinioti",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-95",
+      "seatType": "general"
+    },
+    {
+      "name": "Zulfiqar Ali Shah",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-96",
+      "seatType": "general"
+    },
+    {
+      "name": "Saqib Khan Chadhar",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-97",
+      "seatType": "general"
+    },
+    {
+      "name": "Azad Ali Tabassum",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-98",
+      "seatType": "general"
+    },
+    {
+      "name": "Ahmad Mujtaba Chaudhry",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-99",
+      "seatType": "general"
+    },
+    {
+      "name": "Sardar Khan Bahadur Dogar",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-100",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Akram Chaudhary",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-101",
+      "seatType": "general"
+    },
+    {
+      "name": "Jafar Ali Hocha",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-102",
+      "seatType": "general"
+    },
+    {
+      "name": "Noor Shahid Noor",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-103",
+      "seatType": "general"
+    },
+    {
+      "name": "Arif Mahmood Gill",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-104",
+      "seatType": "general"
+    },
+    {
+      "name": "Rao Kashif Raheem Khan",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-105",
+      "seatType": "general"
+    },
+    {
+      "name": "Ahsan Raza",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-106",
+      "seatType": "general"
+    },
+    {
+      "name": "Javed Niaz Manj",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-107",
+      "seatType": "general"
+    },
+    {
+      "name": "Rana Aftab Ahmad Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-108",
+      "seatType": "general"
+    },
+    {
+      "name": "Chaudhry Zafar Iqbal Nagra",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-109",
+      "seatType": "general"
+    },
+    {
+      "name": "Hassan Zaka",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-110",
+      "seatType": "general"
+    },
+    {
+      "name": "Basharat Ali",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-111",
+      "seatType": "general"
+    },
+    {
+      "name": "Asad Mehmood",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-112",
+      "seatType": "general"
+    },
+    {
+      "name": "Nadeem Sadiq Dogar",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-113",
+      "seatType": "general"
+    },
+    {
+      "name": "Chaudhry Latif Nazar Gujjar",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-114",
+      "seatType": "general"
+    },
+    {
+      "name": "Mian Tahir Pervaz",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-115",
+      "seatType": "general"
+    },
+    {
+      "name": "Rana Ahmad Sheheryar Khan",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-116",
+      "seatType": "general"
+    },
+    {
+      "name": "Abdul Razzaq Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-117",
+      "seatType": "general"
+    },
+    {
+      "name": "Khayal Ahmad Kastro",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-118",
+      "seatType": "general"
+    },
+    {
+      "name": "Asad Zaman",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-119",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Ahsan Ihsan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-120",
+      "seatType": "general"
+    },
+    {
+      "name": "Chaudhry Amjad Ali Javed",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-121",
+      "seatType": "general"
+    },
+    {
+      "name": "Sardar Muhammad Ayub Khan",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-122",
+      "seatType": "general"
+    },
+    {
+      "name": "Ashifa Riaz Fatyana",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-123",
+      "seatType": "general"
+    },
+    {
+      "name": "Syeda Sonia Ali Raza Shah",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-124",
+      "seatType": "general"
+    },
+    {
+      "name": "Ghulam Ahmed Khan Gadi",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-125",
+      "seatType": "general"
+    },
+    {
+      "name": "Mehar Muhammad Nawaz",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-126",
+      "seatType": "general"
+    },
+    {
+      "name": "Sheikh Muhammad Akram",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-127",
+      "seatType": "general"
+    },
+    {
+      "name": "Ghazanfar Abbas Shah",
+      "party": "IPP",
+      "partyRaw": "Istehkam-e-Pakistan Party",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-128",
+      "seatType": "general"
+    },
+    {
+      "name": "Mian Muhammad Asif Kathia",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-129",
+      "seatType": "general"
+    },
+    {
+      "name": "Rana Shahbaz Ahmad",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-130",
+      "seatType": "general"
+    },
+    {
+      "name": "Mian Muhammad Azam",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-131",
+      "seatType": "general"
+    },
+    {
+      "name": "Sultan Bajwa",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-132",
+      "seatType": "general"
+    },
+    {
+      "name": "Rana Muhammad Arshad",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-133",
+      "seatType": "general"
+    },
+    {
+      "name": "Mahr Muhammad Kashif",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-134",
+      "seatType": "general"
+    },
+    {
+      "name": "Agha Ali Haidar",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-135",
+      "seatType": "general"
+    },
+    {
+      "name": "Hassaan Riaz",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-136",
+      "seatType": "general"
+    },
+    {
+      "name": "Khurram Ijaz Chattha",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-137",
+      "seatType": "general"
+    },
+    {
+      "name": "Pir Muhammad Ashraf Rasool",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-138",
+      "seatType": "general"
+    },
+    {
+      "name": "Rana Tahir Iqbal",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-139",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Awais",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-140",
+      "seatType": "general"
+    },
+    {
+      "name": "Tayyab Rashid",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-141",
+      "seatType": "general"
+    },
+    {
+      "name": "Waqas Mahmood Maan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-142",
+      "seatType": "general"
+    },
+    {
+      "name": "Khan Sher Akbar Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-143",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Sarfraz Dogar",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-144",
+      "seatType": "general"
+    },
+    {
+      "name": "Sami Ullah Khan",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-145",
+      "seatType": "general"
+    },
+    {
+      "name": "Ghazali Saleem Butt",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-146",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Riaz Malik",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-147",
+      "seatType": "general"
+    },
+    {
+      "name": "Mian Mujtaba Shuja-ur-Rehman",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-148",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Shoaib Siddiqui",
+      "party": "IPP",
+      "partyRaw": "Istehkam-e-Pakistan Party",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-149",
+      "seatType": "general"
+    },
+    {
+      "name": "Khawaja Imran Nazir",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-150",
+      "seatType": "general"
+    },
+    {
+      "name": "Sohail Shaukat Butt",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-151",
+      "seatType": "general"
+    },
+    {
+      "name": "Malik Muhammad Waheed",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-152",
+      "seatType": "general"
+    },
+    {
+      "name": "Khawaja Salman Rafique",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-153",
+      "seatType": "general"
+    },
+    {
+      "name": "Malik Ghulam Habib Awan",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-154",
+      "seatType": "general"
+    },
+    {
+      "name": "Imtiaz Mehmood",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-155",
+      "seatType": "general"
+    },
+    {
+      "name": "Ali Imtiaz",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-156",
+      "seatType": "general"
+    },
+    {
+      "name": "Hafiz Farhat Abbas",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-157",
+      "seatType": "general"
+    },
+    {
+      "name": "Chaudhary Muhammad Nawaz Ladhar",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-158",
+      "seatType": "general"
+    },
+    {
+      "name": "Maryam Nawaz",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-159",
+      "seatType": "general"
+    },
+    {
+      "name": "Malik Asad Ali Khokhar",
+      "party": "PMLZ",
+      "partyRaw": "Pakistan Muslim League (Z)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-160",
+      "seatType": "general"
+    },
+    {
+      "name": "Farrukh Javaid",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-161",
+      "seatType": "general"
+    },
+    {
+      "name": "Shahbaz Ali Khokhar",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-162",
+      "seatType": "general"
+    },
+    {
+      "name": "Imran Javed",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-163",
+      "seatType": "general"
+    },
+    {
+      "name": "Rana Rashid Minhas",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-164",
+      "seatType": "general"
+    },
+    {
+      "name": "Ahmer Rasheed Bhatti",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-165",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Anas Mehmood",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-166",
+      "seatType": "general"
+    },
+    {
+      "name": "Irfan Shafi Khokhar",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-167",
+      "seatType": "general"
+    },
+    {
+      "name": "Faisal Ayub Khokhar",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-168",
+      "seatType": "general"
+    },
+    {
+      "name": "Malik Khalid Pervaz Khokhar",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-169",
+      "seatType": "general"
+    },
+    {
+      "name": "Mian Muhammad Haroon Akbar",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-170",
+      "seatType": "general"
+    },
+    {
+      "name": "Mian Aslam Iqbal",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-171",
+      "seatType": "general"
+    },
+    {
+      "name": "Misbah Wajid",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-172",
+      "seatType": "general"
+    },
+    {
+      "name": "Mian Marghoob Ahmad",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-173",
+      "seatType": "general"
+    },
+    {
+      "name": "Bilal Yasin",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-174",
+      "seatType": "general"
+    },
+    {
+      "name": "Rashid Tufail",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-175",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Ilyas Khan",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-176",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Naeem Safdar Ansari",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-177",
+      "seatType": "general"
+    },
+    {
+      "name": "Malik Ahmad Saeed Khan",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-178",
+      "seatType": "general"
+    },
+    {
+      "name": "Malik Ahmad Khan",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-179",
+      "seatType": "general"
+    },
+    {
+      "name": "Ahsan Raza Khan",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-180",
+      "seatType": "general"
+    },
+    {
+      "name": "Mian Humble Sana Kareemi",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-181",
+      "seatType": "general"
+    },
+    {
+      "name": "Mehmood Anwar",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-182",
+      "seatType": "general"
+    },
+    {
+      "name": "Rana Sikandar Hayat",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-183",
+      "seatType": "general"
+    },
+    {
+      "name": "Rana Muhammad Iqbal Khan",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-184",
+      "seatType": "general"
+    },
+    {
+      "name": "Javaid Alla-ud-Din Sajid",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-185",
+      "seatType": "general"
+    },
+    {
+      "name": "Ashiq Husain Khan",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-186",
+      "seatType": "general"
+    },
+    {
+      "name": "Chaudry Iftikhar Hussain Chachar",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-187",
+      "seatType": "general"
+    },
+    {
+      "name": "Noor Ul Amin Wattoo",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-188",
+      "seatType": "general"
+    },
+    {
+      "name": "Malik Ali Abbas Khokhar",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-189",
+      "seatType": "general"
+    },
+    {
+      "name": "Mian Yawar Zaman",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-190",
+      "seatType": "general"
+    },
+    {
+      "name": "Mian Muhammad Munir",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-191",
+      "seatType": "general"
+    },
+    {
+      "name": "Ghulam Raza",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-192",
+      "seatType": "general"
+    },
+    {
+      "name": "Farooq Ahmad Khan Maneka",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-193",
+      "seatType": "general"
+    },
+    {
+      "name": "Chaudhry Javed Ahmad",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-194",
+      "seatType": "general"
+    },
+    {
+      "name": "Imran Akram",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-195",
+      "seatType": "general"
+    },
+    {
+      "name": "Farrukh Javed",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-196",
+      "seatType": "general"
+    },
+    {
+      "name": "Sardar Mansab Ali Dogar",
+      "party": "IPP",
+      "partyRaw": "Istehkam-e-Pakistan Party",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-197",
+      "seatType": "general"
+    },
+    {
+      "name": "Walayat Shah Khagga",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-198",
+      "seatType": "general"
+    },
+    {
+      "name": "Qasim Nadeem",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-199",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Arshad Malik",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-200",
+      "seatType": "general"
+    },
+    {
+      "name": "Naveed Aslam Khan Lodhi",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-201",
+      "seatType": "general"
+    },
+    {
+      "name": "Rana Riaz Ahmad",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-202",
+      "seatType": "general"
+    },
+    {
+      "name": "Chaudhry Muhammad Hanif",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-203",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Ghulam Sarwar",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-204",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Akbar Hayat Hiraj",
+      "party": "UNKNOWN",
+      "partyRaw": null,
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-205",
+      "seatType": "general"
+    },
+    {
+      "name": "Chaudhary Usama Fazal",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-206",
+      "seatType": "general"
+    },
+    {
+      "name": "Amir Hayat Hiraj",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-207",
+      "seatType": "general"
+    },
+    {
+      "name": "Rana Babar Hussain Abid",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-208",
+      "seatType": "general"
+    },
+    {
+      "name": "Chaudhry Zia Ur Rehman",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-209",
+      "seatType": "general"
+    },
+    {
+      "name": "Khalid Javed",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-210",
+      "seatType": "general"
+    },
+    {
+      "name": "Rana Muhammad Saleem",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-211",
+      "seatType": "general"
+    },
+    {
+      "name": "Asghar Hayat",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-212",
+      "seatType": "general"
+    },
+    {
+      "name": "Ali Haider Gillani",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-213",
+      "seatType": "general"
+    },
+    {
+      "name": "Nawabzada Waseem Khan Badozai",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-214",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Moeen Ud Din Riaz",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-215",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Adnan Dogar",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-216",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Nadeem Qureshi",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-217",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Salman Naeem",
+      "party": "PMLZ",
+      "partyRaw": "Pakistan Muslim League (Z)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-218",
+      "seatType": "general"
+    },
+    {
+      "name": "Malik Wasif Mazhar Raan",
+      "party": "IPP",
+      "partyRaw": "Istehkam-e-Pakistan Party",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-219",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Iqbal",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-220",
+      "seatType": "general"
+    },
+    {
+      "name": "Mian Kamran Muhammad Abdullah",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-221",
+      "seatType": "general"
+    },
+    {
+      "name": "Ayaz Ahmed",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-222",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Nazik Kareem",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-223",
+      "seatType": "general"
+    },
+    {
+      "name": "Malik Lal Muhammad",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-224",
+      "seatType": "general"
+    },
+    {
+      "name": "Shazia Hayyat",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-225",
+      "seatType": "general"
+    },
+    {
+      "name": "Razi Ullah Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-226",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Zubair Khan Baloch",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-227",
+      "seatType": "general"
+    },
+    {
+      "name": "Izzat Javaid Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-228",
+      "seatType": "general"
+    },
+    {
+      "name": "Chaudhry Muhammad Yousaf Kaselya",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-229",
+      "seatType": "general"
+    },
+    {
+      "name": "Salman Shahid",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-230",
+      "seatType": "general"
+    },
+    {
+      "name": "Khalid Zubair Nisar",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-231",
+      "seatType": "general"
+    },
+    {
+      "name": "Malik Nosher Khan Anjam Lungerial",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-232",
+      "seatType": "general"
+    },
+    {
+      "name": "Mian Muhammad Saqib Khurshid",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-233",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Naeem Akhtar Khan Bhabha",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-234",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Jahanzaib Khan Khichi",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-235",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Ali Raza Khan Khakwani",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-236",
+      "seatType": "general"
+    },
+    {
+      "name": "Mian Fida Hussain Wattoo",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-237",
+      "seatType": "general"
+    },
+    {
+      "name": "Inam Bari",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-238",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Atif Aurangzeb",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-239",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Sohail Khan Zahid",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-240",
+      "seatType": "general"
+    },
+    {
+      "name": "Chaudhry Ghulam Murtaza",
+      "party": "PMLZ",
+      "partyRaw": "Pakistan Muslim League (Z)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-241",
+      "seatType": "general"
+    },
+    {
+      "name": "Kashif Naveed",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-242",
+      "seatType": "general"
+    },
+    {
+      "name": "Chaudhry Zahid Akram",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-243",
+      "seatType": "general"
+    },
+    {
+      "name": "Suryia Sultana",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-244",
+      "seatType": "general"
+    },
+    {
+      "name": "Kazim Ali Pirzada",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-245",
+      "seatType": "general"
+    },
+    {
+      "name": "Farzana Khalil",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-246",
+      "seatType": "general"
+    },
+    {
+      "name": "Chaudhry Khalid Mehmood Jajja",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-247",
+      "seatType": "general"
+    },
+    {
+      "name": "Hassan Askari Sheikh",
+      "party": "PMLQ",
+      "partyRaw": "Pakistan Muslim League (Q)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-248",
+      "seatType": "general"
+    },
+    {
+      "name": "Sahibzada Gazain Abbasi",
+      "party": "IPP",
+      "partyRaw": "Istehkam-e-Pakistan Party",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-249",
+      "seatType": "general"
+    },
+    {
+      "name": "Syed Amir Ali Shah",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-250",
+      "seatType": "general"
+    },
+    {
+      "name": "Malik Khalid Mehmood Babar",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-251",
+      "seatType": "general"
+    },
+    {
+      "name": "Mian Muhammad Shoaib Awaisi",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-252",
+      "seatType": "general"
+    },
+    {
+      "name": "Zaheer Iqbal Channar",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-253",
+      "seatType": "general"
+    },
+    {
+      "name": "Rana Muhammad Tariq Khan",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-254",
+      "seatType": "general"
+    },
+    {
+      "name": "Ghazanfar Ali Khan",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-255",
+      "seatType": "general"
+    },
+    {
+      "name": "Qazi Ahmad Saeed",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-256",
+      "seatType": "general"
+    },
+    {
+      "name": "Chaudhry Mahmood Ahmed",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-257",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Ejaz Shafi",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-258",
+      "seatType": "general"
+    },
+    {
+      "name": "Faisal Jamil",
+      "party": "IPP",
+      "partyRaw": "Istehkam-e-Pakistan Party",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-259",
+      "seatType": "general"
+    },
+    {
+      "name": "Saima Kanwal",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-260",
+      "seatType": "general"
+    },
+    {
+      "name": "Jam Aman Ullah",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-261",
+      "seatType": "general"
+    },
+    {
+      "name": "Chaudhry Asif Majeed",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-262",
+      "seatType": "general"
+    },
+    {
+      "name": "Chaudhary Naeem Shafiq",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-263",
+      "seatType": "general"
+    },
+    {
+      "name": "Sardar Habib Ur Rehman Khan",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-264",
+      "seatType": "general"
+    },
+    {
+      "name": "Sajjad Ahmad",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-265",
+      "seatType": "general"
+    },
+    {
+      "name": "Mumtaz Ali Khan Chang",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-266",
+      "seatType": "general"
+    },
+    {
+      "name": "Rais Nabeel Ahmad",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-267",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Ajmal Khan Chandia",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-268",
+      "seatType": "general"
+    },
+    {
+      "name": "Mian Alamdar Abbas Qureshi",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-269",
+      "seatType": "general"
+    },
+    {
+      "name": "Zahid Ismail Bhutta",
+      "party": "IPP",
+      "partyRaw": "Istehkam-e-Pakistan Party",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-270",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Aoon Hamid",
+      "party": "IPP",
+      "partyRaw": "Istehkam-e-Pakistan Party",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-271",
+      "seatType": "general"
+    },
+    {
+      "name": "Rana Abdul Manan Sajid",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-272",
+      "seatType": "general"
+    },
+    {
+      "name": "Daud Khan Jatoi",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-273",
+      "seatType": "general"
+    },
+    {
+      "name": "Syed Muhammad Sibtain Raza",
+      "party": "IPP",
+      "partyRaw": "Istehkam-e-Pakistan Party",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-274",
+      "seatType": "general"
+    },
+    {
+      "name": "Nawab Khan Gopang",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-275",
+      "seatType": "general"
+    },
+    {
+      "name": "Rana Aurangzaib",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-276",
+      "seatType": "general"
+    },
+    {
+      "name": "Nadia Khar",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-277",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Ahsan Ali",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-278",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Athar Maqbool",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-279",
+      "seatType": "general"
+    },
+    {
+      "name": "Sardar Shahab-ud-Din Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-280",
+      "seatType": "general"
+    },
+    {
+      "name": "Shoaib Ameer",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-281",
+      "seatType": "general"
+    },
+    {
+      "name": "Usama Asghar Ali Gujjar",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-282",
+      "seatType": "general"
+    },
+    {
+      "name": "Ghulam Asghar Khan",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-283",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Tahir",
+      "party": "IPP",
+      "partyRaw": "Istehkam-e-Pakistan Party",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-284",
+      "seatType": "general"
+    },
+    {
+      "name": "Khawaja Salah Ud Din Akbar",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-285",
+      "seatType": "general"
+    },
+    {
+      "name": "Salah Ud Din Khan",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-286",
+      "seatType": "general"
+    },
+    {
+      "name": "Usama Leghari",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-287",
+      "seatType": "general"
+    },
+    {
+      "name": "Hanif Khan Pitafi",
+      "party": "UNKNOWN",
+      "partyRaw": null,
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-288",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Taufeeq Butt",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-289",
+      "seatType": "general"
+    },
+    {
+      "name": "Sardar Ali Ahmed Khan Leghari",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-290",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Ahmad Khan Leghari",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-291",
+      "seatType": "general"
+    },
+    {
+      "name": "Sardar Sher Afgan Gorchani",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-292",
+      "seatType": "general"
+    },
+    {
+      "name": "Sardar Sher Ali Gorchani",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-293",
+      "seatType": "general"
+    },
+    {
+      "name": "Sardar Pervaz Iqbal Gorchani",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-294",
+      "seatType": "general"
+    },
+    {
+      "name": "Abdul Aziz Khan Dreshak",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-295",
+      "seatType": "general"
+    },
+    {
+      "name": "Awais Dareshak",
+      "party": "IPP",
+      "partyRaw": "Istehkam-e-Pakistan Party",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-296",
+      "seatType": "general"
+    },
+    {
+      "name": "Khizer Hussain Mazari",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "PB",
+      "assembly": "PP",
+      "constituency": "PP-297",
+      "seatType": "general"
+    },
+    {
+      "name": "Sher Muhammad Khan Mugheri",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-1",
+      "seatType": "general"
+    },
+    {
+      "name": "Sohrab Khan Sarki",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-2",
+      "seatType": "general"
+    },
+    {
+      "name": "Mumtaz Hussain Khan",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-3",
+      "seatType": "general"
+    },
+    {
+      "name": "Abdul Rauf Khoso",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-4",
+      "seatType": "general"
+    },
+    {
+      "name": "Ghulam Abid Khan",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-5",
+      "seatType": "general"
+    },
+    {
+      "name": "Mir Mehboob Ali Khan Bijarani",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-6",
+      "seatType": "general"
+    },
+    {
+      "name": "Imtiaz Ahmed Shaikh",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-7",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Arif Khan Mahar",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-8",
+      "seatType": "general"
+    },
+    {
+      "name": "Agha Shahbaz Ali Durrani",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-9",
+      "seatType": "general"
+    },
+    {
+      "name": "Faryal Talpur",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-10",
+      "seatType": "general"
+    },
+    {
+      "name": "Jameel Ahmed Soomro",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-11",
+      "seatType": "general"
+    },
+    {
+      "name": "Sohail Anwar Siyal",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-12",
+      "seatType": "general"
+    },
+    {
+      "name": "Adil Altaf Unnar",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-13",
+      "seatType": "general"
+    },
+    {
+      "name": "Mir Nadir Ali Khan Magsi",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-14",
+      "seatType": "general"
+    },
+    {
+      "name": "Nisar Khuhro",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-15",
+      "seatType": "general"
+    },
+    {
+      "name": "Nawab Ghaibi Sardar Khan Chandio",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-16",
+      "seatType": "general"
+    },
+    {
+      "name": "Burhan Chandio",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-17",
+      "seatType": "general"
+    },
+    {
+      "name": "Jam Mehtab Hussain Dahar",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-18",
+      "seatType": "general"
+    },
+    {
+      "name": "Sardar Nadir Akmal Khan Leghari",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-19",
+      "seatType": "general"
+    },
+    {
+      "name": "Sardar Muhammad Bakhsh Khan Mahar",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-20",
+      "seatType": "general"
+    },
+    {
+      "name": "Ali Nawaz Khan Mahar",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-21",
+      "seatType": "general"
+    },
+    {
+      "name": "Ikramullah Khan Dharejo",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-22",
+      "seatType": "general"
+    },
+    {
+      "name": "Awais Qadir Shah",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-23",
+      "seatType": "general"
+    },
+    {
+      "name": "Syed Farukh Ahmed Shah",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-24",
+      "seatType": "general"
+    },
+    {
+      "name": "Nasir Hussain Shah",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-25",
+      "seatType": "general"
+    },
+    {
+      "name": "Syed Qaim Ali Shah",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-26",
+      "seatType": "general"
+    },
+    {
+      "name": "Hallar Wassan",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-27",
+      "seatType": "general"
+    },
+    {
+      "name": "Sajid Ali Banbhan",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-28",
+      "seatType": "general"
+    },
+    {
+      "name": "Shiraz Shaukat Rajpar",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-29",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Rashid Shah",
+      "party": "UNKNOWN",
+      "partyRaw": null,
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-31",
+      "seatType": "general"
+    },
+    {
+      "name": "Syed Serfraz Hussain Shah",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-32",
+      "seatType": "general"
+    },
+    {
+      "name": "Syed Hassan Ali Shah",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-33",
+      "seatType": "general"
+    },
+    {
+      "name": "Mumtaz Ali Chandio",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-34",
+      "seatType": "general"
+    },
+    {
+      "name": "Zia Ul Hassan Lanjar",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-35",
+      "seatType": "general"
+    },
+    {
+      "name": "Azra Fazal Pechuho",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-36",
+      "seatType": "general"
+    },
+    {
+      "name": "Chaudhary Javed Iqbal Arain",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-37",
+      "seatType": "general"
+    },
+    {
+      "name": "Ghulam Qadir Chandio",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-38",
+      "seatType": "general"
+    },
+    {
+      "name": "Bahadur Khan Dahri",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-39",
+      "seatType": "general"
+    },
+    {
+      "name": "Ghulam Dastageer Rajar",
+      "party": "UNKNOWN",
+      "partyRaw": null,
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-40",
+      "seatType": "general"
+    },
+    {
+      "name": "Ali Hassan Hingorjo",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-41",
+      "seatType": "general"
+    },
+    {
+      "name": "Jam Shabbir Ali Khan",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-42",
+      "seatType": "general"
+    },
+    {
+      "name": "Sardar Paras Dero",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-43",
+      "seatType": "general"
+    },
+    {
+      "name": "Shahid Abdul Salam Thahim",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-44",
+      "seatType": "general"
+    },
+    {
+      "name": "Hari Ram",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-45",
+      "seatType": "general"
+    },
+    {
+      "name": "Syed Zulfiqar Ali Shah",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-46",
+      "seatType": "general"
+    },
+    {
+      "name": "Noor Ahmed Bhurgri",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-47",
+      "seatType": "general"
+    },
+    {
+      "name": "Mir Tariq Ali Khan Talpur",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-48",
+      "seatType": "general"
+    },
+    {
+      "name": "Syed Sardar Ali Shah",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-49",
+      "seatType": "general"
+    },
+    {
+      "name": "Syed Ameer Ali Shah",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-50",
+      "seatType": "general"
+    },
+    {
+      "name": "Nawab Muhammad Taimur Talpur",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-51",
+      "seatType": "general"
+    },
+    {
+      "name": "Dost Muhammad Rahimoon",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-52",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Qasim Soomro",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-53",
+      "seatType": "general"
+    },
+    {
+      "name": "Fakeer Sher Muhammad Bilalani",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-54",
+      "seatType": "general"
+    },
+    {
+      "name": "Arbab Lutfullah",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-55",
+      "seatType": "general"
+    },
+    {
+      "name": "Makhdoom Mehboob Zaman",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-56",
+      "seatType": "general"
+    },
+    {
+      "name": "Makhdoom Fakhar Zaman",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-57",
+      "seatType": "general"
+    },
+    {
+      "name": "Syed Zia Abbas Shah",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-58",
+      "seatType": "general"
+    },
+    {
+      "name": "Imdad Ali Pitafi",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-59",
+      "seatType": "general"
+    },
+    {
+      "name": "Jam Khan Shoro",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-60",
+      "seatType": "general"
+    },
+    {
+      "name": "Sharjeel Memon",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-61",
+      "seatType": "general"
+    },
+    {
+      "name": "Sabir Hussain Qaimkhani",
+      "party": "MQMP",
+      "partyRaw": "Muttahida Qaumi Movement – Pakistan",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-62",
+      "seatType": "general"
+    },
+    {
+      "name": "Rehan Rajpoot",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-63",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Rashid Khan",
+      "party": "MQMP",
+      "partyRaw": "Muttahida Qaumi Movement – Pakistan",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-64",
+      "seatType": "general"
+    },
+    {
+      "name": "Nasir Hussain Qureshi",
+      "party": "MQMP",
+      "partyRaw": "Muttahida Qaumi Movement – Pakistan",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-65",
+      "seatType": "general"
+    },
+    {
+      "name": "Syed Aijaz Hussain Shah",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-66",
+      "seatType": "general"
+    },
+    {
+      "name": "Khurram Karim Soomro",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-67",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Halepoto",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-68",
+      "seatType": "general"
+    },
+    {
+      "name": "Allah Bux Talpur",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-69",
+      "seatType": "general"
+    },
+    {
+      "name": "Sardar Arbab Ameer Amanullah Khan",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-70",
+      "seatType": "general"
+    },
+    {
+      "name": "Taj Muhammad Mallah",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-71",
+      "seatType": "general"
+    },
+    {
+      "name": "Ismail Rahoo",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-72",
+      "seatType": "general"
+    },
+    {
+      "name": "Shah Hussain Shah Sheerazi",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-73",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Ali Malkani",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-74",
+      "seatType": "general"
+    },
+    {
+      "name": "Riaz Hussain Shah Sheerazi",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-75",
+      "seatType": "general"
+    },
+    {
+      "name": "Ali Hassan Zardari",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-76",
+      "seatType": "general"
+    },
+    {
+      "name": "Murad Ali Shah",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-77",
+      "seatType": "general"
+    },
+    {
+      "name": "Sikandar Ali Shoro",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-78",
+      "seatType": "general"
+    },
+    {
+      "name": "Malik Sikandar Khan",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-79",
+      "seatType": "general"
+    },
+    {
+      "name": "Zubair Ahmed Junejo",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-80",
+      "seatType": "general"
+    },
+    {
+      "name": "Fayaz Ali Butt",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-81",
+      "seatType": "general"
+    },
+    {
+      "name": "Pir Mujeeb ul Haq",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-82",
+      "seatType": "general"
+    },
+    {
+      "name": "Pir Saleh Shah Jeelani",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-83",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Yousuf Murtaza Baloch",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-84",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Sajid Jokhio",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-85",
+      "seatType": "general"
+    },
+    {
+      "name": "Abdul Razak Raja",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-86",
+      "seatType": "general"
+    },
+    {
+      "name": "Mehmood Alam Jamot",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-87",
+      "seatType": "general"
+    },
+    {
+      "name": "Ajaz Khan Swati",
+      "party": "UNKNOWN",
+      "partyRaw": null,
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-88",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Saleem Baloch",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-89",
+      "seatType": "general"
+    },
+    {
+      "name": "Syed Shariq Jamal",
+      "party": "MQMP",
+      "partyRaw": "Muttahida Qaumi Movement – Pakistan",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-90",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Farooq Farhan",
+      "party": "JI",
+      "partyRaw": "Jamaat-e-Islami Pakistan",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-91",
+      "seatType": "general"
+    },
+    {
+      "name": "Wajid Hussain Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-92",
+      "seatType": "general"
+    },
+    {
+      "name": "Sajid Hussain Mir",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-93",
+      "seatType": "general"
+    },
+    {
+      "name": "Najam Mirza",
+      "party": "MQMP",
+      "partyRaw": "Muttahida Qaumi Movement – Pakistan",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-94",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Farooq Awan",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-95",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Owais",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-96",
+      "seatType": "general"
+    },
+    {
+      "name": "Rana Shoukat Ali",
+      "party": "MQMP",
+      "partyRaw": "Muttahida Qaumi Movement – Pakistan",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-97",
+      "seatType": "general"
+    },
+    {
+      "name": "Arsalan Perwaiz Siddiqui",
+      "party": "MQMP",
+      "partyRaw": "Muttahida Qaumi Movement – Pakistan",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-98",
+      "seatType": "general"
+    },
+    {
+      "name": "Syed Farhan Ansari",
+      "party": "MQMP",
+      "partyRaw": "Muttahida Qaumi Movement – Pakistan",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-99",
+      "seatType": "general"
+    },
+    {
+      "name": "Syed Muhammad Usman",
+      "party": "MQMP",
+      "partyRaw": "Muttahida Qaumi Movement – Pakistan",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-100",
+      "seatType": "general"
+    },
+    {
+      "name": "Moeed Anwar",
+      "party": "MQMP",
+      "partyRaw": "Muttahida Qaumi Movement – Pakistan",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-101",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Aamir Siddiqui",
+      "party": "MQMP",
+      "partyRaw": "Muttahida Qaumi Movement – Pakistan",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-102",
+      "seatType": "general"
+    },
+    {
+      "name": "Faisal Rafiq",
+      "party": "MQMP",
+      "partyRaw": "Muttahida Qaumi Movement – Pakistan",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-103",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Daniyal",
+      "party": "MQMP",
+      "partyRaw": "Muttahida Qaumi Movement – Pakistan",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-104",
+      "seatType": "general"
+    },
+    {
+      "name": "Saeed Ghani",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-105",
+      "seatType": "general"
+    },
+    {
+      "name": "Sajjad Ali Soomro",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-106",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Yousuf Baloch",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-107",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Dilawar",
+      "party": "MQMP",
+      "partyRaw": "Muttahida Qaumi Movement – Pakistan",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-108",
+      "seatType": "general"
+    },
+    {
+      "name": "Bilal Hussain Khan Jadoon",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-109",
+      "seatType": "general"
+    },
+    {
+      "name": "Rehan Bandukda",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-110",
+      "seatType": "general"
+    },
+    {
+      "name": "Liaquat Ali Askani",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-111",
+      "seatType": "general"
+    },
+    {
+      "name": "Asif Moosa",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-112",
+      "seatType": "general"
+    },
+    {
+      "name": "Faheem Ahmed Patni",
+      "party": "MQMP",
+      "partyRaw": "Muttahida Qaumi Movement – Pakistan",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-113",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Shabbir Qureshi",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-114",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Asif Khan",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-115",
+      "seatType": "general"
+    },
+    {
+      "name": "Ali Ahmed Jan",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-116",
+      "seatType": "general"
+    },
+    {
+      "name": "Sheikh Abdullah",
+      "party": "MQMP",
+      "partyRaw": "Muttahida Qaumi Movement – Pakistan",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-117",
+      "seatType": "general"
+    },
+    {
+      "name": "Naseer Ahmed",
+      "party": "MQMP",
+      "partyRaw": "Muttahida Qaumi Movement – Pakistan",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-118",
+      "seatType": "general"
+    },
+    {
+      "name": "Ali Khursheedi",
+      "party": "MQMP",
+      "partyRaw": "Muttahida Qaumi Movement – Pakistan",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-119",
+      "seatType": "general"
+    },
+    {
+      "name": "Mazahir Amir Khan",
+      "party": "MQMP",
+      "partyRaw": "Muttahida Qaumi Movement – Pakistan",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-120",
+      "seatType": "general"
+    },
+    {
+      "name": "Syed Ejaz Ul Haque",
+      "party": "MQMP",
+      "partyRaw": "Muttahida Qaumi Movement – Pakistan",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-121",
+      "seatType": "general"
+    },
+    {
+      "name": "Rehan Akram Mirza",
+      "party": "MQMP",
+      "partyRaw": "Muttahida Qaumi Movement – Pakistan",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-122",
+      "seatType": "general"
+    },
+    {
+      "name": "Abdul Waseem",
+      "party": "MQMP",
+      "partyRaw": "Muttahida Qaumi Movement – Pakistan",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-123",
+      "seatType": "general"
+    },
+    {
+      "name": "Abdul Basit",
+      "party": "MQMP",
+      "partyRaw": "Muttahida Qaumi Movement – Pakistan",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-124",
+      "seatType": "general"
+    },
+    {
+      "name": "Syed Adil Askari",
+      "party": "MQMP",
+      "partyRaw": "Muttahida Qaumi Movement – Pakistan",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-125",
+      "seatType": "general"
+    },
+    {
+      "name": "Iftikhar Alam",
+      "party": "MQMP",
+      "partyRaw": "Muttahida Qaumi Movement – Pakistan",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-126",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Maaz Mehboob",
+      "party": "MQMP",
+      "partyRaw": "Muttahida Qaumi Movement – Pakistan",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-127",
+      "seatType": "general"
+    },
+    {
+      "name": "Taha Ahmed Khan",
+      "party": "MQMP",
+      "partyRaw": "Muttahida Qaumi Movement – Pakistan",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-128",
+      "seatType": "general"
+    },
+    {
+      "name": "Jamal Ahmed",
+      "party": "MQMP",
+      "partyRaw": "Muttahida Qaumi Movement – Pakistan",
+      "province": "SD",
+      "assembly": "PS",
+      "constituency": "PS-130",
+      "seatType": "general"
+    },
+    {
+      "name": "Suraya Bibi",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-1",
+      "seatType": "general"
+    },
+    {
+      "name": "Fateh-ul-Mulk Ali Nasir",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-2",
+      "seatType": "general"
+    },
+    {
+      "name": "Sharafat Ali",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-3",
+      "seatType": "general"
+    },
+    {
+      "name": "Ali Shah",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-4",
+      "seatType": "general"
+    },
+    {
+      "name": "Akhtar Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-5",
+      "seatType": "general"
+    },
+    {
+      "name": "Fazal Hakim",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-6",
+      "seatType": "general"
+    },
+    {
+      "name": "Amjad Ali",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-7",
+      "seatType": "general"
+    },
+    {
+      "name": "Hamid Ur Rahman",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-8",
+      "seatType": "general"
+    },
+    {
+      "name": "Sultan e Rum",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-9",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Naeem Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-10",
+      "seatType": "general"
+    },
+    {
+      "name": "Gul Ibrahim Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-11",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Yamin",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-12",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Anwar Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-13",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Azam Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-14",
+      "seatType": "general"
+    },
+    {
+      "name": "Hamayun Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-15",
+      "seatType": "general"
+    },
+    {
+      "name": "Shafi Ullah",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-16",
+      "seatType": "general"
+    },
+    {
+      "name": "Ubaidur Rahman",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-17",
+      "seatType": "general"
+    },
+    {
+      "name": "Liaqat Ali Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-18",
+      "seatType": "general"
+    },
+    {
+      "name": "Hamid Ur Rehman",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-19",
+      "seatType": "general"
+    },
+    {
+      "name": "Anwar Zeb Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-20",
+      "seatType": "general"
+    },
+    {
+      "name": "Ajmal Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-21",
+      "seatType": "general"
+    },
+    {
+      "name": "Nisar Baaz",
+      "party": "ANP",
+      "partyRaw": "Awami National Party",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-22",
+      "seatType": "general"
+    },
+    {
+      "name": "Shakeel Ahmad",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-23",
+      "seatType": "general"
+    },
+    {
+      "name": "Musavir Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-24",
+      "seatType": "general"
+    },
+    {
+      "name": "Riaz Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-25",
+      "seatType": "general"
+    },
+    {
+      "name": "Syed Fakhr e Jehan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-26",
+      "seatType": "general"
+    },
+    {
+      "name": "Abdul Kabir Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-27",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Rashad Khan",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-28",
+      "seatType": "general"
+    },
+    {
+      "name": "Abdul Munim",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-29",
+      "seatType": "general"
+    },
+    {
+      "name": "Ibadullah Khan",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-30",
+      "seatType": "general"
+    },
+    {
+      "name": "Fazal-e Haq",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-31",
+      "seatType": "general"
+    },
+    {
+      "name": "Sajjad Ullah",
+      "party": "JUIF",
+      "partyRaw": "Jamiat Ulema-e-Islam (F)",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-32",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Riaz",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-33",
+      "seatType": "general"
+    },
+    {
+      "name": "Zubair Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-34",
+      "seatType": "general"
+    },
+    {
+      "name": "Taj Muhammad",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-35",
+      "seatType": "general"
+    },
+    {
+      "name": "Munir Hussain",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-36",
+      "seatType": "general"
+    },
+    {
+      "name": "Babar Saleem Swati",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-37",
+      "seatType": "general"
+    },
+    {
+      "name": "Zahid Chanzeb",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-38",
+      "seatType": "general"
+    },
+    {
+      "name": "Ikram Ullah",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-39",
+      "seatType": "general"
+    },
+    {
+      "name": "Shahjahan Yousuf",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-40",
+      "seatType": "general"
+    },
+    {
+      "name": "Laiq Muhammad Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-41",
+      "seatType": "general"
+    },
+    {
+      "name": "Nazir Ahmed Abbasi",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-42",
+      "seatType": "general"
+    },
+    {
+      "name": "Rajab Ali Khan Abbasi",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-43",
+      "seatType": "general"
+    },
+    {
+      "name": "Iftikhar Ahmad Khan Jadoon",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-44",
+      "seatType": "general"
+    },
+    {
+      "name": "Mushtaq Ahmed Ghani",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-45",
+      "seatType": "general"
+    },
+    {
+      "name": "Akbar Ayub Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-46",
+      "seatType": "general"
+    },
+    {
+      "name": "Arshad Ayub Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-47",
+      "seatType": "general"
+    },
+    {
+      "name": "Malik Adeel Iqbal",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-48",
+      "seatType": "general"
+    },
+    {
+      "name": "Rangez Ahmad",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-49",
+      "seatType": "general"
+    },
+    {
+      "name": "Aqibullah Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-50",
+      "seatType": "general"
+    },
+    {
+      "name": "Abdul Kareem",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-51",
+      "seatType": "general"
+    },
+    {
+      "name": "Faisal Khan Tarakai",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-52",
+      "seatType": "general"
+    },
+    {
+      "name": "Murtaza Khan Tarakai",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-53",
+      "seatType": "general"
+    },
+    {
+      "name": "Zarshad Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-54",
+      "seatType": "general"
+    },
+    {
+      "name": "Tufail Anjum",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-55",
+      "seatType": "general"
+    },
+    {
+      "name": "Amir Farzand Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-56",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Zahir Shah",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-57",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Abdul Salam",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-58",
+      "seatType": "general"
+    },
+    {
+      "name": "Tariq Mehmood Aryani",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-59",
+      "seatType": "general"
+    },
+    {
+      "name": "Iftikhar Ali Mushwani",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-60",
+      "seatType": "general"
+    },
+    {
+      "name": "Ihtisham Ali",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-61",
+      "seatType": "general"
+    },
+    {
+      "name": "Khalid Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-62",
+      "seatType": "general"
+    },
+    {
+      "name": "Arshad Ali",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-63",
+      "seatType": "general"
+    },
+    {
+      "name": "Iftikhar Ullah Jan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-64",
+      "seatType": "general"
+    },
+    {
+      "name": "Fazle Shakoor Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-65",
+      "seatType": "general"
+    },
+    {
+      "name": "Mohammad Arif",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-66",
+      "seatType": "general"
+    },
+    {
+      "name": "Mehboob Sher",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-67",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Israr",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-68",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Adnan Qadri",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-69",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Sohail Afridi",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-70",
+      "seatType": "general"
+    },
+    {
+      "name": "Abdul Ghani",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-71",
+      "seatType": "general"
+    },
+    {
+      "name": "Kiramat Ullah Khan",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-72",
+      "seatType": "general"
+    },
+    {
+      "name": "Arbab Muhammad Wasim Khan",
+      "party": "PTI",
+      "partyRaw": "Pakistan Tehreek-e-Insaf Parliamentarians",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-73",
+      "seatType": "general"
+    },
+    {
+      "name": "Ijaz Muhammad",
+      "party": "JUIF",
+      "partyRaw": "Jamiat Ulema-e-Islam (F)",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-74",
+      "seatType": "general"
+    },
+    {
+      "name": "Arbab Muhammad Usman Khan",
+      "party": "ANP",
+      "partyRaw": "Awami National Party",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-75",
+      "seatType": "general"
+    },
+    {
+      "name": "Samiullah Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-76",
+      "seatType": "general"
+    },
+    {
+      "name": "Sher Ali Afridi",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-77",
+      "seatType": "general"
+    },
+    {
+      "name": "Zahir Khan",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-78",
+      "seatType": "general"
+    },
+    {
+      "name": "Jalal Khan",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-79",
+      "seatType": "general"
+    },
+    {
+      "name": "Arbab Zarak Khan",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-80",
+      "seatType": "general"
+    },
+    {
+      "name": "Syed Qasim Ali Shah",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-81",
+      "seatType": "general"
+    },
+    {
+      "name": "Malik Tariq Awan",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-82",
+      "seatType": "general"
+    },
+    {
+      "name": "Meena Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-83",
+      "seatType": "general"
+    },
+    {
+      "name": "Fazal Elahi",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-84",
+      "seatType": "general"
+    },
+    {
+      "name": "Zar Alam Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-85",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Idrees",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-86",
+      "seatType": "general"
+    },
+    {
+      "name": "Khaliq-ur-Rehman",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-87",
+      "seatType": "general"
+    },
+    {
+      "name": "Mian Muhammad Umar",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-88",
+      "seatType": "general"
+    },
+    {
+      "name": "Ishfaq Ahmed",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-89",
+      "seatType": "general"
+    },
+    {
+      "name": "Aftab Alam Afridi",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-90",
+      "seatType": "general"
+    },
+    {
+      "name": "Daud Shah Afridi",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-91",
+      "seatType": "general"
+    },
+    {
+      "name": "Shafi Ullah Jan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-92",
+      "seatType": "general"
+    },
+    {
+      "name": "Shah Abu Tarab Khan Bangash",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-93",
+      "seatType": "general"
+    },
+    {
+      "name": "Aurangzeb Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-94",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Riaz Shaheen",
+      "party": "JUIF",
+      "partyRaw": "Jamiat Ulema-e-Islam (F)",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-95",
+      "seatType": "general"
+    },
+    {
+      "name": "Ali Hadi",
+      "party": "PTI",
+      "partyRaw": "Pakistan Tehreek-e-Insaf",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-96",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Khurshid",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-97",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Sajjad",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-98",
+      "seatType": "general"
+    },
+    {
+      "name": "Zahid Ullah Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-99",
+      "seatType": "general"
+    },
+    {
+      "name": "Pakhtoon Yar Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-100",
+      "seatType": "general"
+    },
+    {
+      "name": "Adnan Wazir",
+      "party": "JUIF",
+      "partyRaw": "Jamiat Ulema-e-Islam (F)",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-101",
+      "seatType": "general"
+    },
+    {
+      "name": "Akram Khan Durrani",
+      "party": "JUIF",
+      "partyRaw": "Jamiat Ulema-e-Islam (F)",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-102",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Iqbal Wazir",
+      "party": "PTI",
+      "partyRaw": "Pakistan Tehreek-e-Insaf Parliamentarians",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-103",
+      "seatType": "general"
+    },
+    {
+      "name": "Nek Muhammad Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-104",
+      "seatType": "general"
+    },
+    {
+      "name": "Johar Muhammad",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-105",
+      "seatType": "general"
+    },
+    {
+      "name": "Hisham Inamullah Khan",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-106",
+      "seatType": "general"
+    },
+    {
+      "name": "Tariq Saeed",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-107",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Usman",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-108",
+      "seatType": "general"
+    },
+    {
+      "name": "Asif Khan",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-109",
+      "seatType": "general"
+    },
+    {
+      "name": "Ajab Gul",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-110",
+      "seatType": "general"
+    },
+    {
+      "name": "Makhdoom Zada Muhammad Aftab Haider",
+      "party": "JUIF",
+      "partyRaw": "Jamiat Ulema-e-Islam (F)",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-111",
+      "seatType": "general"
+    },
+    {
+      "name": "Ahmad Kundi",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-112",
+      "seatType": "general"
+    },
+    {
+      "name": "Ali Amin Gandapur",
+      "party": "SIC",
+      "partyRaw": "Sunni Ittehad Council",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-113",
+      "seatType": "general"
+    },
+    {
+      "name": "Luftur Rehman",
+      "party": "JUIF",
+      "partyRaw": "Jamiat Ulema-e-Islam (F)",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-114",
+      "seatType": "general"
+    },
+    {
+      "name": "Ehsanullah Khan",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "KP",
+      "assembly": "PK",
+      "constituency": "PK-115",
+      "seatType": "general"
+    },
+    {
+      "name": "Nawaz Kibzai",
+      "party": "JUIF",
+      "partyRaw": "Jamiat Ulema-e-Islam (F)",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-1",
+      "seatType": "general"
+    },
+    {
+      "name": "Fazal Qadir Mandokhail",
+      "party": "JUIF",
+      "partyRaw": "Jamiat Ulema-e-Islam (F)",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-2",
+      "seatType": "general"
+    },
+    {
+      "name": "Maulana Noorullah",
+      "party": "PPP",
+      "partyRaw": "Pakistan Peoples Party",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-3",
+      "seatType": "general"
+    },
+    {
+      "name": "Abdul Rehman Khetran",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-4",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Khan Toor Utmankhel",
+      "party": "BAP",
+      "partyRaw": "Balochistan Awami Party",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-5",
+      "seatType": "general"
+    },
+    {
+      "name": "Sardar Masood Ali Khan Luni",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-6",
+      "seatType": "general"
+    },
+    {
+      "name": "Noor Muhammad Dummar",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-7",
+      "seatType": "general"
+    },
+    {
+      "name": "Mir Kohyar Khan Domki",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-8",
+      "seatType": "general"
+    },
+    {
+      "name": "Changez Khan Marri",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-9",
+      "seatType": "general"
+    },
+    {
+      "name": "Sarfraz Bugti",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-10",
+      "seatType": "general"
+    },
+    {
+      "name": "Nawabzada Tariq Magsi",
+      "party": "BAP",
+      "partyRaw": "Balochistan Awami Party",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-11",
+      "seatType": "general"
+    },
+    {
+      "name": "Mir Mohammad Asim Kurd Gello",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-12",
+      "seatType": "general"
+    },
+    {
+      "name": "Mir Muhammad Sadiq Umrani",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-13",
+      "seatType": "general"
+    },
+    {
+      "name": "Muhammad Khan Lehri",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-14",
+      "seatType": "general"
+    },
+    {
+      "name": "Mir Saleem Ahmed Khoso",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-15",
+      "seatType": "general"
+    },
+    {
+      "name": "Abdul Majeed Badini",
+      "party": "JI",
+      "partyRaw": "Jamaat-e-Islami",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-16",
+      "seatType": "general"
+    },
+    {
+      "name": "Faisal Khan Jamali",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-17",
+      "seatType": "general"
+    },
+    {
+      "name": "Sanaullah Khan Zehri",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-18",
+      "seatType": "general"
+    },
+    {
+      "name": "Mir Younus Aziz Zehri",
+      "party": "JUIF",
+      "partyRaw": "Jamiat Ulema-e-Islam (F)",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-19",
+      "seatType": "general"
+    },
+    {
+      "name": "Mir Jahanzaib Mengal",
+      "party": "BNPM",
+      "partyRaw": "Balochistan National Party (Mengal)",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-20",
+      "seatType": "general"
+    },
+    {
+      "name": "Mohammad Saleh Bhootani",
+      "party": "BAP",
+      "partyRaw": "Balochistan Awami Party",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-21",
+      "seatType": "general"
+    },
+    {
+      "name": "Nawabzada Mir Muhammad Zarain Khan Magsi",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-22",
+      "seatType": "general"
+    },
+    {
+      "name": "Khair Jan Baloch",
+      "party": "NP",
+      "partyRaw": "National Party (Pakistan)",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-23",
+      "seatType": "general"
+    },
+    {
+      "name": "Hidayat ur Rehman Baloch",
+      "party": "UNKNOWN",
+      "partyRaw": null,
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-24",
+      "seatType": "general"
+    },
+    {
+      "name": "Zahoor Ahmed Buledi",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-25",
+      "seatType": "general"
+    },
+    {
+      "name": "Abdul Malik Baloch",
+      "party": "NP",
+      "partyRaw": "National Party (Pakistan)",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-26",
+      "seatType": "general"
+    },
+    {
+      "name": "Barkat Ali Rind",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-27",
+      "seatType": "general"
+    },
+    {
+      "name": "Mir Asghar Rind",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-28",
+      "seatType": "general"
+    },
+    {
+      "name": "Mir Asadullah Baloch",
+      "party": "OTHER",
+      "partyRaw": "Balochistan National Party (Awami)",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-29",
+      "seatType": "general"
+    },
+    {
+      "name": "Rahmat Saleh Baloch",
+      "party": "NP",
+      "partyRaw": "National Party (Pakistan)",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-30",
+      "seatType": "general"
+    },
+    {
+      "name": "Mir Zabid Ali Reki",
+      "party": "JUIF",
+      "partyRaw": "Jamiat Ulema-e-Islam (F)",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-31",
+      "seatType": "general"
+    },
+    {
+      "name": "Sadiq Sanjrani",
+      "party": "BAP",
+      "partyRaw": "Balochistan Awami Party",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-32",
+      "seatType": "general"
+    },
+    {
+      "name": "Mir Shoaib Nosherwani",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-33",
+      "seatType": "general"
+    },
+    {
+      "name": "Haji Ghulam Dastagir Badeni",
+      "party": "JUIF",
+      "partyRaw": "Jamiat Ulema-e-Islam (F)",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-34",
+      "seatType": "general"
+    },
+    {
+      "name": "Mir Zafarullah Khan Zehri",
+      "party": "JUIF",
+      "partyRaw": "Jamiat Ulema-e-Islam (F)",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-35",
+      "seatType": "general"
+    },
+    {
+      "name": "Mir Ziaullah Langau",
+      "party": "BAP",
+      "partyRaw": "Balochistan Awami Party",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-36",
+      "seatType": "general"
+    },
+    {
+      "name": "Aslam Raisani",
+      "party": "JUIF",
+      "partyRaw": "Jamiat Ulema-e-Islam (F)",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-37",
+      "seatType": "general"
+    },
+    {
+      "name": "Malik Naeem Khan Bazai",
+      "party": "ANP",
+      "partyRaw": "Awami National Party",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-38",
+      "seatType": "general"
+    },
+    {
+      "name": "Bakht Muhammad Kakar",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-39",
+      "seatType": "general"
+    },
+    {
+      "name": "Samad Khan Gorgage",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-40",
+      "seatType": "general"
+    },
+    {
+      "name": "Wali Muhammad Noorzai",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-41",
+      "seatType": "general"
+    },
+    {
+      "name": "Sheikh Zarak Khan Mandokhail",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-42",
+      "seatType": "general"
+    },
+    {
+      "name": "Mir Liaquat Ali Lehri",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-43",
+      "seatType": "general"
+    },
+    {
+      "name": "Mir Ubaidullah Gorgage",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-44",
+      "seatType": "general"
+    },
+    {
+      "name": "Ali Madad Jattak",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-45",
+      "seatType": "general"
+    },
+    {
+      "name": "Prince Ahmed Umer Ahmedzai",
+      "party": "BAP",
+      "partyRaw": "Balochistan Awami Party",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-46",
+      "seatType": "general"
+    },
+    {
+      "name": "Asfand Yar Khan Kakar",
+      "party": "PPP",
+      "partyRaw": "Pakistan People's Party",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-47",
+      "seatType": "general"
+    },
+    {
+      "name": "Asghar Ali Tareen",
+      "party": "JUIF",
+      "partyRaw": "Jamiat Ulema-e-Islam (F)",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-48",
+      "seatType": "general"
+    },
+    {
+      "name": "Syed Zafar Ali Agha",
+      "party": "JUIF",
+      "partyRaw": "Jamiat Ulema-e-Islam (F)",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-49",
+      "seatType": "general"
+    },
+    {
+      "name": "Zmarak Khan Achakzai",
+      "party": "ANP",
+      "partyRaw": "Awami National Party",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-50",
+      "seatType": "general"
+    },
+    {
+      "name": "Abdul Khaliq Khan Achakzai",
+      "party": "PMLN",
+      "partyRaw": "Pakistan Muslim League (N)",
+      "province": "BA",
+      "assembly": "PB",
+      "constituency": "PB-51",
+      "seatType": "general"
+    }
+  ]
+}
