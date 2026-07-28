@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import {
   Home, MapPin, Map, TrendingUp, FileText, Inbox, MessageSquare, Library,
-  ChevronsLeft, Languages, X,
+  HelpCircle, ChevronsLeft, Languages, X,
 } from "lucide-react";
 import { useLocale } from "../i18n/LocaleProvider";
 import type { MessageKey } from "../i18n/dictionary";
@@ -39,6 +39,10 @@ const NAV: Array<{ href: string; labelKey: MessageKey; Icon: typeof Home }> = [
   { href: "/pk/constituency/na-123", labelKey: "nav.constituencies", Icon: MapPin },
   { href: "/pk/province/pb", labelKey: "nav.provinces", Icon: Map },
   { href: "/pk/instruments", labelKey: "nav.instruments", Icon: FileText },
+  // Sits next to drafting deliberately: Rule 78(j) bars a question already answered
+  // in the current session or the two before it, so "has this been asked" is the
+  // step immediately before filing, not a separate research errand.
+  { href: "/pk/questions", labelKey: "questions.nav", Icon: HelpCircle },
   { href: "/pk/casework", labelKey: "nav.casework", Icon: Inbox },
   { href: "/pk/chat", labelKey: "nav.chat", Icon: MessageSquare },
   { href: "/pk/documents", labelKey: "nav.documents", Icon: Library },
