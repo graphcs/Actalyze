@@ -13,6 +13,8 @@
  * invented; the UI simply renders less.
  */
 
+import { COUNTRY_SEARCH_LOCALE } from './country';
+
 export interface SerpTweet {
   id: string;
   text: string;
@@ -106,10 +108,15 @@ function cleanTitle(title: string): string {
 /**
  * Search for real tweets matching `query`. Returns [] on any failure so callers
  * can fall through to an empty feed rather than surfacing an error.
+ *
+ * `locale` defaults to the US values this function has always sent, so no existing
+ * call site changes behaviour. The Pakistan routes pass `COUNTRY_SEARCH_LOCALE.PK`;
+ * without it, `gl=us` pulls American posts for a Pakistani constituency query.
  */
 export async function searchTweetsViaSerpApi(
   query: string,
-  limit: number
+  limit: number,
+  locale: { gl: string; hl: string; location: string } = COUNTRY_SEARCH_LOCALE.US
 ): Promise<SerpTweet[]> {
   const key = process.env.SERPAPI_KEY;
   if (!key) {
@@ -121,12 +128,12 @@ export async function searchTweetsViaSerpApi(
     engine: 'google',
     q: `site:x.com OR site:twitter.com ${query}`,
     num: String(Math.min(Math.max(limit * 5, 20), 40)),
-    // This is a US political intelligence tool. Without a locale hint, generic
-    // terms drift to other countries' politics — "congress" alone returns Indian
-    // National Congress posts. Anchor results to the US.
-    gl: 'us',
-    hl: 'en',
-    location: 'United States',
+    // Without a locale hint, generic terms drift to other countries' politics —
+    // "congress" alone returns Indian National Congress posts. Anchor results to
+    // the caller's country.
+    gl: locale.gl,
+    hl: locale.hl,
+    location: locale.location,
     api_key: key,
   });
 

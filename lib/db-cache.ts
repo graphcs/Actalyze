@@ -4,6 +4,7 @@
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import type { CountryCode } from './country';
 
 // Lazy-load Supabase client
 let supabaseClient: SupabaseClient | null = null;
@@ -37,12 +38,22 @@ export const DEFAULT_CACHE_DURATIONS: Record<string, number> = {
 };
 
 /**
- * Generate a cache key for district data
+ * Generate a cache key for district data.
+ *
+ * `country` scopes the key so a second country cannot overwrite the first in the
+ * shared `district_cache` table. This is not hypothetical: Pakistan's `NA-123` and a
+ * US district code live in the same `cache_key` column, and two-letter subnational
+ * codes collide outright (Sindh `SD` vs South Dakota `SD`).
+ *
+ * `'US'` — the default — emits the byte-identical key it always has, so every cache
+ * row written before this parameter existed still resolves. Only non-US countries
+ * take a prefix.
  */
 export function generateDistrictCacheKey(
   cacheType: CacheType,
   districtCode: string,
-  additionalParams?: Record<string, string>
+  additionalParams?: Record<string, string>,
+  country: CountryCode = 'US'
 ): string {
   let key = `district:${cacheType}:${districtCode}`;
   if (additionalParams) {
@@ -52,7 +63,7 @@ export function generateDistrictCacheKey(
       .join('&');
     key += `:${sortedParams}`;
   }
-  return key;
+  return country === 'US' ? key : `${country.toLowerCase()}:${key}`;
 }
 
 /**
