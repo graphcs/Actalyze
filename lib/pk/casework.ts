@@ -21,11 +21,12 @@
  *
  * ── Why the tier-1 ordering is what it is ───────────────────────────────────────────
  * The order is not alphabetical and not a guess. It follows complaint volumes in the
- * **Wafaqi Mohtasib (Federal Ombudsman) Annual Report 2024**, which recorded 226,372
+ * **Wafaqi Mohtasib (Federal Ombudsman) Annual Report 2024**, Table-5 "Volume of
+ * Complaints Against Key Agencies", which recorded 226,372
  * complaints. The agency ranking used here is:
  *
- *   LESCO 20,199 · MEPCO 9,310 · PESCO 9,008 · K-Electric 8,186 · HESCO 5,689
- *   SEPCO 3,843 · SSGCL 3,598 · SNGPL 1,903 · Pakistan Post 1,031 · GEPCO 838
+ *   LESCO 39,520 · MEPCO 20,241 · BISP 20,264 · SSGCL 16,564 · K-Electric 14,966
+ *   HESCO 9,689 · PESCO 9,568 · SNGPL 6,625 · SEPCO 6,237 · NADRA 5,839
  *   FESCO 706 · IESCO 568 · CDA 556 · Immigration & Passports 530 · NADRA 442
  *   EOBI 398 · BISP 327 · Pakistan Railways 294
  *
@@ -287,7 +288,16 @@ export interface PkUtility {
   territory: string[];
   territoryLabelEn: string;
   ministry: string;
-  /** Complaints recorded against this body in the Wafaqi Mohtasib 2024 report. */
+  /**
+   * Complaints RECEIVED against this body in 2024, from Table-5 of the Wafaqi
+   * Mohtasib annual report ("Volume of Complaints Against Key Agencies").
+   *
+   * Not Table-1, which reports "Net Implementable / Implemented" — findings the
+   * Mohtasib issued and the agency then acted on. The two differ by roughly a
+   * factor of two and reorder the agencies, so quoting Table-1 under a
+   * "complaints received" label would misstate the figure and the ranking. The
+   * Table-5 receipts sum to the 226,372 total the report states.
+   */
   mohtasib2024?: number;
   note?: string;
 }
@@ -320,7 +330,7 @@ export const PK_UTILITIES: PkUtility[] = [
     territory: ['lahore', 'kasur', 'sheikhupura', 'nankana sahib', 'okara'],
     territoryLabelEn: 'Lahore, Kasur, Sheikhupura, Nankana Sahib, Okara',
     ministry: 'Power Division, Ministry of Energy',
-    mohtasib2024: 20199,
+    mohtasib2024: 39520,
   },
   {
     id: 'mepco',
@@ -334,7 +344,7 @@ export const PK_UTILITIES: PkUtility[] = [
     ],
     territoryLabelEn: 'Multan and southern Punjab',
     ministry: 'Power Division, Ministry of Energy',
-    mohtasib2024: 9310,
+    mohtasib2024: 20241,
   },
   {
     id: 'pesco',
@@ -348,7 +358,7 @@ export const PK_UTILITIES: PkUtility[] = [
     // Hazara division is HAZECO's, not PESCO's — see below.
     territoryLabelEn: 'Khyber Pakhtunkhwa, except Hazara division',
     ministry: 'Power Division, Ministry of Energy',
-    mohtasib2024: 9008,
+    mohtasib2024: 9568,
   },
   {
     id: 'k-electric',
@@ -358,7 +368,7 @@ export const PK_UTILITIES: PkUtility[] = [
     territory: ['karachi', 'dhabeji', 'gharo', 'hub', 'uthal', 'bela', 'vinder'],
     territoryLabelEn: 'Karachi, plus Dhabeji, Gharo, Hub, Uthal, Bela and Vinder',
     ministry: 'Privatised — regulated by NEPRA, not a Power Division DISCO',
-    mohtasib2024: 8186,
+    mohtasib2024: 14966,
     note: 'Privatised and vertically integrated: it generates, transmits and distributes. It is NOT a DISCO under the Power Division, so escalation runs through NEPRA. Its licence area is not Sindh-only — Hub, Uthal, Bela and Vinder are in Balochistan, so a constituent there may be a K-Electric consumer rather than a QESCO one.',
   },
   {
@@ -372,7 +382,7 @@ export const PK_UTILITIES: PkUtility[] = [
     ],
     territoryLabelEn: 'Hyderabad and southern Sindh',
     ministry: 'Power Division, Ministry of Energy',
-    mohtasib2024: 5689,
+    mohtasib2024: 9689,
   },
   {
     id: 'sepco',
@@ -385,7 +395,7 @@ export const PK_UTILITIES: PkUtility[] = [
     ],
     territoryLabelEn: 'Sukkur and northern Sindh',
     ministry: 'Power Division, Ministry of Energy',
-    mohtasib2024: 3843,
+    mohtasib2024: 6237,
   },
   {
     id: 'gepco',
@@ -395,7 +405,7 @@ export const PK_UTILITIES: PkUtility[] = [
     territory: ['gujranwala', 'gujrat', 'sialkot', 'narowal', 'hafizabad', 'mandi bahauddin'],
     territoryLabelEn: 'Gujranwala, Gujrat, Sialkot, Narowal, Hafizabad, Mandi Bahauddin',
     ministry: 'Power Division, Ministry of Energy',
-    mohtasib2024: 838,
+    mohtasib2024: 3030,
   },
   {
     id: 'fesco',
@@ -405,7 +415,7 @@ export const PK_UTILITIES: PkUtility[] = [
     territory: ['faisalabad', 'jhang', 'toba tek singh', 'chiniot', 'bhakkar', 'mianwali', 'sargodha', 'khushab'],
     territoryLabelEn: 'Faisalabad, Sargodha, Jhang, Mianwali and adjoining districts',
     ministry: 'Power Division, Ministry of Energy',
-    mohtasib2024: 706,
+    mohtasib2024: 3103,
   },
   {
     id: 'iesco',
@@ -417,7 +427,7 @@ export const PK_UTILITIES: PkUtility[] = [
     ],
     territoryLabelEn: 'Islamabad, Rawalpindi, Attock, Jhelum, Chakwal',
     ministry: 'Power Division, Ministry of Energy',
-    mohtasib2024: 568,
+    mohtasib2024: 1507,
   },
   {
     id: 'qesco',
@@ -465,7 +475,7 @@ export const PK_GAS_UTILITIES: PkUtility[] = [
     territory: ['punjab', 'khyber pakhtunkhwa', 'islamabad', 'lahore', 'rawalpindi', 'peshawar', 'faisalabad', 'multan', 'gujranwala'],
     territoryLabelEn: 'Punjab, Khyber Pakhtunkhwa and Islamabad',
     ministry: 'Petroleum Division, Ministry of Energy',
-    mohtasib2024: 1903,
+    mohtasib2024: 6625,
   },
   {
     id: 'ssgc',
@@ -478,7 +488,7 @@ export const PK_GAS_UTILITIES: PkUtility[] = [
     territory: ['sindh', 'balochistan', 'karachi', 'hyderabad', 'quetta', 'sukkur', 'gwadar'],
     territoryLabelEn: 'Sindh and Balochistan',
     ministry: 'Petroleum Division, Ministry of Energy',
-    mohtasib2024: 3598,
+    mohtasib2024: 16564,
   },
 ];
 

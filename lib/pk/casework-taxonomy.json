@@ -308,7 +308,7 @@
           "nameUr": "کیپیٹل ڈویلپمنٹ اتھارٹی",
           "abbreviation": "CDA",
           "tier": 2,
-          "description": "Islamabad Capital Territory only. 556 complaints in 2024. A CDA matter arising anywhere outside Islamabad is misdirected.",
+          "description": "Islamabad Capital Territory only. 557 complaints in 2024. A CDA matter arising anywhere outside Islamabad is misdirected.",
           "ministry": "Ministry of Interior",
           "children": [
             {
@@ -416,7 +416,7 @@
       "nameUr": "پاسپورٹ اور امیگریشن",
       "abbreviation": "DGI&P",
       "tier": 1,
-      "description": "Directorate General of Immigration and Passports, an attached department of the Ministry of Interior. 530 complaints in 2024.",
+      "description": "Directorate General of Immigration and Passports, an attached department of the Ministry of Interior. 4,692 complaints in 2024.",
       "jurisdiction": "federal",
       "escalation": [
         "wafaqi-mohtasib",
@@ -511,7 +511,7 @@
       "nameUr": "نادرا — شناخت اور رجسٹریشن",
       "abbreviation": "NADRA",
       "tier": 1,
-      "description": "National Database and Registration Authority, an attached department of the Ministry of Interior. 442 complaints in 2024. Almost every other federal service depends on a valid CNIC, so a blocked identity record blocks everything downstream.",
+      "description": "National Database and Registration Authority, an attached department of the Ministry of Interior. 5,839 complaints in 2024. Almost every other federal service depends on a valid CNIC, so a blocked identity record blocks everything downstream.",
       "jurisdiction": "federal",
       "escalation": [
         "wafaqi-mohtasib",
@@ -620,7 +620,7 @@
           "nameUr": "ای او بی آئی",
           "abbreviation": "EOBI",
           "tier": 2,
-          "description": "Employees' Old-Age Benefits Institution. 398 complaints in 2024. NEEDS LOCAL REVIEW: the parent ministry is stated on the historical position and could not be confirmed from an official source.",
+          "description": "Employees' Old-Age Benefits Institution. 3,583 complaints in 2024. NEEDS LOCAL REVIEW: the parent ministry is stated on the historical position and could not be confirmed from an official source.",
           "ministry": "Ministry of Overseas Pakistanis and Human Resource Development (needs confirmation)",
           "children": [
             {
@@ -715,7 +715,7 @@
           "nameUr": "بی آئی ایس پی",
           "abbreviation": "BISP",
           "tier": 2,
-          "description": "Benazir Income Support Programme. 327 complaints in 2024, though the number reaching a constituency office is far higher — most beneficiaries go to the MNA's office before they go to an ombudsman.",
+          "description": "Benazir Income Support Programme. 20,264 complaints in 2024 — second only to LESCO, and the number reaching a constituency office is higher still, since most beneficiaries go to the MNA before they go to an ombudsman.",
           "ministry": "Ministry of Poverty Alleviation and Social Safety",
           "children": [
             {
