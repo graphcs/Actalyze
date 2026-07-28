@@ -212,6 +212,65 @@ export const en = {
   'constituency.mapUnavailableVacant': 'No constituency geography is recorded for a vacant seat.',
   'constituency.signalUnavailableVacant': 'No discourse signal is produced for a vacant seat.',
   'constituency.sourceRoster': 'Member and constituency record: National Assembly of Pakistan.',
+
+  // ── parliamentary drafting, continued ───────────────────────────────────────────
+  // Appended so this block merges cleanly alongside the other agents' additions.
+  'instruments.tabDraft': 'Draft an instrument',
+  'instruments.tabCheck': 'Rule 78 admissibility',
+  'instruments.groupQuestions': 'Questions',
+  'instruments.groupMotions': 'Notices and motions',
+  'instruments.groupComms': 'Communications',
+  'instruments.ministryPlaceholder': 'e.g. Poverty Alleviation and Social Safety',
+  'instruments.constituency': 'Constituency',
+  'instruments.memberName': 'Member',
+  'instruments.memberNamePlaceholder': 'Name as it appears on the notice',
+  'instruments.checkFromDraft': 'Check this draft against Rule 78',
+  'instruments.checkPlaceholder':
+    'Paste the question exactly as it would be filed with the Secretary — including the asterisk and any lettered parts.',
+  'instruments.checkEmpty':
+    'Paste a question and run the check. Rule 78(f) is counted here in the browser, so the word count is exact before anything is sent.',
+  'instruments.rule78Note':
+    'Rule 78 sets out twenty-two conditions, (a) to (v). Sub-clause (q) has five limbs, each tested separately — {total} checks in all.',
+  'instruments.wordCountOver':
+    'This question is {n} words, exceeding the Rule 78(f) limit of {limit} by {excess}.',
+  'instruments.wordCountOk':
+    'This question is {n} words, within the Rule 78(f) limit of {limit}.',
+  'instruments.conditionsSummary': '{pass} of {total} conditions satisfied',
+  'instruments.computed': 'counted, not judged',
+  'instruments.rule78Source':
+    'Conditions quoted from the Rules of Procedure and Conduct of Business in the National Assembly, 2007, rule 78.',
+  'instruments.footerNote':
+    '{n} formal instruments, each stamped with the rule, notice period and per-sitting limit the Secretariat applies before a notice reaches the Orders of the Day.',
+
+  // ── constituent casework, continued ────────────────────────────────────────────
+  'casework.constituency': 'Constituency',
+  'casework.constituencyHelp':
+    'Optional. Supplying the seat routes an electricity or gas case to the company that actually serves that district.',
+  'casework.examples': 'Try a case',
+  'casework.example1': 'CNIC pending with NADRA for four months',
+  'casework.example2': 'Cannot register an FIR at the police station',
+  'casework.example3': 'Benazir Kafaalat payment not received',
+  'casework.example4': 'Burnt transformer in Multan, eleven days',
+  'casework.empty':
+    'Describe a case in English or Urdu. The classifier returns the responsible body, whether the subject is federal or provincial, and where the case is actually filed.',
+  'casework.confidence': 'confidence',
+  'casework.ministry': 'Ministry or Division',
+  'casework.actions': 'Next steps for the office',
+  'casework.documents': 'Documents to obtain',
+  'casework.routedUtility': 'Routed to',
+  'casework.mohtasibVolume': '{n} complaints against this body in the Wafaqi Mohtasib 2024 report.',
+  'casework.eighteenthAmendment':
+    'The Eighteenth Amendment abolished the Concurrent Legislative List in 2010. The Wafaqi Mohtasib has no jurisdiction over a provincial department, however similar the complaint looks to a federal one.',
+  'casework.taxonomyTitle': 'Taxonomy',
+  'casework.taxonomySize': '{leaves} specific issues across {tier1} top-level areas.',
+  'casework.taxonomySource':
+    'Volumes are from a total of {n} complaints recorded in 2024.',
+  'casework.discoTitle': 'Electricity distribution companies',
+  'casework.discoNote':
+    'An electricity case is routed by where the constituent lives, not by the nature of the complaint. Figures are complaints recorded by the Wafaqi Mohtasib in 2024. K-Electric is privatised and vertically integrated — it is not a Power Division DISCO.',
+  'casework.linkNoSite': 'no website',
+  'casework.linkHttpOnly': 'http only',
+  'casework.linkUnreachable': 'link unverified',
 } as const;
 
 export type MessageKey = keyof typeof en;
@@ -399,6 +458,63 @@ export const ur: Record<MessageKey, string> = {
   'constituency.mapUnavailableVacant': 'خالی نشست کے لیے کوئی جغرافیائی معلومات درج نہیں۔',
   'constituency.signalUnavailableVacant': 'خالی نشست کے لیے عوامی گفتگو کا رجحان تیار نہیں کیا جاتا۔',
   'constituency.sourceRoster': 'رکن اور حلقے کی معلومات: قومی اسمبلی پاکستان۔',
+
+  // ── parliamentary drafting, continued ───────────────────────────────────────────
+  'instruments.tabDraft': 'مسودہ تیار کریں',
+  'instruments.tabCheck': 'قاعدہ 78 کے تحت قابلِ سماعت',
+  'instruments.groupQuestions': 'سوالات',
+  'instruments.groupMotions': 'نوٹس اور تحاریک',
+  'instruments.groupComms': 'ابلاغ',
+  'instruments.ministryPlaceholder': 'مثلاً غربت کے خاتمے اور سماجی تحفظ ڈویژن',
+  'instruments.constituency': 'حلقہ',
+  'instruments.memberName': 'رکن',
+  'instruments.memberNamePlaceholder': 'نام جیسا نوٹس پر درج ہو گا',
+  'instruments.checkFromDraft': 'اس مسودے کو قاعدہ 78 کے مطابق جانچیں',
+  'instruments.checkPlaceholder':
+    'سوال بعینہٖ اسی صورت میں چسپاں کریں جس میں وہ سیکرٹری کے پاس جمع ہو گا — بشمول ستارہ اور حصوں کی ترتیب۔',
+  'instruments.checkEmpty':
+    'سوال چسپاں کریں اور جانچ چلائیں۔ قاعدہ 78(f) کے الفاظ یہیں براؤزر میں شمار ہوتے ہیں، اس لیے تعداد کچھ بھیجے بغیر ہی درست ہوتی ہے۔',
+  'instruments.rule78Note':
+    'قاعدہ 78 بائیس شرائط بیان کرتا ہے، (a) سے (v) تک۔ ذیلی شق (q) کی پانچ شاخیں ہیں جن میں سے ہر ایک الگ جانچی جاتی ہے — مجموعی طور پر {total} جانچیں۔',
+  'instruments.wordCountOver':
+    'یہ سوال {n} الفاظ پر مشتمل ہے، جو قاعدہ 78(f) کی {limit} الفاظ کی حد سے {excess} الفاظ زائد ہے۔',
+  'instruments.wordCountOk':
+    'یہ سوال {n} الفاظ پر مشتمل ہے، جو قاعدہ 78(f) کی {limit} الفاظ کی حد کے اندر ہے۔',
+  'instruments.conditionsSummary': '{total} میں سے {pass} شرائط پوری ہوئیں',
+  'instruments.computed': 'شمار شدہ، اندازہ نہیں',
+  'instruments.rule78Source':
+    'شرائط قومی اسمبلی کے قواعدِ کار و انصرامِ کار 2007 کے قاعدہ 78 سے ماخوذ ہیں۔',
+  'instruments.footerNote':
+    '{n} باضابطہ دستاویزات، ہر ایک پر وہ قاعدہ، مدتِ نوٹس اور فی اجلاس حد درج ہے جو سیکرٹریٹ نوٹس کے ایجنڈے تک پہنچنے سے پہلے لاگو کرتا ہے۔',
+
+  // ── constituent casework, continued ────────────────────────────────────────────
+  'casework.constituency': 'حلقہ',
+  'casework.constituencyHelp':
+    'اختیاری۔ حلقہ درج کرنے سے بجلی یا گیس کا کیس اُس کمپنی کو بھیجا جاتا ہے جو واقعی اُس ضلع کو سروس دیتی ہے۔',
+  'casework.examples': 'کوئی مثال آزمائیں',
+  'casework.example1': 'شناختی کارڈ چار ماہ سے نادرا میں زیرِ التوا',
+  'casework.example2': 'تھانے میں ایف آئی آر درج نہیں ہو رہی',
+  'casework.example3': 'بینظیر کفالت کی ادائیگی موصول نہیں ہوئی',
+  'casework.example4': 'ملتان میں ٹرانسفارمر گیارہ دن سے جلا ہوا ہے',
+  'casework.empty':
+    'مسئلہ اردو یا انگریزی میں بیان کریں۔ نظام ذمہ دار ادارہ، معاملے کا وفاقی یا صوبائی ہونا، اور درخواست دائر کرنے کا اصل فورم بتائے گا۔',
+  'casework.confidence': 'اعتماد',
+  'casework.ministry': 'وزارت یا ڈویژن',
+  'casework.actions': 'دفتر کے لیے اگلے اقدامات',
+  'casework.documents': 'مطلوبہ دستاویزات',
+  'casework.routedUtility': 'متعلقہ کمپنی',
+  'casework.mohtasibVolume': 'وفاقی محتسب کی 2024 کی رپورٹ میں اس ادارے کے خلاف {n} شکایات۔',
+  'casework.eighteenthAmendment':
+    'اٹھارہویں ترمیم نے 2010 میں مشترکہ فہرستِ قانون سازی ختم کر دی تھی۔ وفاقی محتسب کا کسی صوبائی محکمے پر دائرہ اختیار نہیں، شکایت خواہ وفاقی شکایت سے کتنی ہی ملتی جلتی کیوں نہ ہو۔',
+  'casework.taxonomyTitle': 'درجہ بندی کا ڈھانچہ',
+  'casework.taxonomySize': '{tier1} بنیادی شعبوں میں {leaves} مخصوص مسائل۔',
+  'casework.taxonomySource': 'اعداد و شمار 2024 میں درج ہونے والی کل {n} شکایات میں سے ہیں۔',
+  'casework.discoTitle': 'بجلی کی تقسیم کار کمپنیاں',
+  'casework.discoNote':
+    'بجلی کا کیس اس بنیاد پر بھیجا جاتا ہے کہ شہری کہاں رہتا ہے، نہ کہ شکایت کی نوعیت پر۔ اعداد و شمار 2024 میں وفاقی محتسب کو موصولہ شکایات ہیں۔ کے الیکٹرک نجی اور عمودی طور پر مربوط ادارہ ہے — یہ پاور ڈویژن کی ڈسکو نہیں۔',
+  'casework.linkNoSite': 'ویب سائٹ موجود نہیں',
+  'casework.linkHttpOnly': 'صرف http',
+  'casework.linkUnreachable': 'لنک غیر مصدقہ',
 };
 
 export const DICTIONARIES = { en, ur } as const;

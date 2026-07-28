@@ -1,0 +1,1133 @@
+{
+  "metadata": {
+    "title": "Pakistan Constituent Casework Taxonomy",
+    "description": "Classification of constituent casework for a Member of the National Assembly of Pakistan. Tier-1 ordering follows complaint volumes reported by the Wafaqi Mohtasib (Federal Ombudsman). Every node carries a jurisdiction, because a Member of the National Assembly has no formal locus on a provincial subject.",
+    "version": "1.0.0",
+    "modified": "2026-07-27",
+    "publisher": "Actalyze Pakistan",
+    "source": "Wafaqi Mohtasib (Federal Ombudsman) Annual Report 2024 — 226,372 complaints",
+    "sourceUrl": "https://mohtasib.gov.pk",
+    "totalComplaints": 226372
+  },
+  "data": [
+    {
+      "label_id": "pk.elec",
+      "name": "Electricity",
+      "nameUr": "بجلی",
+      "tier": 1,
+      "description": "Electricity distribution. Six of the eight most-complained-of bodies in the Wafaqi Mohtasib 2024 report are DISCOs. The distribution companies are federal entities under the Power Division, so an MNA has locus and the Wafaqi Mohtasib has jurisdiction — but electricity itself sits in Part II of the Federal Legislative List under the Council of Common Interests, and Article 157 reserves rights to the provinces.",
+      "jurisdiction": "shared",
+      "escalation": [
+        "nepra",
+        "wafaqi-mohtasib",
+        "citizen-portal"
+      ],
+      "ministry": "Power Division, Ministry of Energy",
+      "children": [
+        {
+          "label_id": "pk.elec.bill",
+          "name": "Billing and tariff",
+          "nameUr": "بلنگ اور ٹیرف",
+          "tier": 2,
+          "description": "The single largest category of electricity complaints.",
+          "children": [
+            {
+              "label_id": "pk.elec.bill.excess",
+              "name": "Excess or inflated bill",
+              "nameUr": "زائد یا بڑھا ہوا بل",
+              "tier": 3,
+              "description": "Bill materially higher than the consumer's usual consumption without a corresponding change in use."
+            },
+            {
+              "label_id": "pk.elec.bill.detection",
+              "name": "Detection bill",
+              "nameUr": "ڈیٹیکشن بل",
+              "tier": 3,
+              "description": "Bill raised retrospectively for alleged unrecorded consumption or meter tampering. Frequently disputed and frequently reduced on appeal."
+            },
+            {
+              "label_id": "pk.elec.bill.estimated",
+              "name": "Estimated or average billing",
+              "nameUr": "تخمینی یا اوسط بلنگ",
+              "tier": 3,
+              "description": "Meter not read; bill raised on an average. Common where the meter is inside a locked premises."
+            },
+            {
+              "label_id": "pk.elec.bill.slab",
+              "name": "Tariff slab or protected consumer status",
+              "nameUr": "ٹیرف سلیب یا محفوظ صارف کا درجہ",
+              "tier": 3,
+              "description": "Consumer wrongly moved out of the protected slab, losing the lower rate."
+            },
+            {
+              "label_id": "pk.elec.bill.arrears",
+              "name": "Arrears and instalment plan",
+              "nameUr": "بقایا جات اور اقساط",
+              "tier": 3,
+              "description": "Request to spread accumulated arrears over instalments rather than face disconnection."
+            }
+          ]
+        },
+        {
+          "label_id": "pk.elec.connect",
+          "name": "Connection and load",
+          "nameUr": "کنکشن اور لوڈ",
+          "tier": 2,
+          "children": [
+            {
+              "label_id": "pk.elec.connect.new",
+              "name": "New connection delayed",
+              "nameUr": "نیا کنکشن تاخیر کا شکار",
+              "tier": 3,
+              "description": "Demand notice paid but the connection not energised."
+            },
+            {
+              "label_id": "pk.elec.connect.load",
+              "name": "Load extension or reduction",
+              "nameUr": "لوڈ میں اضافہ یا کمی",
+              "tier": 3,
+              "description": "Sanctioned load does not match actual requirement."
+            },
+            {
+              "label_id": "pk.elec.connect.tubewell",
+              "name": "Agricultural tubewell connection",
+              "nameUr": "زرعی ٹیوب ویل کنکشن",
+              "tier": 3,
+              "description": "Agricultural connections and the agricultural tariff. A large share of rural casework in Punjab and Sindh."
+            }
+          ]
+        },
+        {
+          "label_id": "pk.elec.supply",
+          "name": "Supply and outages",
+          "nameUr": "فراہمی اور بندش",
+          "tier": 2,
+          "children": [
+            {
+              "label_id": "pk.elec.supply.loadshed",
+              "name": "Load shedding schedule",
+              "nameUr": "لوڈ شیڈنگ کا شیڈول",
+              "tier": 3,
+              "description": "Hours of load shedding, including additional hours imposed on high-loss feeders."
+            },
+            {
+              "label_id": "pk.elec.supply.voltage",
+              "name": "Low voltage or fluctuation",
+              "nameUr": "کم وولٹیج یا اتار چڑھاؤ",
+              "tier": 3,
+              "description": "Voltage too low to run appliances, or fluctuation damaging them."
+            },
+            {
+              "label_id": "pk.elec.supply.transformer",
+              "name": "Burnt or overloaded transformer",
+              "nameUr": "ٹرانسفارمر جل جانا یا اوورلوڈ",
+              "tier": 3,
+              "description": "Replacement or upgrading of a distribution transformer serving the locality."
+            }
+          ]
+        },
+        {
+          "label_id": "pk.elec.meter",
+          "name": "Metering",
+          "nameUr": "میٹرنگ",
+          "tier": 2,
+          "children": [
+            {
+              "label_id": "pk.elec.meter.defective",
+              "name": "Defective or burnt meter",
+              "nameUr": "خراب یا جلا ہوا میٹر",
+              "tier": 3,
+              "description": "Replacement of a meter that has stopped, run fast, or burnt out."
+            }
+          ]
+        },
+        {
+          "label_id": "pk.elec.safety",
+          "name": "Safety and infrastructure",
+          "nameUr": "حفاظت اور بنیادی ڈھانچہ",
+          "tier": 2,
+          "children": [
+            {
+              "label_id": "pk.elec.safety.hazard",
+              "name": "Dangerous poles, wires or installations",
+              "nameUr": "خطرناک کھمبے، تاریں یا تنصیبات",
+              "tier": 3,
+              "description": "Sagging conductors, leaning poles, or an installation over a residential roof."
+            },
+            {
+              "label_id": "pk.elec.safety.accident",
+              "name": "Electrocution or accident compensation",
+              "nameUr": "بجلی کے کرنٹ سے حادثہ یا معاوضہ",
+              "tier": 3,
+              "description": "Death or injury from a distribution installation, and the compensation claim that follows."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label_id": "pk.gas",
+      "name": "Gas",
+      "nameUr": "گیس",
+      "tier": 1,
+      "description": "Natural gas distribution. SNGPL serves Punjab, Khyber Pakhtunkhwa and Islamabad; SSGC serves Sindh and Balochistan. Both are federal entities under the Petroleum Division, though Article 158 gives the province in which a gas well-head is situated precedence in supply.",
+      "jurisdiction": "shared",
+      "escalation": [
+        "ogra",
+        "wafaqi-mohtasib",
+        "citizen-portal"
+      ],
+      "ministry": "Petroleum Division, Ministry of Energy",
+      "children": [
+        {
+          "label_id": "pk.gas.bill",
+          "name": "Billing",
+          "nameUr": "بلنگ",
+          "tier": 2,
+          "children": [
+            {
+              "label_id": "pk.gas.bill.excess",
+              "name": "Excess or inflated bill",
+              "nameUr": "زائد یا بڑھا ہوا بل",
+              "tier": 3
+            },
+            {
+              "label_id": "pk.gas.bill.slab",
+              "name": "Slab and tariff dispute",
+              "nameUr": "سلیب اور ٹیرف کا تنازع",
+              "tier": 3,
+              "description": "Protected-category status and the steep slab structure applied to domestic consumers."
+            }
+          ]
+        },
+        {
+          "label_id": "pk.gas.connect",
+          "name": "Connection",
+          "nameUr": "کنکشن",
+          "tier": 2,
+          "children": [
+            {
+              "label_id": "pk.gas.connect.domestic",
+              "name": "New domestic connection",
+              "nameUr": "نیا گھریلو کنکشن",
+              "tier": 3,
+              "description": "New domestic connections have been restricted for extended periods; confirm the current position with the company before advising the constituent."
+            },
+            {
+              "label_id": "pk.gas.connect.commercial",
+              "name": "Commercial or industrial connection",
+              "nameUr": "کمرشل یا صنعتی کنکشن",
+              "tier": 3
+            }
+          ]
+        },
+        {
+          "label_id": "pk.gas.supply",
+          "name": "Supply and pressure",
+          "nameUr": "فراہمی اور پریشر",
+          "tier": 2,
+          "children": [
+            {
+              "label_id": "pk.gas.supply.pressure",
+              "name": "Low pressure",
+              "nameUr": "کم پریشر",
+              "tier": 3,
+              "description": "Winter low pressure, the largest single source of gas casework between November and February."
+            },
+            {
+              "label_id": "pk.gas.supply.schedule",
+              "name": "Gas load management schedule",
+              "nameUr": "گیس لوڈ مینجمنٹ شیڈول",
+              "tier": 3
+            },
+            {
+              "label_id": "pk.gas.supply.leak",
+              "name": "Leakage or safety hazard",
+              "nameUr": "لیکیج یا حفاظتی خطرہ",
+              "tier": 3,
+              "description": "A reported leak is an emergency, not ordinary casework — the company's emergency number comes before any written complaint."
+            }
+          ]
+        },
+        {
+          "label_id": "pk.gas.meter",
+          "name": "Metering",
+          "nameUr": "میٹرنگ",
+          "tier": 2,
+          "children": [
+            {
+              "label_id": "pk.gas.meter.theft",
+              "name": "Theft case or detection bill",
+              "nameUr": "چوری کا مقدمہ یا ڈیٹیکشن بل",
+              "tier": 3,
+              "description": "Meter removed and a detection bill raised on an allegation of tampering."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label_id": "pk.fedsvc",
+      "name": "Federal services, transport and communications",
+      "nameUr": "وفاقی خدمات، ٹرانسپورٹ اور مواصلات",
+      "tier": 1,
+      "jurisdiction": "federal",
+      "escalation": [
+        "wafaqi-mohtasib",
+        "citizen-portal"
+      ],
+      "children": [
+        {
+          "label_id": "pk.fedsvc.post",
+          "name": "Pakistan Post Office Department",
+          "nameUr": "محکمہ ڈاک پاکستان",
+          "abbreviation": "Pakistan Post",
+          "tier": 2,
+          "description": "Ranked ninth by complaint volume in the Wafaqi Mohtasib 2024 report, with 1,031 complaints.",
+          "ministry": "Ministry of Communications",
+          "children": [
+            {
+              "label_id": "pk.fedsvc.post.item",
+              "name": "Lost, delayed or damaged article",
+              "nameUr": "گم شدہ، تاخیر زدہ یا خراب ڈاک",
+              "tier": 3,
+              "description": "Ordinary post, registered post and Urgent Mail Service."
+            },
+            {
+              "label_id": "pk.fedsvc.post.money",
+              "name": "Money order or postal savings",
+              "nameUr": "منی آرڈر یا ڈاک خانہ بچت",
+              "tier": 3,
+              "description": "Money orders, Postal Life Insurance and National Savings products sold through post offices."
+            }
+          ]
+        },
+        {
+          "label_id": "pk.fedsvc.cda",
+          "name": "Capital Development Authority",
+          "nameUr": "کیپیٹل ڈویلپمنٹ اتھارٹی",
+          "abbreviation": "CDA",
+          "tier": 2,
+          "description": "Islamabad Capital Territory only. 556 complaints in 2024. A CDA matter arising anywhere outside Islamabad is misdirected.",
+          "ministry": "Ministry of Interior",
+          "children": [
+            {
+              "label_id": "pk.fedsvc.cda.plot",
+              "name": "Plot allotment or transfer",
+              "nameUr": "پلاٹ کی الاٹمنٹ یا منتقلی",
+              "tier": 3
+            },
+            {
+              "label_id": "pk.fedsvc.cda.municipal",
+              "name": "Municipal services in Islamabad",
+              "nameUr": "اسلام آباد میں بلدیاتی خدمات",
+              "tier": 3,
+              "description": "Water, sanitation and roads within the Capital Territory — federal here, unlike everywhere else in the country."
+            }
+          ]
+        },
+        {
+          "label_id": "pk.fedsvc.rail",
+          "name": "Pakistan Railways",
+          "nameUr": "پاکستان ریلویز",
+          "abbreviation": "Railways",
+          "tier": 2,
+          "description": "Railways sits in Part II of the Federal Legislative List, so it is administered federally but supervised by the Council of Common Interests.",
+          "ministry": "Ministry of Railways",
+          "children": [
+            {
+              "label_id": "pk.fedsvc.rail.booking",
+              "name": "Booking, refund or service",
+              "nameUr": "بکنگ، رقم کی واپسی یا سروس",
+              "tier": 3
+            },
+            {
+              "label_id": "pk.fedsvc.rail.land",
+              "name": "Railway land and encroachment",
+              "nameUr": "ریلوے کی زمین اور تجاوزات",
+              "tier": 3
+            }
+          ]
+        },
+        {
+          "label_id": "pk.fedsvc.pta",
+          "name": "Telecommunications",
+          "nameUr": "ٹیلی کمیونیکیشن",
+          "abbreviation": "PTA",
+          "tier": 2,
+          "description": "Regulated by the Pakistan Telecommunication Authority. Regulatory authorities established under federal law sit in Part II of the Federal Legislative List, entry 6, so PTA, NEPRA and OGRA are all supervised by the Council of Common Interests.",
+          "escalation": [
+            "pta",
+            "wafaqi-mohtasib",
+            "citizen-portal"
+          ],
+          "ministry": "Ministry of Information Technology and Telecommunication",
+          "children": [
+            {
+              "label_id": "pk.fedsvc.pta.sim",
+              "name": "SIM blocked or biometric verification",
+              "nameUr": "سم بلاک یا بائیو میٹرک تصدیق",
+              "tier": 3,
+              "description": "SIMs blocked on a CNIC mismatch, which usually needs NADRA and the operator resolved together."
+            },
+            {
+              "label_id": "pk.fedsvc.pta.quality",
+              "name": "Network or broadband service quality",
+              "nameUr": "نیٹ ورک یا براڈ بینڈ سروس کا معیار",
+              "tier": 3
+            },
+            {
+              "label_id": "pk.fedsvc.pta.nuisance",
+              "name": "Nuisance or fraudulent calls and messages",
+              "nameUr": "پریشان کن یا جعلی کالز اور پیغامات",
+              "tier": 3
+            }
+          ]
+        },
+        {
+          "label_id": "pk.fedsvc.fia",
+          "name": "Federal Investigation Agency",
+          "nameUr": "وفاقی تحقیقاتی ادارہ",
+          "abbreviation": "FIA",
+          "tier": 2,
+          "description": "Federal offences including human trafficking, immigration offences and financial crime. Cybercrime investigation was reorganised in 2024–25 under a separate national agency — confirm the current filing point before advising the constituent.",
+          "ministry": "Ministry of Interior",
+          "children": [
+            {
+              "label_id": "pk.fedsvc.fia.cyber",
+              "name": "Online fraud, harassment or blackmail",
+              "nameUr": "آن لائن فراڈ، ہراسانی یا بلیک میلنگ",
+              "tier": 3
+            },
+            {
+              "label_id": "pk.fedsvc.fia.trafficking",
+              "name": "Human trafficking or illegal emigration",
+              "nameUr": "انسانی اسمگلنگ یا غیر قانونی ہجرت",
+              "tier": 3,
+              "description": "Includes constituents defrauded by an unlicensed overseas employment promoter."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label_id": "pk.passport",
+      "name": "Passports and immigration",
+      "nameUr": "پاسپورٹ اور امیگریشن",
+      "abbreviation": "DGI&P",
+      "tier": 1,
+      "description": "Directorate General of Immigration and Passports, an attached department of the Ministry of Interior. 530 complaints in 2024.",
+      "jurisdiction": "federal",
+      "escalation": [
+        "wafaqi-mohtasib",
+        "citizen-portal"
+      ],
+      "ministry": "Ministry of Interior",
+      "children": [
+        {
+          "label_id": "pk.passport.issue",
+          "name": "Issue and renewal",
+          "nameUr": "اجرا اور تجدید",
+          "tier": 2,
+          "children": [
+            {
+              "label_id": "pk.passport.issue.delay",
+              "name": "Ordinary passport delayed",
+              "nameUr": "عام پاسپورٹ میں تاخیر",
+              "tier": 3,
+              "description": "Application submitted, fee paid, delivery date passed."
+            },
+            {
+              "label_id": "pk.passport.issue.urgent",
+              "name": "Urgent or fast-track fee paid but still delayed",
+              "nameUr": "ارجنٹ فیس کے باوجود تاخیر",
+              "tier": 3,
+              "description": "The premium fee creates a service expectation the constituent has paid for."
+            },
+            {
+              "label_id": "pk.passport.issue.lost",
+              "name": "Lost, damaged or stolen passport",
+              "nameUr": "گم شدہ، خراب یا چوری شدہ پاسپورٹ",
+              "tier": 3
+            }
+          ]
+        },
+        {
+          "label_id": "pk.passport.data",
+          "name": "Particulars and documents",
+          "nameUr": "کوائف اور دستاویزات",
+          "tier": 2,
+          "children": [
+            {
+              "label_id": "pk.passport.data.spelling",
+              "name": "Name spelling correction",
+              "nameUr": "نام کے ہجوں کی درستی",
+              "tier": 3,
+              "description": "A mismatch between the passport and the CNIC is the most common cause of a visa refusal."
+            },
+            {
+              "label_id": "pk.passport.data.dob",
+              "name": "Date of birth or other particulars",
+              "nameUr": "تاریخِ پیدائش یا دیگر کوائف",
+              "tier": 3,
+              "description": "Ordinarily requires the NADRA record to be corrected first."
+            }
+          ]
+        },
+        {
+          "label_id": "pk.passport.travel",
+          "name": "Travel restrictions and repatriation",
+          "nameUr": "سفری پابندیاں اور وطن واپسی",
+          "tier": 2,
+          "children": [
+            {
+              "label_id": "pk.passport.travel.ecl",
+              "name": "Exit Control List",
+              "nameUr": "ای سی ایل",
+              "tier": 3,
+              "description": "Placement on the ECL is a Ministry of Interior decision. Removal is by review, and this is a matter on which an MNA can properly correspond with the Ministry."
+            },
+            {
+              "label_id": "pk.passport.travel.blacklist",
+              "name": "Passport Control List or blacklist",
+              "nameUr": "پاسپورٹ کنٹرول لسٹ یا بلیک لسٹ",
+              "tier": 3,
+              "description": "Distinct from the ECL: it restricts passport issue rather than departure."
+            },
+            {
+              "label_id": "pk.passport.travel.stranded",
+              "name": "Deportee or Pakistani stranded abroad",
+              "nameUr": "ملک بدر یا بیرونِ ملک پھنسے پاکستانی",
+              "tier": 3,
+              "description": "Usually needs the mission abroad as well as the Directorate, so route through the Ministry of Foreign Affairs in parallel."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label_id": "pk.nadra",
+      "name": "NADRA — identity and registration",
+      "nameUr": "نادرا — شناخت اور رجسٹریشن",
+      "abbreviation": "NADRA",
+      "tier": 1,
+      "description": "National Database and Registration Authority, an attached department of the Ministry of Interior. 442 complaints in 2024. Almost every other federal service depends on a valid CNIC, so a blocked identity record blocks everything downstream.",
+      "jurisdiction": "federal",
+      "escalation": [
+        "wafaqi-mohtasib",
+        "citizen-portal"
+      ],
+      "ministry": "Ministry of Interior",
+      "children": [
+        {
+          "label_id": "pk.nadra.cnic",
+          "name": "Computerised National Identity Card",
+          "nameUr": "کمپیوٹرائزڈ قومی شناختی کارڈ",
+          "abbreviation": "CNIC",
+          "tier": 2,
+          "children": [
+            {
+              "label_id": "pk.nadra.cnic.delay",
+              "name": "New CNIC or renewal pending",
+              "nameUr": "نیا شناختی کارڈ یا تجدید زیرِ التوا",
+              "tier": 3,
+              "description": "Application taken, token issued, card not delivered."
+            },
+            {
+              "label_id": "pk.nadra.cnic.blocked",
+              "name": "CNIC blocked or under verification",
+              "nameUr": "شناختی کارڈ بلاک یا زیرِ تصدیق",
+              "tier": 3,
+              "description": "Blocking suspends the record and with it a bank account, a SIM, a pension and a BISP payment. Treat as urgent."
+            },
+            {
+              "label_id": "pk.nadra.cnic.correction",
+              "name": "Correction of name, date of birth or parentage",
+              "nameUr": "نام، تاریخِ پیدائش یا والدیت کی درستی",
+              "tier": 3
+            }
+          ]
+        },
+        {
+          "label_id": "pk.nadra.family",
+          "name": "Family and civil registration",
+          "nameUr": "خاندانی اور شہری رجسٹریشن",
+          "tier": 2,
+          "description": "Routing trap: NADRA does NOT issue birth certificates. The union council or local government issues them, which makes that a PROVINCIAL matter; NADRA only records the registration afterwards.",
+          "children": [
+            {
+              "label_id": "pk.nadra.family.bform",
+              "name": "Child Registration Certificate (B-Form)",
+              "nameUr": "بے فارم / بچے کا اندراج",
+              "tier": 3,
+              "description": "Required for school admission, a child's passport and inclusion in a BISP household."
+            },
+            {
+              "label_id": "pk.nadra.family.frc",
+              "name": "Family Registration Certificate",
+              "nameUr": "فیملی رجسٹریشن سرٹیفکیٹ",
+              "abbreviation": "FRC",
+              "tier": 3,
+              "description": "The standard proof of family composition for visas, inheritance and benefit claims."
+            },
+            {
+              "label_id": "pk.nadra.family.death",
+              "name": "Death certificate or removal of a deceased record",
+              "nameUr": "وفات کا سرٹیفکیٹ یا مرحوم کا اندراج ختم کرنا",
+              "tier": 3
+            }
+          ]
+        },
+        {
+          "label_id": "pk.nadra.overseas",
+          "name": "Overseas Pakistanis",
+          "nameUr": "بیرونِ ملک پاکستانی",
+          "tier": 2,
+          "children": [
+            {
+              "label_id": "pk.nadra.overseas.nicop",
+              "name": "NICOP",
+              "nameUr": "نائیکاپ",
+              "tier": 3,
+              "description": "National Identity Card for Overseas Pakistanis."
+            },
+            {
+              "label_id": "pk.nadra.overseas.poc",
+              "name": "Pakistan Origin Card",
+              "nameUr": "پاکستان اوریجن کارڈ",
+              "abbreviation": "POC",
+              "tier": 3,
+              "description": "For foreign nationals of Pakistani origin."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label_id": "pk.pension",
+      "name": "Pensions, labour and workers' welfare",
+      "nameUr": "پنشن، محنت اور مزدوروں کی بہبود",
+      "tier": 1,
+      "jurisdiction": "federal",
+      "escalation": [
+        "wafaqi-mohtasib",
+        "citizen-portal"
+      ],
+      "children": [
+        {
+          "label_id": "pk.pension.eobi",
+          "name": "EOBI",
+          "nameUr": "ای او بی آئی",
+          "abbreviation": "EOBI",
+          "tier": 2,
+          "description": "Employees' Old-Age Benefits Institution. 398 complaints in 2024. NEEDS LOCAL REVIEW: the parent ministry is stated on the historical position and could not be confirmed from an official source.",
+          "ministry": "Ministry of Overseas Pakistanis and Human Resource Development (needs confirmation)",
+          "children": [
+            {
+              "label_id": "pk.pension.eobi.claim",
+              "name": "Old-age pension claim delayed",
+              "nameUr": "بڑھاپا پنشن کے دعوے میں تاخیر",
+              "tier": 3
+            },
+            {
+              "label_id": "pk.pension.eobi.contrib",
+              "name": "Employer not depositing contributions",
+              "nameUr": "آجر کی جانب سے کنٹریبیوشن جمع نہ کرانا",
+              "tier": 3,
+              "description": "The commonest cause of a rejected claim: the worker's service is real but the employer never registered or never paid."
+            },
+            {
+              "label_id": "pk.pension.eobi.survivor",
+              "name": "Survivors' or invalidity pension",
+              "nameUr": "پسماندگان یا معذوری کی پنشن",
+              "tier": 3
+            }
+          ]
+        },
+        {
+          "label_id": "pk.pension.civil",
+          "name": "Federal civil and military pensions",
+          "nameUr": "وفاقی سول اور فوجی پنشن",
+          "tier": 2,
+          "children": [
+            {
+              "label_id": "pk.pension.civil.agpr",
+              "name": "AGPR pension case",
+              "nameUr": "اے جی پی آر پنشن کیس",
+              "abbreviation": "AGPR",
+              "tier": 3,
+              "description": "Accountant General Pakistan Revenues, within the Controller General of Accounts organisation — federal civil pensions and pay."
+            },
+            {
+              "label_id": "pk.pension.civil.cma",
+              "name": "Military pension through the Controller Military Accounts",
+              "nameUr": "کنٹرولر ملٹری اکاؤنٹس کے ذریعے فوجی پنشن",
+              "abbreviation": "CMA",
+              "tier": 3,
+              "description": "Controller Military Accounts (Pension), within the Pakistan Military Accounts Department, an attached department of the Ministry of Defence. Federal civil pensions go to AGPR instead; PROVINCIAL government pensions go to the provincial Accountant General and are outside an MNA's locus."
+            },
+            {
+              "label_id": "pk.pension.civil.family",
+              "name": "Family pension after a pensioner's death",
+              "nameUr": "پنشنر کی وفات کے بعد فیملی پنشن",
+              "tier": 3
+            },
+            {
+              "label_id": "pk.pension.civil.gpfund",
+              "name": "GP Fund, gratuity or commutation",
+              "nameUr": "جی پی فنڈ، گریجویٹی یا کمیوٹیشن",
+              "tier": 3
+            }
+          ]
+        },
+        {
+          "label_id": "pk.pension.overseas",
+          "name": "Overseas employment and welfare",
+          "nameUr": "بیرونِ ملک ملازمت اور بہبود",
+          "tier": 2,
+          "ministry": "Ministry of Overseas Pakistanis and Human Resource Development",
+          "children": [
+            {
+              "label_id": "pk.pension.overseas.recruit",
+              "name": "Overseas employment promoter or recruitment dispute",
+              "nameUr": "بیرونِ ملک ملازمت کے پروموٹر یا بھرتی کا تنازع",
+              "tier": 3,
+              "description": "Licensed promoters are regulated by the Bureau of Emigration and Overseas Employment."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label_id": "pk.social",
+      "name": "Social protection",
+      "nameUr": "سماجی تحفظ",
+      "tier": 1,
+      "jurisdiction": "federal",
+      "escalation": [
+        "wafaqi-mohtasib",
+        "citizen-portal"
+      ],
+      "children": [
+        {
+          "label_id": "pk.social.bisp",
+          "name": "BISP",
+          "nameUr": "بی آئی ایس پی",
+          "abbreviation": "BISP",
+          "tier": 2,
+          "description": "Benazir Income Support Programme. 327 complaints in 2024, though the number reaching a constituency office is far higher — most beneficiaries go to the MNA's office before they go to an ombudsman.",
+          "ministry": "Ministry of Poverty Alleviation and Social Safety",
+          "children": [
+            {
+              "label_id": "pk.social.bisp.kafaalat",
+              "name": "Benazir Kafaalat quarterly stipend",
+              "nameUr": "بینظیر کفالت سہ ماہی وظیفہ",
+              "tier": 3,
+              "description": "The unconditional cash stipend, paid quarterly to the woman registered as head of the beneficiary household."
+            },
+            {
+              "label_id": "pk.social.bisp.nser",
+              "name": "Benazir NSER survey or PMT score",
+              "nameUr": "بینظیر این ایس ای آر سروے یا پی ایم ٹی سکور",
+              "tier": 3,
+              "description": "The official name carries the Benazir prefix: Benazir National Socio-Economic Registry. A household whose circumstances have worsened can seek a re-survey. Eligibility turns on the Proxy Means Test score, and a re-survey is the remedy for a household whose circumstances have worsened."
+            },
+            {
+              "label_id": "pk.social.bisp.taleemi",
+              "name": "Benazir Taleemi Wazaif",
+              "nameUr": "بینظیر تعلیمی وظائف",
+              "tier": 3,
+              "description": "Education stipend conditional on the child's school enrolment and attendance."
+            },
+            {
+              "label_id": "pk.social.bisp.nashonuma",
+              "name": "Benazir Nashonuma Programme",
+              "nameUr": "بینظیر نشوونما پروگرام",
+              "tier": 3,
+              "description": "Conditional nutrition support for pregnant and lactating women and children under two."
+            },
+            {
+              "label_id": "pk.social.bisp.biometric",
+              "name": "Biometric verification failure",
+              "nameUr": "بائیو میٹرک تصدیق کی ناکامی",
+              "tier": 3,
+              "description": "Worn or unreadable fingerprints stop payment at the campsite or agent. It is a NADRA-side problem presenting as a BISP-side one."
+            },
+            {
+              "label_id": "pk.social.bisp.deduction",
+              "name": "Deduction by a payment agent",
+              "nameUr": "ادائیگی ایجنٹ کی جانب سے کٹوتی",
+              "tier": 3,
+              "description": "Illegal deductions by a retailer or branchless-banking agent. The remedy runs through the disbursing bank as well as BISP.",
+              "escalation": [
+                "banking-mohtasib",
+                "wafaqi-mohtasib",
+                "citizen-portal"
+              ]
+            },
+            {
+              "label_id": "pk.social.bisp.exclusion",
+              "name": "Wrongly declared ineligible or dropped",
+              "nameUr": "غلط طور پر نااہل قرار یا فہرست سے خارج",
+              "tier": 3
+            }
+          ]
+        },
+        {
+          "label_id": "pk.social.baitulmal",
+          "name": "Pakistan Bait-ul-Mal",
+          "nameUr": "پاکستان بیت المال",
+          "abbreviation": "PBM",
+          "tier": 2,
+          "ministry": "Poverty Alleviation and Social Safety Division",
+          "children": [
+            {
+              "label_id": "pk.social.baitulmal.ifa",
+              "name": "Individual financial assistance",
+              "nameUr": "انفرادی مالی امداد",
+              "tier": 3
+            },
+            {
+              "label_id": "pk.social.baitulmal.medical",
+              "name": "Medical or treatment assistance",
+              "nameUr": "طبی یا علاج کی امداد",
+              "tier": 3
+            },
+            {
+              "label_id": "pk.social.baitulmal.child",
+              "name": "Child support and orphan care",
+              "nameUr": "بچوں کی کفالت اور یتیم بچوں کی دیکھ بھال",
+              "tier": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label_id": "pk.tax",
+      "name": "Revenue and taxation",
+      "nameUr": "محصولات اور ٹیکس",
+      "abbreviation": "FBR",
+      "tier": 1,
+      "description": "Federal Board of Revenue. Note the forum: maladministration by FBR goes to the Federal Tax Ombudsman, a separate institution from the Wafaqi Mohtasib with its own statute.",
+      "jurisdiction": "federal",
+      "escalation": [
+        "federal-tax-ombudsman",
+        "citizen-portal"
+      ],
+      "ministry": "Revenue Division, Ministry of Finance",
+      "children": [
+        {
+          "label_id": "pk.tax.income",
+          "name": "Income tax",
+          "nameUr": "انکم ٹیکس",
+          "tier": 2,
+          "children": [
+            {
+              "label_id": "pk.tax.income.refund",
+              "name": "Refund delayed",
+              "nameUr": "ریفنڈ میں تاخیر",
+              "tier": 3
+            },
+            {
+              "label_id": "pk.tax.income.ntn",
+              "name": "NTN registration or IRIS access",
+              "nameUr": "این ٹی این رجسٹریشن یا آئی آر آئی ایس تک رسائی",
+              "tier": 3
+            },
+            {
+              "label_id": "pk.tax.income.atl",
+              "name": "Active Taxpayer List status",
+              "nameUr": "ایکٹو ٹیکس پیئر لسٹ کی حیثیت",
+              "tier": 3,
+              "description": "Absence from the ATL raises withholding rates on banking, property and vehicle transactions."
+            },
+            {
+              "label_id": "pk.tax.income.notice",
+              "name": "Notice, audit or recovery",
+              "nameUr": "نوٹس، آڈٹ یا وصولی",
+              "tier": 3
+            }
+          ]
+        },
+        {
+          "label_id": "pk.tax.indirect",
+          "name": "Sales tax and customs",
+          "nameUr": "سیلز ٹیکس اور کسٹمز",
+          "tier": 2,
+          "children": [
+            {
+              "label_id": "pk.tax.indirect.registration",
+              "name": "Sales tax registration or suspension",
+              "nameUr": "سیلز ٹیکس رجسٹریشن یا معطلی",
+              "tier": 3
+            },
+            {
+              "label_id": "pk.tax.indirect.customs",
+              "name": "Customs clearance or valuation",
+              "nameUr": "کسٹمز کلیئرنس یا ویلیوایشن",
+              "tier": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label_id": "pk.health",
+      "name": "Health",
+      "nameUr": "صحت",
+      "tier": 1,
+      "description": "Health service delivery is a provincial subject after the Eighteenth Amendment. What remains federal is regulation, and those national programmes that a province has not taken over.",
+      "jurisdiction": "shared",
+      "escalation": [
+        "wafaqi-mohtasib",
+        "citizen-portal"
+      ],
+      "children": [
+        {
+          "label_id": "pk.health.sehat",
+          "name": "Sehat Sahulat / health card",
+          "nameUr": "صحت سہولت / ہیلتھ کارڈ",
+          "tier": 2,
+          "description": "Now effectively a provincial programme. Verified as operating in Khyber Pakhtunkhwa as Sehat Card Plus. NEEDS LOCAL REVIEW: the position in Punjab, Sindh and Balochistan could not be confirmed, and there is no working federal programme website — confirm in the constituent's own province before advising.",
+          "jurisdiction": "shared",
+          "children": [
+            {
+              "label_id": "pk.health.sehat.eligibility",
+              "name": "Eligibility or card not issued",
+              "nameUr": "اہلیت یا کارڈ جاری نہ ہونا",
+              "tier": 3
+            },
+            {
+              "label_id": "pk.health.sehat.refusal",
+              "name": "Empanelled hospital refusing treatment",
+              "nameUr": "منظور شدہ ہسپتال کا علاج سے انکار",
+              "tier": 3
+            },
+            {
+              "label_id": "pk.health.sehat.limit",
+              "name": "Treatment limit or excluded procedure",
+              "nameUr": "علاج کی حد یا خارج شدہ طریقۂ علاج",
+              "tier": 3
+            }
+          ]
+        },
+        {
+          "label_id": "pk.health.regulatory",
+          "name": "Medicines and professional regulation",
+          "nameUr": "ادویات اور پیشہ ورانہ ضابطہ",
+          "tier": 2,
+          "jurisdiction": "federal",
+          "children": [
+            {
+              "label_id": "pk.health.regulatory.drap",
+              "name": "Medicine quality, price or availability",
+              "nameUr": "ادویات کا معیار، قیمت یا دستیابی",
+              "tier": 3,
+              "description": "Drug Regulatory Authority of Pakistan."
+            },
+            {
+              "label_id": "pk.health.regulatory.council",
+              "name": "Registration of a doctor, nurse or pharmacist",
+              "nameUr": "ڈاکٹر، نرس یا فارماسسٹ کی رجسٹریشن",
+              "tier": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label_id": "pk.edu",
+      "name": "Higher education and skills",
+      "nameUr": "اعلیٰ تعلیم اور ہنر",
+      "tier": 1,
+      "description": "Standards in institutions for higher education sit in Part II of the Federal Legislative List, entry 12 — federal competence, but supervised by the Council of Common Interests rather than exclusively federal. Administratively the HEC is a federal body and the Wafaqi Mohtasib takes complaints against it. School education is provincial and appears under provincial subjects; Punjab and Sindh also run their own provincial higher education commissions.",
+      "jurisdiction": "shared",
+      "escalation": [
+        "wafaqi-mohtasib",
+        "citizen-portal"
+      ],
+      "children": [
+        {
+          "label_id": "pk.edu.hec",
+          "name": "Higher Education Commission",
+          "nameUr": "ہائر ایجوکیشن کمیشن",
+          "abbreviation": "HEC",
+          "tier": 2,
+          "children": [
+            {
+              "label_id": "pk.edu.hec.attestation",
+              "name": "Degree attestation",
+              "nameUr": "ڈگری کی تصدیق",
+              "tier": 3,
+              "description": "Required for overseas employment and further study; a bottleneck for constituents with a job offer and a deadline."
+            },
+            {
+              "label_id": "pk.edu.hec.equivalence",
+              "name": "Equivalence of a foreign degree",
+              "nameUr": "غیر ملکی ڈگری کی مساوات",
+              "tier": 3
+            },
+            {
+              "label_id": "pk.edu.hec.scholarship",
+              "name": "Scholarship award or stipend",
+              "nameUr": "وظیفہ یا سکالرشپ",
+              "tier": 3
+            },
+            {
+              "label_id": "pk.edu.hec.recognition",
+              "name": "Recognition of a university or programme",
+              "nameUr": "جامعہ یا پروگرام کی منظوری",
+              "tier": 3
+            }
+          ]
+        },
+        {
+          "label_id": "pk.edu.skills",
+          "name": "Technical and vocational training",
+          "nameUr": "تکنیکی و پیشہ ورانہ تربیت",
+          "tier": 2,
+          "children": [
+            {
+              "label_id": "pk.edu.skills.navttc",
+              "name": "Training place or certification",
+              "nameUr": "تربیتی نشست یا سند",
+              "tier": 3,
+              "description": "National Vocational and Technical Training Commission and its provincial counterparts."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label_id": "pk.prov",
+      "name": "Provincial subjects",
+      "nameUr": "صوبائی معاملات",
+      "tier": 1,
+      "description": "Subjects that fell to the provinces when the Concurrent Legislative List was abolished by the Eighteenth Amendment in 2010. A Member of the NATIONAL Assembly has no formal locus on any of them. These cases still walk into the constituency office every day, so they are classified here and routed onward — to the MPA, or to the provincial ombudsman. The Wafaqi Mohtasib cannot take them.",
+      "jurisdiction": "provincial",
+      "escalation": [
+        "provincial-ombudsman",
+        "citizen-portal"
+      ],
+      "children": [
+        {
+          "label_id": "pk.prov.police",
+          "name": "Police and criminal process",
+          "nameUr": "پولیس اور فوجداری کارروائی",
+          "tier": 2,
+          "description": "The police force is provincial. Two exceptions worth knowing: Islamabad Capital Territory Police is FEDERAL, under the Ministry of Interior, and the FIA handles federal offences. Note also that criminal law and criminal procedure are a concurrent field under Article 142(b) even though the force that applies them is provincial.",
+          "children": [
+            {
+              "label_id": "pk.prov.police.fir",
+              "name": "FIR not registered",
+              "nameUr": "ایف آئر درج نہ ہونا",
+              "tier": 3,
+              "description": "Registration under section 154 of the Code of Criminal Procedure is compelled through the Justice of the Peace under section 22-A, not through a Member of the National Assembly. In Islamabad the police are federal, so an ICT case is the one exception where an MNA does have a route."
+            },
+            {
+              "label_id": "pk.prov.police.investigation",
+              "name": "Investigation stalled or biased",
+              "nameUr": "تفتیش رکی ہوئی یا جانبدار",
+              "tier": 3
+            },
+            {
+              "label_id": "pk.prov.police.misconduct",
+              "name": "Police misconduct or unlawful detention",
+              "nameUr": "پولیس کی بدسلوکی یا غیر قانونی حراست",
+              "tier": 3
+            }
+          ]
+        },
+        {
+          "label_id": "pk.prov.land",
+          "name": "Land and revenue",
+          "nameUr": "زمین اور محکمہ مال",
+          "tier": 2,
+          "children": [
+            {
+              "label_id": "pk.prov.land.record",
+              "name": "Land record or fard",
+              "nameUr": "ریکارڈ یا فرد",
+              "tier": 3,
+              "description": "Computerised through the provincial land records authorities; the service centre, not the patwari, is the point of contact."
+            },
+            {
+              "label_id": "pk.prov.land.mutation",
+              "name": "Mutation (intiqal) pending",
+              "nameUr": "انتقال زیرِ التوا",
+              "tier": 3
+            },
+            {
+              "label_id": "pk.prov.land.encroach",
+              "name": "Encroachment or unlawful occupation",
+              "nameUr": "تجاوزات یا ناجائز قبضہ",
+              "tier": 3
+            }
+          ]
+        },
+        {
+          "label_id": "pk.prov.education",
+          "name": "School education",
+          "nameUr": "سکول ایجوکیشن",
+          "tier": 2,
+          "children": [
+            {
+              "label_id": "pk.prov.education.admission",
+              "name": "Admission or transfer",
+              "nameUr": "داخلہ یا تبادلہ",
+              "tier": 3
+            },
+            {
+              "label_id": "pk.prov.education.staff",
+              "name": "Teacher absence or shortage",
+              "nameUr": "استاد کی غیر حاضری یا کمی",
+              "tier": 3
+            }
+          ]
+        },
+        {
+          "label_id": "pk.prov.localgov",
+          "name": "Local government and municipal services",
+          "nameUr": "بلدیاتی حکومت اور خدمات",
+          "tier": 2,
+          "children": [
+            {
+              "label_id": "pk.prov.localgov.water",
+              "name": "Water supply and sanitation",
+              "nameUr": "پانی کی فراہمی اور نکاسی",
+              "tier": 3,
+              "description": "Outside the Islamabad Capital Territory, water and sanitation are municipal and therefore provincial."
+            },
+            {
+              "label_id": "pk.prov.localgov.waste",
+              "name": "Solid waste and sewerage",
+              "nameUr": "ٹھوس فضلہ اور سیوریج",
+              "tier": 3
+            }
+          ]
+        },
+        {
+          "label_id": "pk.prov.health",
+          "name": "Provincial health facilities",
+          "nameUr": "صوبائی صحت مراکز",
+          "tier": 2,
+          "children": [
+            {
+              "label_id": "pk.prov.health.primary",
+              "name": "Basic Health Unit or Rural Health Centre",
+              "nameUr": "بنیادی مرکزِ صحت یا دیہی مرکزِ صحت",
+              "tier": 3
+            },
+            {
+              "label_id": "pk.prov.health.hospital",
+              "name": "District or tehsil headquarters hospital",
+              "nameUr": "ضلعی یا تحصیل ہیڈ کوارٹر ہسپتال",
+              "tier": 3
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
