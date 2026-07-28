@@ -134,16 +134,32 @@ export function party(id: string | null | undefined): PkParty {
 }
 
 /**
- * Six of the parties in this house are some shade of green (PML-N, PML-Q, JUI-F,
- * IPP, PML-Z, MWM), which is unreadable when they sit adjacent on a map or a stacked
- * bar. Callers should hatch the ones flagged here rather than relying on hue alone.
+ * Parties whose colours are too close to a same-family neighbour to be told apart by
+ * hue alone on a stacked bar or a map. Callers should apply a pattern fill to these.
+ *
+ * Two clusters, both real:
+ *  - **Greens.** Six parties in this house are some shade of green, PML-N and PML-Q
+ *    among them.
+ *  - **Reds.** MQM-P (#BE1212) and PTI/IND_PTI (#E70A0A) are nearly identical, and
+ *    they sit adjacent on any Karachi seat — NA-247 puts them side by side.
  */
 export const GREEN_FAMILY: ReadonlySet<PkPartyId> = new Set([
   'PMLN', 'PMLQ', 'JUIF', 'IPP', 'PMLZ', 'MWM', 'BAP',
 ]);
 
+export const RED_FAMILY: ReadonlySet<PkPartyId> = new Set([
+  'MQMP', 'PTI', 'IND_PTI', 'ANP', 'PKNAP', 'NP',
+]);
+
 export function needsPatternFill(id: PkPartyId): boolean {
-  return GREEN_FAMILY.has(id);
+  return GREEN_FAMILY.has(id) || RED_FAMILY.has(id);
+}
+
+/** Which cluster a party belongs to, so callers can vary the hatch angle. */
+export function colourFamily(id: PkPartyId): 'green' | 'red' | null {
+  if (GREEN_FAMILY.has(id)) return 'green';
+  if (RED_FAMILY.has(id)) return 'red';
+  return null;
 }
 
 export const PK_PROVINCES = {

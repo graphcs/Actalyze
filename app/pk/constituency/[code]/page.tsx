@@ -217,7 +217,9 @@ export default function PkConstituencyPage() {
     let cancelled = false;
 
     setIntelLoading(true);
-    fetchWithCache(`/api/pk/ai-intel?code=${encodeURIComponent(constituency.code)}`)
+    fetchWithCache(
+      `/api/pk/ai-intel?code=${encodeURIComponent(constituency.code)}&lang=${locale}`
+    )
       .then((r) => r.json())
       .then((d) => {
         if (!cancelled && !d.error) setIntel(d);
@@ -230,7 +232,9 @@ export default function PkConstituencyPage() {
     return () => {
       cancelled = true;
     };
-  }, [constituency]);
+    // `locale` matters: topic labels and insights are rendered per language, so
+    // toggling has to refetch or the section keeps the previous language's text.
+  }, [constituency, locale]);
 
   // ── Bad code ─────────────────────────────────────────────────────────────────────
   if (!code || !constituency) {

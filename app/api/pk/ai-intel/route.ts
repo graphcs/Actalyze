@@ -11,6 +11,7 @@ import {
 import { normalizePkCode } from "@/lib/pk/constituency-code";
 import { getConstituency, type PkConstituency } from "@/lib/pk/constituencies";
 import { PK_PROVINCES } from "@/lib/pk/parties";
+import { localizeIntelToUrdu } from "@/lib/pk/localize-intel";
 import {
   classifyPkPosts,
   aggregatePkClassifications,
@@ -119,8 +120,11 @@ export async function GET(request: NextRequest) {
       10
     );
 
-    const memoryCacheKey = generateCacheKey("pk-ai-intel", { code });
-    const dbCacheKey = generateDistrictCacheKey("ai-intel", code, undefined, "PK");
+    // Topic labels and insights are rendered per language, so the cache is keyed on
+    // it too — otherwise an Urdu visitor gets whichever language warmed first.
+    const lang = request.nextUrl.searchParams.get("lang") === "ur" ? "ur" : "en";
+    const memoryCacheKey = generateCacheKey("pk-ai-intel", { code, lang });
+    const dbCacheKey = generateDistrictCacheKey("ai-intel", code, { lang }, "PK");
 
     const dbCached = await timer.time("db_cache_read", () =>
       getFromDbCache<PkIntelResponse>(dbCacheKey, useCache)
@@ -215,7 +219,14 @@ export async function GET(request: NextRequest) {
       })
     );
 
-    const intel = aggregatePkClassifications(classifications, code, constituency.name);
+    const aggregated = aggregatePkClassifications(classifications, code, constituency.name);
+
+    // Classification runs in English so topic strings aggregate consistently across
+    // posts; the finished payload is translated once, not per post.
+    const intel =
+      lang === "ur"
+        ? await timer.time("localize", () => localizeIntelToUrdu(aggregated))
+        : aggregated;
 
     console.log(
       `🎯 [${code}] n=${intel.sample_size} partisan=${intel.partisan_posts} ` +
