@@ -167,8 +167,15 @@ export function referenceNumber(i: NoticeIntake): string {
   const wing = bareWing(i.wing);
   const file = i.fileNumber.trim();
   const serial = i.serial.trim();
-  return `No.SO(${wing})${file}${serial ? `-${serial}` : ''}/${i.year}`;
+  // An unfilled field renders as a visible blank rather than collapsing. `No.SO()/2026`
+  // reads as a bug; `No.SO(——)——/2026` reads as a form waiting for the officer, which is
+  // what it is. The same reasoning applies to the letterhead and signature block below.
+  return `No.SO(${wing || BLANK})${file || BLANK}${serial ? `-${serial}` : ''}/${i.year}`;
 }
+
+/** Em dashes, not underscores: this gets printed, and a rule of underscores looks like a
+ *  form to sign rather than a field to complete. */
+const BLANK = '——';
 
 /**
  * `Energy` -> `Energy Department`, but `Finance Department` is left alone.
@@ -336,14 +343,37 @@ function subjectOf(i: NoticeIntake, locale: Locale): string {
 function effectOf(i: NoticeIntake, locale: Locale): string {
   return locale === 'ur' ? (i.effectUr || i.effect) : i.effect;
 }
+/**
+ * Fit a phrase into the middle of a sentence.
+ *
+ * `appliesTo` and `supersedes` arrive as standalone phrases — from a model, or from an
+ * officer typing into a labelled box — so they come capitalised and full-stopped. Dropped
+ * straight into "This applies to …" that produces *"This applies to All individuals and
+ * entities interested in applying for solar net metering in Punjab.."*: a stray capital
+ * and a doubled full stop, in the operative paragraph of a legal instrument.
+ *
+ * Only the first letter is lowered, and only when the rest of the first word is not
+ * already capitalised — so `NADRA`, `DISCOs` and `All Deputy Commissioners` keep the case
+ * they were given, because those are proper nouns and titles rather than sentence case.
+ */
+function embed(phrase: string): string {
+  const s = phrase.trim().replace(/[.。]+$/, '');
+  if (!s) return s;
+  const firstWord = s.split(/\s+/)[0];
+  const isProperNoun = /^[A-Z][A-Z]/.test(firstWord) || /^[A-Z]\w*[A-Z]/.test(firstWord);
+  if (isProperNoun) return s;
+  return s.charAt(0).toLowerCase() + s.slice(1);
+}
+
 function appliesToOf(i: NoticeIntake, locale: Locale): string {
-  return locale === 'ur' ? (i.appliesToUr || i.appliesTo) : i.appliesTo;
+  return embed(locale === 'ur' ? (i.appliesToUr || i.appliesTo) : i.appliesTo);
 }
 function powerOf(i: NoticeIntake, locale: Locale): string | undefined {
   return locale === 'ur' ? (i.statutoryPowerUr || i.statutoryPower) : i.statutoryPower;
 }
 function supersedesOf(i: NoticeIntake, locale: Locale): string | undefined {
-  return locale === 'ur' ? (i.supersedesUr || i.supersedes) : i.supersedes;
+  const v = locale === 'ur' ? (i.supersedesUr || i.supersedes) : i.supersedes;
+  return v ? embed(v) : undefined;
 }
 function deptOf(i: NoticeIntake, locale: Locale): string {
   return locale === 'ur' ? (i.departmentUr || i.department) : i.department;
@@ -365,9 +395,11 @@ export function renderNotification(i: NoticeIntake, locale: Locale): string {
 
   lines.push(t.govt);
   lines.push(
-    locale === 'ur'
-      ? departmentName(deptOf(i, 'ur'), 'ur')
-      : departmentName(i.department, 'en').toUpperCase()
+    i.department.trim()
+      ? locale === 'ur'
+        ? departmentName(deptOf(i, 'ur'), 'ur')
+        : departmentName(i.department, 'en').toUpperCase()
+      : `${BLANK} ${locale === 'ur' ? 'محکمہ' : 'DEPARTMENT'}`
   );
   lines.push('');
   lines.push(dateline(i, locale));
@@ -396,11 +428,12 @@ export function renderNotification(i: NoticeIntake, locale: Locale): string {
 
   lines.push('');
   lines.push('');
-  lines.push(`(${locale === 'ur' ? i.signatoryNameUr || i.signatoryName : i.signatoryName})`);
+  const signatory = (locale === 'ur' ? i.signatoryNameUr || i.signatoryName : i.signatoryName).trim();
+  lines.push(`(${signatory || BLANK})`);
   lines.push(
     locale === 'ur'
-      ? `${i.signatoryDesignationUr || i.signatoryDesignation} (${bareWing(i.wing)})`
-      : `${i.signatoryDesignation.toUpperCase()} (${bareWing(i.wing)})`
+      ? `${i.signatoryDesignationUr || i.signatoryDesignation} (${bareWing(i.wing) || BLANK})`
+      : `${i.signatoryDesignation.toUpperCase()} (${bareWing(i.wing) || BLANK})`
   );
   lines.push('');
   // `Even` = the same number and date as the notification above. An endorsement issued
@@ -548,7 +581,32 @@ export function missingFields(i: Partial<NoticeIntake>): string[] {
   return missing;
 }
 
-/** Whether the Urdu is the officer's or a machine rendering, so the UI can say which. */
+/**
+ * Which fields would render in English inside the Urdu notification.
+ *
+ * Checked field by field rather than as a boolean on the subject alone, because the
+ * fallback is silent by design: a missing `signatoryNameUr` does not break anything, it
+ * just puts "Muhammad Adnan Rafique / SECTION OFFICER" into an otherwise Urdu legal
+ * instrument, and a `supersedes` reference carries "dated 4th December, 2025" with it.
+ * Those are the gaps a native reader notices immediately and an English-reading reviewer
+ * does not see at all, so the page names them individually.
+ */
+export function urduGaps(i: NoticeIntake): string[] {
+  const gaps: string[] = [];
+  if (!i.subjectUr?.trim()) gaps.push('subject');
+  if (!i.effectUr?.trim()) gaps.push('effect');
+  if (i.appliesTo?.trim() && !i.appliesToUr?.trim()) gaps.push('appliesTo');
+  if (i.department?.trim() && !i.departmentUr?.trim()) gaps.push('department');
+  if (i.statutoryPower?.trim() && !i.statutoryPowerUr?.trim()) gaps.push('statutoryPower');
+  if (i.supersedes?.trim() && !i.supersedesUr?.trim()) gaps.push('supersedes');
+  if (i.signatoryName?.trim() && !i.signatoryNameUr?.trim()) gaps.push('signatoryName');
+  if (i.signatoryDesignation?.trim() && !i.signatoryDesignationUr?.trim())
+    gaps.push('signatoryDesignation');
+  if (i.distribution?.length && !i.distributionUr?.length) gaps.push('distribution');
+  return gaps;
+}
+
+/** Whether the Urdu is the officer's throughout, so the UI can say which. */
 export function urduIsReviewed(i: NoticeIntake): boolean {
-  return Boolean(i.subjectUr?.trim() && i.effectUr?.trim());
+  return urduGaps(i).length === 0;
 }
