@@ -60,3 +60,7 @@ next-env.d.ts
 # COD-AB source download for scripts/pk/build-province-geo.mjs — re-fetchable,
 # and the district layer alone is 11MB
 .pk-geo-cache/
+
+# downloaded sample notifications for data/pk/NOTIFICATION-FORMAT.md — all scans,
+# re-fetchable, and one of them is 7MB
+.pk-notice-samples/
