@@ -615,6 +615,7 @@ export const en = {
   'seat.provincial': 'Provincial assembly seat',
   'seat.member': 'Member',
   'seat.districtLabel': 'District',
+  'seat.otherSeats': 'Other seats in the same district',
 } as const;
 
 export type MessageKey = keyof typeof en;
@@ -1183,6 +1184,7 @@ export const ur: Record<MessageKey, string> = {
   'seat.provincial': 'صوبائی اسمبلی کی نشست',
   'seat.member': 'رکن',
   'seat.districtLabel': 'ضلع',
+  'seat.otherSeats': 'اسی ضلعے کی دیگر نشستیں',
 };
 
 export const DICTIONARIES = { en, ur } as const;

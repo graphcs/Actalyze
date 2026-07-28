@@ -124,20 +124,40 @@ export async function searchTweetsViaSerpApi(
     return [];
   }
 
-  const params = new URLSearchParams({
-    engine: 'google',
-    q: `site:x.com OR site:twitter.com ${query}`,
-    num: String(Math.min(Math.max(limit * 5, 20), 40)),
-    // Without a locale hint, generic terms drift to other countries' politics —
-    // "congress" alone returns Indian National Congress posts. Anchor results to
-    // the caller's country.
-    gl: locale.gl,
-    hl: locale.hl,
-    location: locale.location,
-    api_key: key,
-  });
+  /**
+   * ── Why the site restriction is a single domain and not an OR ──────────────────
+   *
+   * This used to ask for `site:x.com OR site:twitter.com {query}`, and for most
+   * queries it worked. For a single common word it silently did not: `site:x.com OR
+   * site:twitter.com congress` comes back with congress.gov, senate.gov and Wikipedia
+   * and **zero** x.com URLs. Google is reading the bare term as binding to the OR —
+   * "site:x.com, or else site:twitter.com AND congress" — so one branch carries no
+   * domain restriction at all. Parenthesising does not fix it; measured against the
+   * live API, `(site:x.com OR site:twitter.com) congress` still returns zero statuses.
+   *
+   * A single `site:x.com` holds the restriction: 3 statuses for the same query, and
+   * the same count as the OR form for queries that already worked. So x.com is asked
+   * first, and twitter.com only as a fallback when it returns nothing — which spends a
+   * second search on the rare failure instead of on every call.
+   *
+   * The symptom this fixes is the worst kind: HTTP 200, a well-formed `{"tweets":[]}`,
+   * no error logged anywhere, and a panel that renders as though the topic simply has
+   * no discussion.
+   */
+  async function attempt(site: string): Promise<SerpTweet[]> {
+    const params = new URLSearchParams({
+      engine: 'google',
+      q: `site:${site} ${query}`,
+      num: String(Math.min(Math.max(limit * 5, 20), 40)),
+      // Without a locale hint, generic terms drift to other countries' politics —
+      // "congress" alone returns Indian National Congress posts. Anchor results to
+      // the caller's country.
+      gl: locale.gl,
+      hl: locale.hl,
+      location: locale.location,
+      api_key: key!,
+    });
 
-  try {
     const res = await fetch(`https://serpapi.com/search.json?${params}`, {
       next: { revalidate: 3600 },
     });
@@ -183,6 +203,15 @@ export async function searchTweetsViaSerpApi(
         retweets: parsed.retweets,
         replies: parsed.replies,
       });
+    }
+    return out;
+  }
+
+  try {
+    let out = await attempt('x.com');
+    if (out.length === 0) {
+      // Older tweets are still indexed under the previous domain.
+      out = await attempt('twitter.com');
     }
 
     // Most-engaged first, mirroring the live Twitter path's ordering. Items with

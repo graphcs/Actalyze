@@ -26,7 +26,7 @@ import { PK_PROVINCES, party } from "@/lib/pk/parties";
 import type { PkIntelResponse } from "@/lib/pk/party-intel";
 import { fetchWithCache } from "@/src/lib/fetchWithCache";
 import Link from "next/link";
-import { provincialSeat } from "@/lib/pk/provincial-seats";
+import { provincialSeat, seatsInProvince } from "@/lib/pk/provincial-seats";
 import { asProvinceCode, assemblyForProvince, provinceName } from "@/lib/pk/provinces";
 
 /**
@@ -257,6 +257,18 @@ export default function PkConstituencyPage() {
       const meta = seat.party ? party(seat.party) : null;
       const prov = asProvinceCode(seat.province);
       const assembly = prov ? assemblyForProvince(prov) : null;
+      // Seats sharing any district with this one, excluding itself. Matched on the
+      // roster's own district names rather than on resolved polygons, so this works
+      // without the geometry having loaded.
+      const siblings = prov
+        ? seatsInProvince(prov)
+            .filter(
+              (s) =>
+                s.code !== seat.code &&
+                s.districts.some((d) => seat.districts.includes(d))
+            )
+            .sort((a, b) => a.seatNumber - b.seatNumber)
+        : [];
       return (
         <PkAppLayout>
           <div className="max-w-3xl mx-auto px-4 pt-10 pb-16">
@@ -321,6 +333,58 @@ export default function PkConstituencyPage() {
                 </div>
               )}
             </dl>
+
+            {/*
+              The other seats covering the same district.
+
+              Without this the page is four facts and a link. A member or an official
+              looking up a seat almost always wants the neighbours too — a district
+              returns up to thirty of these in Lahore's case, and they are the people
+              who share the same Deputy Commissioner. It is also data we already hold,
+              so it costs nothing and invents nothing.
+            */}
+            {prov && siblings.length > 0 && (
+              <div className="mt-10">
+                <h2 className="pk-eyebrow mb-3" style={{ color: "var(--pk-text-muted)" }}>
+                  {t("seat.otherSeats")}
+                </h2>
+                <ul className="grid gap-2 sm:grid-cols-2">
+                  {siblings.map((s) => {
+                    const m = s.party ? party(s.party) : null;
+                    return (
+                      <li key={s.code}>
+                        <Link
+                          href={`/pk/constituency/${toPkUrlSegment(s.code)}`}
+                          className="pk-focus flex items-center gap-3 rounded-lg px-3 py-2 transition hover:bg-black/[0.03] dark:hover:bg-white/[0.04]"
+                          style={{ border: "1px solid var(--pk-border)" }}
+                        >
+                          <span
+                            className="inline-block w-2.5 h-2.5 rounded-sm shrink-0"
+                            style={{
+                              backgroundColor: m ? m.color : "transparent",
+                              border: m ? undefined : "1px solid var(--pk-border-strong)",
+                            }}
+                          />
+                          <span className="pk-figure text-xs w-16 shrink-0" style={{ color: "var(--pk-text-muted)" }}>
+                            <Ltr>{s.code}</Ltr>
+                          </span>
+                          <span className="flex-1 min-w-0 text-sm truncate">
+                            {s.memberName ?? (
+                              <em style={{ color: "var(--pk-text-faint)" }}>{t("board.vacant")}</em>
+                            )}
+                          </span>
+                          {m && (
+                            <span className="text-xs shrink-0" style={{ color: "var(--pk-text-muted)" }}>
+                              {locale === "ur" ? m.nameUr : m.commonName}
+                            </span>
+                          )}
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
 
             {prov && (
               <Link
