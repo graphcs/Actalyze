@@ -1,0 +1,58 @@
+/*
+ * Pakistan-subtree styling.
+ *
+ * Everything here is scoped under `.pk-root` or `[dir="rtl"]`, so it is structurally
+ * incapable of affecting the US app even though both share `globals.css`.
+ */
+
+.pk-root {
+  font-family: var(--font-urdu), "Segoe UI", system-ui, sans-serif;
+}
+
+/* Urdu in Naskh needs more leading than Latin, but nowhere near what Nastaliq wants.
+   These values keep the existing cards, badges and table rows intact. */
+.pk-root[dir="rtl"] {
+  line-height: 1.75;
+}
+.pk-root[dir="rtl"] .text-xs {
+  line-height: 1.6;
+}
+.pk-root[dir="rtl"] .text-\[10px\] {
+  line-height: 1.7;
+}
+
+/* Long-form Urdu only — briefings, generated drafts, insight text. Nastaliq's deep
+   descenders overlap below roughly 2.0, hence the generous value. */
+.pk-root .urdu-prose {
+  font-family: var(--font-urdu-prose), var(--font-urdu), serif;
+  line-height: 2.1;
+}
+.pk-root[dir="ltr"] .urdu-prose {
+  /* In English the prose face would be wrong; fall back to the UI stack. */
+  font-family: inherit;
+  line-height: 1.7;
+}
+
+/* Charts and maps stay left-to-right. Urdu print media renders time series
+   left-to-right, and Leaflet computes pane transforms assuming LTR — a `dir=rtl`
+   ancestor shifts tile positioning. */
+.pk-root [dir="ltr"].ltr-island {
+  direction: ltr;
+}
+
+/* Icons that encode direction (back arrows, chevrons used for "next") need mirroring,
+   which `-scale-x-100` does properly. Deliberately not `rotate-180`, which also flips
+   vertically and is wrong for asymmetric glyphs. Applied via the `rtl:` variant at
+   the call site; this is here for the inline SVGs that predate that convention. */
+.pk-root[dir="rtl"] .mirror-in-rtl {
+  transform: scaleX(-1);
+}
+
+@media print {
+  .pk-root .no-print {
+    display: none !important;
+  }
+  .pk-root {
+    background: white;
+  }
+}

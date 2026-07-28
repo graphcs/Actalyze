@@ -1,0 +1,4582 @@
+{
+  "meta": {
+    "source": "https://na.gov.pk/en/all-members.php",
+    "scrapedAt": "2026-07-28T01:23:33.266Z",
+    "totalSeats": 336,
+    "generalSeats": 266,
+    "seatsFilled": 333,
+    "vacant": [
+      "NA-1",
+      "NA-175",
+      "NA-256"
+    ],
+    "bySeatType": {
+      "general": 263,
+      "women_reserved": 60,
+      "minority_reserved": 10
+    },
+    "partyTotals": {
+      "PML-N": 132,
+      "Independent": 79,
+      "PPP": 74,
+      "MQM-P": 22,
+      "JUI-F": 10,
+      "PML-Q": 5,
+      "IPP": 4,
+      "MWM": 1,
+      "SIC": 1,
+      "PML-Z": 1,
+      "PKNAP": 1,
+      "BAP": 1,
+      "NP": 1,
+      "PkMAP": 1
+    },
+    "warnings": []
+  },
+  "constituencies": [
+    {
+      "code": "NA-1",
+      "seatNumber": 1,
+      "assembly": "NA",
+      "name": null,
+      "province": null,
+      "districts": [],
+      "memberUid": null,
+      "memberName": null,
+      "party": null,
+      "partyCommon": null,
+      "vacant": true
+    },
+    {
+      "code": "NA-2",
+      "seatNumber": 2,
+      "assembly": "NA",
+      "name": "Swat-I",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Swat"
+      ],
+      "memberUid": 1617,
+      "memberName": "Mr. Amjad Ali Khan",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-3",
+      "seatNumber": 3,
+      "assembly": "NA",
+      "name": "Swat-II",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Swat"
+      ],
+      "memberUid": 1618,
+      "memberName": "Mr. Saleem Rehman",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-4",
+      "seatNumber": 4,
+      "assembly": "NA",
+      "name": "Swat-III",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Swat"
+      ],
+      "memberUid": 1619,
+      "memberName": "Mr. Sohail Sultan",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-5",
+      "seatNumber": 5,
+      "assembly": "NA",
+      "name": "Upper Dir",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Upper Dir"
+      ],
+      "memberUid": 1620,
+      "memberName": "Sahibzada Sibghatullah",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-6",
+      "seatNumber": 6,
+      "assembly": "NA",
+      "name": "Lower Dir-I",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Lower Dir"
+      ],
+      "memberUid": 1621,
+      "memberName": "Mr. Muhammad Bashir Khan",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-7",
+      "seatNumber": 7,
+      "assembly": "NA",
+      "name": "Lower Dir-II",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Lower Dir"
+      ],
+      "memberUid": 1622,
+      "memberName": "Mr. Mehboob Shah",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-8",
+      "seatNumber": 8,
+      "assembly": "NA",
+      "name": "Bajaur",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Bajaur"
+      ],
+      "memberUid": 1961,
+      "memberName": "Mr. Mubarak Zeb",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-9",
+      "seatNumber": 9,
+      "assembly": "NA",
+      "name": "Malakand",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Malakand"
+      ],
+      "memberUid": 1624,
+      "memberName": "Mr. Junaid Akbar",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-10",
+      "seatNumber": 10,
+      "assembly": "NA",
+      "name": "Buner",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Buner"
+      ],
+      "memberUid": 1625,
+      "memberName": "Mr. Gohar Ali Khan",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-11",
+      "seatNumber": 11,
+      "assembly": "NA",
+      "name": "Shangla",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Shangla"
+      ],
+      "memberUid": 1626,
+      "memberName": "Mr. Amir Muqam",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-12",
+      "seatNumber": 12,
+      "assembly": "NA",
+      "name": "Kohistan-cum-Lower Kohistan-cum-Kolai Pallas Kohistan",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Kohistan",
+        "Lower Kohistan",
+        "Kolai Pallas Kohistan"
+      ],
+      "memberUid": 1627,
+      "memberName": "Mr. Muhammad Idrees",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-13",
+      "seatNumber": 13,
+      "assembly": "NA",
+      "name": "Battagram",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Battagram"
+      ],
+      "memberUid": 1628,
+      "memberName": "Mr. Muhammad Nawaz Khan",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-14",
+      "seatNumber": 14,
+      "assembly": "NA",
+      "name": "Mansehra-I",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Mansehra"
+      ],
+      "memberUid": 1629,
+      "memberName": "Sardar Muhammad Yousaf Zaman",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-15",
+      "seatNumber": 15,
+      "assembly": "NA",
+      "name": "Mansehra-cum-Torghar",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Mansehra",
+        "Torghar"
+      ],
+      "memberUid": 1630,
+      "memberName": "Mr. Shahzada Muhammad Gushtasap Khan",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-16",
+      "seatNumber": 16,
+      "assembly": "NA",
+      "name": "Abbottabad-I",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Abbottabad"
+      ],
+      "memberUid": 1631,
+      "memberName": "Mr. Ali Asghar Khan",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-17",
+      "seatNumber": 17,
+      "assembly": "NA",
+      "name": "Abbottabad-II",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Abbottabad"
+      ],
+      "memberUid": 1632,
+      "memberName": "Mr. Ali Khan Jadoon",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-18",
+      "seatNumber": 18,
+      "assembly": "NA",
+      "name": "Haripur",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Haripur"
+      ],
+      "memberUid": 1972,
+      "memberName": "Mr. Babar Nawaz Khan",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-19",
+      "seatNumber": 19,
+      "assembly": "NA",
+      "name": "Swabi-I",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Swabi"
+      ],
+      "memberUid": 1634,
+      "memberName": "Mr. Asad Qaiser",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-20",
+      "seatNumber": 20,
+      "assembly": "NA",
+      "name": "Swabi-II",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Swabi"
+      ],
+      "memberUid": 1635,
+      "memberName": "Mr. Shahram Khan",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-21",
+      "seatNumber": 21,
+      "assembly": "NA",
+      "name": "Mardan-I",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Mardan"
+      ],
+      "memberUid": 1636,
+      "memberName": "Mr. Mujahid Ali",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-22",
+      "seatNumber": 22,
+      "assembly": "NA",
+      "name": "Mardan-II",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Mardan"
+      ],
+      "memberUid": 1637,
+      "memberName": "Mr. Muhammad Atif",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-23",
+      "seatNumber": 23,
+      "assembly": "NA",
+      "name": "Mardan-III",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Mardan"
+      ],
+      "memberUid": 1638,
+      "memberName": "Mr. Ali Muhammad Khan",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-24",
+      "seatNumber": 24,
+      "assembly": "NA",
+      "name": "Charsadda-I",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Charsadda"
+      ],
+      "memberUid": 1639,
+      "memberName": "Malik Anwar Taj",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-25",
+      "seatNumber": 25,
+      "assembly": "NA",
+      "name": "Charsadda-II",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Charsadda"
+      ],
+      "memberUid": 1640,
+      "memberName": "Mr. Fazal Muhammad Khan",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-26",
+      "seatNumber": 26,
+      "assembly": "NA",
+      "name": "Mohmand",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Mohmand"
+      ],
+      "memberUid": 1641,
+      "memberName": "Mr. Sajid Khan",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-27",
+      "seatNumber": 27,
+      "assembly": "NA",
+      "name": "Khyber",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Khyber"
+      ],
+      "memberUid": 1642,
+      "memberName": "Mr. Muhammad Iqbal Khan",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-28",
+      "seatNumber": 28,
+      "assembly": "NA",
+      "name": "Peshawar-I",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Peshawar"
+      ],
+      "memberUid": 1643,
+      "memberName": "Mr. Noor Alam Khan",
+      "party": "JUIF",
+      "partyCommon": "JUI-F",
+      "vacant": false
+    },
+    {
+      "code": "NA-29",
+      "seatNumber": 29,
+      "assembly": "NA",
+      "name": "Peshawar-II",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Peshawar"
+      ],
+      "memberUid": 1644,
+      "memberName": "Mr. Arbab Amir Ayub",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-30",
+      "seatNumber": 30,
+      "assembly": "NA",
+      "name": "Peshawar-III",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Peshawar"
+      ],
+      "memberUid": 1645,
+      "memberName": "Ms. Shandana Gulzar Khan",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-31",
+      "seatNumber": 31,
+      "assembly": "NA",
+      "name": "Peshawar-IV",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Peshawar"
+      ],
+      "memberUid": 1646,
+      "memberName": "Mr. Sher Ali Arbab",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-32",
+      "seatNumber": 32,
+      "assembly": "NA",
+      "name": "Peshawar-V",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Peshawar"
+      ],
+      "memberUid": 1647,
+      "memberName": "Mr. Asif Khan",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-33",
+      "seatNumber": 33,
+      "assembly": "NA",
+      "name": "Nowshera-I",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Nowshera"
+      ],
+      "memberUid": 1648,
+      "memberName": "Syed Shah Ahad Ali Shah",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-34",
+      "seatNumber": 34,
+      "assembly": "NA",
+      "name": "Nowshera-II",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Nowshera"
+      ],
+      "memberUid": 1649,
+      "memberName": "Mr. Zulfiqar Ali",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-35",
+      "seatNumber": 35,
+      "assembly": "NA",
+      "name": "Kohat",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Kohat"
+      ],
+      "memberUid": 1650,
+      "memberName": "Mr. Shehryar Khan Afridi",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-36",
+      "seatNumber": 36,
+      "assembly": "NA",
+      "name": "Hangu-cum-Orakzai",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Hangu",
+        "Orakzai"
+      ],
+      "memberUid": 1651,
+      "memberName": "Mr. Yousaf Khan",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-37",
+      "seatNumber": 37,
+      "assembly": "NA",
+      "name": "Kurram",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Kurram"
+      ],
+      "memberUid": 1652,
+      "memberName": "Mr. Hameed Hussain",
+      "party": "MWM",
+      "partyCommon": "MWM",
+      "vacant": false
+    },
+    {
+      "code": "NA-38",
+      "seatNumber": 38,
+      "assembly": "NA",
+      "name": "Karak",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Karak"
+      ],
+      "memberUid": 1653,
+      "memberName": "Mr. Shahid Ahmed",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-39",
+      "seatNumber": 39,
+      "assembly": "NA",
+      "name": "Bannu",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Bannu"
+      ],
+      "memberUid": 1654,
+      "memberName": "Mr. Nasim Ali shah",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-40",
+      "seatNumber": 40,
+      "assembly": "NA",
+      "name": "North Waziristan",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "North Waziristan"
+      ],
+      "memberUid": 1655,
+      "memberName": "Mr. Misbah Uddin",
+      "party": "JUIF",
+      "partyCommon": "JUI-F",
+      "vacant": false
+    },
+    {
+      "code": "NA-41",
+      "seatNumber": 41,
+      "assembly": "NA",
+      "name": "Laki Marwat",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Laki Marwat"
+      ],
+      "memberUid": 1656,
+      "memberName": "Mr. Sher Afzal Khan",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-42",
+      "seatNumber": 42,
+      "assembly": "NA",
+      "name": "South Waziristan Upper-cum-South Waziristan Lower",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "South Waziristan Upper",
+        "South Waziristan Lower"
+      ],
+      "memberUid": 1657,
+      "memberName": "Mr. Zubair Khan",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-43",
+      "seatNumber": 43,
+      "assembly": "NA",
+      "name": "Tank-cum-Dera Ismail Khan",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Tank",
+        "Dera Ismail Khan"
+      ],
+      "memberUid": 1658,
+      "memberName": "Mr. Dawar Khan Kundi",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-44",
+      "seatNumber": 44,
+      "assembly": "NA",
+      "name": "Dera Ismail Khan-I",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Dera Ismail Khan"
+      ],
+      "memberUid": 1957,
+      "memberName": "Mr. Faisal Amin Khan",
+      "party": "SIC",
+      "partyCommon": "SIC",
+      "vacant": false
+    },
+    {
+      "code": "NA-45",
+      "seatNumber": 45,
+      "assembly": "NA",
+      "name": "Dera Ismail Khan-II",
+      "nameOverridden": false,
+      "province": "KP",
+      "provinceNameEn": "Khyber Pakhtunkhwa",
+      "districts": [
+        "Dera Ismail Khan"
+      ],
+      "memberUid": 1660,
+      "memberName": "Mr. Fateh Ullah Khan",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-46",
+      "seatNumber": 46,
+      "assembly": "NA",
+      "name": "ICT-I",
+      "nameOverridden": false,
+      "province": "ICT",
+      "provinceNameEn": "Islamabad Capital Territory",
+      "districts": [
+        "ICT"
+      ],
+      "memberUid": 1661,
+      "memberName": "Mr. Anjum Aqeel Khan",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-47",
+      "seatNumber": 47,
+      "assembly": "NA",
+      "name": "ICT-II",
+      "nameOverridden": false,
+      "province": "ICT",
+      "provinceNameEn": "Islamabad Capital Territory",
+      "districts": [
+        "ICT"
+      ],
+      "memberUid": 1662,
+      "memberName": "Mr. Tariq Fazal Chudhary",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-48",
+      "seatNumber": 48,
+      "assembly": "NA",
+      "name": "ICT-III",
+      "nameOverridden": true,
+      "province": "ICT",
+      "provinceNameEn": "Islamabad Capital Territory",
+      "districts": [
+        "ICT"
+      ],
+      "memberUid": 1663,
+      "memberName": "Raja Khurram Shahzad Nawaz",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-49",
+      "seatNumber": 49,
+      "assembly": "NA",
+      "name": "Attock-I",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Attock"
+      ],
+      "memberUid": 1664,
+      "memberName": "Sheikh Aftab Ahmad",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-50",
+      "seatNumber": 50,
+      "assembly": "NA",
+      "name": "Attock-II",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Attock"
+      ],
+      "memberUid": 1665,
+      "memberName": "Malik Sohail Khan",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-51",
+      "seatNumber": 51,
+      "assembly": "NA",
+      "name": "Rawalpindi-cum-Murree",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Rawalpindi",
+        "Murree"
+      ],
+      "memberUid": 1666,
+      "memberName": "Raja Osama Sarwar",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-52",
+      "seatNumber": 52,
+      "assembly": "NA",
+      "name": "Rawalpindi-I",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Rawalpindi"
+      ],
+      "memberUid": 1667,
+      "memberName": "Raja Pervez Ashraf",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-53",
+      "seatNumber": 53,
+      "assembly": "NA",
+      "name": "Rawalpindi-II",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Rawalpindi"
+      ],
+      "memberUid": 1668,
+      "memberName": "Raja Qamar Ul Islam",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-54",
+      "seatNumber": 54,
+      "assembly": "NA",
+      "name": "Rawalpindi-III",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Rawalpindi"
+      ],
+      "memberUid": 1669,
+      "memberName": "Mr. Aqeel Malik",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-55",
+      "seatNumber": 55,
+      "assembly": "NA",
+      "name": "Rawalpindi-IV",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Rawalpindi"
+      ],
+      "memberUid": 1670,
+      "memberName": "Mr. Ibrar Ahmed",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-56",
+      "seatNumber": 56,
+      "assembly": "NA",
+      "name": "Rawalpindi-V",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Rawalpindi"
+      ],
+      "memberUid": 1671,
+      "memberName": "Mr. Muhammad Hanif Abbasi",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-57",
+      "seatNumber": 57,
+      "assembly": "NA",
+      "name": "Rawalpindi-VI",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Rawalpindi"
+      ],
+      "memberUid": 1672,
+      "memberName": "Mr. Danyal Chaudhary",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-58",
+      "seatNumber": 58,
+      "assembly": "NA",
+      "name": "Chakwal",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Chakwal"
+      ],
+      "memberUid": 1673,
+      "memberName": "Maj. (R) Tahir Iqbal",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-59",
+      "seatNumber": 59,
+      "assembly": "NA",
+      "name": "Talagang-cum-Chakwal",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Talagang",
+        "Chakwal"
+      ],
+      "memberUid": 1674,
+      "memberName": "Sardar Ghulam Abbas",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-60",
+      "seatNumber": 60,
+      "assembly": "NA",
+      "name": "Jhelum-I",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Jhelum"
+      ],
+      "memberUid": 1675,
+      "memberName": "Mr. Bilal Azhar Kayani",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-61",
+      "seatNumber": 61,
+      "assembly": "NA",
+      "name": "Jhelum-II",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Jhelum"
+      ],
+      "memberUid": 1676,
+      "memberName": "Chaudhary Farrukh Altaf",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-62",
+      "seatNumber": 62,
+      "assembly": "NA",
+      "name": "Gujrat-I",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Gujrat"
+      ],
+      "memberUid": 1677,
+      "memberName": "Mr. Mohammad Ilyas Choudhary",
+      "party": "PMLQ",
+      "partyCommon": "PML-Q",
+      "vacant": false
+    },
+    {
+      "code": "NA-63",
+      "seatNumber": 63,
+      "assembly": "NA",
+      "name": "Gujrat-II",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Gujrat"
+      ],
+      "memberUid": 1678,
+      "memberName": "Mr. Hussain Ellahi",
+      "party": "PMLQ",
+      "partyCommon": "PML-Q",
+      "vacant": false
+    },
+    {
+      "code": "NA-64",
+      "seatNumber": 64,
+      "assembly": "NA",
+      "name": "Gujrat-III",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Gujrat"
+      ],
+      "memberUid": 1679,
+      "memberName": "Chaudhry Salik Hussain",
+      "party": "PMLQ",
+      "partyCommon": "PML-Q",
+      "vacant": false
+    },
+    {
+      "code": "NA-65",
+      "seatNumber": 65,
+      "assembly": "NA",
+      "name": "Gujrat-IV",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Gujrat"
+      ],
+      "memberUid": 1680,
+      "memberName": "Choudhary Naseer Ahmed Abbas",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-66",
+      "seatNumber": 66,
+      "assembly": "NA",
+      "name": "Wazirabad",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Wazirabad"
+      ],
+      "memberUid": 1971,
+      "memberName": "Mr. Bilal Farooq Tarar",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-67",
+      "seatNumber": 67,
+      "assembly": "NA",
+      "name": "Hafizabad",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Hafizabad"
+      ],
+      "memberUid": 1682,
+      "memberName": "Ms. Aniqa Mehdi",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-68",
+      "seatNumber": 68,
+      "assembly": "NA",
+      "name": "Mandi Bahauddin-I",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Mandi Bahauddin"
+      ],
+      "memberUid": 1683,
+      "memberName": "Haji Imtiaz Ahmad Choudhry",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-69",
+      "seatNumber": 69,
+      "assembly": "NA",
+      "name": "Mandi Bahauddin-II",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Mandi Bahauddin"
+      ],
+      "memberUid": 1684,
+      "memberName": "Mr. Nasir Iqbal Bosal",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-70",
+      "seatNumber": 70,
+      "assembly": "NA",
+      "name": "Sialkot-I",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Sialkot"
+      ],
+      "memberUid": 1685,
+      "memberName": "Chaudhry Armghan Subhani",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-71",
+      "seatNumber": 71,
+      "assembly": "NA",
+      "name": "Sialkot-II",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Sialkot"
+      ],
+      "memberUid": 1686,
+      "memberName": "Khawaja Muhammad Asif",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-72",
+      "seatNumber": 72,
+      "assembly": "NA",
+      "name": "Sialkot-III",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Sialkot"
+      ],
+      "memberUid": 1687,
+      "memberName": "Mr. Ali Zahid",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-73",
+      "seatNumber": 73,
+      "assembly": "NA",
+      "name": "Sialkot-IV",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Sialkot"
+      ],
+      "memberUid": 1688,
+      "memberName": "Syeda Nosheen Iftikhar",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-74",
+      "seatNumber": 74,
+      "assembly": "NA",
+      "name": "Sialkot-V",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Sialkot"
+      ],
+      "memberUid": 1689,
+      "memberName": "Mr. Muhammad Aslam Ghumman",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-75",
+      "seatNumber": 75,
+      "assembly": "NA",
+      "name": "Narowal-I",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Narowal"
+      ],
+      "memberUid": 1690,
+      "memberName": "Mr. Anwar-ul-Haq Chaudhary",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-76",
+      "seatNumber": 76,
+      "assembly": "NA",
+      "name": "Narowal-II",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Narowal"
+      ],
+      "memberUid": 1691,
+      "memberName": "Mr. Ahsan Iqbal Chaudhary",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-77",
+      "seatNumber": 77,
+      "assembly": "NA",
+      "name": "Gujranwala-I",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Gujranwala"
+      ],
+      "memberUid": 1692,
+      "memberName": "Chaudhry Mahmood Bashir Virk",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-78",
+      "seatNumber": 78,
+      "assembly": "NA",
+      "name": "Gujranwala-II",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Gujranwala"
+      ],
+      "memberUid": 1693,
+      "memberName": "Mr. Muhammad Mobeen Arif",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-79",
+      "seatNumber": 79,
+      "assembly": "NA",
+      "name": "Gujranwala-III",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Gujranwala"
+      ],
+      "memberUid": 1964,
+      "memberName": "Mr. Zulfiqar Ahmad",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-80",
+      "seatNumber": 80,
+      "assembly": "NA",
+      "name": "Gujranwala-IV",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Gujranwala"
+      ],
+      "memberUid": 1695,
+      "memberName": "Mr. Shahid Usman",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-81",
+      "seatNumber": 81,
+      "assembly": "NA",
+      "name": "Gujranwala-V",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Gujranwala"
+      ],
+      "memberUid": 1954,
+      "memberName": "Mr. Azhar Qayyum Nahra",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-82",
+      "seatNumber": 82,
+      "assembly": "NA",
+      "name": "Sargodha-I",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Sargodha"
+      ],
+      "memberUid": 1697,
+      "memberName": "Mr. Mukhtar Ahmad Malik",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-83",
+      "seatNumber": 83,
+      "assembly": "NA",
+      "name": "Sargodha-II",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Sargodha"
+      ],
+      "memberUid": 1698,
+      "memberName": "Mr. Usama Ahmed Mela",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-84",
+      "seatNumber": 84,
+      "assembly": "NA",
+      "name": "Sargodha-III",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Sargodha"
+      ],
+      "memberUid": 1699,
+      "memberName": "Mr. Shafqat Abbas",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-85",
+      "seatNumber": 85,
+      "assembly": "NA",
+      "name": "Sargodha-IV",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Sargodha"
+      ],
+      "memberUid": 1700,
+      "memberName": "Mr. Zulfiqar Ali Bhatti",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-86",
+      "seatNumber": 86,
+      "assembly": "NA",
+      "name": "Sargodha-V",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Sargodha"
+      ],
+      "memberUid": 1701,
+      "memberName": "Mr. Muhammad Miqdad Ali Khan",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-87",
+      "seatNumber": 87,
+      "assembly": "NA",
+      "name": "Khushab-I",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Khushab"
+      ],
+      "memberUid": 1702,
+      "memberName": "Malik Shakir Bashir Awan",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-88",
+      "seatNumber": 88,
+      "assembly": "NA",
+      "name": "Khushab-II",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Khushab"
+      ],
+      "memberUid": 1703,
+      "memberName": "Mr. Gul Asghar Khan",
+      "party": "IPP",
+      "partyCommon": "IPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-89",
+      "seatNumber": 89,
+      "assembly": "NA",
+      "name": "Mianwali-I",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Mianwali"
+      ],
+      "memberUid": 1704,
+      "memberName": "Mr. Muhammad Jamal Ahsan Khan",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-90",
+      "seatNumber": 90,
+      "assembly": "NA",
+      "name": "Mianwali-II",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Mianwali"
+      ],
+      "memberUid": 1705,
+      "memberName": "Mr. Umair Khan Niazi",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-91",
+      "seatNumber": 91,
+      "assembly": "NA",
+      "name": "Bhakkar-I",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Bhakkar"
+      ],
+      "memberUid": 1706,
+      "memberName": "Mr. Sana Ullah Khan Mastikhel",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-92",
+      "seatNumber": 92,
+      "assembly": "NA",
+      "name": "Bhakkar-II",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Bhakkar"
+      ],
+      "memberUid": 1707,
+      "memberName": "Sardar Rashid Akbar Khan",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-93",
+      "seatNumber": 93,
+      "assembly": "NA",
+      "name": "Chiniot-I",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Chiniot"
+      ],
+      "memberUid": 1708,
+      "memberName": "Mr. Ghulam Muhammad",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-94",
+      "seatNumber": 94,
+      "assembly": "NA",
+      "name": "Chiniot-II",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Chiniot"
+      ],
+      "memberUid": 1709,
+      "memberName": "Mr. Qaiser Ahmed Sheikh",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-95",
+      "seatNumber": 95,
+      "assembly": "NA",
+      "name": "Faisalabad-I",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Faisalabad"
+      ],
+      "memberUid": 1710,
+      "memberName": "Mr. Ali Afzal Sahi",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-96",
+      "seatNumber": 96,
+      "assembly": "NA",
+      "name": "Faisalabad-II",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Faisalabad"
+      ],
+      "memberUid": 1977,
+      "memberName": "Mr. Muhammad Bilal Badar Chaudhry",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-97",
+      "seatNumber": 97,
+      "assembly": "NA",
+      "name": "Faisalabad-III",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Faisalabad"
+      ],
+      "memberUid": 1712,
+      "memberName": "Mr. Muhammad Saad Ullah",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-98",
+      "seatNumber": 98,
+      "assembly": "NA",
+      "name": "Faisalabad-IV",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Faisalabad"
+      ],
+      "memberUid": 1713,
+      "memberName": "Ch. Muhammad Shahbaz Babar",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-99",
+      "seatNumber": 99,
+      "assembly": "NA",
+      "name": "Faisalabad-V",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Faisalabad"
+      ],
+      "memberUid": 1714,
+      "memberName": "Mr. Umar Farooq",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-100",
+      "seatNumber": 100,
+      "assembly": "NA",
+      "name": "Faisalabad-VI",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Faisalabad"
+      ],
+      "memberUid": 1715,
+      "memberName": "Mr. Nisar Ahmed",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-101",
+      "seatNumber": 101,
+      "assembly": "NA",
+      "name": "Faisalabad-VII",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Faisalabad"
+      ],
+      "memberUid": 1716,
+      "memberName": "Rana Atif",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-102",
+      "seatNumber": 102,
+      "assembly": "NA",
+      "name": "Faisalabad-VIII",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Faisalabad"
+      ],
+      "memberUid": 1717,
+      "memberName": "Mr. Changaze Ahmad Khan",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-103",
+      "seatNumber": 103,
+      "assembly": "NA",
+      "name": "Faisalabad-IX",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Faisalabad"
+      ],
+      "memberUid": 1718,
+      "memberName": "Mr. Muhammad Ali Sarfraz",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-104",
+      "seatNumber": 104,
+      "assembly": "NA",
+      "name": "Faisalabad-X",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Faisalabad"
+      ],
+      "memberUid": 1973,
+      "memberName": "Mr. Daniyal Ahmed",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-105",
+      "seatNumber": 105,
+      "assembly": "NA",
+      "name": "Toba Tek Singh-I",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Toba Tek Singh"
+      ],
+      "memberUid": 1720,
+      "memberName": "Mr. Usama Hamza",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-106",
+      "seatNumber": 106,
+      "assembly": "NA",
+      "name": "Toba Tek Singh-II",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Toba Tek Singh"
+      ],
+      "memberUid": 1721,
+      "memberName": "Mr. M Junaid Anwar Chaudhry",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-107",
+      "seatNumber": 107,
+      "assembly": "NA",
+      "name": "Toba Tek Singh-III",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Toba Tek Singh"
+      ],
+      "memberUid": 1722,
+      "memberName": "Mr. Mohammad Riaz Fatyana",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-108",
+      "seatNumber": 108,
+      "assembly": "NA",
+      "name": "Jhang-I",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Jhang"
+      ],
+      "memberUid": 1723,
+      "memberName": "Muhammad Mahbob Sultan",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-109",
+      "seatNumber": 109,
+      "assembly": "NA",
+      "name": "Jhang-II",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Jhang"
+      ],
+      "memberUid": 1724,
+      "memberName": "Mr. Waqas Akram",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-110",
+      "seatNumber": 110,
+      "assembly": "NA",
+      "name": "Jhang-III",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Jhang"
+      ],
+      "memberUid": 1725,
+      "memberName": "Mr. Muhammad Ameer Sultan",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-111",
+      "seatNumber": 111,
+      "assembly": "NA",
+      "name": "Nankana Sahib-I",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Nankana Sahib"
+      ],
+      "memberUid": 1726,
+      "memberName": "Mr. Muhammad Arshad Sahi",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-112",
+      "seatNumber": 112,
+      "assembly": "NA",
+      "name": "Nankana Sahib-II",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Nankana Sahib"
+      ],
+      "memberUid": 1727,
+      "memberName": "Dr. Shezra Mansab Ali Khan Kharal",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-113",
+      "seatNumber": 113,
+      "assembly": "NA",
+      "name": "Sheikhupura-I",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Sheikhupura"
+      ],
+      "memberUid": 1728,
+      "memberName": "Mr. Ahmad Atteeq Anwer",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-114",
+      "seatNumber": 114,
+      "assembly": "NA",
+      "name": "Sheikhupura-II",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Sheikhupura"
+      ],
+      "memberUid": 1729,
+      "memberName": "Rana Tanveer Hussain",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-115",
+      "seatNumber": 115,
+      "assembly": "NA",
+      "name": "Sheikhupura-III",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Sheikhupura"
+      ],
+      "memberUid": 1730,
+      "memberName": "Mr. Khurram Shahzad Virk",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-116",
+      "seatNumber": 116,
+      "assembly": "NA",
+      "name": "Sheikhupura-IV",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Sheikhupura"
+      ],
+      "memberUid": 1731,
+      "memberName": "Mr. Khurram Munawar Manj",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-117",
+      "seatNumber": 117,
+      "assembly": "NA",
+      "name": "Lahore-I",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Lahore"
+      ],
+      "memberUid": 1732,
+      "memberName": "Mr. Abdul Aleem Khan",
+      "party": "IPP",
+      "partyCommon": "IPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-118",
+      "seatNumber": 118,
+      "assembly": "NA",
+      "name": "Lahore-II",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Lahore"
+      ],
+      "memberUid": 1733,
+      "memberName": "Mr. Muhammad Hamza Shahbaz Sharif",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-119",
+      "seatNumber": 119,
+      "assembly": "NA",
+      "name": "Lahore-III",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Lahore"
+      ],
+      "memberUid": 1959,
+      "memberName": "Mr. Ali Pervaiz",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-120",
+      "seatNumber": 120,
+      "assembly": "NA",
+      "name": "Lahore-IV",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Lahore"
+      ],
+      "memberUid": 1735,
+      "memberName": "Sardar Ayaz Sadiq, Speaker National Assembly",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-121",
+      "seatNumber": 121,
+      "assembly": "NA",
+      "name": "Lahore-V",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Lahore"
+      ],
+      "memberUid": 1736,
+      "memberName": "Mr. Waseem Qadir",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-122",
+      "seatNumber": 122,
+      "assembly": "NA",
+      "name": "Lahore-VI",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Lahore"
+      ],
+      "memberUid": 1737,
+      "memberName": "Sardar Muhammad Latif Khan Khosa",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-123",
+      "seatNumber": 123,
+      "assembly": "NA",
+      "name": "Lahore-VII",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Lahore"
+      ],
+      "memberUid": 1738,
+      "memberName": "Mian Muhammad Shehbaz Sharif",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-124",
+      "seatNumber": 124,
+      "assembly": "NA",
+      "name": "Lahore-VIII",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Lahore"
+      ],
+      "memberUid": 1739,
+      "memberName": "Rana Mubashar Iqbal",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-125",
+      "seatNumber": 125,
+      "assembly": "NA",
+      "name": "Lahore-IX",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Lahore"
+      ],
+      "memberUid": 1740,
+      "memberName": "Mr. Muhammad Afzal",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-126",
+      "seatNumber": 126,
+      "assembly": "NA",
+      "name": "Lahore-X",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Lahore"
+      ],
+      "memberUid": 1741,
+      "memberName": "Malik Saif-ul-Malook Khokhar",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-127",
+      "seatNumber": 127,
+      "assembly": "NA",
+      "name": "Lahore-XI",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Lahore"
+      ],
+      "memberUid": 1742,
+      "memberName": "Mr. Attaullah Tarar",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-128",
+      "seatNumber": 128,
+      "assembly": "NA",
+      "name": "Lahore-XII",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Lahore"
+      ],
+      "memberUid": 1743,
+      "memberName": "Mr. Mohammad Awn Saqlain",
+      "party": "IPP",
+      "partyCommon": "IPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-129",
+      "seatNumber": 129,
+      "assembly": "NA",
+      "name": "Lahore-XIII",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Lahore"
+      ],
+      "memberUid": 1974,
+      "memberName": "Mr. Muhammad Numan",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-130",
+      "seatNumber": 130,
+      "assembly": "NA",
+      "name": "Lahore-XIV",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Lahore"
+      ],
+      "memberUid": 1745,
+      "memberName": "Mian Muhammad Nawaz Sharif",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-131",
+      "seatNumber": 131,
+      "assembly": "NA",
+      "name": "Kasur-I",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Kasur"
+      ],
+      "memberUid": 1746,
+      "memberName": "Mr. Saad Waseem Sheikh",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-132",
+      "seatNumber": 132,
+      "assembly": "NA",
+      "name": "Kasur-II",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Kasur"
+      ],
+      "memberUid": 1960,
+      "memberName": "Mr. Rasheed Ahmad Khan",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-133",
+      "seatNumber": 133,
+      "assembly": "NA",
+      "name": "Kasur-III",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Kasur"
+      ],
+      "memberUid": 1748,
+      "memberName": "Mr. Azim-ud-Din Zahid",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-134",
+      "seatNumber": 134,
+      "assembly": "NA",
+      "name": "Kasur-IV",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Kasur"
+      ],
+      "memberUid": 1749,
+      "memberName": "Rana Muhammad Hayat Khan",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-135",
+      "seatNumber": 135,
+      "assembly": "NA",
+      "name": "Okara-I",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Okara"
+      ],
+      "memberUid": 1750,
+      "memberName": "Mr. Nadeem Abbas",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-136",
+      "seatNumber": 136,
+      "assembly": "NA",
+      "name": "Okara-II",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Okara"
+      ],
+      "memberUid": 1751,
+      "memberName": "Mr. Riaz Ul Haq",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-137",
+      "seatNumber": 137,
+      "assembly": "NA",
+      "name": "Okara-III",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Okara"
+      ],
+      "memberUid": 1752,
+      "memberName": "Syed Raza Ali Gillani",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-138",
+      "seatNumber": 138,
+      "assembly": "NA",
+      "name": "Okara-IV",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Okara"
+      ],
+      "memberUid": 1753,
+      "memberName": "Mr. Muhammad Mueen Wattoo",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-139",
+      "seatNumber": 139,
+      "assembly": "NA",
+      "name": "Pakpattan-I",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Pakpattan"
+      ],
+      "memberUid": 1754,
+      "memberName": "Mr. Ahmad Raza Maneka",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-140",
+      "seatNumber": 140,
+      "assembly": "NA",
+      "name": "Pakpattan-II",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Pakpattan"
+      ],
+      "memberUid": 1755,
+      "memberName": "Rana Iradat Sharif Khan",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-141",
+      "seatNumber": 141,
+      "assembly": "NA",
+      "name": "Sahiwal-I",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Sahiwal"
+      ],
+      "memberUid": 1756,
+      "memberName": "Syed Imran Ahmad Shah",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-142",
+      "seatNumber": 142,
+      "assembly": "NA",
+      "name": "Sahiwal-II",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Sahiwal"
+      ],
+      "memberUid": 1757,
+      "memberName": "Mr. Usman Ali",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-143",
+      "seatNumber": 143,
+      "assembly": "NA",
+      "name": "Sahiwal-III",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Sahiwal"
+      ],
+      "memberUid": 1975,
+      "memberName": "Mr. Muhammad Tufail",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-144",
+      "seatNumber": 144,
+      "assembly": "NA",
+      "name": "Khanewal-I",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Khanewal"
+      ],
+      "memberUid": 1759,
+      "memberName": "Mr. Muhammad Raza Hayat Harraj",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-145",
+      "seatNumber": 145,
+      "assembly": "NA",
+      "name": "Khanewal-II",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Khanewal"
+      ],
+      "memberUid": 1760,
+      "memberName": "Mr. Muhammad Khan Daha",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-146",
+      "seatNumber": 146,
+      "assembly": "NA",
+      "name": "Khanewal-III",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Khanewal"
+      ],
+      "memberUid": 1761,
+      "memberName": "Mr. Zahoor Hussain Qureshi",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-147",
+      "seatNumber": 147,
+      "assembly": "NA",
+      "name": "Khanewal-IV",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Khanewal"
+      ],
+      "memberUid": 1762,
+      "memberName": "Choudhary Iftikhar Nazir",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-148",
+      "seatNumber": 148,
+      "assembly": "NA",
+      "name": "Multan-I",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Multan"
+      ],
+      "memberUid": 1963,
+      "memberName": "Syed Ali Qasim Gillani",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-149",
+      "seatNumber": 149,
+      "assembly": "NA",
+      "name": "Multan-II",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Multan"
+      ],
+      "memberUid": 1764,
+      "memberName": "Malik Muhammad Aamir Dogar",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-150",
+      "seatNumber": 150,
+      "assembly": "NA",
+      "name": "Multan-III",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Multan"
+      ],
+      "memberUid": 1765,
+      "memberName": "Makhdoom Zain Hussain Qureshi",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-151",
+      "seatNumber": 151,
+      "assembly": "NA",
+      "name": "Multan-IV",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Multan"
+      ],
+      "memberUid": 1766,
+      "memberName": "Syed Ali Musa Gilani",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-152",
+      "seatNumber": 152,
+      "assembly": "NA",
+      "name": "Multan-V",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Multan"
+      ],
+      "memberUid": 1767,
+      "memberName": "Syed Abdul Kadir Gillani",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-153",
+      "seatNumber": 153,
+      "assembly": "NA",
+      "name": "Multan-VI",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Multan"
+      ],
+      "memberUid": 1768,
+      "memberName": "Rana Muhammad Qasim Noon",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-154",
+      "seatNumber": 154,
+      "assembly": "NA",
+      "name": "Lodhran-I",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Lodhran"
+      ],
+      "memberUid": 1953,
+      "memberName": "Mr. Abdul Rehman Khan Kanju",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-155",
+      "seatNumber": 155,
+      "assembly": "NA",
+      "name": "Lodhran-II",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Lodhran"
+      ],
+      "memberUid": 1770,
+      "memberName": "Mr. Khan Muhammad Saddique Khan Baloch",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-156",
+      "seatNumber": 156,
+      "assembly": "NA",
+      "name": "Vehari-I",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Vehari"
+      ],
+      "memberUid": 1771,
+      "memberName": "Ms. Ayesha Nazir",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-157",
+      "seatNumber": 157,
+      "assembly": "NA",
+      "name": "Vehari-II",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Vehari"
+      ],
+      "memberUid": 1772,
+      "memberName": "Mr. Sajid Mehdi",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-158",
+      "seatNumber": 158,
+      "assembly": "NA",
+      "name": "Vehari-III",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Vehari"
+      ],
+      "memberUid": 1773,
+      "memberName": "Begum Tehmina Daultana",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-159",
+      "seatNumber": 159,
+      "assembly": "NA",
+      "name": "Vehari-IV",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Vehari"
+      ],
+      "memberUid": 1774,
+      "memberName": "Mr. Aurangzeb Khan Khichi",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-160",
+      "seatNumber": 160,
+      "assembly": "NA",
+      "name": "Bahawalnagar-I",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Bahawalnagar"
+      ],
+      "memberUid": 1775,
+      "memberName": "Mr. Muhammad Abdul Ghaffar Watto",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-161",
+      "seatNumber": 161,
+      "assembly": "NA",
+      "name": "Bahawalnagar-II",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Bahawalnagar"
+      ],
+      "memberUid": 1776,
+      "memberName": "Mr. Alam Dad Laleka",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-162",
+      "seatNumber": 162,
+      "assembly": "NA",
+      "name": "Bahawalnagar-III",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Bahawalnagar"
+      ],
+      "memberUid": 1777,
+      "memberName": "Mr. Ehsan-ul-Haq Bajwa",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-163",
+      "seatNumber": 163,
+      "assembly": "NA",
+      "name": "Bahawalnagar-IV",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Bahawalnagar"
+      ],
+      "memberUid": 1778,
+      "memberName": "Mr. Muhammad Ijaz Ul Haq",
+      "party": "PMLZ",
+      "partyCommon": "PML-Z",
+      "vacant": false
+    },
+    {
+      "code": "NA-164",
+      "seatNumber": 164,
+      "assembly": "NA",
+      "name": "Bahawalpur-I",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Bahawalpur"
+      ],
+      "memberUid": 1779,
+      "memberName": "Mian Riaz Hussain Pirzada",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-165",
+      "seatNumber": 165,
+      "assembly": "NA",
+      "name": "Bahawalpur-II",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Bahawalpur"
+      ],
+      "memberUid": 1780,
+      "memberName": "Chaudhry Tariq Bashir Cheema",
+      "party": "PMLQ",
+      "partyCommon": "PML-Q",
+      "vacant": false
+    },
+    {
+      "code": "NA-166",
+      "seatNumber": 166,
+      "assembly": "NA",
+      "name": "Bahawalpur-III",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Bahawalpur"
+      ],
+      "memberUid": 1781,
+      "memberName": "Makhdoom Syed Sami-ul-Hassan Gillani",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-167",
+      "seatNumber": 167,
+      "assembly": "NA",
+      "name": "Bahawalpur-IV",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Bahawalpur"
+      ],
+      "memberUid": 1782,
+      "memberName": "Mr. Muhammad Usman Awaisi",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-168",
+      "seatNumber": 168,
+      "assembly": "NA",
+      "name": "Bahawalpur-V",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Bahawalpur"
+      ],
+      "memberUid": 1783,
+      "memberName": "Malik Muhammad Iqbal",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-169",
+      "seatNumber": 169,
+      "assembly": "NA",
+      "name": "Rahim Yar Khan-I",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Rahim Yar Khan"
+      ],
+      "memberUid": 1784,
+      "memberName": "Syed Murtaza Mahmud",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-170",
+      "seatNumber": 170,
+      "assembly": "NA",
+      "name": "Rahim Yar Khan-II",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Rahim Yar Khan"
+      ],
+      "memberUid": 1785,
+      "memberName": "Mian Ghous Muhammad",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-171",
+      "seatNumber": 171,
+      "assembly": "NA",
+      "name": "Rahim Yar Khan-III",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Rahim Yar Khan"
+      ],
+      "memberUid": 1965,
+      "memberName": "Makhdoom Tahir Rashid Ud Din",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-172",
+      "seatNumber": 172,
+      "assembly": "NA",
+      "name": "Rahim Yar Khan-IV",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Rahim Yar Khan"
+      ],
+      "memberUid": 1787,
+      "memberName": "Mr. Javaid Iqbal Waraich",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-173",
+      "seatNumber": 173,
+      "assembly": "NA",
+      "name": "Rahim Yar Khan-V",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Rahim Yar Khan"
+      ],
+      "memberUid": 1788,
+      "memberName": "Syed Mustafa Mehmood",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-174",
+      "seatNumber": 174,
+      "assembly": "NA",
+      "name": "Rahim Yar Khan-VI",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Rahim Yar Khan"
+      ],
+      "memberUid": 1789,
+      "memberName": "Mr. Muhammad Azhar Khan Leghari",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-175",
+      "seatNumber": 175,
+      "assembly": "NA",
+      "name": null,
+      "province": null,
+      "districts": [],
+      "memberUid": null,
+      "memberName": null,
+      "party": null,
+      "partyCommon": null,
+      "vacant": true
+    },
+    {
+      "code": "NA-176",
+      "seatNumber": 176,
+      "assembly": "NA",
+      "name": "Muzaffargarh-II",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Muzaffargarh"
+      ],
+      "memberUid": 1791,
+      "memberName": "Nawabzada Iftikhar Ahmed Khan Babar",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-177",
+      "seatNumber": 177,
+      "assembly": "NA",
+      "name": "Muzaffargarh-III",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Muzaffargarh"
+      ],
+      "memberUid": 1792,
+      "memberName": "Mr. Muhammad Moazzam Ali Khan",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-178",
+      "seatNumber": 178,
+      "assembly": "NA",
+      "name": "Muzaffargarh-IV",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Muzaffargarh"
+      ],
+      "memberUid": 1793,
+      "memberName": "Mr. Aamir Talal Khan",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-179",
+      "seatNumber": 179,
+      "assembly": "NA",
+      "name": "Kot Addu-I",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Kot Addu"
+      ],
+      "memberUid": 1794,
+      "memberName": "Mr. Muhammad Shabbir Ali Qureshi",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-180",
+      "seatNumber": 180,
+      "assembly": "NA",
+      "name": "Kot Addu-II",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Kot Addu"
+      ],
+      "memberUid": 1795,
+      "memberName": "Mian Fayyaz Hussain Chajra",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-181",
+      "seatNumber": 181,
+      "assembly": "NA",
+      "name": "Layyah-I",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Layyah"
+      ],
+      "memberUid": 1796,
+      "memberName": "Ms. Umber Majeed",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-182",
+      "seatNumber": 182,
+      "assembly": "NA",
+      "name": "Layyah-II",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Layyah"
+      ],
+      "memberUid": 1797,
+      "memberName": "Mr. Awais Haider Jakhar",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-183",
+      "seatNumber": 183,
+      "assembly": "NA",
+      "name": "Taunsa",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Taunsa"
+      ],
+      "memberUid": 1798,
+      "memberName": "Khawaja Sheraz Mehmood",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-184",
+      "seatNumber": 184,
+      "assembly": "NA",
+      "name": "D.G.Khan-I",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "D.G.Khan"
+      ],
+      "memberUid": 1799,
+      "memberName": "Mr. Abdul Qadir Khan",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-185",
+      "seatNumber": 185,
+      "assembly": "NA",
+      "name": "D.G.Khan-II",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "D.G.Khan"
+      ],
+      "memberUid": 1976,
+      "memberName": "Mr. Mehmood Qadir Khan",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-186",
+      "seatNumber": 186,
+      "assembly": "NA",
+      "name": "D.G.Khan-III",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "D.G.Khan"
+      ],
+      "memberUid": 1801,
+      "memberName": "Sardar Awais Ahmad Khan Leghari",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-187",
+      "seatNumber": 187,
+      "assembly": "NA",
+      "name": "Rajanpur-I",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Rajanpur"
+      ],
+      "memberUid": 1802,
+      "memberName": "Mr. Ammar Ahmad Khan Leghari",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-188",
+      "seatNumber": 188,
+      "assembly": "NA",
+      "name": "Rajanpur-II",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Rajanpur"
+      ],
+      "memberUid": 1803,
+      "memberName": "Mr. Hafeez-ur-Rehman Khan Drishak",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-189",
+      "seatNumber": 189,
+      "assembly": "NA",
+      "name": "Rajanpur-III",
+      "nameOverridden": false,
+      "province": "PB",
+      "provinceNameEn": "Punjab",
+      "districts": [
+        "Rajanpur"
+      ],
+      "memberUid": 1804,
+      "memberName": "Mr. Shamsher Ali Mazari",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-190",
+      "seatNumber": 190,
+      "assembly": "NA",
+      "name": "Jacobabad",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Jacobabad"
+      ],
+      "memberUid": 1805,
+      "memberName": "Mr. Aijaz Hussain Jakhrani",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-191",
+      "seatNumber": 191,
+      "assembly": "NA",
+      "name": "Jacobabad-cum-Kashmore",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Jacobabad",
+        "Kashmore"
+      ],
+      "memberUid": 1806,
+      "memberName": "Mr. Ali Jan Mazari",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-192",
+      "seatNumber": 192,
+      "assembly": "NA",
+      "name": "Kashmore-cum-Shikarpur",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Kashmore",
+        "Shikarpur"
+      ],
+      "memberUid": 1807,
+      "memberName": "Mir Shabbir Ali Bijarani",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-193",
+      "seatNumber": 193,
+      "assembly": "NA",
+      "name": "Shikarpur",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Shikarpur"
+      ],
+      "memberUid": 1808,
+      "memberName": "Mr. Muhammad Shaharyar Khan Mahar",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-194",
+      "seatNumber": 194,
+      "assembly": "NA",
+      "name": "Larkana-I",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Larkana"
+      ],
+      "memberUid": 1809,
+      "memberName": "Mr. Bilawal Bhutto Zardari",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-195",
+      "seatNumber": 195,
+      "assembly": "NA",
+      "name": "Larkana-II",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Larkana"
+      ],
+      "memberUid": 1810,
+      "memberName": "Mr. Nazir Ahmed Bhugio",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-196",
+      "seatNumber": 196,
+      "assembly": "NA",
+      "name": "Kamber Shahdadkot-I",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Kamber Shahdadkot"
+      ],
+      "memberUid": 1958,
+      "memberName": "Mr. Khurshed Ahmed Junejo",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-197",
+      "seatNumber": 197,
+      "assembly": "NA",
+      "name": "Kamber Shahdadkot-II",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Kamber Shahdadkot"
+      ],
+      "memberUid": 1812,
+      "memberName": "Mir Amer Ali Khan Magsi",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-198",
+      "seatNumber": 198,
+      "assembly": "NA",
+      "name": "Ghotki-I",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Ghotki"
+      ],
+      "memberUid": 1813,
+      "memberName": "Mr. Khalid Ahmed Khan Lund",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-199",
+      "seatNumber": 199,
+      "assembly": "NA",
+      "name": "Ghotki-II",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Ghotki"
+      ],
+      "memberUid": 1814,
+      "memberName": "Mr. Ali Gohar Khan Mahar",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-200",
+      "seatNumber": 200,
+      "assembly": "NA",
+      "name": "Sukkur-I",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Sukkur"
+      ],
+      "memberUid": 1815,
+      "memberName": "Mr. Nauman Islam Shaikh",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-201",
+      "seatNumber": 201,
+      "assembly": "NA",
+      "name": "Sukkur-II",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Sukkur"
+      ],
+      "memberUid": 1816,
+      "memberName": "Syed Khursheed Ahmed Shah",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-202",
+      "seatNumber": 202,
+      "assembly": "NA",
+      "name": "Khairpur-I",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Khairpur"
+      ],
+      "memberUid": 1817,
+      "memberName": "Dr. Nafisa Shah",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-203",
+      "seatNumber": 203,
+      "assembly": "NA",
+      "name": "Khairpur-II",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Khairpur"
+      ],
+      "memberUid": 1818,
+      "memberName": "Pir Syed Fazal Ali Shah Jillani",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-204",
+      "seatNumber": 204,
+      "assembly": "NA",
+      "name": "Khairpur-III",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Khairpur"
+      ],
+      "memberUid": 1819,
+      "memberName": "Syed Javed Ali Shah Jillani",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-205",
+      "seatNumber": 205,
+      "assembly": "NA",
+      "name": "Naushero Feroze-I",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Naushero Feroze"
+      ],
+      "memberUid": 1820,
+      "memberName": "Syed Abrar Ali Shah",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-206",
+      "seatNumber": 206,
+      "assembly": "NA",
+      "name": "Naushero Feroze-II",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Naushero Feroze"
+      ],
+      "memberUid": 1821,
+      "memberName": "Mr. Zulfiqar Ali Behan",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-207",
+      "seatNumber": 207,
+      "assembly": "NA",
+      "name": "Shaheed Benazirabad-I",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Shaheed Benazirabad"
+      ],
+      "memberUid": 1955,
+      "memberName": "Ms. Aseefa Bhutto Zardari",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-208",
+      "seatNumber": 208,
+      "assembly": "NA",
+      "name": "Shaheed Benazirabad-II",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Shaheed Benazirabad"
+      ],
+      "memberUid": 1823,
+      "memberName": "Syed Ghulam Mustafa Shah, Deputy Speaker National Assembly",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-209",
+      "seatNumber": 209,
+      "assembly": "NA",
+      "name": "Sanghar-I",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Sanghar"
+      ],
+      "memberUid": 1824,
+      "memberName": "Ms. Shazia Marri",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-210",
+      "seatNumber": 210,
+      "assembly": "NA",
+      "name": "Sanghar-II",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Sanghar"
+      ],
+      "memberUid": 1825,
+      "memberName": "Mr. Salahuddin Junejo",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-211",
+      "seatNumber": 211,
+      "assembly": "NA",
+      "name": "Mirpurkhas-I",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Mirpurkhas"
+      ],
+      "memberUid": 1826,
+      "memberName": "Pir Aftab Hussain Shah Jilani",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-212",
+      "seatNumber": 212,
+      "assembly": "NA",
+      "name": "Mirpurkhas-II",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Mirpurkhas"
+      ],
+      "memberUid": 1827,
+      "memberName": "Mir Munawar Ali Talpur",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-213",
+      "seatNumber": 213,
+      "assembly": "NA",
+      "name": "Umerkot",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Umerkot"
+      ],
+      "memberUid": 1967,
+      "memberName": "Saba Talpur",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-214",
+      "seatNumber": 214,
+      "assembly": "NA",
+      "name": "Tharparkar-I",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Tharparkar"
+      ],
+      "memberUid": 1829,
+      "memberName": "Pir Ameer Ali Shah Jeelani",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-215",
+      "seatNumber": 215,
+      "assembly": "NA",
+      "name": "Tharparkar-II",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Tharparkar"
+      ],
+      "memberUid": 1830,
+      "memberName": "Dr. Mahesh Kumar Malani",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-216",
+      "seatNumber": 216,
+      "assembly": "NA",
+      "name": "Matiari",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Matiari"
+      ],
+      "memberUid": 1831,
+      "memberName": "Makhdoom Jamil uz Zaman",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-217",
+      "seatNumber": 217,
+      "assembly": "NA",
+      "name": "Tando Allahyar",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Tando Allahyar"
+      ],
+      "memberUid": 1832,
+      "memberName": "Mr. Zulfiqar Sattar Bachani",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-218",
+      "seatNumber": 218,
+      "assembly": "NA",
+      "name": "Hyderabad-I",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Hyderabad"
+      ],
+      "memberUid": 1833,
+      "memberName": "Syed Hussain Tariq",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-219",
+      "seatNumber": 219,
+      "assembly": "NA",
+      "name": "Hyderabad-II",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Hyderabad"
+      ],
+      "memberUid": 1834,
+      "memberName": "Mr. Abdul Aleem Khan",
+      "party": "MQMP",
+      "partyCommon": "MQM-P",
+      "vacant": false
+    },
+    {
+      "code": "NA-220",
+      "seatNumber": 220,
+      "assembly": "NA",
+      "name": "Hyderabad-III",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Hyderabad"
+      ],
+      "memberUid": 1835,
+      "memberName": "Syed Waseem Hussain",
+      "party": "MQMP",
+      "partyCommon": "MQM-P",
+      "vacant": false
+    },
+    {
+      "code": "NA-221",
+      "seatNumber": 221,
+      "assembly": "NA",
+      "name": "Tando Muhammad Khan",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Tando Muhammad Khan"
+      ],
+      "memberUid": 1836,
+      "memberName": "Syed Naveed Qamar",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-222",
+      "seatNumber": 222,
+      "assembly": "NA",
+      "name": "Badin-I",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Badin"
+      ],
+      "memberUid": 1837,
+      "memberName": "Mir Ghulam Ali Talpur",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-223",
+      "seatNumber": 223,
+      "assembly": "NA",
+      "name": "Badin-II",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Badin"
+      ],
+      "memberUid": 1838,
+      "memberName": "Haji Rasool Bux Chandio",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-224",
+      "seatNumber": 224,
+      "assembly": "NA",
+      "name": "Sujawal",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Sujawal"
+      ],
+      "memberUid": 1839,
+      "memberName": "Syed Ayaz Ali Shah Sheerazi",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-225",
+      "seatNumber": 225,
+      "assembly": "NA",
+      "name": "Thatta",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Thatta"
+      ],
+      "memberUid": 1840,
+      "memberName": "Mr. Sadiq Ali Memon",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-226",
+      "seatNumber": 226,
+      "assembly": "NA",
+      "name": "Jamshoro",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Jamshoro"
+      ],
+      "memberUid": 1841,
+      "memberName": "Malik Asad Sikandar",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-227",
+      "seatNumber": 227,
+      "assembly": "NA",
+      "name": "Dadu-I",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Dadu"
+      ],
+      "memberUid": 1842,
+      "memberName": "Mr. Irfan Ali Leghari",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-228",
+      "seatNumber": 228,
+      "assembly": "NA",
+      "name": "Dadu-II",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Dadu"
+      ],
+      "memberUid": 1843,
+      "memberName": "Mr. Rafiq Ahmed Jamali",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-229",
+      "seatNumber": 229,
+      "assembly": "NA",
+      "name": "Malir-I",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Malir"
+      ],
+      "memberUid": 1844,
+      "memberName": "Jam Abdul Karim Bijar",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-230",
+      "seatNumber": 230,
+      "assembly": "NA",
+      "name": "Malir-II",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Malir"
+      ],
+      "memberUid": 1845,
+      "memberName": "Syed Rafiullah",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-231",
+      "seatNumber": 231,
+      "assembly": "NA",
+      "name": "Malir-III",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Malir"
+      ],
+      "memberUid": 1846,
+      "memberName": "Mr. Abdul Hakeem Baloch",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-232",
+      "seatNumber": 232,
+      "assembly": "NA",
+      "name": "Korangi Karachi-I",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Korangi Karachi"
+      ],
+      "memberUid": 1847,
+      "memberName": "Ms. Aasia Ishaque Siddiqui",
+      "party": "MQMP",
+      "partyCommon": "MQM-P",
+      "vacant": false
+    },
+    {
+      "code": "NA-233",
+      "seatNumber": 233,
+      "assembly": "NA",
+      "name": "Korangi Karachi-II",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Korangi Karachi"
+      ],
+      "memberUid": 1848,
+      "memberName": "Mr. Muhammad Jawed Hanif Khan",
+      "party": "MQMP",
+      "partyCommon": "MQM-P",
+      "vacant": false
+    },
+    {
+      "code": "NA-234",
+      "seatNumber": 234,
+      "assembly": "NA",
+      "name": "Korangi Karachi-III",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Korangi Karachi"
+      ],
+      "memberUid": 1849,
+      "memberName": "Mr. Muhammad Moin Aamer Pirzada",
+      "party": "MQMP",
+      "partyCommon": "MQM-P",
+      "vacant": false
+    },
+    {
+      "code": "NA-235",
+      "seatNumber": 235,
+      "assembly": "NA",
+      "name": "Karachi East-I",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Karachi East"
+      ],
+      "memberUid": 1850,
+      "memberName": "Mr. Muhammad Iqbal Khan",
+      "party": "MQMP",
+      "partyCommon": "MQM-P",
+      "vacant": false
+    },
+    {
+      "code": "NA-236",
+      "seatNumber": 236,
+      "assembly": "NA",
+      "name": "Karachi East-II",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Karachi East"
+      ],
+      "memberUid": 1851,
+      "memberName": "Mr. Hassaan Sabir",
+      "party": "MQMP",
+      "partyCommon": "MQM-P",
+      "vacant": false
+    },
+    {
+      "code": "NA-237",
+      "seatNumber": 237,
+      "assembly": "NA",
+      "name": "Karachi East-III",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Karachi East"
+      ],
+      "memberUid": 1852,
+      "memberName": "Mr. Asad Alam Niazi",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-238",
+      "seatNumber": 238,
+      "assembly": "NA",
+      "name": "Karachi East-IV",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Karachi East"
+      ],
+      "memberUid": 1853,
+      "memberName": "Mr. Sadiq Iftikhar",
+      "party": "MQMP",
+      "partyCommon": "MQM-P",
+      "vacant": false
+    },
+    {
+      "code": "NA-239",
+      "seatNumber": 239,
+      "assembly": "NA",
+      "name": "Karachi South-I",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Karachi South"
+      ],
+      "memberUid": 1854,
+      "memberName": "Sardar Nabil Ahmed Gabol",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-240",
+      "seatNumber": 240,
+      "assembly": "NA",
+      "name": "Karachi South-II",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Karachi South"
+      ],
+      "memberUid": 1855,
+      "memberName": "Mr. Arshad Abdullah Vohra",
+      "party": "MQMP",
+      "partyCommon": "MQM-P",
+      "vacant": false
+    },
+    {
+      "code": "NA-241",
+      "seatNumber": 241,
+      "assembly": "NA",
+      "name": "Karachi South-III",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Karachi South"
+      ],
+      "memberUid": 1856,
+      "memberName": "Mirza Ikhtiar Baig",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-242",
+      "seatNumber": 242,
+      "assembly": "NA",
+      "name": "Karachi Keamari-I",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Karachi Keamari"
+      ],
+      "memberUid": 1857,
+      "memberName": "Syed Mustufa Kamal",
+      "party": "MQMP",
+      "partyCommon": "MQM-P",
+      "vacant": false
+    },
+    {
+      "code": "NA-243",
+      "seatNumber": 243,
+      "assembly": "NA",
+      "name": "Karachi Keamari-II",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Karachi Keamari"
+      ],
+      "memberUid": 1858,
+      "memberName": "Mr. Abdul Qadir Patel",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-244",
+      "seatNumber": 244,
+      "assembly": "NA",
+      "name": "Karachi West-I",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Karachi West"
+      ],
+      "memberUid": 1859,
+      "memberName": "Dr. Muhammad Farooq Sattar",
+      "party": "MQMP",
+      "partyCommon": "MQM-P",
+      "vacant": false
+    },
+    {
+      "code": "NA-245",
+      "seatNumber": 245,
+      "assembly": "NA",
+      "name": "Karachi West-II",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Karachi West"
+      ],
+      "memberUid": 1860,
+      "memberName": "Syed Hafeezuddin",
+      "party": "MQMP",
+      "partyCommon": "MQM-P",
+      "vacant": false
+    },
+    {
+      "code": "NA-246",
+      "seatNumber": 246,
+      "assembly": "NA",
+      "name": "Karachi West-III",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Karachi West"
+      ],
+      "memberUid": 1861,
+      "memberName": "Syed Amin-ul-Haque",
+      "party": "MQMP",
+      "partyCommon": "MQM-P",
+      "vacant": false
+    },
+    {
+      "code": "NA-247",
+      "seatNumber": 247,
+      "assembly": "NA",
+      "name": "Karachi Central-I",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Karachi Central"
+      ],
+      "memberUid": 1862,
+      "memberName": "Khawaja Izhar-ul-Hassan",
+      "party": "MQMP",
+      "partyCommon": "MQM-P",
+      "vacant": false
+    },
+    {
+      "code": "NA-248",
+      "seatNumber": 248,
+      "assembly": "NA",
+      "name": "Karachi Central-II",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Karachi Central"
+      ],
+      "memberUid": 1863,
+      "memberName": "Dr. Khalid Maqbool Siddiqui",
+      "party": "MQMP",
+      "partyCommon": "MQM-P",
+      "vacant": false
+    },
+    {
+      "code": "NA-249",
+      "seatNumber": 249,
+      "assembly": "NA",
+      "name": "Karachi Central-III",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Karachi Central"
+      ],
+      "memberUid": 1864,
+      "memberName": "Mr. Ahmed Saleem Siddiqui",
+      "party": "MQMP",
+      "partyCommon": "MQM-P",
+      "vacant": false
+    },
+    {
+      "code": "NA-250",
+      "seatNumber": 250,
+      "assembly": "NA",
+      "name": "Karachi Central-IV",
+      "nameOverridden": false,
+      "province": "SD",
+      "provinceNameEn": "Sindh",
+      "districts": [
+        "Karachi Central"
+      ],
+      "memberUid": 1865,
+      "memberName": "Mr. Farhan Chishti",
+      "party": "MQMP",
+      "partyCommon": "MQM-P",
+      "vacant": false
+    },
+    {
+      "code": "NA-251",
+      "seatNumber": 251,
+      "assembly": "NA",
+      "name": "Sherani-cum-Zhob-cum-Killa Saifullah",
+      "nameOverridden": false,
+      "province": "BA",
+      "provinceNameEn": "Balochistan",
+      "districts": [
+        "Sherani",
+        "Zhob",
+        "Killa Saifullah"
+      ],
+      "memberUid": 1978,
+      "memberName": "Mr. Khushal Khan Kakar",
+      "party": "PKNAP",
+      "partyCommon": "PKNAP",
+      "vacant": false
+    },
+    {
+      "code": "NA-252",
+      "seatNumber": 252,
+      "assembly": "NA",
+      "name": "Musa Khail-cum-Barkhan-cum-Loralai-cum-Dukki",
+      "nameOverridden": false,
+      "province": "BA",
+      "provinceNameEn": "Balochistan",
+      "districts": [
+        "Musa Khail",
+        "Barkhan",
+        "Loralai",
+        "Dukki"
+      ],
+      "memberUid": 1867,
+      "memberName": "Sardar Muhammad Yaqoob Khan Nasar",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-253",
+      "seatNumber": 253,
+      "assembly": "NA",
+      "name": "Ziarat-cum-Harnai-cum-Sibi-cum-Kohlu-cum-Dera Bugti",
+      "nameOverridden": false,
+      "province": "BA",
+      "provinceNameEn": "Balochistan",
+      "districts": [
+        "Ziarat",
+        "Harnai",
+        "Sibi",
+        "Kohlu",
+        "Dera Bugti"
+      ],
+      "memberUid": 1868,
+      "memberName": "Mian Khan Bugti",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-254",
+      "seatNumber": 254,
+      "assembly": "NA",
+      "name": "Jhal Magsi-cum-Kachhi-cum-Naseerabad",
+      "nameOverridden": false,
+      "province": "BA",
+      "provinceNameEn": "Balochistan",
+      "districts": [
+        "Jhal Magsi",
+        "Kachhi",
+        "Naseerabad"
+      ],
+      "memberUid": 1869,
+      "memberName": "Mr. Khalid Hussain Magsi",
+      "party": "BAP",
+      "partyCommon": "BAP",
+      "vacant": false
+    },
+    {
+      "code": "NA-255",
+      "seatNumber": 255,
+      "assembly": "NA",
+      "name": "Shobat Pur-cum-Jaffarabad-cum-Usta Muhammad-cum-Naseerabad",
+      "nameOverridden": false,
+      "province": "BA",
+      "provinceNameEn": "Balochistan",
+      "districts": [
+        "Shobat Pur",
+        "Jaffarabad",
+        "Usta Muhammad",
+        "Naseerabad"
+      ],
+      "memberUid": 1870,
+      "memberName": "Mir Khan Muhammad Jamali",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-256",
+      "seatNumber": 256,
+      "assembly": "NA",
+      "name": null,
+      "province": null,
+      "districts": [],
+      "memberUid": null,
+      "memberName": null,
+      "party": null,
+      "partyCommon": null,
+      "vacant": true
+    },
+    {
+      "code": "NA-257",
+      "seatNumber": 257,
+      "assembly": "NA",
+      "name": "Hub-cum-Lasbela-cum-Awaran",
+      "nameOverridden": false,
+      "province": "BA",
+      "provinceNameEn": "Balochistan",
+      "districts": [
+        "Hub",
+        "Lasbela",
+        "Awaran"
+      ],
+      "memberUid": 1872,
+      "memberName": "Mr. Jam Kamal Khan",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-258",
+      "seatNumber": 258,
+      "assembly": "NA",
+      "name": "Panjgur-cum-Kech",
+      "nameOverridden": false,
+      "province": "BA",
+      "provinceNameEn": "Balochistan",
+      "districts": [
+        "Panjgur",
+        "Kech"
+      ],
+      "memberUid": 1873,
+      "memberName": "Mr. Pullain Baloch",
+      "party": "NP",
+      "partyCommon": "NP",
+      "vacant": false
+    },
+    {
+      "code": "NA-259",
+      "seatNumber": 259,
+      "assembly": "NA",
+      "name": "Lech-cum-Gawadar",
+      "nameOverridden": false,
+      "province": "BA",
+      "provinceNameEn": "Balochistan",
+      "districts": [
+        "Lech",
+        "Gawadar"
+      ],
+      "memberUid": 1874,
+      "memberName": "Malik Shah",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-260",
+      "seatNumber": 260,
+      "assembly": "NA",
+      "name": "Chagai-cum-Nushki-cum-Kharan-cum-Washuk",
+      "nameOverridden": false,
+      "province": "BA",
+      "provinceNameEn": "Balochistan",
+      "districts": [
+        "Chagai",
+        "Nushki",
+        "Kharan",
+        "Washuk"
+      ],
+      "memberUid": 1875,
+      "memberName": "Mr. Mohammad Usman Badini",
+      "party": "JUIF",
+      "partyCommon": "JUI-F",
+      "vacant": false
+    },
+    {
+      "code": "NA-261",
+      "seatNumber": 261,
+      "assembly": "NA",
+      "name": "Surab-cum-Kalat-cum-Mastung",
+      "nameOverridden": false,
+      "province": "BA",
+      "provinceNameEn": "Balochistan",
+      "districts": [
+        "Surab",
+        "Kalat",
+        "Mastung"
+      ],
+      "memberUid": 1876,
+      "memberName": "Moulana Abdul Ghafoor Haideri",
+      "party": "JUIF",
+      "partyCommon": "JUI-F",
+      "vacant": false
+    },
+    {
+      "code": "NA-262",
+      "seatNumber": 262,
+      "assembly": "NA",
+      "name": "Quetta-I",
+      "nameOverridden": false,
+      "province": "BA",
+      "provinceNameEn": "Balochistan",
+      "districts": [
+        "Quetta"
+      ],
+      "memberUid": 1877,
+      "memberName": "Mr. Adil Khan Bazai",
+      "party": "IND",
+      "partyCommon": "Independent",
+      "vacant": false
+    },
+    {
+      "code": "NA-263",
+      "seatNumber": 263,
+      "assembly": "NA",
+      "name": "Quetta-II",
+      "nameOverridden": false,
+      "province": "BA",
+      "provinceNameEn": "Balochistan",
+      "districts": [
+        "Quetta"
+      ],
+      "memberUid": 1878,
+      "memberName": "Haji Jamal Shah Kakar",
+      "party": "PMLN",
+      "partyCommon": "PML-N",
+      "vacant": false
+    },
+    {
+      "code": "NA-264",
+      "seatNumber": 264,
+      "assembly": "NA",
+      "name": "Quetta-III",
+      "nameOverridden": false,
+      "province": "BA",
+      "provinceNameEn": "Balochistan",
+      "districts": [
+        "Quetta"
+      ],
+      "memberUid": 1879,
+      "memberName": "Nawabzada Mir Jamal Khan Raisani",
+      "party": "PPP",
+      "partyCommon": "PPP",
+      "vacant": false
+    },
+    {
+      "code": "NA-265",
+      "seatNumber": 265,
+      "assembly": "NA",
+      "name": "Pishin",
+      "nameOverridden": false,
+      "province": "BA",
+      "provinceNameEn": "Balochistan",
+      "districts": [
+        "Pishin"
+      ],
+      "memberUid": 1880,
+      "memberName": "Moulana Fazl-ur-Rahman",
+      "party": "JUIF",
+      "partyCommon": "JUI-F",
+      "vacant": false
+    },
+    {
+      "code": "NA-266",
+      "seatNumber": 266,
+      "assembly": "NA",
+      "name": "Killa Abdullah-cum-Chaman",
+      "nameOverridden": false,
+      "province": "BA",
+      "provinceNameEn": "Balochistan",
+      "districts": [
+        "Killa Abdullah",
+        "Chaman"
+      ],
+      "memberUid": 1881,
+      "memberName": "Mr. Mehmood Khan Achakzai",
+      "party": "PKMAP",
+      "partyCommon": "PkMAP",
+      "vacant": false
+    }
+  ]
+}
