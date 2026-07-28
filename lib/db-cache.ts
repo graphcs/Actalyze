@@ -27,7 +27,7 @@ function getSupabase(): SupabaseClient | null {
   return supabaseClient;
 }
 
-export type CacheType = 'news' | 'summary' | 'polling' | 'perspectives' | 'tweets' | 'ai-intel' | 'state-news' | 'wordcloud' | 'trending' | 'trending-series';
+export type CacheType = 'news' | 'summary' | 'polling' | 'perspectives' | 'tweets' | 'ai-intel' | 'state-news' | 'wordcloud' | 'trending' | 'trending-series' | 'comms-radar';
 
 // Default TTL values in seconds
 export const DEFAULT_CACHE_DURATIONS: Record<string, number> = {

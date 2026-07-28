@@ -207,3 +207,154 @@ test.describe("Notification pipeline", () => {
     await page.screenshot({ path: "tests/e2e/screenshots/pk-comms-notice.png", fullPage: false });
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────────────
+
+import {
+  enforce, draftReply, readsAsOpinion, bucketCounts, type Claim,
+} from "../../lib/pk/claims";
+import { unresolvedOwnershipIds, ownerFor, rankIssues, PK_ISSUES } from "../../lib/pk/issues";
+import { allSchemes, progressLine, outstanding } from "../../lib/pk/schemes";
+
+const CITATION = {
+  title: "Provision of filtration plants in Rajanpur district",
+  locator: "ADP scheme 1847",
+  excerpt: "31 of 48 filtration plants have been delivered to date.",
+};
+
+test.describe("Claims and corrections", () => {
+  test("criticism is never answered, whatever the classifier said", () => {
+    /**
+     * The load-bearing assertion of the whole feature. Governments do not get into
+     * trouble for correcting falsehoods, they get into trouble for treating disagreement
+     * as disinformation — so a model that returns `correctable` for an opinion must be
+     * overruled by code, and no reply may exist for it even with a citation attached.
+     */
+    const opinions = [
+      "This government has done nothing for South Punjab and should resign.",
+      "The smog policy is a complete failure and the worst in the region.",
+      "Why is the Chief Minister travelling abroad while Lahore chokes?",
+      "They need to step down.",
+      "حکومت نااہل ہے اور اسے استعفیٰ دینا چاہیے۔",
+    ];
+
+    for (const text of opinions) {
+      expect(readsAsOpinion(text), `not detected as opinion: ${text}`).toBe(true);
+
+      // The model insisting it is correctable, with a citation, must not survive.
+      const forced: Claim = {
+        id: "x", text, bucket: "correctable",
+        rationale: "model said so", citation: CITATION,
+      };
+      const out = enforce(forced);
+      expect(out.bucket, `opinion must not be correctable: ${text}`).toBe("criticism");
+      expect(out.citation).toBeNull();
+      expect(draftReply(out, { en: "Government of the Punjab", ur: "حکومتِ پنجاب" }, "en")).toBeNull();
+      expect(draftReply(out, { en: "Government of the Punjab", ur: "حکومتِ پنجاب" }, "ur")).toBeNull();
+    }
+  });
+
+  test("no correction is ever drafted without a citation", () => {
+    const uncited: Claim = {
+      id: "y",
+      text: "Only 12 filtration plants in Rajanpur were built.",
+      bucket: "correctable",
+      rationale: "believed false",
+      citation: null,
+    };
+    const out = enforce(uncited);
+    // Believing a claim is false is not the same as being able to show it.
+    expect(out.bucket).toBe("unverifiable");
+    expect(draftReply(out, { en: "x", ur: "x" }, "en")).toBeNull();
+
+    // A citation missing its excerpt is not usable either.
+    const halfCited = enforce({ ...uncited, citation: { title: "Something", excerpt: "" } });
+    expect(halfCited.bucket).toBe("unverifiable");
+  });
+
+  test("a cited correction quotes the document and names the office", () => {
+    const claim: Claim = {
+      id: "z",
+      text: "Only 12 filtration plants in Rajanpur were built.",
+      bucket: "correctable",
+      rationale: "contradicted by the scheme record",
+      citation: CITATION,
+    };
+    const reply = draftReply(enforce(claim), { en: "Government of the Punjab", ur: "حکومتِ پنجاب" }, "en");
+    expect(reply).toBeTruthy();
+    expect(reply!).toContain("ADP scheme 1847");
+    expect(reply!).toContain(CITATION.excerpt);
+    expect(reply!, "a correction must name who is issuing it").toContain("Government of the Punjab");
+  });
+
+  test("bucket counts report all three, so criticism cannot be hidden", () => {
+    const counts = bucketCounts([
+      { id: "1", text: "a", bucket: "criticism", rationale: "", citation: null },
+      { id: "2", text: "b", bucket: "criticism", rationale: "", citation: null },
+      { id: "3", text: "c", bucket: "correctable", rationale: "", citation: CITATION },
+    ]);
+    expect(counts).toEqual({ correctable: 1, criticism: 2, unverifiable: 0 });
+  });
+});
+
+test.describe("Issue radar", () => {
+  test("every issue routes to a taxonomy node that exists", () => {
+    // A stale id resolves to null, the jurisdiction caveat silently never fires, and a
+    // federal subject lands on the Chief Minister's desk looking like his to fix.
+    expect(unresolvedOwnershipIds()).toEqual([]);
+  });
+
+  test("federal and shared subjects carry their caveat", () => {
+    // Electricity is routinely the loudest issue in a Punjab feed and distribution is
+    // federal. Presenting it as the province's own problem is the error a CM's own staff
+    // would catch in the first minute.
+    const energy = ownerFor("energy");
+    expect(energy.jurisdiction).toBe("shared");
+    expect(energy.caveatEn).toBeTruthy();
+
+    const welfare = ownerFor("welfare");
+    expect(welfare.jurisdiction, "BISP is a federal programme").toBe("federal");
+    expect(welfare.caveatEn).toBeTruthy();
+
+    // A purely provincial subject carries no caveat — it really is theirs.
+    expect(ownerFor("water").jurisdiction).toBe("provincial");
+    expect(ownerFor("water").caveatEn).toBeNull();
+  });
+
+  test("issues are counted from the items, and carry the items", () => {
+    const items = [
+      { title: "Load-shedding worsens across Lahore as grid fails", url: "u1", source: "Dawn" },
+      { title: "Electricity tariff raised again", url: "u2", source: "The News" },
+      { title: "Schools in Multan reopen after monsoon flooding", url: "u3", source: "Geo" },
+      { title: "Cricket team announced", url: "u4", source: "ARY" },
+    ];
+    const ranked = rankIssues(items, PK_ISSUES);
+    const energy = ranked.find((r) => r.id === "energy")!;
+    expect(energy.count).toBe(2);
+    expect(energy.samples.length, "an issue must carry what it was counted from").toBe(2);
+    // Nothing matched an unrelated story, so it appears in no issue.
+    expect(ranked.every((r) => !r.samples.some((s) => s.url === "u4"))).toBe(true);
+  });
+
+  test("every scheme renders its shortfall, never just its delivery", () => {
+    for (const s of allSchemes()) {
+      const line = progressLine(s, "en");
+      expect(line, `${s.adpNumber} must show the target`).toContain(String(s.target));
+      expect(line).toContain(String(s.delivered));
+      expect(line).toMatch(/\d+ of \d+/);
+      expect(outstanding(s)).toBe(Math.max(0, s.target - s.delivered));
+    }
+  });
+
+  test("the radar and claims pages render", async ({ page }) => {
+    test.setTimeout(180_000);
+    for (const path of ["/pk/comms/radar", "/pk/comms/claims"]) {
+      const { errors } = collectErrors(page);
+      const res = await page.goto(path, { waitUntil: "domcontentloaded" });
+      expect(res?.status(), path).toBe(200);
+      expect(await page.locator(".pk-root").first().getAttribute("dir")).toBe("rtl");
+      await page.waitForTimeout(2000);
+      expect(errors.fatal, path).toEqual([]);
+    }
+  });
+});
