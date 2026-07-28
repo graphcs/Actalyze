@@ -25,6 +25,9 @@ import { getConstituency } from "@/lib/pk/constituencies";
 import { PK_PROVINCES, party } from "@/lib/pk/parties";
 import type { PkIntelResponse } from "@/lib/pk/party-intel";
 import { fetchWithCache } from "@/src/lib/fetchWithCache";
+import Link from "next/link";
+import { provincialSeat } from "@/lib/pk/provincial-seats";
+import { asProvinceCode, assemblyForProvince, provinceName } from "@/lib/pk/provinces";
 
 /**
  * The constituency page — the screen a Pakistani government audience spends the most
@@ -235,6 +238,104 @@ export default function PkConstituencyPage() {
     // `locale` matters: topic labels and insights are rendered per language, so
     // toggling has to refetch or the section keeps the previous language's text.
   }, [constituency, locale]);
+
+  /**
+   * ── Provincial seat ───────────────────────────────────────────────────────────
+   *
+   * `normalizePkCode` accepts PP/PS/PK/PB, but everything above this point is built on
+   * the National Assembly seed and the `/api/pk/*` intelligence routes, which take an
+   * NA code. Rather than let a provincial seat fall through to "not found" — it is a
+   * real seat and we hold a real record for it — it gets its own compact panel.
+   *
+   * It deliberately does not fake the NA page. No briefing, no sentiment, no news:
+   * those routes have not been given provincial constituencies and a page that showed
+   * empty versions of them would look broken rather than scoped.
+   */
+  if (code && !constituency) {
+    const seat = provincialSeat(code);
+    if (seat) {
+      const meta = seat.party ? party(seat.party) : null;
+      const prov = asProvinceCode(seat.province);
+      const assembly = prov ? assemblyForProvince(prov) : null;
+      return (
+        <PkAppLayout>
+          <div className="max-w-3xl mx-auto px-4 pt-10 pb-16">
+            {prov && (
+              <Link
+                href={`/pk/province/${toPkUrlSegment(prov)}`}
+                className="pk-focus text-xs"
+                style={{ color: "var(--pk-accent)" }}
+              >
+                ← {provinceName(prov, locale)}
+              </Link>
+            )}
+            <h1 className="pk-display mt-2 text-3xl md:text-4xl">
+              <Ltr>{seat.code}</Ltr>
+              {seat.name && <> · <Ltr>{seat.name}</Ltr></>}
+            </h1>
+            <p className="mt-1 text-sm" style={{ color: "var(--pk-text-muted)" }}>
+              {t("seat.provincial")}
+              {assembly && <> — {locale === "ur" ? assembly.nameUr : assembly.nameEn}</>}
+            </p>
+
+            <dl className="mt-8 grid gap-4 sm:grid-cols-2">
+              <div>
+                <dt className="text-xs" style={{ color: "var(--pk-text-muted)" }}>
+                  {t("seat.member")}
+                </dt>
+                <dd className="mt-0.5 text-base font-semibold">
+                  {seat.memberName ?? (
+                    <em style={{ color: "var(--pk-text-faint)" }}>{t("board.vacant")}</em>
+                  )}
+                </dd>
+                {meta && (
+                  <dd className="mt-1 flex items-center gap-2 text-sm">
+                    <span
+                      className="inline-block w-3 h-3 rounded-sm shrink-0"
+                      style={{ backgroundColor: meta.color }}
+                    />
+                    {locale === "ur" ? meta.nameUr : meta.commonName}
+                  </dd>
+                )}
+              </div>
+              {seat.districts.length > 0 && prov && (
+                <div>
+                  <dt className="text-xs" style={{ color: "var(--pk-text-muted)" }}>
+                    {t("seat.districtLabel")}
+                  </dt>
+                  <dd className="mt-0.5 flex flex-wrap gap-x-3">
+                    {seat.districts.map((d) => (
+                      <Link
+                        key={d}
+                        href={`/pk/province/${toPkUrlSegment(prov)}/district/${d
+                          .toLowerCase()
+                          .replace(/[.'’]/g, "")
+                          .replace(/\s+/g, "-")}`}
+                        className="pk-focus text-base font-semibold"
+                        style={{ color: "var(--pk-accent)" }}
+                      >
+                        <Ltr>{d}</Ltr>
+                      </Link>
+                    ))}
+                  </dd>
+                </div>
+              )}
+            </dl>
+
+            {prov && (
+              <Link
+                href={`/pk/province/${toPkUrlSegment(prov)}/assembly`}
+                className="pk-focus inline-block mt-8 text-sm font-medium"
+                style={{ color: "var(--pk-accent)" }}
+              >
+                {t("assembly.view")} →
+              </Link>
+            )}
+          </div>
+        </PkAppLayout>
+      );
+    }
+  }
 
   // ── Bad code ─────────────────────────────────────────────────────────────────────
   if (!code || !constituency) {

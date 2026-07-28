@@ -140,6 +140,17 @@ const CITY_GROUPS: Record<string, string[]> = {
   ],
 };
 
+/**
+ * URL segment for a district: `Dera Ghazi Khan` -> `dera-ghazi-khan`.
+ *
+ * Lives here rather than beside the page that uses it because a Next.js page module may
+ * only export a default and a fixed set of route config values — exporting a helper from
+ * one fails the build with "does not match the required types of a Next.js Page".
+ */
+export function districtSlug(name: string): string {
+  return String(name).toLowerCase().replace(/[.'’]/g, '').replace(/\s+/g, '-');
+}
+
 /** The polygons a city-level name covers, or null where the name is not a city group. */
 export function cityGroup(name: string): string[] | null {
   return CITY_GROUPS[normaliseDistrict(name)] ?? null;

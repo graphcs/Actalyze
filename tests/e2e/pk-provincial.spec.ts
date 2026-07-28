@@ -170,6 +170,79 @@ test.describe("Pakistan provincial build", () => {
     }
   });
 
+  for (const prov of PROVINCES) {
+    test(`${prov.path}/assembly draws the chamber`, async ({ page }) => {
+      test.setTimeout(120_000);
+      const { errors } = collectErrors(page);
+      const res = await page.goto(`${prov.path}/assembly`, { waitUntil: "domcontentloaded" });
+      expect(res?.status()).toBe(200);
+      await settle(page, 30_000);
+
+      // One circle per general seat. A short count means the roster did not load; the
+      // hemicycle is the one visual here that should never be able to be empty.
+      const circles = page.locator('svg[role="img"] circle');
+      await expect(circles).toHaveCount(prov.seats, { timeout: 20_000 });
+
+      // And the roster below it must list every seat.
+      const rows = page.locator('ul a[href^="/pk/constituency/"]');
+      await expect(rows).toHaveCount(prov.seats, { timeout: 20_000 });
+
+      expect(errors.fatal).toEqual([]);
+      await page.screenshot({
+        path: `tests/e2e/screenshots/pk-assembly-${prov.path.split("/").pop()}.png`,
+        fullPage: false,
+      });
+    });
+  }
+
+  test("Islamabad says it has no assembly rather than 404ing", async ({ page }) => {
+    const res = await page.goto("/pk/province/ict/assembly", { waitUntil: "domcontentloaded" });
+    expect(res?.status()).toBe(200);
+    await settle(page, 20_000);
+    await page.getByRole("button", { name: "English", exact: true }).first().click();
+    await page.waitForTimeout(600);
+    const body = await page.locator("body").innerText();
+    expect(body).toContain("federal territory");
+  });
+
+  test("a district page carries its figures, or says why it has none", async ({ page }) => {
+    test.setTimeout(120_000);
+
+    await page.goto("/pk/province/pb/district/lahore");
+    await settle(page, 30_000);
+    await page.getByRole("button", { name: "English", exact: true }).first().click();
+    await page.waitForTimeout(800);
+    let body = await page.locator("body").innerText();
+    expect(body).toContain("Lahore");
+    expect(body, "district figures must name their census").toContain("Census 2017");
+    expect(body, "Lahore should list its provincial seats").toMatch(/PP-\d+/);
+
+    // Karachi's districts have no separate 2017 figure. The page must say which of the
+    // three reasons applies rather than render a blank or a zero.
+    await page.goto("/pk/province/sd/district/central-karachi");
+    await settle(page, 30_000);
+    body = await page.locator("body").innerText();
+    expect(body).toMatch(/Karachi City|کراچی/);
+    expect(body, "an absent figure must state its reason").toMatch(
+      /counted only as part of|census/i
+    );
+  });
+
+  test("a provincial seat resolves to the right province", async ({ page }) => {
+    // The PB/BA collision again, this time end to end through the page. PB-12 must be
+    // a Balochistan seat even though /pk/province/pb is Punjab.
+    await page.goto("/pk/constituency/pb-12");
+    await settle(page, 20_000);
+    await page.getByRole("button", { name: "English", exact: true }).first().click();
+    await page.waitForTimeout(600);
+    const body = await page.locator("body").innerText();
+    expect(body).toContain("PB-12");
+    expect(body, "PB-12 belongs to the Balochistan Assembly").toContain(
+      "Provincial Assembly of Balochistan"
+    );
+    expect(body).not.toContain("Provincial Assembly of the Punjab");
+  });
+
   test("provincial codes are never zero-padded", async ({ page }) => {
     await page.goto("/pk/province/pb");
     await settle(page, 30_000);

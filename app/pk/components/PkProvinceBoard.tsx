@@ -194,6 +194,21 @@ export function PkProvinceBoard({ provinceCode }: { provinceCode: ProvinceCode }
             onSelect={setSelected}
             seatsByDistrict={seatCounts}
           />
+          {/* Once a district is selected the drill-down has somewhere to go. Rendered
+              beside the map rather than inside it: PkDrillMap knows nothing about
+              routing and should not have to. */}
+          {selected && (
+            <a
+              href={`/pk/province/${String(provinceCode).toLowerCase()}/district/${selected
+                .toLowerCase()
+                .replace(/[.'’]/g, "")
+                .replace(/\s+/g, "-")}`}
+              className="pk-focus inline-block mt-3 text-sm font-medium"
+              style={{ color: "var(--pk-accent)" }}
+            >
+              {t("district.open")}: <Ltr>{selected}</Ltr> →
+            </a>
+          )}
         </div>
         <div className="lg:col-span-2">
           <PkDistrictTable
@@ -290,6 +305,14 @@ export function PkProvinceBoard({ provinceCode }: { provinceCode: ProvinceCode }
               );
             })}
           </ul>
+
+          <a
+            href={`/pk/province/${String(provinceCode).toLowerCase()}/assembly`}
+            className="pk-focus inline-block mt-4 text-sm font-medium"
+            style={{ color: "var(--pk-accent)" }}
+          >
+            {t("assembly.view")} →
+          </a>
 
           <p className="mt-3 text-xs leading-relaxed" style={{ color: "var(--pk-text-faint)" }}>
             {t("board.generalSeatsNote")}

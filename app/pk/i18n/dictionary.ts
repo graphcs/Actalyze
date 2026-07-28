@@ -600,6 +600,21 @@ export const en = {
   'board.noAssembly': 'Islamabad Capital Territory has no provincial assembly. It is federal territory and Parliament legislates for it.',
   'board.seatsInDistrict': 'Assembly seats in this district',
   'board.notFound': 'No such province.',
+  'assembly.hemicycleAria': 'Seating plan of the assembly, one circle per general seat, coloured by party.',
+  'assembly.hemicycleNote': '{general} general seats, of which {filled} are filled. The House has {total} seats in total once the reserved seats for women and non-Muslims are counted; those are returned from party lists and are not shown here.',
+  'assembly.members': 'Members',
+  'assembly.searchPlaceholder': 'Search by seat, member, or district',
+  'assembly.none': 'No provincial assembly',
+  'assembly.nav': 'Provincial assemblies',
+  'assembly.view': 'View the full chamber',
+  'district.notFound': 'No such district in this province.',
+  'district.noFigures': 'The 2017 census has no separate figures for this district',
+  'district.area': 'Area',
+  'district.noSeats': 'No provincial assembly seat is recorded in this district.',
+  'district.open': 'Open the district',
+  'seat.provincial': 'Provincial assembly seat',
+  'seat.member': 'Member',
+  'seat.districtLabel': 'District',
 } as const;
 
 export type MessageKey = keyof typeof en;
@@ -1153,6 +1168,21 @@ export const ur: Record<MessageKey, string> = {
   'board.noAssembly': 'اسلام آباد وفاقی دارالحکومت ہے، اس کی کوئی صوبائی اسمبلی نہیں۔ اس کے لیے قانون سازی پارلیمنٹ کرتی ہے۔',
   'board.seatsInDistrict': 'اس ضلعے کی اسمبلی نشستیں',
   'board.notFound': 'ایسا کوئی صوبہ نہیں۔',
+  'assembly.hemicycleAria': 'اسمبلی کا نقشۂ نشست، ہر جنرل نشست کے لیے ایک دائرہ، جماعت کے رنگ میں۔',
+  'assembly.hemicycleNote': '{general} جنرل نشستیں، جن میں سے {filled} پُر ہیں۔ خواتین اور غیر مسلموں کی مخصوص نشستیں شامل کر کے ایوان کی کل نشستیں {total} ہیں؛ وہ جماعتی فہرستوں سے پُر ہوتی ہیں اور یہاں نہیں دکھائی گئیں۔',
+  'assembly.members': 'اراکین',
+  'assembly.searchPlaceholder': 'نشست، رکن یا ضلعے کے ذریعے تلاش کریں',
+  'assembly.none': 'کوئی صوبائی اسمبلی نہیں',
+  'assembly.nav': 'صوبائی اسمبلیاں',
+  'assembly.view': 'پورا ایوان دیکھیں',
+  'district.notFound': 'اس صوبے میں ایسا کوئی ضلع نہیں۔',
+  'district.noFigures': 'مردم شماری ۲۰۱۷ میں اس ضلعے کے الگ اعداد موجود نہیں',
+  'district.area': 'رقبہ',
+  'district.noSeats': 'اس ضلعے میں کوئی صوبائی اسمبلی نشست درج نہیں۔',
+  'district.open': 'ضلع کھولیں',
+  'seat.provincial': 'صوبائی اسمبلی کی نشست',
+  'seat.member': 'رکن',
+  'seat.districtLabel': 'ضلع',
 };
 
 export const DICTIONARIES = { en, ur } as const;
