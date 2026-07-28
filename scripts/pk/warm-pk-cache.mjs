@@ -87,7 +87,8 @@ await pool(
 console.log('\nPages:');
 await pool([
   ...['', '/trending', '/instruments', '/casework', '/chat', '/documents', '/questions',
-      '/committees', '/repugnancy'].map((p) => () => hit(`/pk${p}`, 60_000)),
+      '/committees', '/repugnancy', '/comms/notice', '/comms/radar', '/comms/claims']
+    .map((p) => () => hit(`/pk${p}`, 60_000)),
   ...PROVINCES.map((p) => () => hit(`/pk/province/${p}`, 60_000)),
   ...SEATS.map((s) => () => hit(`/pk/constituency/${s}`, 60_000)),
 ], 4);
@@ -115,5 +116,16 @@ await pool([
   // A deep-linked district is the shape a demo actually opens.
   () => hit('/pk/province/pb?district=Lahore', 60_000),
 ], 4);
+
+/**
+ * The radar. Four SerpAPI searches per province, cached twelve hours, so this is the
+ * one block here that costs quota — warm it deliberately before a demo rather than
+ * letting the first click of the presentation pay for it.
+ */
+console.log('\nIssue radar (4 SerpAPI searches per province):');
+await pool(
+  ['PB', 'SD', 'KP', 'BA'].map((p) => () => hit(`/api/pk/comms/radar?province=${p}`, 120_000)),
+  2
+);
 
 console.log('\nDone.');
