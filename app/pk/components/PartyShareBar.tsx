@@ -1,6 +1,6 @@
 "use client";
 
-import { party, needsPatternFill, type PkPartyId } from "@/lib/pk/parties";
+import { party, needsPatternFill, hatchAngle, type PkPartyId } from "@/lib/pk/parties";
 import { useT } from "../i18n/LocaleProvider";
 import { Ltr } from "./Ltr";
 
@@ -18,12 +18,16 @@ import { Ltr } from "./Ltr";
  *
  * ── The hatch ──────────────────────────────────────────────────────────────────────
  *
- * Seven parties in this house are some shade of green — PML-N #228B22, PML-Q #5CB85C,
- * JUI-F #003800, IPP #67BA27, PML-Z #00A877, MWM #0B9A51, BAP #6B8E23. Adjacent in a
- * stacked bar they are indistinguishable, and colour-blind readers lose them
- * entirely. `needsPatternFill()` flags them and they get a diagonal hatch, so the
- * segments differ in texture as well as hue. The same hatch is repeated in the legend
- * swatch so the mapping is learnable.
+ * Two colour collisions matter, and both show up on real seats. Seven parties are
+ * some shade of green — PML-N #228B22, PML-Q #5CB85C, JUI-F #003800, IPP #67BA27,
+ * PML-Z #00A877, MWM #0B9A51, BAP #6B8E23 — which collide across central Punjab. And
+ * MQM-P #BE1212 sits beside PTI #E70A0A on every Karachi seat.
+ *
+ * `needsPatternFill()` flags both families, and `hatchAngle()` gives each party its
+ * own angle — a single shared hatch would separate a green party from a red one but
+ * still leave MQM-P and PTI identical to each other. Segments therefore differ in
+ * texture as well as hue, which also helps colour-blind readers. The same hatch is
+ * repeated in the legend swatch so the mapping is learnable.
  *
  * ── Never the word "poll" ──────────────────────────────────────────────────────────
  *
@@ -37,13 +41,20 @@ export interface PartyShare {
   share: number;
 }
 
-/** Diagonal hatch laid over the party colour. */
+/**
+ * Diagonal hatch laid over the party colour.
+ *
+ * The angle varies per party, not just per family. A single shared hatch separates a
+ * green party from a red one but leaves MQM-P and PTI — adjacent on every Karachi
+ * seat — looking identical, which is the case that actually shows up.
+ */
 function fillStyle(id: PkPartyId, color: string): React.CSSProperties {
   if (!needsPatternFill(id)) return { backgroundColor: color };
   return {
     backgroundColor: color,
-    backgroundImage:
-      "repeating-linear-gradient(45deg, rgba(255,255,255,0.42) 0 3px, rgba(255,255,255,0) 3px 8px)",
+    backgroundImage: `repeating-linear-gradient(${hatchAngle(
+      id
+    )}deg, rgba(255,255,255,0.42) 0 3px, rgba(255,255,255,0) 3px 8px)`,
   };
 }
 
@@ -97,9 +108,9 @@ export function PartyShareBar({
               style={{
                 width: `${width}%`,
                 ...fillStyle(id, p.color),
-                // The hatch separates the green family, but MQM-P #BE1212 and PTI
-                // #E70A0A are both red and read as one block when adjacent. A 1px
-                // inset divider keeps every boundary visible whatever the hues.
+                // Belt and braces alongside the hatch: a 1px inset divider keeps every
+                // boundary visible whatever the hues, including at the narrow widths
+                // where a hatch pattern has too few pixels to read.
                 ...(i < shares.length - 1
                   ? { boxShadow: "inset -1px 0 0 rgba(255,255,255,0.65)" }
                   : {}),

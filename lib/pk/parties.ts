@@ -155,11 +155,45 @@ export function needsPatternFill(id: PkPartyId): boolean {
   return GREEN_FAMILY.has(id) || RED_FAMILY.has(id);
 }
 
-/** Which cluster a party belongs to, so callers can vary the hatch angle. */
+/** Which cluster a party belongs to. */
 export function colourFamily(id: PkPartyId): 'green' | 'red' | null {
   if (GREEN_FAMILY.has(id)) return 'green';
   if (RED_FAMILY.has(id)) return 'red';
   return null;
+}
+
+/**
+ * Hatch angle per party, in degrees.
+ *
+ * A single shared hatch is not enough. It separates a green party from a red one,
+ * but leaves the two parties *within* a family looking identical — and the pairs that
+ * matter sit adjacent on real seats: MQM-P and PTI on every Karachi constituency,
+ * PML-N and PML-Q across central Punjab. Giving each party in a collision family its
+ * own angle makes the segments differ in texture as well as hue.
+ *
+ * Angles are fixed per party rather than derived from position in the bar, so a seat
+ * always renders a given party the same way.
+ */
+const HATCH_ANGLE: Partial<Record<PkPartyId, number>> = {
+  // Reds — the Karachi problem.
+  MQMP: 45,
+  PTI: -45,
+  IND_PTI: -45,
+  ANP: 90,
+  PKNAP: 0,
+  NP: 20,
+  // Greens — the Punjab problem.
+  PMLN: 45,
+  PMLQ: -45,
+  JUIF: 90,
+  IPP: 0,
+  PMLZ: 20,
+  MWM: -20,
+  BAP: 70,
+};
+
+export function hatchAngle(id: PkPartyId): number {
+  return HATCH_ANGLE[id] ?? 45;
 }
 
 export const PK_PROVINCES = {
