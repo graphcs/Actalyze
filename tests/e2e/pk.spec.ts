@@ -24,6 +24,7 @@ const PK_PAGES = [
   "/pk",
   "/pk/trending",
   "/pk/instruments",
+  "/pk/questions",
   "/pk/casework",
   "/pk/chat",
   "/pk/documents",
@@ -151,6 +152,29 @@ test.describe("Pakistan subtree", () => {
     }
 
     expect(offenders, `empty states found:\n${offenders.join("\n")}`).toEqual([]);
+  });
+
+  test("question search returns real records with replies", async ({ request }) => {
+    // The value of this feature is entirely in whether the corpus actually has
+    // content. A page that renders an empty result set looks identical to a working
+    // one, so assert on the data rather than the DOM.
+    const res = await request.get("/api/pk/questions?q=solar+net+metering", {
+      timeout: 60_000,
+    });
+    expect(res.status()).toBe(200);
+
+    const body = await res.json();
+    expect(body.total, "expected hits for a subject known to be in the corpus").toBeGreaterThan(0);
+
+    const record = body.hits[0].record;
+    expect(record.question?.length, "a hit must carry the question text").toBeGreaterThan(40);
+    expect(record.asker, "a hit must name the member who asked").toBeTruthy();
+    expect(record.pdfUrl, "a hit must cite its source paper").toContain("na.gov.pk");
+
+    // Coverage is what makes the feature credible in a demo — if the ingest
+    // silently produced a handful of records, this is where it shows.
+    expect(body.coverage?.questionCount ?? 0).toBeGreaterThan(200);
+    expect(body.coverage?.replyCount ?? 0).toBeGreaterThan(150);
   });
 
   test("constituency codes are never zero-padded", async ({ page }) => {
