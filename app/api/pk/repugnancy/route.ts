@@ -44,6 +44,7 @@ import {
   NO_RULING_DIRECTIVE,
   readsAsRuling,
   isAttributedReport,
+  windowAroundAnchor,
   classifySource,
   detectLanguage,
   type ReviewArticle,
@@ -572,14 +573,19 @@ async function triage(
       // catches everything the blacklist did not anticipate, by requiring the sentence
       // to open by naming what said it. Failing either drops the note and keeps the
       // passage — the reader loses a summary, never a source.
+      // Now that the anchor is known to be in the passage, use it to decide which part
+      // of the passage the reader is shown. See `windowAroundAnchor` for why this is a
+      // narrowing rather than a clean-up.
+      const quote = windowAroundAnchor(p.quote, verdict.anchor || '');
+
       const note = (verdict.records || '').trim();
       if (note && (readsAsRuling(note) || !isAttributedReport(note))) {
         withheld++;
         console.warn(`Repugnancy: withheld a model note that did not read as attributed reporting: ${note.slice(0, 120)}`);
-        kept.push({ ...p, note: null, noteWithheld: true });
+        kept.push({ ...p, quote, note: null, noteWithheld: true });
         return;
       }
-      kept.push({ ...p, note: note || null, noteWithheld: false });
+      kept.push({ ...p, quote, note: note || null, noteWithheld: false });
     });
 
     return { kept, provider: provider.provider, withheld };

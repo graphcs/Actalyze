@@ -4,6 +4,9 @@ import {
   assertNoNextErrorOverlay,
   assertHasVisibleContent,
 } from "./helpers";
+// Imported rather than re-expressed: the point of the assertion is that the filters
+// shipping in production accept the sentences production actually generates.
+import { readsAsRuling, isAttributedReport } from "../../lib/pk/repugnancy";
 
 /**
  * Pakistan subtree.
@@ -31,6 +34,7 @@ const PK_PAGES = [
   "/pk/province/pb",
   "/pk/province/ict",
   "/pk/committees",
+  "/pk/repugnancy",
   "/pk/constituency/na-123",
   "/pk/constituency/na-247",
 ];
@@ -176,6 +180,58 @@ test.describe("Pakistan subtree", () => {
     // silently produced a handful of records, this is where it shows.
     expect(body.coverage?.questionCount ?? 0).toBeGreaterThan(200);
     expect(body.coverage?.replyCount ?? 0).toBeGreaterThan(150);
+  });
+
+  test("repugnancy research reports sources and never rules", async ({ request }) => {
+    // The one constraint this feature cannot be allowed to regress. Article 230(1)(b)
+    // gives the advisory jurisdiction to the Council and 203D the deciding one to the
+    // Federal Shariat Court; a product that issued its own repugnancy opinion would be
+    // claiming a jurisdiction it does not have, in front of the people who hold it.
+    // So: every generated sentence must open in the voice of a named source, and none
+    // may read as a verdict in the tool's own voice.
+    const hit = await request.post("/api/pk/repugnancy", {
+      data: { subject: "riba and interest-based banking", locale: "en" },
+      timeout: 120_000,
+    });
+    expect(hit.status()).toBe(200);
+    const found = await hit.json();
+
+    expect(found.council.found, "the Council has published on riba repeatedly").toBe(true);
+    expect(found.constitutional.groundedCount, "Articles must be grounded in the library")
+      .toBeGreaterThan(0);
+
+    for (const p of found.council.passages) {
+      expect(p.quote?.length, "a passage must carry verbatim text").toBeGreaterThan(20);
+      expect(p.documentTitle, "a passage must name its document").toBeTruthy();
+      if (p.note) {
+        expect(
+          isAttributedReport(p.note),
+          `note does not open in a source's voice: "${p.note}"`
+        ).toBe(true);
+        expect(readsAsRuling(p.note), `note reads as a ruling: "${p.note}"`).toBe(false);
+      }
+    }
+
+    // And the harder half: a subject nothing in the corpus addresses must produce an
+    // honest absence, not an improvisation. It must still name what it searched, so a
+    // reader can tell "searched and found nothing" from "had nothing to search".
+    const miss = await request.post("/api/pk/repugnancy", {
+      data: {
+        subject: "licensing requirements for commercial drone photography over farmland",
+        locale: "en",
+      },
+      timeout: 120_000,
+    });
+    expect(miss.status()).toBe(200);
+    const empty = await miss.json();
+    expect(empty.council.found).toBe(false);
+    expect(empty.council.passages).toEqual([]);
+    expect(empty.council.corpus.length, "must name the documents it searched")
+      .toBeGreaterThan(0);
+
+    // The Court bucket is empty for corpus reasons, and must say so rather than
+    // presenting silence as a finding that the Court has not ruled.
+    expect(empty.court.corpusEmpty).toBe(true);
   });
 
   test("constituency codes are never zero-padded", async ({ page }) => {

@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import {
   Home, MapPin, Map, TrendingUp, FileText, Inbox, MessageSquare, Library,
-  HelpCircle, Users, ChevronsLeft, Languages, X,
+  HelpCircle, Users, Scale, ChevronsLeft, Languages, X,
 } from "lucide-react";
 import { useLocale } from "../i18n/LocaleProvider";
 import type { MessageKey } from "../i18n/dictionary";
@@ -44,6 +44,10 @@ const NAV: Array<{ href: string; labelKey: MessageKey; Icon: typeof Home }> = [
   // step immediately before filing, not a separate research errand.
   { href: "/pk/questions", labelKey: "questions.nav", Icon: HelpCircle },
   { href: "/pk/committees", labelKey: "committees.title", Icon: Users },
+  // Closes the legislative block. Article 227 is a constraint on what may be enacted,
+  // so "what has the Council already said about this subject" is research done while a
+  // bill is still being drafted — not after it has been moved.
+  { href: "/pk/repugnancy", labelKey: "nav.repugnancy", Icon: Scale },
   { href: "/pk/casework", labelKey: "nav.casework", Icon: Inbox },
   { href: "/pk/chat", labelKey: "nav.chat", Icon: MessageSquare },
   { href: "/pk/documents", labelKey: "nav.documents", Icon: Library },

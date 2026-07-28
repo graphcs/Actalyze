@@ -516,6 +516,93 @@ export function isAttributedReport(line: string): boolean {
 }
 
 /**
+ * Enforcement point 3's presentational half: show the passage, not the whole chunk.
+ *
+ * Retrieval returns a fixed-size chunk, and a chunk boundary falls wherever the
+ * character count ran out. In the Council's annual reports that regularly means the
+ * substantive paragraph is preceded by the tail of a membership roster, and — because
+ * these are two-column PDFs with vertical marginalia — by columns of stray single
+ * letters that the extractor interleaves into the text. A reader shown all of it sees
+ * a broken document before reaching the sentence the note is about, and a native Urdu
+ * reader sees it instantly.
+ *
+ * So the quotation is windowed around the anchor the model already had to copy out of
+ * the passage verbatim, expanded outward to sentence boundaries. This is a narrowing,
+ * never an edit: the returned text is a contiguous substring of the original, interior
+ * characters are never removed, and any trimmed end is marked with an ellipsis so the
+ * reader can see the excerpt is an excerpt. Deleting the loose letters *inside* the
+ * window would read better and would be a lie about what the document says.
+ *
+ * `anchor` is assumed to have already passed the containment test in the route. Where
+ * it cannot be located — or the chunk is short enough not to need this — the original
+ * text is returned unchanged.
+ */
+export function windowAroundAnchor(
+  quote: string,
+  anchor: string,
+  { max = 900, lead = 240 }: { max?: number; lead?: number } = {}
+): string {
+  if (!quote || quote.length <= max) return quote;
+
+  // The anchor was matched against whitespace-collapsed text, so its offset there does
+  // not map onto the raw string. Rebuild the collapsed form while recording, for each
+  // collapsed character, the raw index it came from.
+  const map: number[] = [];
+  let collapsed = '';
+  let inSpace = false;
+  for (let i = 0; i < quote.length; i++) {
+    const ch = quote[i];
+    if (/\s/.test(ch)) {
+      if (!inSpace && collapsed.length) {
+        collapsed += ' ';
+        map.push(i);
+        inSpace = true;
+      }
+      continue;
+    }
+    inSpace = false;
+    collapsed += ch.toLowerCase();
+    map.push(i);
+  }
+
+  const needle = anchor.replace(/\s+/g, ' ').trim().toLowerCase();
+  const at = needle ? collapsed.indexOf(needle) : -1;
+  if (at < 0) return quote.slice(0, max).trimEnd() + '…';
+
+  const rawStart = map[at] ?? 0;
+  const rawEnd = map[Math.min(at + needle.length, map.length - 1)] ?? quote.length;
+
+  // Expand to the sentence containing the anchor: back to the previous full stop,
+  // forward to the next. `۔` is the Urdu full stop; a paragraph break counts as one.
+  const BOUNDARY = /[۔.!؟?]|\n\s*\n/g;
+  // Backwards to the start of the sentence the anchor sits in.
+  //
+  // Only `۔` counts as the boundary. A blank line does not: these are two-column PDFs
+  // and the extractor emits one wherever the layout broke, so `\n\n` lands inside
+  // rosters and tables as readily as between paragraphs. Where the preceding `lead`
+  // characters contain no sentence end at all — which here means the anchor is preceded
+  // by a membership roster, which is not punctuated — begin at the anchor itself. A
+  // short excerpt that starts on a real sentence is worth more than a longer one that
+  // opens halfway through a list of names.
+  const from0 = Math.max(0, rawStart - lead);
+  const before = quote.slice(from0, rawStart);
+  const lastBreak = before.lastIndexOf('۔');
+  const from = lastBreak >= 0 ? from0 + lastBreak + 1 : rawStart;
+
+  let to = Math.min(quote.length, from + max);
+  const after = quote.slice(rawEnd, to);
+  BOUNDARY.lastIndex = 0;
+  let lastSentenceEnd = -1;
+  for (const m of after.matchAll(BOUNDARY)) lastSentenceEnd = m.index + m[0].length;
+  if (lastSentenceEnd > 0) to = rawEnd + lastSentenceEnd;
+
+  const excerpt = quote.slice(from, to).trim();
+  if (!excerpt) return quote.slice(0, max).trimEnd() + '…';
+
+  return `${from > 0 ? '…' : ''}${excerpt}${to < quote.length ? '…' : ''}`;
+}
+
+/**
  * The statement the page carries, in both languages, about what the tool is not.
  * Section 5 of the brief. Rendered as prose, not as a collapsible footnote.
  */
