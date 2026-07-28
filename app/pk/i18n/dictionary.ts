@@ -410,6 +410,95 @@ export const en = {
   'questions.chars': 'characters',
   'questions.repaired': 'Font encoding repaired before extraction',
   'questions.loadFailed': 'The question index could not be loaded.',
+  // ── committee oversight packs ───────────────────────────────────────────────────
+  // A note on the committee NAMES, which are not in here and never will be.
+  // na.gov.pk/ur/ returns HTTP 404 for every path: the Secretariat publishes committee
+  // names in English only. Translating "Standing Committee on Energy (Power Division)"
+  // into Urdu and printing it as the committee's name would be inventing an official
+  // title in front of the people who sit on it. So the Urdu build wraps the published
+  // English name in a real Urdu descriptor — 'committees.standingCommitteeOn' below —
+  // and the name itself travels through in <Ltr> untouched.
+  'committees.title': 'Committee oversight packs',
+  'committees.subtitle': 'A pre-meeting brief for every committee of the National Assembly: what the Rules give it power to do, who sits on it, what its subject area is in the news, and questions it could put to the ministry.',
+  'committees.indexHeading': 'Committees of the National Assembly',
+  'committees.search': 'Filter by committee, subject or chairman',
+  'committees.noMatch': 'No committee matches that filter.',
+  'committees.statCommittees': 'Committees',
+  'committees.statSeats': 'Committee seats',
+  'committees.statReports': 'Reports to the House',
+  'committees.kindAll': 'All',
+  'committees.kindStanding': 'Standing committees',
+  'committees.kindOther': 'Non-ministerial standing committees',
+  'committees.kindParliamentary': 'Parliamentary committees',
+  'committees.kindSpecial': 'Special committees',
+  'committees.standingCommitteeOn': 'Standing Committee on',
+  'committees.committeeOn': 'Committee on',
+  'committees.chair': 'Chairman',
+  'committees.chairVacant': 'Chairmanship vacant',
+  'committees.members': 'Members',
+  'committees.senators': 'Senators',
+  'committees.senatorsNote': 'Senators sit on this committee but are not members of the National Assembly, so they have no constituency here.',
+  'committees.exOfficio': 'Ex-officio',
+  'committees.secretary': 'Committee secretary',
+  'committees.notFound': 'Committee not found',
+  'committees.notFoundBody': 'That address does not match a committee of the National Assembly. Open the committee list and pick one.',
+  'committees.backToList': 'All committees',
+  'committees.openPack': 'Open the oversight pack',
+  'committees.packTitle': 'Oversight pack',
+  'committees.preparedOn': 'Prepared',
+  'committees.print': 'Print this pack',
+
+  // Remit and rules
+  'committees.remitHeading': 'Remit and governing rules',
+  'committees.remitSub': 'Quoted from the Rules of Procedure in the document library. Nothing in this section is written by the assistant.',
+  'committees.remitRule': 'The rule that sets this committee’s subject matter',
+  'committees.rule': 'Rule',
+  'committees.rulesEmpty': 'The document search returned no rule text for this committee. Rather than describe the rules from memory, this section is left empty — open the Rules of Procedure in the document library.',
+  'committees.rulesRemitMissing': 'The sub-rule that states what subjects a committee deals with was not returned by this search. The rules below are what was.',
+  'committees.rulesSource': 'Source document',
+
+  // Composition
+  'committees.compositionHeading': 'Composition',
+  'committees.compositionSub': 'From the National Assembly Secretariat, joined to the member roster so each seat links to its constituency.',
+  'committees.compositionEmpty': 'The composition page for this committee could not be read, so no member list is shown. It has not been guessed.',
+  'committees.reservedSeat': 'Reserved seat',
+  'committees.notOnRoster': 'Listed by the Secretariat but not on the current member roster; the seat link is withheld.',
+  'committees.government': 'Government',
+  'committees.opposition': 'Opposition',
+  'committees.neutral': 'Independent or unaligned',
+  'committees.blocNote': 'Blocs follow each party’s position in this Assembly. Independents are counted separately.',
+
+  // Business
+  'committees.businessHeading': 'Business before the committee',
+  'committees.upcomingMeetings': 'Scheduled sittings',
+  'committees.meetingsEmpty': 'No sitting of this committee is currently on the published schedule.',
+  'committees.subCommittee': 'Sub-committee',
+  'committees.venue': 'Venue',
+  'committees.meetingNotice': 'Meeting notice',
+  'committees.reports': 'Reports presented to the House',
+  'committees.reportsEmpty': 'No report from this committee appears on the published list.',
+  'committees.reportsMore': 'more reports',
+
+  // News
+  'committees.newsHeading': 'In this committee’s subject area',
+  'committees.newsSub': 'Retrieved coverage from the last six months, Pakistan-scoped.',
+  'committees.newsEmpty': 'No recent coverage of this subject area was retrieved.',
+
+  // Questions
+  'committees.questionsHeading': 'Suggested lines of questioning',
+  'committees.questionsSuggested': 'Suggestions only — not the committee’s position',
+  'committees.questionsSub': 'Drafted from the retrieved coverage and this committee’s own record, for a secretary to consider, amend or discard. Each one shows what it was drawn from.',
+  'committees.questionsEmpty': 'Not enough retrieved material to draft questions that could be sourced. None have been invented.',
+  'committees.basis': 'Drawn from',
+
+  // Provenance
+  'committees.provenanceHeading': 'Where this came from',
+  'committees.provenanceBody': 'Committee names, chairmen, members, reports and sittings are scraped from na.gov.pk. Rule text is retrieved from the Rules of Procedure in the document library and quoted verbatim. Coverage is retrieved from Google News scoped to Pakistan. Only the suggested questions are generated, and only from the material on this page.',
+  'committees.namesEnglishNote': 'The National Assembly Secretariat publishes committee names in English only, so they appear here as published rather than translated.',
+  'committees.scrapedAt': 'Committee data collected',
+  'committees.viewOnNa': 'This committee on na.gov.pk',
+  'committees.loading': 'Building the pack…',
+  'committees.packFailed': 'The rules, coverage and questions could not be built. Composition below is local data and is unaffected.',
 } as const;
 
 export type MessageKey = keyof typeof en;
@@ -790,6 +879,85 @@ export const ur: Record<MessageKey, string> = {
   'questions.chars': 'حروف',
   'questions.repaired': 'اخذ سے پہلے فونٹ انکوڈنگ درست کی گئی',
   'questions.loadFailed': 'سوالات کی فہرست لوڈ نہیں ہو سکی۔',
+  // ── کمیٹی نگرانی پیکٹ ───────────────────────────────────────────────────────────
+  // کمیٹیوں کے نام یہاں ترجمہ نہیں کیے گئے: na.gov.pk اردو میں کمیٹیوں کے نام شائع
+  // نہیں کرتا (/ur/ ہر راستے پر 404 دیتا ہے)، اس لیے نام انگریزی میں ہی دکھائے جاتے
+  // ہیں اور ان کے گرد اردو کا اصل عنوان لگایا جاتا ہے۔ @review
+  'committees.title': 'کمیٹی نگرانی پیکٹ',
+  'committees.subtitle': 'قومی اسمبلی کی ہر کمیٹی کے لیے اجلاس سے پہلے کی بریفنگ: قواعد کے تحت اس کے اختیارات، اس کے ارکان، اس کے شعبے سے متعلق حالیہ خبریں، اور وہ سوالات جو کمیٹی متعلقہ وزارت سے پوچھ سکتی ہے۔',
+  'committees.indexHeading': 'قومی اسمبلی کی کمیٹیاں',
+  'committees.search': 'کمیٹی، شعبے یا چیئرمین کے نام سے چھانٹیں',
+  'committees.noMatch': 'اس چھانٹی سے کوئی کمیٹی نہیں ملی۔',
+  'committees.statCommittees': 'کمیٹیاں',
+  'committees.statSeats': 'کمیٹی نشستیں',
+  'committees.statReports': 'ایوان میں رپورٹیں',
+  'committees.kindAll': 'تمام',
+  'committees.kindStanding': 'قائمہ کمیٹیاں',
+  'committees.kindOther': 'غیر وزارتی قائمہ کمیٹیاں',
+  'committees.kindParliamentary': 'پارلیمانی کمیٹیاں',
+  'committees.kindSpecial': 'خصوصی کمیٹیاں',
+  'committees.standingCommitteeOn': 'قائمہ کمیٹی برائے',
+  'committees.committeeOn': 'کمیٹی برائے',
+  'committees.chair': 'چیئرمین',
+  'committees.chairVacant': 'چیئرمین کا عہدہ خالی ہے',
+  'committees.members': 'ارکان',
+  'committees.senators': 'سینیٹرز',
+  'committees.senatorsNote': 'یہ سینیٹرز اس کمیٹی کے رکن ہیں لیکن قومی اسمبلی کے رکن نہیں، اس لیے یہاں ان کا کوئی حلقہ نہیں۔',
+  'committees.exOfficio': 'بلحاظِ عہدہ رکن',
+  'committees.secretary': 'سیکرٹری کمیٹی',
+  'committees.notFound': 'کمیٹی نہیں ملی',
+  'committees.notFoundBody': 'یہ پتہ قومی اسمبلی کی کسی کمیٹی سے مطابقت نہیں رکھتا۔ کمیٹیوں کی فہرست کھول کر کوئی ایک منتخب کریں۔',
+  'committees.backToList': 'تمام کمیٹیاں',
+  'committees.openPack': 'نگرانی پیکٹ کھولیں',
+  'committees.packTitle': 'نگرانی پیکٹ',
+  'committees.preparedOn': 'تیاری کی تاریخ',
+  'committees.print': 'یہ پیکٹ پرنٹ کریں',
+
+  'committees.remitHeading': 'دائرۂ کار اور متعلقہ قواعد',
+  'committees.remitSub': 'یہ متن دستاویزی لائبریری میں موجود قواعدِ ضابطہ سے بعینہٖ نقل کیا گیا ہے۔ اس حصے میں کچھ بھی معاون نے خود نہیں لکھا۔',
+  'committees.remitRule': 'وہ قاعدہ جو اس کمیٹی کا موضوعی دائرہ متعین کرتا ہے',
+  'committees.rule': 'قاعدہ',
+  'committees.rulesEmpty': 'اس کمیٹی کے لیے دستاویزی تلاش سے کوئی قاعدہ برآمد نہیں ہوا۔ یادداشت سے قواعد بیان کرنے کے بجائے یہ حصہ خالی رکھا گیا ہے — قواعدِ ضابطہ دستاویزی لائبریری میں دیکھیے۔',
+  'committees.rulesRemitMissing': 'وہ ذیلی قاعدہ جو کمیٹی کے موضوعات بیان کرتا ہے، اس تلاش میں برآمد نہیں ہوا۔ نیچے وہی قواعد ہیں جو برآمد ہوئے۔',
+  'committees.rulesSource': 'ماخذ دستاویز',
+
+  'committees.compositionHeading': 'ترکیب',
+  'committees.compositionSub': 'قومی اسمبلی سیکرٹریٹ سے، اور ارکان کی فہرست سے ملا کر — تاکہ ہر نشست اپنے حلقے سے جُڑی رہے۔',
+  'committees.compositionEmpty': 'اس کمیٹی کا ترکیبی صفحہ پڑھا نہیں جا سکا، اس لیے ارکان کی فہرست نہیں دکھائی جا رہی۔ اندازہ نہیں لگایا گیا۔',
+  'committees.reservedSeat': 'مخصوص نشست',
+  'committees.notOnRoster': 'سیکرٹریٹ کی فہرست میں شامل، مگر موجودہ ارکان کی فہرست میں نہیں؛ اس لیے حلقے کا لنک نہیں دیا گیا۔',
+  'committees.government': 'حکومت',
+  'committees.opposition': 'اپوزیشن',
+  'committees.neutral': 'آزاد یا غیر وابستہ',
+  'committees.blocNote': 'بلاک ہر جماعت کی اس ایوان میں پوزیشن کے مطابق ہیں۔ آزاد ارکان الگ شمار کیے گئے ہیں۔',
+
+  'committees.businessHeading': 'کمیٹی کے سامنے زیرِ غور امور',
+  'committees.upcomingMeetings': 'طے شدہ اجلاس',
+  'committees.meetingsEmpty': 'اس کمیٹی کا کوئی اجلاس فی الحال شائع شدہ شیڈول میں نہیں۔',
+  'committees.subCommittee': 'ذیلی کمیٹی',
+  'committees.venue': 'مقام',
+  'committees.meetingNotice': 'اجلاس کا نوٹس',
+  'committees.reports': 'ایوان میں پیش کردہ رپورٹیں',
+  'committees.reportsEmpty': 'شائع شدہ فہرست میں اس کمیٹی کی کوئی رپورٹ موجود نہیں۔',
+  'committees.reportsMore': 'مزید رپورٹیں',
+
+  'committees.newsHeading': 'اس کمیٹی کے شعبے سے متعلق خبریں',
+  'committees.newsSub': 'گزشتہ چھ ماہ کی خبریں، پاکستان تک محدود۔',
+  'committees.newsEmpty': 'اس شعبے سے متعلق حالیہ خبریں دستیاب نہیں ہوئیں۔',
+
+  'committees.questionsHeading': 'تجویز کردہ سوالات',
+  'committees.questionsSuggested': 'صرف تجاویز — کمیٹی کا مؤقف نہیں',
+  'committees.questionsSub': 'یہ سوالات برآمد شدہ خبروں اور کمیٹی کے اپنے ریکارڈ سے تیار کیے گئے ہیں تاکہ سیکرٹری انہیں دیکھے، بدلے یا رد کرے۔ ہر سوال کے ساتھ اس کا ماخذ درج ہے۔',
+  'committees.questionsEmpty': 'قابلِ حوالہ سوالات تیار کرنے کے لیے کافی مواد برآمد نہیں ہوا۔ کوئی سوال خود سے نہیں بنایا گیا۔',
+  'committees.basis': 'ماخذ',
+
+  'committees.provenanceHeading': 'یہ معلومات کہاں سے آئیں',
+  'committees.provenanceBody': 'کمیٹیوں کے نام، چیئرمین، ارکان، رپورٹیں اور اجلاس na.gov.pk سے لیے گئے ہیں۔ قواعد کا متن دستاویزی لائبریری میں موجود قواعدِ ضابطہ سے بعینہٖ نقل کیا گیا ہے۔ خبریں پاکستان تک محدود گوگل نیوز سے لی گئی ہیں۔ صرف تجویز کردہ سوالات تیار کیے گئے ہیں، اور وہ بھی اسی صفحے پر موجود مواد سے۔',
+  'committees.namesEnglishNote': 'قومی اسمبلی سیکرٹریٹ کمیٹیوں کے نام صرف انگریزی میں شائع کرتا ہے، اس لیے یہ نام یہاں ترجمہ کیے بغیر اسی طرح دیے گئے ہیں۔',
+  'committees.scrapedAt': 'کمیٹی معلومات کی تاریخ',
+  'committees.viewOnNa': 'یہ کمیٹی na.gov.pk پر',
+  'committees.loading': 'پیکٹ تیار کیا جا رہا ہے…',
+  'committees.packFailed': 'قواعد، خبریں اور سوالات تیار نہیں ہو سکے۔ نیچے دی گئی ترکیب مقامی معلومات سے ہے اور اس پر کوئی اثر نہیں پڑا۔',
 };
 
 export const DICTIONARIES = { en, ur } as const;
